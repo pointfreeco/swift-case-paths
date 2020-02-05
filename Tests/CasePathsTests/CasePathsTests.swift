@@ -332,6 +332,16 @@ final class CasePathsTests: XCTestCase {
     XCTAssertNil((/EnumWithLabeledCase.labeled(label:otherLabel:)).extract(from: .labeled(2, 2)))
     XCTAssertNotNil((/EnumWithLabeledCase.labeled(label:otherLabel:)).extract(from: .labeled(label: 2, otherLabel: 2)))
   }
+  
+  func testCasePathSubscriptable() {
+    enum Foo: CasePathSubscriptable {
+      case bar(Int)
+      case baz(String)
+    }
+    
+    XCTAssertEqual(Foo.bar(12)[casePath: /Foo.bar], 12)
+    XCTAssertEqual(Foo.bar(12)[casePath: /Foo.baz], nil)
+  }
 
 //  func testStructs() {
 //    struct Point { var x: Double, y: Double }
