@@ -343,6 +343,32 @@ final class CasePathsTests: XCTestCase {
     XCTAssertEqual(Foo.bar(12)[casePath: /Foo.baz], nil)
   }
   
+  func testMultiValueCasePathSubscriptable() {
+    enum Foo: CasePathSubscriptable {
+      case bar(Int, Int)
+      case baz(String)
+    }
+    
+    let test0 = Foo.bar(12, 42)[casePath: /Foo.bar]
+    XCTAssertEqual(test0!.0, 12)
+    XCTAssertEqual(test0!.1, 42)
+    let test1 = Foo.bar(12, 42)[casePath: /Foo.baz]
+    XCTAssertEqual(test1, nil)
+  }
+  
+  func testNamedMultiValueCasePathSubscriptable() {
+    enum Foo: CasePathSubscriptable {
+      case bar(a: Int, b: Int)
+      case baz(String)
+    }
+    
+    let test0 = Foo.bar(a: 12, b: 42)[casePath: /Foo.bar]
+    XCTAssertEqual(test0!.0, 12)
+    XCTAssertEqual(test0!.1, 42)
+    let test1 = Foo.bar(a: 12, b: 42)[casePath: /Foo.baz]
+    XCTAssertEqual(test1, nil)
+  }
+  
   func testNestedCasePathSubscriptable() {
     enum EnumA: CasePathSubscriptable {
       case one(EnumB)
