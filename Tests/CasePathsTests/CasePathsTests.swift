@@ -342,6 +342,26 @@ final class CasePathsTests: XCTestCase {
     XCTAssertEqual(Foo.bar(12)[casePath: /Foo.bar], 12)
     XCTAssertEqual(Foo.bar(12)[casePath: /Foo.baz], nil)
   }
+  
+  func testNestedCasePathSubscriptable() {
+    enum EnumA: CasePathSubscriptable {
+      case one(EnumB)
+      case two(EnumC)
+    }
+    
+    enum EnumB: CasePathSubscriptable {
+      case one(Int)
+      case two(String)
+    }
+    
+    enum EnumC: CasePathSubscriptable {
+      case one(Int)
+    }
+    
+    XCTAssertEqual(EnumA.one(EnumB.one(12))[casePath: /EnumA.one .. /EnumB.one], 12)
+    XCTAssertEqual(EnumA.one(EnumB.one(12))[casePath: /EnumA.one .. /EnumB.two], nil)
+    XCTAssertEqual(EnumA.two(EnumC.one(12))[casePath: /EnumA.one .. /EnumB.one], nil)
+  }
 
 //  func testStructs() {
 //    struct Point { var x: Double, y: Double }
