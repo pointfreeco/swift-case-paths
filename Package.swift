@@ -2,7 +2,7 @@
 import PackageDescription
 
 let package = Package(
-  name: "CasePaths",
+  name: "case-paths",
   products: [
     .library(
       name: "CasePaths",
