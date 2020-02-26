@@ -154,6 +154,12 @@ dependencies: [
 ]
 ```
 
+If you want to use CasePaths in a CocoaPods project, just:
+
+```ruby
+pod 'CasePaths'
+```
+
 ## Prior art
 
   - [`EnumKit`](https://github.com/gringoireDM/EnumKit) is a protocol-oriented, reflection-based solution to ergonomic enum access and inspired the creation of this library.
