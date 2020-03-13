@@ -224,19 +224,19 @@ final class CasePathsTests: XCTestCase {
   }
 
   func testEnumsWithClosures() {
-    enum Foo {
-      case bar(() -> Void)
+    struct Baz {
+      let name: String
     }
 
-    var didRun = false
-    guard let bar = (/Foo.bar)
-      .extract(from: .bar { didRun = true })
-      else {
-        XCTFail()
-        return
+    enum Foo {
+      case bar(() -> Baz)
     }
-    bar()
-    XCTAssertTrue(didRun)
+
+    let foo = Foo.bar { Baz(name: "Blob") }
+    let bar = Mirror(reflecting: foo).children.first!.value as! () -> Baz
+    let baz = bar()
+    print(baz.name)
+
   }
 
   func testRecursive() {
