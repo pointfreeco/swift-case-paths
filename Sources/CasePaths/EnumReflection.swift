@@ -20,7 +20,7 @@ extension CasePath where Value == Void {
   /// - Note: This function is only intended to be used with enum cases that have no associated values. Its behavior is otherwise undefined.
   /// - Parameter value: An enum case with no associated values.
   /// - Returns: A case path that extracts `()` if the case matches, otherwise `nil`.
-  public static func `case`(_ value: Root) -> CasePath{
+  public static func `case`(_ value: Root) -> CasePath {
     let label = "\(value)"
     return CasePath(
       embed: { value },
