@@ -65,6 +65,12 @@ final class CasePathsTests: XCTestCase {
 
     XCTAssertEqual(
       .some(42),
+      (/.self)
+        .extract(from: 42)
+    )
+
+    XCTAssertEqual(
+      .some(42),
       (/{ $0 })
         .extract(from: 42)
     )

@@ -32,6 +32,16 @@ public prefix func / <Root>(
   .self
 }
 
+/// Identifies and returns a given case path. Enables shorthand syntax on static case paths, _e.g._ `/.self`  instead of `.self`.
+///
+/// - Parameter type: A type for which to return the identity case path.
+/// - Returns: An identity case path.
+public prefix func / <Root>(
+  type: CasePath<Root, Root>
+) -> CasePath<Root, Root> {
+  .self
+}
+
 /// Returns a function that can attempt to extract associated values from the given enum case initializer.
 ///
 /// Use this operator to create new transform functions to pass to higher-order methods like `compactMap`:
