@@ -2,10 +2,14 @@
 import PackageDescription
 
 let package = Package(
-  name: "CasePaths",
+  name: "swift-case-paths",
   products: [
     .library(
       name: "CasePaths",
+      targets: ["CasePaths"]),
+    .library(
+      name: "CasePaths-dynamic",
+      type: .dynamic,
       targets: ["CasePaths"]),
   ],
   dependencies: [],
