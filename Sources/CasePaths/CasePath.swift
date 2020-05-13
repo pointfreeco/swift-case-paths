@@ -1,4 +1,5 @@
-/// A path that supports embedding a value in a root and attempting to extract a root's embedded value.
+/// A path that supports embedding a value in a root and attempting to extract a root's embedded
+/// value.
 ///
 /// This type defines key path-like semantics for enum cases.
 public struct CasePath<Root, Value> {
@@ -37,7 +38,9 @@ public struct CasePath<Root, Value> {
   ///
   /// - Parameter path: The case path to append.
   /// - Returns: A case path from the root of this case path to the value type of `path`.
-  public func appending<AppendedValue>(path: CasePath<Value, AppendedValue>) -> CasePath<Root, AppendedValue> {
+  public func appending<AppendedValue>(path: CasePath<Value, AppendedValue>) -> CasePath<
+    Root, AppendedValue
+  > {
     CasePath<Root, AppendedValue>(
       embed: { self.embed(path.embed($0)) },
       extract: { self.extract(from: $0).flatMap(path.extract) }

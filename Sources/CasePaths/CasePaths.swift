@@ -22,7 +22,8 @@ extension CasePath where Root == Void {
 }
 
 extension CasePath where Value == Never {
-  /// The never case path for `Root`: a case path that always fails to extract the a value of the uninhabited `Never` type.
+  /// The never case path for `Root`: a case path that always fails to extract the a value of the
+  /// uninhabited `Never` type.
   public static var never: CasePath {
     func absurd<A>(_ never: Never) -> A {}
     return .init(
@@ -33,7 +34,8 @@ extension CasePath where Value == Never {
 }
 
 extension CasePath where Value: RawRepresentable, Root == Value.RawValue {
-  /// Returns a case path for `RawRepresentable` types: a case path that attempts to extract a value that can be represented by a raw value from a raw value.
+  /// Returns a case path for `RawRepresentable` types: a case path that attempts to extract a value
+  /// that can be represented by a raw value from a raw value.
   public static var rawValue: CasePath {
     .init(
       embed: { $0.rawValue },
@@ -43,7 +45,8 @@ extension CasePath where Value: RawRepresentable, Root == Value.RawValue {
 }
 
 extension CasePath where Value: LosslessStringConvertible, Root == String {
-  /// Returns a case path for `LosslessStringConvertible` types: a case path that attempts to extract a value that can be represented by a lossless string from a string.
+  /// Returns a case path for `LosslessStringConvertible` types: a case path that attempts to
+  /// extract a value that can be represented by a lossless string from a string.
   public static var description: CasePath {
     .init(
       embed: { $0.description },

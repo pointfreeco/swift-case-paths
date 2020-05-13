@@ -2,7 +2,8 @@ prefix operator /
 
 /// Returns a case path for the given embed function.
 ///
-/// - Note: This operator is only intended to be used with enum cases that have no associated values. Its behavior is otherwise undefined.
+/// - Note: This operator is only intended to be used with enum cases that have no associated
+///   values. Its behavior is otherwise undefined.
 /// - Parameter embed: An embed function.
 /// - Returns: A case path.
 public prefix func / <Root, Value>(
@@ -13,7 +14,8 @@ public prefix func / <Root, Value>(
 
 /// Returns a void case path for a case with no associated value.
 ///
-/// - Note: This operator is only intended to be used with enum cases that have no associated values. Its behavior is otherwise undefined.
+/// - Note: This operator is only intended to be used with enum cases that have no associated
+///   values. Its behavior is otherwise undefined.
 /// - Parameter root: A case with no an associated value.
 /// - Returns: A void case path.
 public prefix func / <Root>(
@@ -32,7 +34,8 @@ public prefix func / <Root>(
   .self
 }
 
-/// Identifies and returns a given case path. Enables shorthand syntax on static case paths, _e.g._ `/.self`  instead of `.self`.
+/// Identifies and returns a given case path. Enables shorthand syntax on static case paths, _e.g._
+/// `/.self`  instead of `.self`.
 ///
 /// - Parameter type: A type for which to return the identity case path.
 /// - Returns: An identity case path.
@@ -42,15 +45,18 @@ public prefix func / <Root>(
   .self
 }
 
-/// Returns a function that can attempt to extract associated values from the given enum case initializer.
+/// Returns a function that can attempt to extract associated values from the given enum case
+/// initializer.
 ///
-/// Use this operator to create new transform functions to pass to higher-order methods like `compactMap`:
+/// Use this operator to create new transform functions to pass to higher-order methods like
+/// `compactMap`:
 ///
 ///     [Result<Int, Error>.success(42), .failure(MyError()]
 ///       .compactMap(/Result.success)
 ///     // [42]
 ///
-/// - Note: This operator is only intended to be used with enum case initializers. Its behavior is otherwise undefined.
+/// - Note: This operator is only intended to be used with enum case initializers. Its behavior is
+///   otherwise undefined.
 /// - Parameter case: An enum case initializer.
 /// - Returns: A function that can attempt to extract associated values from an enum.
 public prefix func / <Root, Value>(
@@ -61,7 +67,8 @@ public prefix func / <Root, Value>(
 
 /// Returns a void case path for a case with no associated value.
 ///
-/// - Note: This operator is only intended to be used with enum cases that have no associated values. Its behavior is otherwise undefined.
+/// - Note: This operator is only intended to be used with enum cases that have no associated
+///   values. Its behavior is otherwise undefined.
 /// - Parameter root: A case with no an associated value.
 /// - Returns: A void case path.
 public prefix func / <Root>(
@@ -79,7 +86,8 @@ infix operator ..: CasePathCompositionPrecedence
 extension CasePath {
   /// Returns a new case path created by appending the given case path to this one.
   ///
-  /// The operator version of `CasePath.appending(path:)`. Use this method to extend this case path to the value type of another case path.
+  /// The operator version of `CasePath.appending(path:)`. Use this method to extend this case path
+  /// to the value type of another case path.
   ///
   /// - Parameters:
   ///   - lhs: A case path from a root to a value.
@@ -96,7 +104,7 @@ extension CasePath {
   ///
   /// - Parameters:
   ///   - lhs: A case path from a root to a value.
-  ///   - rhs: An embed function from an appended value
+  ///   - rhs: An embed function from an appended value.
   /// - Returns: A new case path from the first case path's root to the second embed function's value.
   public static func .. <AppendedValue>(
     lhs: CasePath,
@@ -117,7 +125,8 @@ extension CasePath {
 /// - Parameters:
 ///   - lhs: An extract function from a root to a value.
 ///   - rhs: An embed function from some other appended value to the extract function's value.
-/// - Returns: A new extract function from the first extract function's root to the second embed function's appended value.
+/// - Returns: A new extract function from the first extract function's root to the second embed
+///   function's appended value.
 public func .. <Root, Value, AppendedValue>(
   lhs: @escaping (Root) -> Value?,
   rhs: @escaping (AppendedValue) -> Value
