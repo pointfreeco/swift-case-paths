@@ -1,5 +1,5 @@
-import XCTest
 import CasePaths
+import XCTest
 
 final class CasePathsTests: XCTestCase {
   func testEmbed() {
@@ -13,7 +13,7 @@ final class CasePathsTests: XCTestCase {
     enum Foo: Equatable { case bar(Bar) }
     enum Bar: Equatable { case baz(Int) }
 
-    XCTAssertEqual(.bar(.baz(42)), (/Foo.bar..Bar.baz).embed(42))
+    XCTAssertEqual(.bar(.baz(42)), (/Foo.bar .. Bar.baz).embed(42))
   }
 
   func testVoidCasePath() {
@@ -94,12 +94,12 @@ final class CasePathsTests: XCTestCase {
 
     XCTAssertEqual(
       .some(42),
-//      (/Foo.bar(none:)) // Abort trap: 6
+      //      (/Foo.bar(none:)) // Abort trap: 6
       CasePath.case { Foo.bar(none: $0) }
         .extract(from: .bar(none: 42))
     )
     XCTAssertNil(
-//      (/Foo.bar(none:)) // Abort trap: 6
+      //      (/Foo.bar(none:)) // Abort trap: 6
       CasePath.case { Foo.bar(none: $0) }
         .extract(from: .bar(some: 42))
     )
@@ -110,11 +110,12 @@ final class CasePathsTests: XCTestCase {
       case bar(Int, String)
     }
 
-    guard let fizzBuzz = (/Foo.bar)
-      .extract(from: .bar(42, "Blob"))
-      else {
-        XCTFail()
-        return
+    guard
+      let fizzBuzz = (/Foo.bar)
+        .extract(from: .bar(42, "Blob"))
+    else {
+      XCTFail()
+      return
     }
     XCTAssertEqual(42, fizzBuzz.0)
     XCTAssertEqual("Blob", fizzBuzz.1)
@@ -125,11 +126,12 @@ final class CasePathsTests: XCTestCase {
       case bar(fizz: Int, buzz: String)
     }
 
-    guard let fizzBuzz = CasePath<Foo, (fizz: Int, buzz: String)>.case(Foo.bar)
-      .extract(from: .bar(fizz: 42, buzz: "Blob"))
-      else {
-        XCTFail()
-        return
+    guard
+      let fizzBuzz = CasePath<Foo, (fizz: Int, buzz: String)>.case(Foo.bar)
+        .extract(from: .bar(fizz: 42, buzz: "Blob"))
+    else {
+      XCTFail()
+      return
     }
     XCTAssertEqual(42, fizzBuzz.fizz)
     XCTAssertEqual("Blob", fizzBuzz.buzz)
@@ -151,11 +153,12 @@ final class CasePathsTests: XCTestCase {
       case bar(Int, buzz: String)
     }
 
-    guard let fizzBuzz = (/Foo.bar)
-      .extract(from: .bar(42, buzz: "Blob"))
-      else {
-        XCTFail()
-        return
+    guard
+      let fizzBuzz = (/Foo.bar)
+        .extract(from: .bar(42, buzz: "Blob"))
+    else {
+      XCTFail()
+      return
     }
     XCTAssertEqual(42, fizzBuzz.0)
     XCTAssertEqual("Blob", fizzBuzz.1)
@@ -189,13 +192,13 @@ final class CasePathsTests: XCTestCase {
         .extract(from: .bar(.baz))
     )
   }
-  
+
   func testEnumsWithoutAssociatedValues() {
     enum Foo: Equatable {
       case bar
       case baz
     }
-    
+
     XCTAssertNotNil(
       (/Foo.bar)
         .extract(from: .bar)
@@ -220,7 +223,7 @@ final class CasePathsTests: XCTestCase {
     XCTAssertNil(
       extract(case: { Foo.bar }, from: .baz)
     )
-    
+
     XCTAssertNotNil(
       extract(case: { Foo.baz }, from: .baz)
     )
@@ -235,11 +238,12 @@ final class CasePathsTests: XCTestCase {
     }
 
     var didRun = false
-    guard let bar = (/Foo.bar)
-      .extract(from: .bar { didRun = true })
-      else {
-        XCTFail()
-        return
+    guard
+      let bar = (/Foo.bar)
+        .extract(from: .bar { didRun = true })
+    else {
+      XCTFail()
+      return
     }
     bar()
     XCTAssertTrue(didRun)
@@ -266,7 +270,7 @@ final class CasePathsTests: XCTestCase {
     XCTAssertEqual(
       [1],
       [Result.success(1), .success(nil), .failure(MyError())]
-        .compactMap(/Result.success..Optional.some)
+        .compactMap(/Result.success .. Optional.some)
     )
 
     XCTAssertEqual(
@@ -306,7 +310,7 @@ final class CasePathsTests: XCTestCase {
     XCTAssertEqual("Blob", extract(case: Result<String, Error>.success, from: .success("Blob")))
     XCTAssertNil(extract(case: Result<String, Error>.failure, from: .success("Blob")))
 
-    XCTAssertEqual(42, (/Int??.some..Int?.some).extract(from: Optional(Optional(42))))
+    XCTAssertEqual(42, (/Int??.some .. Int?.some).extract(from: Optional(Optional(42))))
   }
 
   func testConstantCasePath() {
@@ -336,29 +340,31 @@ final class CasePathsTests: XCTestCase {
       case labeled(Int, Int)
     }
     XCTAssertNil((/EnumWithLabeledCase.labeled(label:otherLabel:)).extract(from: .labeled(2, 2)))
-    XCTAssertNotNil((/EnumWithLabeledCase.labeled(label:otherLabel:)).extract(from: .labeled(label: 2, otherLabel: 2)))
+    XCTAssertNotNil(
+      (/EnumWithLabeledCase.labeled(label:otherLabel:)).extract(
+        from: .labeled(label: 2, otherLabel: 2)))
   }
 
-//  func testStructs() {
-//    struct Point { var x: Double, y: Double }
-//
-//    guard
-//      let (x, y) = CasePath(Point.init(x:y:))
-//        .extract(from: Point(x: 16, y: 8))
-//      else {
-//        XCTFail()
-//        return
-//    }
-//
-//    XCTAssertEqual(16, x)
-//    XCTAssertEqual(8, y)
-//
-//    guard
-//      let (x1, y2) = CasePath(Point.init(what:where:))
-//        .extract(from: Point(x: 16, y: 8))
-//      else {
-//        XCTFail()
-//        return
-//    }
-//  }
+  //  func testStructs() {
+  //    struct Point { var x: Double, y: Double }
+  //
+  //    guard
+  //      let (x, y) = CasePath(Point.init(x:y:))
+  //        .extract(from: Point(x: 16, y: 8))
+  //      else {
+  //        XCTFail()
+  //        return
+  //    }
+  //
+  //    XCTAssertEqual(16, x)
+  //    XCTAssertEqual(8, y)
+  //
+  //    guard
+  //      let (x1, y2) = CasePath(Point.init(what:where:))
+  //        .extract(from: Point(x: 16, y: 8))
+  //      else {
+  //        XCTFail()
+  //        return
+  //    }
+  //  }
 }

@@ -1,3 +1,5 @@
+test-all: test-linux test-swift
+
 test-linux:
 	docker run \
 		--rm \
@@ -12,4 +14,7 @@ test-swift:
 		--enable-test-discovery \
 		--parallel
 
-test-all: test-linux test-swift
+format:
+	swift format --in-place --recursive .
+
+.PHONY: format test-all test-linux test-swift
