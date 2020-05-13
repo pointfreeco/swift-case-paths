@@ -7,10 +7,6 @@ let package = Package(
     .library(
       name: "CasePaths",
       targets: ["CasePaths"]),
-    .library(
-      name: "CasePaths-dynamic",
-      type: .dynamic,
-      targets: ["CasePaths"]),
   ],
   dependencies: [],
   targets: [
