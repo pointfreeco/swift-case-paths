@@ -22,6 +22,16 @@ final class CasePathsTests: XCTestCase {
     XCTAssertEqual(.bar, (/Foo.bar).embed(()))
   }
 
+  func testNeverCase() {
+    enum Foo {
+      case bar
+      case baz(Baz)
+      enum Baz {}
+    }
+
+    XCTAssertNil((/Foo.baz).extract(from: Foo.bar))
+  }
+
   func testCasePaths() {
     XCTAssertEqual(
       .some("Hello"),
