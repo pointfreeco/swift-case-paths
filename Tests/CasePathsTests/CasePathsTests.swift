@@ -192,7 +192,27 @@ final class CasePathsTests: XCTestCase {
         .extract(from: .bar(.baz))
     )
   }
+  
+  func testNestedUninhabitedTypes() {
+    enum Uninhabited {}
+    
+    enum Foo {
+      case foo
+      case bar(Uninhabited)
+      case baz(Never)
+    }
 
+    XCTAssertNil(
+      (/Foo.bar)
+        .extract(from: Foo.foo)
+    )
+
+    XCTAssertNil(
+      (/Foo.baz)
+        .extract(from: Foo.foo)
+    )
+  }
+  
   func testEnumsWithoutAssociatedValues() {
     enum Foo: Equatable {
       case bar
