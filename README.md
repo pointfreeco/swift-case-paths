@@ -155,7 +155,7 @@ dependencies: [
 ]
 ```
 
-## Prior art
+## Other libraries
 
   - [`EnumKit`](https://github.com/gringoireDM/EnumKit) is a protocol-oriented, reflection-based solution to ergonomic enum access and inspired the creation of this library.
 
