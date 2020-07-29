@@ -151,7 +151,7 @@ If you want to use CasePaths in a [SwiftPM](https://swift.org/package-manager/) 
 
 ``` swift
 dependencies: [
-  .package(url: "https://github.com/pointfreeco/swift-case-paths.git", from: "0.1.0")
+  .package(url: "https://github.com/pointfreeco/swift-case-paths.git", from: "0.1.2")
 ]
 ```
 
