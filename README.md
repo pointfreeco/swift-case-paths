@@ -155,6 +155,10 @@ dependencies: [
 ]
 ```
 
+## Documentation
+
+The latest documentation for CasePaths' APIs is available [here](https://pointfreeco.github.io/swift-case-paths/).
+
 ## Other libraries
 
   - [`EnumKit`](https://github.com/gringoireDM/EnumKit) is a protocol-oriented, reflection-based solution to ergonomic enum access and inspired the creation of this library.
