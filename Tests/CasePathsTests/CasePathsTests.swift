@@ -364,6 +364,22 @@ final class CasePathsTests: XCTestCase {
       (/EnumWithLabeledCase.labeled(label:otherLabel:)).extract(
         from: .labeled(label: 2, otherLabel: 2)))
   }
+  
+  func testSiblingCases() {
+    enum Parent {
+      case foo(Foo)
+      case bar(Bar)
+    }
+    enum Foo {
+      case value(Int)
+    }
+    enum Bar {
+      case unrelated
+    }
+    XCTAssertNil(
+      extract(case: { Parent.bar(.unrelated) }, from: Parent.foo(.value(42)) )
+    )
+  }
 
   //  func testStructs() {
   //    struct Point { var x: Double, y: Double }
