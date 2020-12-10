@@ -69,7 +69,7 @@ public func extract<Root, Value>(case embed: (Value) -> Root, from root: Root) -
     if MemoryLayout<Value>.size == 0, !isUninhabitedEnum(Value.self) {
       // If `any` is hashable, using its `hashValue` as path component is 
       // likely faster than describing `any` itself.
-      let path = [String(describing: (any as? AnyHashable)?.hashValue ?? any)]
+      let path = [String(describing: (root as? AnyHashable)?.hashValue ?? root as Any)]
       return (path, unsafeBitCast((), to: Value.self))
     }
     return nil
