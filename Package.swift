@@ -6,7 +6,7 @@ let package = Package(
   products: [
     .library(
       name: "CasePaths",
-      targets: ["CasePaths"]),
+      targets: ["CasePaths"])
   ],
   dependencies: [],
   targets: [

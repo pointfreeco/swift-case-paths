@@ -33,7 +33,7 @@ extension CasePath where Value == Void {
 }
 
 /// Attempts to extract values associated with a given enum case initializer from a given root enum.
-/// 
+///
 ///     extract(case: Result<Int, Error>.success, from: .success(42))
 ///     // 42
 ///     extract(case: Result<Int, Error>.success, from: .failure(MyError())
@@ -74,7 +74,9 @@ public func extract<Root, Value>(case embed: (Value) -> Root, from root: Root) -
   if let (rootPath, child) = extractHelp(from: root),
     let (otherPath, _) = extractHelp(from: embed(child)),
     rootPath == otherPath
-  { return child }
+  {
+    return child
+  }
   return nil
 }
 
