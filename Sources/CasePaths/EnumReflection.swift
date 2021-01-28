@@ -58,13 +58,13 @@ public func extract<Root, Value>(case embed: (Value) -> Root, from root: Root) -
     var path: [String?] = []
     var any: Any = root
 
-    while case let (label?, anyChild)? = Mirror(reflecting: any).children.first {
+    while let child = Mirror(reflecting: any).children.first, let label = child.label {
       path.append(label)
-      path.append(String(describing: type(of: anyChild)))
-      if let child = anyChild as? Value {
+      path.append(String(describing: type(of: child.value)))
+      if let child = child.value as? Value {
         return (path, child)
       }
-      any = anyChild
+      any = child.value
     }
     if MemoryLayout<Value>.size == 0, !isUninhabitedEnum(Value.self) {
       return (["\(root)"], unsafeBitCast((), to: Value.self))
