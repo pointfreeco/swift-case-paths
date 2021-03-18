@@ -6,15 +6,16 @@ let package = Package(
   products: [
     .library(
       name: "CasePaths",
-      targets: ["CasePaths"]),
+      targets: ["CasePaths"]
+    ),
   ],
-  dependencies: [],
   targets: [
     .target(
-      name: "CasePaths",
-      dependencies: []),
+      name: "CasePaths"
+    ),
     .testTarget(
       name: "CasePathsTests",
-      dependencies: ["CasePaths"]),
+      dependencies: ["CasePaths"]
+    ),
   ]
 )
