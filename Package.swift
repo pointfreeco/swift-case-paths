@@ -7,7 +7,7 @@ let package = Package(
     .library(
       name: "CasePaths",
       targets: ["CasePaths"]
-    ),
+    )
   ],
   targets: [
     .target(

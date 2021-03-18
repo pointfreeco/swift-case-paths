@@ -33,7 +33,7 @@ extension CasePath where Value == Void {
 }
 
 /// Attempts to extract values associated with a given enum case initializer from a given root enum.
-/// 
+///
 ///     extract(case: Result<Int, Error>.success, from: .success(42))
 ///     // 42
 ///     extract(case: Result<Int, Error>.success, from: .failure(MyError())
@@ -74,7 +74,9 @@ public func extract<Root, Value>(case embed: (Value) -> Root, from root: Root) -
   if let (rootPath, child) = extractHelp(from: root),
     let (otherPath, _) = extractHelp(from: embed(child)),
     rootPath == otherPath
-  { return child }
+  {
+    return child
+  }
   return nil
 }
 
@@ -109,30 +111,30 @@ private struct EnumTypeDescriptor {
   // These fields are not modeled because we don't need them.
   // They are the type descriptor flags and various pointer offsets.
   let flags, p1, p2, p3, p4: Int32
-  
+
   let numPayloadCasesAndPayloadSizeOffset: Int32
   let numEmptyCases: Int32
-  
+
   var numPayloadCases: Int32 {
     numPayloadCasesAndPayloadSizeOffset & 0xFFFFFF
   }
 }
 
 private func isUninhabitedEnum(_ type: Any.Type) -> Bool {
-    // Load the type kind from the common type metadata area. Memory layout reference:
-    // https://github.com/apple/swift/blob/master/docs/ABI/TypeMetadata.rst
-    let metadataPtr = unsafeBitCast(type, to: UnsafeRawPointer.self)
-    let metadataKind = metadataPtr.load(as: Int.self)
-    
-    // Check that this is an enum. Value reference:
-    // https://github.com/apple/swift/blob/master/stdlib/public/core/ReflectionMirror.swift
-    let isEnum = metadataKind == 0x201
-    guard isEnum else { return false }
-    
-    // Access enum type descriptor
-    let enumMetadata = metadataPtr.load(as: EnumMetadata.self)
-    let enumTypeDescriptor = enumMetadata.typeDescriptor.pointee
-    
-    let numCases = enumTypeDescriptor.numPayloadCases + enumTypeDescriptor.numEmptyCases
-    return numCases == 0
+  // Load the type kind from the common type metadata area. Memory layout reference:
+  // https://github.com/apple/swift/blob/master/docs/ABI/TypeMetadata.rst
+  let metadataPtr = unsafeBitCast(type, to: UnsafeRawPointer.self)
+  let metadataKind = metadataPtr.load(as: Int.self)
+
+  // Check that this is an enum. Value reference:
+  // https://github.com/apple/swift/blob/master/stdlib/public/core/ReflectionMirror.swift
+  let isEnum = metadataKind == 0x201
+  guard isEnum else { return false }
+
+  // Access enum type descriptor
+  let enumMetadata = metadataPtr.load(as: EnumMetadata.self)
+  let enumTypeDescriptor = enumMetadata.typeDescriptor.pointee
+
+  let numCases = enumTypeDescriptor.numPayloadCases + enumTypeDescriptor.numEmptyCases
+  return numCases == 0
 }

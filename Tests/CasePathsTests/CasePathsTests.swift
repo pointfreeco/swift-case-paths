@@ -192,10 +192,10 @@ final class CasePathsTests: XCTestCase {
         .extract(from: .bar(.baz))
     )
   }
-  
+
   func testNestedUninhabitedTypes() {
     enum Uninhabited {}
-    
+
     enum Foo {
       case foo
       case bar(Uninhabited)
@@ -212,7 +212,7 @@ final class CasePathsTests: XCTestCase {
         .extract(from: Foo.foo)
     )
   }
-  
+
   func testEnumsWithoutAssociatedValues() {
     enum Foo: Equatable {
       case bar
