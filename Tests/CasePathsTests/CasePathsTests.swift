@@ -365,6 +365,26 @@ final class CasePathsTests: XCTestCase {
         from: .labeled(label: 2, otherLabel: 2)))
   }
 
+  func testPatternMatching() {
+    let results = [
+      Result<Int, NSError>.success(1),
+      .success(2),
+      .failure(NSError(domain: "co.pointfree", code: -1)),
+      .success(3)
+    ]
+    XCTAssertEqual(
+      Array(results.lazy.prefix(while: { /Result.success ~= $0 }).compactMap(/Result.success)),
+      [1, 2]
+    )
+
+    switch results[0] {
+    case /Result.success:
+      break
+    default:
+      XCTFail()
+    }
+  }
+
   //  func testStructs() {
   //    struct Point { var x: Double, y: Double }
   //

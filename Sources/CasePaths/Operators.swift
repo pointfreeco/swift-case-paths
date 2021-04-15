@@ -1,5 +1,19 @@
 prefix operator /
 
+/// Returns whether or not a root value matches a particular case path.
+///
+///     [Result<Int, Error>.success(1), .success(2), .failure(NSError()), .success(4)]
+///       .prefix(while: { /Result.success ~= $0 })
+///     // [.success(1), .success(2)]
+///
+/// - Parameters:
+///   - pattern: A case path.
+///   - value: A root value.
+/// - Returns: Whether or not a root value matches a particular case path
+public func ~= <Root, Value>(pattern: CasePath<Root, Value>, value: Root) -> Bool {
+  pattern.extract(from: value) != nil
+}
+
 /// Returns a case path for the given embed function.
 ///
 /// - Note: This operator is only intended to be used with enum cases that have no associated
