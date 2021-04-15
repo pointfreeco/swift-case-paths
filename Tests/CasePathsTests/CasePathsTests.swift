@@ -370,7 +370,7 @@ final class CasePathsTests: XCTestCase {
       Result<Int, NSError>.success(1),
       .success(2),
       .failure(NSError(domain: "co.pointfree", code: -1)),
-      .success(3)
+      .success(3),
     ]
     XCTAssertEqual(
       Array(results.lazy.prefix(while: { /Result.success ~= $0 }).compactMap(/Result.success)),
