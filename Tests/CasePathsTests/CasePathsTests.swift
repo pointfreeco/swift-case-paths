@@ -21,8 +21,8 @@ final class CasePathsTests: XCTestCase {
   func testVoidCasePath() {
     enum Foo: Equatable { case bar }
 
-//    let fooBar = /Foo.bar
-    XCTAssertEqual(.bar, (/Foo.bar).embed(()))
+    let fooBar = /Foo.bar
+    XCTAssertEqual(.bar, fooBar.embed(()))
   }
 
   func testCasePaths() {
@@ -207,23 +207,13 @@ final class CasePathsTests: XCTestCase {
       case baz
     }
 
-    XCTAssertNotNil(
-      (/Foo.bar)
-        .extract(from: .bar)
-    )
-    XCTAssertNil(
-      (/Foo.bar)
-        .extract(from: .baz)
-    )
+    let fooBar = /Foo.bar
+    XCTAssertNotNil(fooBar.extract(from: .bar))
+    XCTAssertNil(fooBar.extract(from: .baz))
 
-    XCTAssertNotNil(
-      (/Foo.baz)
-        .extract(from: .baz)
-    )
-    XCTAssertNil(
-      (/Foo.baz)
-        .extract(from: .bar)
-    )
+    let fooBaz = /Foo.baz
+    XCTAssertNotNil(fooBaz.extract(from: .baz))
+    XCTAssertNil(fooBaz.extract(from: .bar))
 
     XCTAssertNotNil(
       extract(case: { Foo.bar }, from: .bar)
@@ -302,6 +292,12 @@ final class CasePathsTests: XCTestCase {
       [Authentication.authenticated(token: "deadbeef"), .unauthenticated]
         .compactMap(/Authentication.unauthenticated)
         .count
+    )
+
+    enum Foo { case bar(Int, Int) }
+    XCTAssertEqual(
+      [3],
+      [Foo.bar(1, 2)].compactMap(/Foo.bar).map(+)
     )
   }
 
