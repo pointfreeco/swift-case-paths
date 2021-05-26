@@ -385,6 +385,27 @@ final class CasePathsTests: XCTestCase {
     }
   }
 
+  func testErasure() {
+    enum A: Equatable { case b(B) }
+    enum B: Equatable { case c(String) }
+
+    let anyA2B: AnyCasePath = /A.b
+    let anyB2C: AnyCasePath = /B.c
+    let anyA2C = anyA2B.appending(path: anyB2C)
+    XCTAssertEqual(A.b(.c("Hello")), anyA2C!.embed("Hello") as! A)
+    XCTAssertEqual("Hello", anyA2C!.extract(from: A.b(.c("Hello"))) as! String)
+
+    let partialA2B: PartialCasePath = /A.b
+    let partialB2C: PartialCasePath = /B.c
+    let partialA2C = partialA2B.appending(path: partialB2C)
+    XCTAssertEqual(A.b(.c("Hello")), partialA2C!.embed("Hello"))
+    XCTAssertEqual("Hello", partialA2C!.extract(from: A.b(.c("Hello"))) as! String)
+
+    let impartialA2C = partialA2B.appending(path: /B.c)
+    XCTAssertEqual(A.b(.c("Hello")), impartialA2C!.embed("Hello"))
+    XCTAssertEqual("Hello", impartialA2C!.extract(from: A.b(.c("Hello"))))
+  }
+
   //  func testStructs() {
   //    struct Point { var x: Double, y: Double }
   //
