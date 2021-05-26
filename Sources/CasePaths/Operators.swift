@@ -32,6 +32,7 @@ public prefix func / <Root, Value>(
 ///   values. Its behavior is otherwise undefined.
 /// - Parameter root: A case with no an associated value.
 /// - Returns: A void case path.
+@_disfavoredOverload
 public prefix func / <Root>(
   root: Root
 ) -> CasePath<Root, Void> {
@@ -73,6 +74,7 @@ public prefix func / <Root>(
 ///   otherwise undefined.
 /// - Parameter case: An enum case initializer.
 /// - Returns: A function that can attempt to extract associated values from an enum.
+@_disfavoredOverload
 public prefix func / <Root, Value>(
   case: @escaping (Value) -> Root
 ) -> (Root) -> Value? {
@@ -85,6 +87,7 @@ public prefix func / <Root, Value>(
 ///   values. Its behavior is otherwise undefined.
 /// - Parameter root: A case with no an associated value.
 /// - Returns: A void case path.
+@_disfavoredOverload
 public prefix func / <Root>(
   root: Root
 ) -> (Root) -> Void? {
