@@ -76,15 +76,16 @@ extension WritableKeyPath: WritablePath {
 
 // MARK: - Optional Paths
 
-//public protocol _AppendOptionalPath {}
-public typealias _AppendOptionalPath = _AppendKeyPath
+public protocol _AppendOptionalPath {}
 
 public class AnyOptionalPath: _AppendOptionalPath, AnyPath {
   @inlinable public static var rootType: Any.Type { Self._rootAndValueType.root }
 
   @inlinable public static var valueType: Any.Type { Self._rootAndValueType.value }
 
-  @usableFromInline class var _rootAndValueType: (root: Any.Type, value: Any.Type) { fatalError() }
+  @usableFromInline class var _rootAndValueType: (root: Any.Type, value: Any.Type) {
+    fatalError("abstract")
+  }
 
   @usableFromInline let _extract: (Any) -> Any?
 

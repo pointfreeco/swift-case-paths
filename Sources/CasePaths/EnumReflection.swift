@@ -14,7 +14,9 @@ import func Foundation.memcmp
 ///   - root: A root enum value.
 /// - Returns: Values iff they can be extracted from the given enum case initializer and root enum,
 ///   otherwise `nil`.
-@inlinable public func extract<Root, Value>(case embed: (Value) -> Root, from root: Root) -> Value? {
+@inlinable public func extract<Root, Value>(
+  case embed: (Value) -> Root, from root: Root
+) -> Value? {
   func extractHelp(from root: Root) -> ([String?], Value)? {
     if let value = root as? Value {
       var otherRoot = embed(value)
@@ -62,7 +64,9 @@ import func Foundation.memcmp
 ///   otherwise undefined.
 /// - Parameter case: An enum case initializer.
 /// - Returns: A function that can attempt to extract associated values from an enum.
-@inlinable public func extract<Root, Value>(_ case: @escaping (Value) -> Root) -> (Root) -> (Value?) {
+@inlinable public func extract<Root, Value>(
+  _ case: @escaping (Value) -> Root
+) -> (Root) -> (Value?) {
   return { root in
     return extract(case: `case`, from: root)
   }
