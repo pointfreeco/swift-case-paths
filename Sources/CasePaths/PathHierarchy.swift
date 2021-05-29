@@ -99,12 +99,12 @@ public class AnyOptionalPath: _AppendOptionalPath, AnyPath {
 }
 
 extension _AppendOptionalPath {
-  /// Returns a new path created by appending the given path to this one.
+  /// Returns a new path created by appending the given case path to this one.
   ///
-  /// - Parameters:
-  ///   - lhs: A path from a root to a value.
-  ///   - rhs: A path from the first path's value to some other appended value.
-  /// - Returns: A new path from the first path's root to the second case path's value.
+  /// Use this method to extend this path to the value type of another path.
+  ///
+  /// - Parameter path: The path to append.
+  /// - Returns: A path from the root of this path to the value type of `path`.
   @inlinable public func appending(
     path: AnyPath
   ) -> AnyOptionalPath?
@@ -127,12 +127,12 @@ public class PartialOptionalPath<Root>: AnyOptionalPath, PartialPath {
 }
 
 extension _AppendOptionalPath {
-  /// Returns a new path created by appending the given path to this one.
+  /// Returns a new path created by appending the given case path to this one.
   ///
-  /// - Parameters:
-  ///   - lhs: A path from a root to a value.
-  ///   - rhs: A path from the first path's value to some other appended value.
-  /// - Returns: A new path from the first path's root to the second case path's value.
+  /// Use this method to extend this path to the value type of another path.
+  ///
+  /// - Parameter path: The path to append.
+  /// - Returns: A path from the root of this path to the value type of `path`.
   @inlinable public func appending<Root>(
     path: AnyPath
   ) -> PartialOptionalPath<Root>?
@@ -140,12 +140,12 @@ extension _AppendOptionalPath {
     _tryToAppendOptionalPaths(root: self, leaf: path)
   }
 
-  /// Returns a new path created by appending the given path to this one.
+  /// Returns a new path created by appending the given case path to this one.
   ///
-  /// - Parameters:
-  ///   - lhs: A path from a root to a value.
-  ///   - rhs: A path from the first path's value to some other appended value.
-  /// - Returns: A new path from the first path's root to the second case path's value.
+  /// Use this method to extend this path to the value type of another path.
+  ///
+  /// - Parameter path: The path to append.
+  /// - Returns: A path from the root of this path to the value type of `path`.
   @inlinable public func appending<Root, AppendedPath>(
     path: AppendedPath
   ) -> OptionalPath<Root, AppendedPath.Value>?
@@ -153,12 +153,12 @@ extension _AppendOptionalPath {
     _tryToAppendOptionalPaths(root: self, leaf: path)
   }
 
-  /// Returns a new path created by appending the given path to this one.
+  /// Returns a new path created by appending the given case path to this one.
   ///
-  /// - Parameters:
-  ///   - lhs: A path from a root to a value.
-  ///   - rhs: A path from the first path's value to some other appended value.
-  /// - Returns: A new path from the first path's root to the second case path's value.
+  /// Use this method to extend this path to the value type of another path.
+  ///
+  /// - Parameter path: The path to append.
+  /// - Returns: A path from the root of this path to the value type of `path`.
   @inlinable public func appending<Root, AppendedPath>(
     path: AppendedPath
   ) -> WritableOptionalPath<Root, AppendedPath.Value>?
@@ -187,12 +187,12 @@ public class OptionalPath<Root, Value>: PartialOptionalPath<Root>, Path {
 }
 
 extension Path {
-  /// Returns a new path created by appending the given path to this one.
+  /// Returns a new path created by appending the given case path to this one.
   ///
-  /// - Parameters:
-  ///   - lhs: A path from a root to a value.
-  ///   - rhs: A path from the first path's value to some other appended value.
-  /// - Returns: A new path from the first path's root to the second case path's value.
+  /// Use this method to extend this path to the value type of another path.
+  ///
+  /// - Parameter path: The path to append.
+  /// - Returns: A path from the root of this path to the value type of `path`.
   @inlinable public func appending<AppendedPath>(
     path: AppendedPath
   ) -> OptionalPath<Root, AppendedPath.Value>
@@ -245,12 +245,12 @@ public class WritableOptionalPath<Root, Value>: OptionalPath<Root, Value>, Writa
 }
 
 extension WritablePath {
-  /// Returns a new path created by appending the given path to this one.
+  /// Returns a new path created by appending the given case path to this one.
   ///
-  /// - Parameters:
-  ///   - lhs: A path from a root to a value.
-  ///   - rhs: A path from the first path's value to some other appended value.
-  /// - Returns: A new path from the first path's root to the second case path's value.
+  /// Use this method to extend this path to the value type of another path.
+  ///
+  /// - Parameter path: The path to append.
+  /// - Returns: A path from the root of this path to the value type of `path`.
   @inlinable public func appending<AppendedPath>(
     path: AppendedPath
   ) -> WritableOptionalPath<Root, AppendedPath.Value>
@@ -264,20 +264,18 @@ extension WritablePath {
     }
     return _appendingOptionalPaths(root: _path(for: self), leaf: _path(for: path))
   }
-}
 
-extension WritableKeyPath {
-  /// Returns a new path created by appending the given path to this one.
+  /// Returns a new path created by optional chaining the given case path to this one.
   ///
-  /// - Parameters:
-  ///   - lhs: A path from a root to a value.
-  ///   - rhs: A path from the first path's value to some other appended value.
-  /// - Returns: A new path from the first path's root to the second case path's value.
+  /// Use this method to extend this path to the value type of another path.
+  ///
+  /// - Parameter path: The path to append.
+  /// - Returns: A path from the root of this path to the value type of `path`.
   @inlinable public func appending<AppendedPath>(
     path: AppendedPath
   ) -> WritableOptionalPath<Root, AppendedPath.Value>
   where AppendedPath: WritablePath, Value == AppendedPath.Root? {
-    WritableOptionalPath(self).appending(path: path)
+    self.appending(path: /Optional.some).appending(path: path)
   }
 }
 
@@ -323,12 +321,12 @@ extension CasePath where Root == Value {
 }
 
 extension EmbeddablePath {
-  /// Returns a new path created by appending the given path to this one.
+  /// Returns a new path created by appending the given case path to this one.
   ///
-  /// - Parameters:
-  ///   - lhs: A path from a root to a value.
-  ///   - rhs: A path from the first path's value to some other appended value.
-  /// - Returns: A new path from the first path's root to the second case path's value.
+  /// Use this method to extend this path to the value type of another path.
+  ///
+  /// - Parameter path: The path to append.
+  /// - Returns: A path from the root of this path to the value type of `path`.
   @inlinable public func appending<AppendedPath>(
     path: AppendedPath
   ) -> CasePath<Root, AppendedPath.Value>
