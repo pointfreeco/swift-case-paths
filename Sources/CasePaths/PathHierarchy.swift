@@ -199,11 +199,8 @@ extension Path {
   ) -> OptionalPath<Root, AppendedPath.Value>
   where AppendedPath: Path, AppendedPath.Root == Value {
     func _path<P>(for path: P) -> OptionalPath<P.Root, P.Value> where P: Path {
-      if let path = path as? OptionalPath<P.Root, P.Value> {
-        return path
-      } else {
-        return OptionalPath(extract: path.extract(from:))
-      }
+      (path as? OptionalPath<P.Root, P.Value>)
+        ?? OptionalPath(extract: path.extract(from:))
     }
     return _appendingOptionalPaths(root: _path(for: self), leaf: _path(for: path))
   }
@@ -257,11 +254,8 @@ extension WritablePath {
   ) -> WritableOptionalPath<Root, AppendedPath.Value>
   where AppendedPath: WritablePath, AppendedPath.Root == Value {
     func _path<P>(for path: P) -> WritableOptionalPath<P.Root, P.Value> where P: WritablePath {
-      if let path = path as? WritableOptionalPath<P.Root, P.Value> {
-        return path
-      } else {
-        return WritableOptionalPath(extract: path.extract(from:), set: path.set)
-      }
+      (path as? WritableOptionalPath<P.Root, P.Value>)
+        ?? WritableOptionalPath(extract: path.extract(from:), set: path.set)
     }
     return _appendingOptionalPaths(root: _path(for: self), leaf: _path(for: path))
   }
@@ -333,11 +327,8 @@ extension EmbeddablePath {
   ) -> CasePath<Root, AppendedPath.Value>
   where AppendedPath: EmbeddablePath, AppendedPath.Root == Value {
     func _path<P>(for path: P) -> CasePath<P.Root, P.Value> where P: EmbeddablePath {
-      if let path = path as? CasePath<P.Root, P.Value> {
-        return path
-      } else {
-        return CasePath(extract: path.extract(from:), embed: path.embed)
-      }
+      (path as? CasePath<P.Root, P.Value>)
+        ?? CasePath(extract: path.extract(from:), embed: path.embed)
     }
     return _appendingOptionalPaths(root: _path(for: self), leaf: _path(for: path))
   }
@@ -351,11 +342,9 @@ extension EmbeddablePath {
     if let path = path as? AnyOptionalPath { return path }
     func open<Root>(_: Root.Type) -> AnyOptionalPath {
       func open2<Value>(_: Value.Type) -> AnyOptionalPath {
-        if let path = path as? WritableKeyPath<Root, Value> {
-          return WritableOptionalPath(extract: path.extract(from:), set: path.set)
-        } else {
-          return OptionalPath(extract: (path as! KeyPath<Root, Value>).extract(from:))
-        }
+        (path as? WritableKeyPath<Root, Value>)
+          .map { WritableOptionalPath(extract: $0.extract(from:), set: $0.set) }
+          ?? OptionalPath(extract: (path as! KeyPath<Root, Value>).extract(from:))
       }
       return _openExistential(type(of: path).valueType, do: open2)
     }

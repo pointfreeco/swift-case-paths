@@ -396,7 +396,8 @@ final class CasePathsTests: XCTestCase {
     let anyA2C = anyA2B.appending(path: anyB2C)
     _ = anyA2C as! CasePath<A, String>
 
-    XCTAssertEqual(A.b(.c("Hello")), (anyA2C! as! CasePath<A, String>).embed("Hello"))
+    XCTAssertEqual(A.b(.c("Hello")), (anyA2C as! CasePath<A, String>).embed("Hello"))
+    XCTAssertEqual("Hello", (anyA2C as! CasePath<A, String>).extract(from: A.b(.c("Hello"))))
     XCTAssertEqual("Hello", anyA2C!.extract(from: A.b(.c("Hello"))) as! String)
 
     let partialA2B: PartialOptionalPath = /A.b
@@ -404,10 +405,22 @@ final class CasePathsTests: XCTestCase {
     let partialA2C = partialA2B.appending(path: partialB2C)
     XCTAssertEqual(A.b(.c("Hello")), (partialA2C as! CasePath<A, String>).embed("Hello"))
     XCTAssertEqual("Hello", (partialA2C as! CasePath<A, String>).extract(from: A.b(.c("Hello"))))
+    XCTAssertEqual("Hello", (partialA2C as! CasePath<A, String>).extract(from: A.b(.c("Hello"))))
 
-    let impartialA2C = partialA2B.appending(path: /B.c)
+    let writeImpartialA2C = partialA2B.appending(path: /B.c)
+    XCTAssertEqual(A.b(.c("Hello")), (writeImpartialA2C as! CasePath<A, String>).embed("Hello"))
+    XCTAssertEqual("Hello", (writeImpartialA2C as! CasePath<A, String>).extract(from: A.b(.c("Hello"))))
+    XCTAssertEqual("Hello", writeImpartialA2C!.extract(from: A.b(.c("Hello"))))
+
+    let impartialA2C = partialA2B.appending(path: /B.c as OptionalPath)
     XCTAssertEqual(A.b(.c("Hello")), (impartialA2C as! CasePath<A, String>).embed("Hello"))
+    XCTAssertEqual("Hello", (impartialA2C as! CasePath<A, String>).extract(from: A.b(.c("Hello"))))
     XCTAssertEqual("Hello", impartialA2C!.extract(from: A.b(.c("Hello"))))
+
+    XCTAssertEqual(
+      5,
+      OptionalPath<Void, String>(extract: { _ in "Hello" }).appending(path: \String.count)
+        .extract(from: ()))
   }
 
   func testAppendErasure() {
