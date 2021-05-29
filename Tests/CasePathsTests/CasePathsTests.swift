@@ -333,26 +333,26 @@ final class CasePathsTests: XCTestCase {
     XCTAssertEqual(42, (/Int??.some .. /Int?.some).extract(from: Optional(Optional(42))))
   }
 
-//  func testConstantCasePath() {
-//    XCTAssertEqual(.some(42), CasePath.constant(42).extract(from: ()))
-//    XCTAssertNotNil(CasePath.constant(42).embed(42))
-//  }
-//
-//  func testNeverCasePath() {
-//    XCTAssertNil(CasePath.never.extract(from: 42))
-//  }
-//
-//  func testRawValuePath() {
-//    enum Foo: String { case bar, baz }
-//
-//    XCTAssertEqual(.some(.bar), CasePath<String, Foo>.rawValue.extract(from: "bar"))
-//    XCTAssertEqual("baz", CasePath.rawValue.embed(Foo.baz))
-//  }
-//
-//  func testDescriptionPath() {
-//    XCTAssertEqual(.some(42), CasePath.description.extract(from: "42"))
-//    XCTAssertEqual("42", CasePath.description.embed(42))
-//  }
+  func testConstantCasePath() {
+    XCTAssertEqual(.some(42), CasePath.constant(42).extract(from: ()))
+    XCTAssertNotNil(CasePath.constant(42).embed(42))
+  }
+
+  func testNeverCasePath() {
+    XCTAssertNil(CasePath.never.extract(from: 42))
+  }
+
+  func testRawValuePath() {
+    enum Foo: String { case bar, baz }
+
+    XCTAssertEqual(.some(.bar), CasePath<String, Foo>.rawValue.extract(from: "bar"))
+    XCTAssertEqual("baz", CasePath.rawValue.embed(Foo.baz))
+  }
+
+  func testDescriptionPath() {
+    XCTAssertEqual(.some(42), CasePath.description.extract(from: "42"))
+    XCTAssertEqual("42", CasePath.description.embed(42))
+  }
 
   func testA() {
     enum EnumWithLabeledCase {
@@ -403,7 +403,7 @@ final class CasePathsTests: XCTestCase {
     let partialB2C: PartialOptionalPath = /B.c
     let partialA2C = partialA2B.appending(path: partialB2C)
     XCTAssertEqual(A.b(.c("Hello")), (partialA2C as! CasePath<A, String>).embed("Hello"))
-    XCTAssertEqual("Hello", partialA2C!.extract(from: A.b(.c("Hello"))) as! String)
+    XCTAssertEqual("Hello", (partialA2C as! CasePath<A, String>).extract(from: A.b(.c("Hello"))))
 
     let impartialA2C = partialA2B.appending(path: /B.c)
     XCTAssertEqual(A.b(.c("Hello")), (impartialA2C as! CasePath<A, String>).embed("Hello"))

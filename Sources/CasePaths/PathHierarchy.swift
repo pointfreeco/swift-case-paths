@@ -1,16 +1,34 @@
 public protocol AnyPath {
+  /// The root type for this path.
   static var rootType: Any.Type { get }
+
+  /// The value type for this path.
   static var valueType: Any.Type { get }
+
+  /// Attempts to extract a value from a root.
+  ///
+  /// - Parameter root: A root to extract from.
+  /// - Returns: A value iff it can be extracted from the given root, otherwise `nil`.
   func extract(from root: Any) -> Any?
 }
 
 public protocol PartialPath: AnyPath {
   associatedtype Root
+
+  /// Attempts to extract a value from a root.
+  ///
+  /// - Parameter root: A root to extract from.
+  /// - Returns: A value iff it can be extracted from the given root, otherwise `nil`.
   func extract(from root: Root) -> Any?
 }
 
 public protocol Path: PartialPath {
   associatedtype Value
+
+  /// Attempts to extract a value from a root.
+  ///
+  /// - Parameter root: A root to extract from.
+  /// - Returns: A value iff it can be extracted from the given root, otherwise `nil`.
   func extract(from root: Root) -> Value?
 }
 
@@ -19,13 +37,17 @@ public protocol WritablePath: Path {
 }
 
 public protocol EmbeddablePath: WritablePath {
+  /// Returns a root by embedding a value.
+  ///
+  /// - Parameter value: A value to embed.
+  /// - Returns: A root that embeds `value`.
   func embed(_ value: Value) -> Root
 }
 
 // MARK: - Key Paths
 
 extension AnyKeyPath: AnyPath {
-  public func extract(from root: Any) -> Any? {
+  @inlinable public func extract(from root: Any) -> Any? {
     root[keyPath: self]
   }
 }
@@ -33,7 +55,7 @@ extension AnyKeyPath: AnyPath {
 extension PartialKeyPath: PartialPath {
   public typealias Root = Root
 
-  public func extract(from root: Root) -> Any? {
+  @inlinable public func extract(from root: Root) -> Any? {
     root[keyPath: self]
   }
 }
@@ -41,13 +63,13 @@ extension PartialKeyPath: PartialPath {
 extension KeyPath: Path {
   public typealias Value = Value
 
-  public func extract(from root: Root) -> Value? {
+  @inlinable public func extract(from root: Root) -> Value? {
     root[keyPath: self]
   }
 }
 
 extension WritableKeyPath: WritablePath {
-  public func set(into root: inout Root, _ value: Value) {
+  @inlinable public func set(into root: inout Root, _ value: Value) {
     root[keyPath: self] = value
   }
 }
@@ -58,28 +80,32 @@ extension WritableKeyPath: WritablePath {
 public typealias _AppendOptionalPath = _AppendKeyPath
 
 public class AnyOptionalPath: _AppendOptionalPath, AnyPath {
-  public static var rootType: Any.Type { Self._rootAndValueType.root }
+  @inlinable public static var rootType: Any.Type { Self._rootAndValueType.root }
 
-  public static var valueType: Any.Type { Self._rootAndValueType.value }
+  @inlinable public static var valueType: Any.Type { Self._rootAndValueType.value }
 
-  class var _rootAndValueType: (root: Any.Type, value: Any.Type) { fatalError() }
+  @usableFromInline class var _rootAndValueType: (root: Any.Type, value: Any.Type) { fatalError() }
 
-  public class var `self`: AnyOptionalPath { .init(extract: { $0 }) }
+  @usableFromInline let _extract: (Any) -> Any?
 
-  let _extract: (Any) -> Any?
-
-  init(extract: @escaping (Any) -> Any?) {
+  @usableFromInline init(extract: @escaping (Any) -> Any?) {
     self._extract = extract
   }
 
   @_disfavoredOverload
-  public func extract(from root: Any) -> Any? {
+  @inlinable public func extract(from root: Any) -> Any? {
     self._extract(root)
   }
 }
 
 extension _AppendOptionalPath {
-  public func appending(
+  /// Returns a new path created by appending the given path to this one.
+  ///
+  /// - Parameters:
+  ///   - lhs: A path from a root to a value.
+  ///   - rhs: A path from the first path's value to some other appended value.
+  /// - Returns: A new path from the first path's root to the second case path's value.
+  @inlinable public func appending(
     path: AnyPath
   ) -> AnyOptionalPath?
   where Self == AnyOptionalPath {
@@ -90,34 +116,50 @@ extension _AppendOptionalPath {
 public class PartialOptionalPath<Root>: AnyOptionalPath, PartialPath {
   public typealias Root = Root
 
-  public class override var `self`: PartialOptionalPath { .init(extract: { $0 }) }
-
-  init(extract: @escaping (Root) -> Any?) {
+  @usableFromInline init(extract: @escaping (Root) -> Any?) {
     super.init(extract: { ($0 as? Root).flatMap(extract) })
   }
 
   @_disfavoredOverload
-  public func extract(from root: Root) -> Any? {
+  @inlinable public func extract(from root: Root) -> Any? {
     self._extract(root)
   }
 }
 
 extension _AppendOptionalPath {
-  public func appending<Root>(
+  /// Returns a new path created by appending the given path to this one.
+  ///
+  /// - Parameters:
+  ///   - lhs: A path from a root to a value.
+  ///   - rhs: A path from the first path's value to some other appended value.
+  /// - Returns: A new path from the first path's root to the second case path's value.
+  @inlinable public func appending<Root>(
     path: AnyPath
   ) -> PartialOptionalPath<Root>?
   where Self == PartialOptionalPath<Root> {
     _tryToAppendOptionalPaths(root: self, leaf: path)
   }
 
-  public func appending<Root, AppendedPath>(
+  /// Returns a new path created by appending the given path to this one.
+  ///
+  /// - Parameters:
+  ///   - lhs: A path from a root to a value.
+  ///   - rhs: A path from the first path's value to some other appended value.
+  /// - Returns: A new path from the first path's root to the second case path's value.
+  @inlinable public func appending<Root, AppendedPath>(
     path: AppendedPath
   ) -> OptionalPath<Root, AppendedPath.Value>?
   where Self == PartialOptionalPath<Root>, AppendedPath: Path {
     _tryToAppendOptionalPaths(root: self, leaf: path)
   }
 
-  public func appending<Root, AppendedPath>(
+  /// Returns a new path created by appending the given path to this one.
+  ///
+  /// - Parameters:
+  ///   - lhs: A path from a root to a value.
+  ///   - rhs: A path from the first path's value to some other appended value.
+  /// - Returns: A new path from the first path's root to the second case path's value.
+  @inlinable public func appending<Root, AppendedPath>(
     path: AppendedPath
   ) -> WritableOptionalPath<Root, AppendedPath.Value>?
   where Self == PartialOptionalPath<Root>, AppendedPath: WritablePath {
@@ -128,23 +170,30 @@ extension _AppendOptionalPath {
 public class OptionalPath<Root, Value>: PartialOptionalPath<Root>, Path {
   public typealias Value = Value
 
-  public class override var `self`: OptionalPath<Root, Root> { .init(extract: { $0 }) }
-
-  override class var _rootAndValueType: (root: Any.Type, value: Any.Type) {
+  @usableFromInline override class var _rootAndValueType: (root: Any.Type, value: Any.Type) {
     (root: Root.self, value: Value.self)
   }
 
-  public init(extract: @escaping (Root) -> Value?) {
+  /// Creates an optional path from an extract function.
+  ///
+  /// - Parameter extract: A function that attempts to extract a value from a root.
+  @inlinable public init(extract: @escaping (Root) -> Value?) {
     super.init(extract: extract)
   }
 
-  public func extract(from root: Root) -> Value? {
+  @inlinable public func extract(from root: Root) -> Value? {
     self._extract(root) as? Value
   }
 }
 
 extension Path {
-  public func appending<AppendedPath>(
+  /// Returns a new path created by appending the given path to this one.
+  ///
+  /// - Parameters:
+  ///   - lhs: A path from a root to a value.
+  ///   - rhs: A path from the first path's value to some other appended value.
+  /// - Returns: A new path from the first path's root to the second case path's value.
+  @inlinable public func appending<AppendedPath>(
     path: AppendedPath
   ) -> OptionalPath<Root, AppendedPath.Value>
   where AppendedPath: Path, AppendedPath.Root == Value {
@@ -159,14 +208,18 @@ extension Path {
   }
 }
 
+/// A path that supports setting a value in a root and attempting to extract a value from a root.
+///
+/// This type defines writable key path-like semantics for optional chaining.
 public class WritableOptionalPath<Root, Value>: OptionalPath<Root, Value>, WritablePath {
-  public class override var `self`: WritableOptionalPath<Root, Root> {
-    .init(extract: { $0 }, set: { $0 = $1 })
-  }
+  @usableFromInline let _set: (inout Root, Value) -> Void
 
-  let _set: (inout Root, Value) -> Void
-
-  public init(
+  /// Creates a writable optional path from a pair of functions.
+  ///
+  /// - Parameters:
+  ///   - extract: A function that attempts to extract a value from a root.
+  ///   - embed: A function that always succeeds in setting a value on a root
+  @inlinable public init(
     extract: @escaping (Root) -> Value?,
     set: @escaping (inout Root, Value) -> Void
   ) {
@@ -174,7 +227,10 @@ public class WritableOptionalPath<Root, Value>: OptionalPath<Root, Value>, Writa
     super.init(extract: extract)
   }
 
-  public convenience init(
+  /// "Upcasts" a writable key path to a writable optional path.
+  ///
+  /// - Parameter keyPath: A writable key path.
+  @inlinable public convenience init(
     _ keyPath: WritableKeyPath<Root, Value?>
   ) {
     self.init(
@@ -183,13 +239,19 @@ public class WritableOptionalPath<Root, Value>: OptionalPath<Root, Value>, Writa
     )
   }
 
-  public func set(into root: inout Root, _ value: Value) {
+  @inlinable public func set(into root: inout Root, _ value: Value) {
     self._set(&root, value)
   }
 }
 
 extension WritablePath {
-  public func appending<AppendedPath>(
+  /// Returns a new path created by appending the given path to this one.
+  ///
+  /// - Parameters:
+  ///   - lhs: A path from a root to a value.
+  ///   - rhs: A path from the first path's value to some other appended value.
+  /// - Returns: A new path from the first path's root to the second case path's value.
+  @inlinable public func appending<AppendedPath>(
     path: AppendedPath
   ) -> WritableOptionalPath<Root, AppendedPath.Value>
   where AppendedPath: WritablePath, AppendedPath.Root == Value {
@@ -205,7 +267,13 @@ extension WritablePath {
 }
 
 extension WritableKeyPath {
-  public func appending<AppendedPath>(
+  /// Returns a new path created by appending the given path to this one.
+  ///
+  /// - Parameters:
+  ///   - lhs: A path from a root to a value.
+  ///   - rhs: A path from the first path's value to some other appended value.
+  /// - Returns: A new path from the first path's root to the second case path's value.
+  @inlinable public func appending<AppendedPath>(
     path: AppendedPath
   ) -> WritableOptionalPath<Root, AppendedPath.Value>
   where AppendedPath: WritablePath, Value == AppendedPath.Root? {
@@ -213,14 +281,19 @@ extension WritableKeyPath {
   }
 }
 
+/// A path that supports embedding a value in a root and attempting to extract a root's embedded
+/// value.
+///
+/// This type defines key path-like semantics for enum cases.
 public class CasePath<Root, Value>: WritableOptionalPath<Root, Value>, EmbeddablePath {
-  public class override var `self`: CasePath<Root, Root> {
-    .init(extract: { $0 }, embed: { $0 })
-  }
+  @usableFromInline let _embed: (Value) -> Root
 
-  let _embed: (Value) -> Root
-
-  public init(
+  /// Creates a case path from a pair of functions.
+  ///
+  /// - Parameters:
+  ///   - extract: A function that attempts to extract a value from a root.
+  ///   - embed: A function that always succeeds in embedding a value in a root
+  @inlinable public init(
     extract: @escaping (Root) -> Value?,
     embed: @escaping (Value) -> Root
   ) {
@@ -228,23 +301,35 @@ public class CasePath<Root, Value>: WritableOptionalPath<Root, Value>, Embeddabl
     super.init(extract: extract, set: { $0 = embed($1) })
   }
 
-  public convenience init(_ embed: @escaping (Value) -> Root) {
+  /// Returns a case path that extracts values associated with a given enum case initializer.
+  ///
+  /// - Note: This function is only intended to be used with enum case initializers. Its behavior is
+  ///   otherwise undefined.
+  /// - Parameter embed: An enum case initializer.
+  /// - Returns: A case path that extracts associated values from enum cases.
+  @inlinable public convenience init(_ embed: @escaping (Value) -> Root) {
     self.init(extract: CasePaths.extract(embed), embed: embed)
   }
 
-  public func embed(_ value: Value) -> Root {
+  @inlinable public func embed(_ value: Value) -> Root {
     self._embed(value)
   }
 }
 
 extension CasePath where Root == Value {
-  public static var `self`: CasePath {
+  @inlinable public static var `self`: CasePath {
     .init(extract: { $0 }, embed: { $0 })
   }
 }
 
 extension EmbeddablePath {
-  public func appending<AppendedPath>(
+  /// Returns a new path created by appending the given path to this one.
+  ///
+  /// - Parameters:
+  ///   - lhs: A path from a root to a value.
+  ///   - rhs: A path from the first path's value to some other appended value.
+  /// - Returns: A new path from the first path's root to the second case path's value.
+  @inlinable public func appending<AppendedPath>(
     path: AppendedPath
   ) -> CasePath<Root, AppendedPath.Value>
   where AppendedPath: EmbeddablePath, AppendedPath.Root == Value {
@@ -259,7 +344,7 @@ extension EmbeddablePath {
   }
 }
 
-func _tryToAppendOptionalPaths<Result: AnyOptionalPath>(
+@usableFromInline func _tryToAppendOptionalPaths<Result: AnyOptionalPath>(
   root: AnyPath,
   leaf: AnyPath
 ) -> Result? {
@@ -302,7 +387,7 @@ func _tryToAppendOptionalPaths<Result: AnyOptionalPath>(
   return _openExistential(rootRoot, do: open)
 }
 
-func _appendingOptionalPaths<
+@usableFromInline func _appendingOptionalPaths<
   Root, Value, AppendedValue,
   Result: OptionalPath<Root, AppendedValue>
 >(
