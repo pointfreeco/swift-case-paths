@@ -137,17 +137,6 @@ final class CasePathsTests: XCTestCase {
     XCTAssertEqual("Blob", fizzBuzz.buzz)
   }
 
-  func testSingleValueExtractionFromMultiple() {
-    enum Foo {
-      case bar(fizz: Int, buzz: String)
-    }
-
-    XCTAssertEqual(
-      .some(42),
-      extract(case: { Foo.bar(fizz: $0, buzz: "Blob") }, from: .bar(fizz: 42, buzz: "Blob"))
-    )
-  }
-
   func testMultiMixedCases() {
     enum Foo {
       case bar(Int, buzz: String)
@@ -174,7 +163,7 @@ final class CasePathsTests: XCTestCase {
 
     XCTAssertEqual(
       42,
-      extract(case: { Foo.bar(.baz($0)) }, from: .bar(.baz(42)))
+      (/{ Foo.bar(.baz($0)) }).extract(from: .bar(.baz(42)))
     )
   }
 
@@ -236,20 +225,6 @@ final class CasePathsTests: XCTestCase {
       (/Foo.baz)
         .extract(from: .bar)
     )
-
-    XCTAssertNotNil(
-      extract(case: { Foo.bar }, from: .bar)
-    )
-    XCTAssertNil(
-      extract(case: { Foo.bar }, from: .baz)
-    )
-
-    XCTAssertNotNil(
-      extract(case: { Foo.baz }, from: .baz)
-    )
-    XCTAssertNil(
-      extract(case: { Foo.baz }, from: .bar)
-    )
   }
 
   func testEnumsWithClosures() {
@@ -277,10 +252,10 @@ final class CasePathsTests: XCTestCase {
 
     XCTAssertEqual(
       .some(42),
-      extract(case: { Foo.foo(.foo(.foo(.bar($0)))) }, from: .foo(.foo(.foo(.bar(42)))))
+      (/{ Foo.foo(.foo(.foo(.bar($0)))) }).extract(from: .foo(.foo(.foo(.bar(42)))))
     )
     XCTAssertNil(
-      extract(case: { Foo.foo(.foo(.foo(.bar($0)))) }, from: .foo(.foo(.bar(42))))
+      (/{ Foo.foo(.foo(.foo(.bar($0)))) }).extract(from: .foo(.foo(.bar(42))))
     )
   }
 
@@ -327,8 +302,8 @@ final class CasePathsTests: XCTestCase {
   }
 
   func testExample() {
-    XCTAssertEqual("Blob", extract(case: Result<String, Error>.success, from: .success("Blob")))
-    XCTAssertNil(extract(case: Result<String, Error>.failure, from: .success("Blob")))
+    XCTAssertEqual("Blob", (/Result<String, Error>.success).extract(from: .success("Blob")))
+    XCTAssertNil((/Result<String, Error>.failure).extract(from: .success("Blob")))
 
     XCTAssertEqual(42, (/Int??.some .. Int?.some).extract(from: Optional(Optional(42))))
   }
