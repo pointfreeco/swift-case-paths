@@ -1,4 +1,4 @@
-import func Foundation.memcmp
+import Echo
 
 extension CasePath {
   /// Returns a case path that extracts values associated with a given enum case initializer.
@@ -46,38 +46,8 @@ extension CasePath where Value == Void {
 ///   - root: A root enum value.
 /// - Returns: Values iff they can be extracted from the given enum case initializer and root enum,
 ///   otherwise `nil`.
-public func extract<Root, Value>(case embed: (Value) -> Root, from root: Root) -> Value? {
-  func extractHelp(from root: Root) -> ([String?], Value)? {
-    if let value = root as? Value {
-      var otherRoot = embed(value)
-      var root = root
-      if memcmp(&root, &otherRoot, MemoryLayout<Root>.size) == 0 {
-        return ([], value)
-      }
-    }
-    var path: [String?] = []
-    var any: Any = root
-
-    while let child = Mirror(reflecting: any).children.first, let label = child.label {
-      path.append(label)
-      path.append(String(describing: type(of: child.value)))
-      if let child = child.value as? Value {
-        return (path, child)
-      }
-      any = child.value
-    }
-    if MemoryLayout<Value>.size == 0, !isUninhabitedEnum(Value.self) {
-      return (["\(root)"], unsafeBitCast((), to: Value.self))
-    }
-    return nil
-  }
-  if let (rootPath, child) = extractHelp(from: root),
-    let (otherPath, _) = extractHelp(from: embed(child)),
-    rootPath == otherPath
-  {
-    return child
-  }
-  return nil
+public func extract<Root, Value>(case embed: @escaping (Value) -> Root, from root: Root) -> Value? {
+  extract(embed)(root)
 }
 
 /// Returns a function that can attempt to extract associated values from the given enum case
@@ -94,47 +64,104 @@ public func extract<Root, Value>(case embed: (Value) -> Root, from root: Root) -
 ///   otherwise undefined.
 /// - Parameter case: An enum case initializer.
 /// - Returns: A function that can attempt to extract associated values from an enum.
-public func extract<Root, Value>(_ case: @escaping (Value) -> Root) -> (Root) -> (Value?) {
+public func extract<Root, Value>(_ embed: @escaping (Value) -> Root) -> (Root) -> (Value?) {
+  let metadata = reflectEnum(Root.self)!
+
+  var tag: UInt32?
   return { root in
-    return extract(case: `case`, from: root)
+    let rootTag = withUnsafePointer(to: root) { metadata.enumVwt.getEnumTag(for: $0) }
+    if let tag = tag, rootTag != tag { return nil }
+
+    let field = metadata.descriptor.fields.records[Int(rootTag)]
+    let type = metadata.type(of: field.mangledTypeName)
+
+    guard type != nil || field.flags.isIndirectCase else {
+      return nil
+    }
+
+    let nativeObject = KnownMetadata.Builtin.nativeObject
+    let payloadMetadata = field.flags.isIndirectCase ? nativeObject : reflect(type!)
+    let pair = swift_allocBox(for: payloadMetadata)
+
+    var container = container(for: root)
+    var opaqueValue = container.projectValue()
+
+    metadata.enumVwt
+      .destructiveProjectEnumData(for: UnsafeMutableRawPointer(mutating: opaqueValue))
+    payloadMetadata.vwt.initializeWithCopy(
+      UnsafeMutableRawPointer(mutating: pair.buffer), UnsafeMutableRawPointer(mutating: opaqueValue)
+    )
+    metadata.enumVwt
+      .destructiveInjectEnumTag(for: UnsafeMutableRawPointer(mutating: opaqueValue), tag: rootTag)
+
+    opaqueValue = pair.buffer
+
+    if field.flags.isIndirectCase {
+      let owner = UnsafePointer<UnsafePointer<HeapObject>>(opaqueValue._rawValue).pointee
+      opaqueValue = swift_projectBox(for: owner)
+    }
+
+    var valueContainer = AnyExistentialContainer(metadata: payloadMetadata)
+    let buffer = payloadMetadata.allocateBoxForExistential(in: &valueContainer)
+    payloadMetadata.vwt.initializeWithCopy(
+      UnsafeMutableRawPointer(mutating: buffer), UnsafeMutableRawPointer(mutating: opaqueValue)
+    )
+
+    swift_release(pair.heapObj)
+
+    let value: Value?
+    if payloadMetadata.type == Any.self && Value.self != Any.self {
+      value = valueContainer.projectValue().load(as: Any.self) as? Value
+    } else {
+      if payloadMetadata.type != Value.self {
+        switch (payloadMetadata, reflect(Value.self)) {
+        // Normalize labeled payloads (`(Int, Int)` vs. `(x: Int, y: Int)`)
+        case let (fieldType as TupleMetadata, valueType as TupleMetadata):
+          guard
+            valueType.numElements == fieldType.numElements,
+            zip(valueType.elements, fieldType.elements).allSatisfy({ $0.type == $1.type })
+          else { return nil }
+
+        // Normalize labeled payload (`(id: Int)` vs. `Int`)
+        case let (fieldType as TupleMetadata, _):
+          guard
+            fieldType.numElements == 1,
+            fieldType.elements[0].type == Value.self
+          else { return nil }
+
+        // Handle indirect payloads
+        case (is OpaqueMetadata, _):
+          break
+
+        // Handle protocol conformances (`Error as? MyError`)
+        case let (fieldType as ExistentialMetadata, valueType as TypeMetadata):
+          guard fieldType.type == Any.self || valueType.conformances.contains(
+            where: { conformance in fieldType.protocols.contains(conformance.protocol) }
+          )
+          else { return nil }
+
+//        case let (valueType, fieldType):
+        default:
+          return nil
+        }
+      }
+      value = valueContainer.projectValue().load(as: Value.self)
+    }
+    guard let value = value else { return nil }
+
+    if tag == nil {
+      let newRoot = embed(value)
+      let newRootTag = withUnsafePointer(to: newRoot) { metadata.enumVwt.getEnumTag(for: $0) }
+      tag = newRootTag
+      guard newRootTag == rootTag else { return nil }
+    }
+
+    return value
   }
 }
 
-// MARK: - Private Helpers
+@_silgen_name("swift_projectBox")
+public func swift_projectBox(for heapObj: UnsafePointer<HeapObject>) -> UnsafeRawPointer
 
-private struct EnumMetadata {
-  let kind: Int
-  let typeDescriptor: UnsafePointer<EnumTypeDescriptor>
-}
-
-private struct EnumTypeDescriptor {
-  // These fields are not modeled because we don't need them.
-  // They are the type descriptor flags and various pointer offsets.
-  let flags, p1, p2, p3, p4: Int32
-
-  let numPayloadCasesAndPayloadSizeOffset: Int32
-  let numEmptyCases: Int32
-
-  var numPayloadCases: Int32 {
-    numPayloadCasesAndPayloadSizeOffset & 0xFFFFFF
-  }
-}
-
-private func isUninhabitedEnum(_ type: Any.Type) -> Bool {
-  // Load the type kind from the common type metadata area. Memory layout reference:
-  // https://github.com/apple/swift/blob/master/docs/ABI/TypeMetadata.rst
-  let metadataPtr = unsafeBitCast(type, to: UnsafeRawPointer.self)
-  let metadataKind = metadataPtr.load(as: Int.self)
-
-  // Check that this is an enum. Value reference:
-  // https://github.com/apple/swift/blob/master/stdlib/public/core/ReflectionMirror.swift
-  let isEnum = metadataKind == 0x201
-  guard isEnum else { return false }
-
-  // Access enum type descriptor
-  let enumMetadata = metadataPtr.load(as: EnumMetadata.self)
-  let enumTypeDescriptor = enumMetadata.typeDescriptor.pointee
-
-  let numCases = enumTypeDescriptor.numPayloadCases + enumTypeDescriptor.numEmptyCases
-  return numCases == 0
-}
+@_silgen_name("swift_projectBox")
+public func swift_release(_ heapObj: UnsafePointer<HeapObject>)
