@@ -86,9 +86,9 @@ public func extract<Root, Value>(case embed: (Value) -> Root, from root: Root) -
 ///
 /// - Note: This function is only intended to be used with enum case initializers. Its behavior is
 ///   otherwise undefined.
-/// - Parameter case: An enum case initializer.
+/// - Parameter embed: An enum case initializer.
 /// - Returns: A function that can attempt to extract associated values from an enum.
-public func extract<Root, Value>(_ case: @escaping (Value) -> Root) -> (Root) -> (Value?) {
+public func extract<Root, Value>(_ embed: @escaping (Value) -> Root) -> (Root) -> (Value?) {
   return { root in
     return extract(case: `case`, from: root)
   }
