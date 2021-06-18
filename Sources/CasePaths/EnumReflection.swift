@@ -69,37 +69,35 @@ public func extract<Root, Value>(_ embed: @escaping (Value) -> Root) -> (Root) -
   return { root in
     guard let rootTag = enumTag(root) else { return nil }
     if let cachedTag = cachedTag, cachedTag != rootTag { return nil }
-    func extractHelp(from root: Root) -> ([String?], Value)? {
+    func extractHelp(from root: Root) -> Value? {
+      guard let tag = enumTag(root) else { return nil }
+      if let cachedTag = cachedTag, cachedTag != tag { return nil }
       if let value = root as? Value {
         var otherRoot = embed(value)
         var root = root
         if memcmp(&root, &otherRoot, MemoryLayout<Root>.size) == 0 {
-          return ([], value)
+          return value
         }
       }
-      var path: [String?] = []
       var any: Any = root
 
-      while let child = Mirror(reflecting: any).children.first, let label = child.label {
-        path.append(label)
-        path.append(String(describing: type(of: child.value)))
+      while let child = Mirror(reflecting: any).children.first {
         if let child = child.value as? Value {
-          return (path, child)
+          return child
         }
         any = child.value
       }
       if MemoryLayout<Value>.size == 0, !isUninhabitedEnum(Value.self) {
-        return (["\(root)"], unsafeBitCast((), to: Value.self))
+        return unsafeBitCast((), to: Value.self)
       }
       return nil
     }
-    guard let (rootPath, child) = extractHelp(from: root) else { return nil }
-    if cachedTag == rootTag { return child }
-    if let (otherPath, _) = extractHelp(from: embed(child)), rootPath == otherPath {
-      cachedTag = rootTag
-      return child
-    }
-    return nil
+    guard let child = extractHelp(from: root) else { return nil }
+    if rootTag == cachedTag { return child }
+    guard let otherTag = enumTag(embed(child)) else { return nil }
+    guard rootTag == otherTag else { return nil }
+    cachedTag = rootTag
+    return child
   }
 }
 
