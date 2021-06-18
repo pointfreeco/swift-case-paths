@@ -68,12 +68,6 @@ final class CasePathsTests: XCTestCase {
       (/.self)
         .extract(from: 42)
     )
-
-    XCTAssertEqual(
-      .some(42),
-      (/{ $0 })
-        .extract(from: 42)
-    )
   }
 
   func testLabeledCases() {
@@ -90,18 +84,6 @@ final class CasePathsTests: XCTestCase {
     XCTAssertNil(
       (/Foo.bar(some:))
         .extract(from: .bar(none: 42))
-    )
-
-    XCTAssertEqual(
-      .some(42),
-      //      (/Foo.bar(none:)) // Abort trap: 6
-      CasePath.case { Foo.bar(none: $0) }
-        .extract(from: .bar(none: 42))
-    )
-    XCTAssertNil(
-      //      (/Foo.bar(none:)) // Abort trap: 6
-      CasePath.case { Foo.bar(none: $0) }
-        .extract(from: .bar(some: 42))
     )
   }
 
@@ -137,17 +119,6 @@ final class CasePathsTests: XCTestCase {
     XCTAssertEqual("Blob", fizzBuzz.buzz)
   }
 
-  func testSingleValueExtractionFromMultiple() {
-    enum Foo {
-      case bar(fizz: Int, buzz: String)
-    }
-
-    XCTAssertEqual(
-      .some(42),
-      extract(case: { Foo.bar(fizz: $0, buzz: "Blob") }, from: .bar(fizz: 42, buzz: "Blob"))
-    )
-  }
-
   func testMultiMixedCases() {
     enum Foo {
       case bar(Int, buzz: String)
@@ -162,20 +133,6 @@ final class CasePathsTests: XCTestCase {
     }
     XCTAssertEqual(42, fizzBuzz.0)
     XCTAssertEqual("Blob", fizzBuzz.1)
-  }
-
-  func testNestedReflection() {
-    enum Foo {
-      case bar(Bar)
-    }
-    enum Bar {
-      case baz(Int)
-    }
-
-    XCTAssertEqual(
-      42,
-      extract(case: { Foo.bar(.baz($0)) }, from: .bar(.baz(42)))
-    )
   }
 
   func testNestedZeroMemoryLayout() {
@@ -236,20 +193,6 @@ final class CasePathsTests: XCTestCase {
       (/Foo.baz)
         .extract(from: .bar)
     )
-
-    XCTAssertNotNil(
-      extract(case: { Foo.bar }, from: .bar)
-    )
-    XCTAssertNil(
-      extract(case: { Foo.bar }, from: .baz)
-    )
-
-    XCTAssertNotNil(
-      extract(case: { Foo.baz }, from: .baz)
-    )
-    XCTAssertNil(
-      extract(case: { Foo.baz }, from: .bar)
-    )
   }
 
   func testEnumsWithClosures() {
@@ -277,10 +220,10 @@ final class CasePathsTests: XCTestCase {
 
     XCTAssertEqual(
       .some(42),
-      extract(case: { Foo.foo(.foo(.foo(.bar($0)))) }, from: .foo(.foo(.foo(.bar(42)))))
+      (/Foo.foo .. /Foo.foo .. /Foo.foo .. /Foo.bar).extract(from: .foo(.foo(.foo(.bar(42)))))
     )
     XCTAssertNil(
-      extract(case: { Foo.foo(.foo(.foo(.bar($0)))) }, from: .foo(.foo(.bar(42))))
+      (/Foo.foo .. /Foo.foo .. /Foo.foo .. /Foo.bar).extract(from: .foo(.foo(.bar(42))))
     )
   }
 
