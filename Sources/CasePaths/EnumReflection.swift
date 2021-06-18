@@ -24,10 +24,10 @@ extension CasePath where Value == Void {
   /// - Parameter value: An enum case with no associated values.
   /// - Returns: A case path that extracts `()` if the case matches, otherwise `nil`.
   public static func `case`(_ value: Root) -> CasePath {
-    let label = "\(value)"
+    let tag = enumTag(value)
     return CasePath(
       embed: { value },
-      extract: { "\($0)" == label ? () : nil }
+      extract: { enumTag($0) == tag ? () : nil }
     )
   }
 }
@@ -69,76 +69,19 @@ public func extract<Root, Value>(_ embed: @escaping (Value) -> Root) -> (Root) -
   return { root in
     guard let rootTag = enumTag(root) else { return nil }
     if let cachedTag = cachedTag, cachedTag != rootTag { return nil }
-    func extractHelp(from root: Root) -> Value? {
-      guard let tag = enumTag(root) else { return nil }
-      if let cachedTag = cachedTag, cachedTag != tag { return nil }
-      if let value = root as? Value {
-        var otherRoot = embed(value)
-        var root = root
-        if memcmp(&root, &otherRoot, MemoryLayout<Root>.size) == 0 {
-          return value
-        }
-      }
-      var any: Any = root
-
-      while let child = Mirror(reflecting: any).children.first {
-        if let child = child.value as? Value {
-          return child
-        }
-        any = child.value
-      }
-      if MemoryLayout<Value>.size == 0, !isUninhabitedEnum(Value.self) {
-        return unsafeBitCast((), to: Value.self)
-      }
-      return nil
-    }
-    guard let child = extractHelp(from: root) else { return nil }
-    if rootTag == cachedTag { return child }
-    guard let otherTag = enumTag(embed(child)) else { return nil }
+    guard
+      let value = (Mirror(reflecting: root).children.first?.value)
+        .flatMap({ $0 as? Value ?? Mirror(reflecting: $0).children.first?.value as? Value })
+    else { return nil }
+    if rootTag == cachedTag { return value }
+    guard let otherTag = enumTag(embed(value)) else { return nil }
     guard rootTag == otherTag else { return nil }
     cachedTag = rootTag
-    return child
+    return value
   }
 }
 
 // MARK: - Private Helpers
-
-private struct EnumMetadata {
-  let kind: Int
-  let typeDescriptor: UnsafePointer<EnumTypeDescriptor>
-}
-
-private struct EnumTypeDescriptor {
-  // These fields are not modeled because we don't need them.
-  // They are the type descriptor flags and various pointer offsets.
-  let flags, p1, p2, p3, p4: Int32
-
-  let numPayloadCasesAndPayloadSizeOffset: Int32
-  let numEmptyCases: Int32
-
-  var numPayloadCases: Int32 {
-    numPayloadCasesAndPayloadSizeOffset & 0xFFFFFF
-  }
-}
-
-private func isUninhabitedEnum(_ type: Any.Type) -> Bool {
-  // Load the type kind from the common type metadata area. Memory layout reference:
-  // https://github.com/apple/swift/blob/master/docs/ABI/TypeMetadata.rst
-  let metadataPtr = unsafeBitCast(type, to: UnsafeRawPointer.self)
-  let metadataKind = metadataPtr.load(as: Int.self)
-
-  // Check that this is an enum. Value reference:
-  // https://github.com/apple/swift/blob/master/stdlib/public/core/ReflectionMirror.swift
-  let isEnum = metadataKind == 0x201
-  guard isEnum else { return false }
-
-  // Access enum type descriptor
-  let enumMetadata = metadataPtr.load(as: EnumMetadata.self)
-  let enumTypeDescriptor = enumMetadata.typeDescriptor.pointee
-
-  let numCases = enumTypeDescriptor.numPayloadCases + enumTypeDescriptor.numEmptyCases
-  return numCases == 0
-}
 
 private func enumTag<Case>(_ `case`: Case) -> UInt32? {
   let metadataPtr = unsafeBitCast(type(of: `case`), to: UnsafeRawPointer.self)
