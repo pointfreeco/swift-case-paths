@@ -67,8 +67,8 @@ public func extract<Root, Value>(case embed: (Value) -> Root, from root: Root) -
     return ([childLabel] + childMirror.children.map { $0.label }, value)
   }
   guard
-    let (rootPath, value) = dump(extractHelp(from: root)),
-    let (embedPath, _) = dump(extractHelp(from: embed(value))),
+    let (rootPath, value) = extractHelp(from: root),
+    let (embedPath, _) = extractHelp(from: embed(value)),
     rootPath == embedPath
   else { return nil }
   return value
