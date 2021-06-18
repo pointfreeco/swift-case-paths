@@ -55,7 +55,14 @@ public func extract<Root, Value>(case embed: (Value) -> Root, from root: Root) -
       let childLabel = child.label,
       case let childMirror = Mirror(reflecting: child.value),
       let value = child.value as? Value ?? childMirror.children.first?.value as? Value
-    else { return nil }
+    else {
+      #if compiler(<5.2)
+        if MemoryLayout<Value>.size == 0, !isUninhabitedEnum(Value.self) {
+          return (["\(root)"], unsafeBitCast((), to: Value.self))
+        }
+      #endif
+      return nil
+    }
     return ([childLabel] + childMirror.children.map { $0.label }, value)
   }
   guard
