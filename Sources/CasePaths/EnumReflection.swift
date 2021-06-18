@@ -57,6 +57,7 @@ public func extract<Root, Value>(case embed: (Value) -> Root, from root: Root) -
       let value = child.value as? Value ?? childMirror.children.first?.value as? Value
     else {
       #if compiler(<5.2)
+        // https://bugs.swift.org/browse/SR-12044
         if MemoryLayout<Value>.size == 0, !isUninhabitedEnum(Value.self) {
           return (["\(root)"], unsafeBitCast((), to: Value.self))
         }
