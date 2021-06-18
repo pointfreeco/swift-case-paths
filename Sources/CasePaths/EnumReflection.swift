@@ -65,8 +65,10 @@ public func extract<Root, Value>(case embed: @escaping (Value) -> Root, from roo
 /// - Parameter embed: An enum case initializer.
 /// - Returns: A function that can attempt to extract associated values from an enum.
 public func extract<Root, Value>(_ embed: @escaping (Value) -> Root) -> (Root) -> (Value?) {
-  var cachedPath: [String?]?
+  var cachedTag: UInt32?
   return { root in
+    guard let rootTag = enumTag(root) else { return nil }
+    if let cachedTag = cachedTag, cachedTag != rootTag { return nil }
     func extractHelp(from root: Root) -> ([String?], Value)? {
       if let value = root as? Value {
         var otherRoot = embed(value)
@@ -91,11 +93,10 @@ public func extract<Root, Value>(_ embed: @escaping (Value) -> Root) -> (Root) -
       }
       return nil
     }
-    if let (rootPath, child) = extractHelp(from: root),
-      let otherPath = cachedPath ?? extractHelp(from: embed(child))?.0,
-      rootPath == otherPath
-    {
-      cachedPath = rootPath
+    guard let (rootPath, child) = extractHelp(from: root) else { return nil }
+    if cachedTag == rootTag { return child }
+    if let (otherPath, _) = extractHelp(from: embed(child)), rootPath == otherPath {
+      cachedTag = rootTag
       return child
     }
     return nil
@@ -139,4 +140,22 @@ private func isUninhabitedEnum(_ type: Any.Type) -> Bool {
 
   let numCases = enumTypeDescriptor.numPayloadCases + enumTypeDescriptor.numEmptyCases
   return numCases == 0
+}
+
+private func enumTag<Case>(_ `case`: Case) -> UInt32? {
+  let metadataPtr = unsafeBitCast(type(of: `case`), to: UnsafeRawPointer.self)
+  let kind = metadataPtr.load(as: Int.self)
+  let isEnumOrOptional = kind == 0x201 || kind == 0x202
+  guard isEnumOrOptional else { return nil }
+  let vwtPtr = (metadataPtr - MemoryLayout<UnsafeRawPointer>.size).load(as: UnsafeRawPointer.self)
+  let vwt = vwtPtr.load(as: EnumValueWitnessTable.self)
+  return withUnsafePointer(to: `case`) { vwt.getEnumTag($0, metadataPtr) }
+}
+
+private struct EnumValueWitnessTable {
+  let f1, f2, f3, f4, f5, f6, f7, f8: UnsafeRawPointer
+  let f9, f10: Int
+  let f11, f12: UInt32
+  let getEnumTag: @convention(c) (UnsafeRawPointer, UnsafeRawPointer) -> UInt32
+  let f13, f14: UnsafeRawPointer
 }
