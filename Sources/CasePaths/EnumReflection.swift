@@ -48,36 +48,22 @@ extension CasePath where Value == Void {
 ///   otherwise `nil`.
 public func extract<Root, Value>(case embed: (Value) -> Root, from root: Root) -> Value? {
   func extractHelp(from root: Root) -> ([String?], Value)? {
-    if let value = root as? Value {
-      var otherRoot = embed(value)
-      var root = root
-      if memcmp(&root, &otherRoot, MemoryLayout<Root>.size) == 0 {
-        return ([], value)
-      }
-    }
-    var path: [String?] = []
-    var any: Any = root
-
-    while let child = Mirror(reflecting: any).children.first, let label = child.label {
-      path.append(label)
-      path.append(String(describing: type(of: child.value)))
-      if let child = child.value as? Value {
-        return (path, child)
-      }
-      any = child.value
-    }
-    if MemoryLayout<Value>.size == 0, !isUninhabitedEnum(Value.self) {
-      return (["\(root)"], unsafeBitCast((), to: Value.self))
-    }
-    return nil
+    let mirror = Mirror(reflecting: root)
+    assert(mirror.displayStyle == .enum || mirror.displayStyle == .optional)
+    guard
+      let child = mirror.children.first,
+      let childLabel = child.label,
+      case let childMirror = Mirror(reflecting: child.value),
+      let value = child.value as? Value ?? childMirror.children.first?.value as? Value
+    else { return nil }
+    return ([childLabel] + childMirror.children.map(\.label), value)
   }
-  if let (rootPath, child) = extractHelp(from: root),
-    let (otherPath, _) = extractHelp(from: embed(child)),
-    rootPath == otherPath
-  {
-    return child
-  }
-  return nil
+  guard
+    let (rootPath, value) = dump(extractHelp(from: root)),
+    let (embedPath, _) = dump(extractHelp(from: embed(value))),
+    rootPath == embedPath
+  else { return nil }
+  return value
 }
 
 /// Returns a function that can attempt to extract associated values from the given enum case
