@@ -46,38 +46,8 @@ extension CasePath where Value == Void {
 ///   - root: A root enum value.
 /// - Returns: Values iff they can be extracted from the given enum case initializer and root enum,
 ///   otherwise `nil`.
-public func extract<Root, Value>(case embed: (Value) -> Root, from root: Root) -> Value? {
-  func extractHelp(from root: Root) -> ([String?], Value)? {
-    if let value = root as? Value {
-      var otherRoot = embed(value)
-      var root = root
-      if memcmp(&root, &otherRoot, MemoryLayout<Root>.size) == 0 {
-        return ([], value)
-      }
-    }
-    var path: [String?] = []
-    var any: Any = root
-
-    while let child = Mirror(reflecting: any).children.first, let label = child.label {
-      path.append(label)
-      path.append(String(describing: type(of: child.value)))
-      if let child = child.value as? Value {
-        return (path, child)
-      }
-      any = child.value
-    }
-    if MemoryLayout<Value>.size == 0, !isUninhabitedEnum(Value.self) {
-      return (["\(root)"], unsafeBitCast((), to: Value.self))
-    }
-    return nil
-  }
-  if let (rootPath, child) = extractHelp(from: root),
-    let (otherPath, _) = extractHelp(from: embed(child)),
-    rootPath == otherPath
-  {
-    return child
-  }
-  return nil
+public func extract<Root, Value>(case embed: @escaping (Value) -> Root, from root: Root) -> Value? {
+  extract(embed)(root)
 }
 
 /// Returns a function that can attempt to extract associated values from the given enum case
@@ -92,11 +62,41 @@ public func extract<Root, Value>(case embed: (Value) -> Root, from root: Root) -
 ///
 /// - Note: This function is only intended to be used with enum case initializers. Its behavior is
 ///   otherwise undefined.
-/// - Parameter case: An enum case initializer.
+/// - Parameter embed: An enum case initializer.
 /// - Returns: A function that can attempt to extract associated values from an enum.
-public func extract<Root, Value>(_ case: @escaping (Value) -> Root) -> (Root) -> (Value?) {
+public func extract<Root, Value>(_ embed: @escaping (Value) -> Root) -> (Root) -> (Value?) {
   return { root in
-    return extract(case: `case`, from: root)
+    func extractHelp(from root: Root) -> ([String?], Value)? {
+      if let value = root as? Value {
+        var otherRoot = embed(value)
+        var root = root
+        if memcmp(&root, &otherRoot, MemoryLayout<Root>.size) == 0 {
+          return ([], value)
+        }
+      }
+      var path: [String?] = []
+      var any: Any = root
+
+      while let child = Mirror(reflecting: any).children.first, let label = child.label {
+        path.append(label)
+        path.append(String(describing: type(of: child.value)))
+        if let child = child.value as? Value {
+          return (path, child)
+        }
+        any = child.value
+      }
+      if MemoryLayout<Value>.size == 0, !isUninhabitedEnum(Value.self) {
+        return (["\(root)"], unsafeBitCast((), to: Value.self))
+      }
+      return nil
+    }
+    if let (rootPath, child) = extractHelp(from: root),
+      let (otherPath, _) = extractHelp(from: embed(child)),
+      rootPath == otherPath
+    {
+      return child
+    }
+    return nil
   }
 }
 
