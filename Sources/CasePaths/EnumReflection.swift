@@ -10,7 +10,7 @@ extension CasePath {
   public static func `case`(_ embed: @escaping (Value) -> Root) -> CasePath {
     return self.init(
       embed: embed,
-      extract: { CasePaths.extract(case: embed, from: $0) }
+      extract: CasePaths.extract(embed)
     )
   }
 }
@@ -65,6 +65,7 @@ public func extract<Root, Value>(case embed: @escaping (Value) -> Root, from roo
 /// - Parameter embed: An enum case initializer.
 /// - Returns: A function that can attempt to extract associated values from an enum.
 public func extract<Root, Value>(_ embed: @escaping (Value) -> Root) -> (Root) -> (Value?) {
+  var cachedPath: [String?]?
   return { root in
     func extractHelp(from root: Root) -> ([String?], Value)? {
       if let value = root as? Value {
@@ -91,9 +92,10 @@ public func extract<Root, Value>(_ embed: @escaping (Value) -> Root) -> (Root) -
       return nil
     }
     if let (rootPath, child) = extractHelp(from: root),
-      let (otherPath, _) = extractHelp(from: embed(child)),
+      let otherPath = cachedPath ?? extractHelp(from: embed(child))?.0,
       rootPath == otherPath
     {
+      cachedPath = rootPath
       return child
     }
     return nil
