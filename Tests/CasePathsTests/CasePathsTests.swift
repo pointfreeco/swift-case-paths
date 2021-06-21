@@ -86,13 +86,15 @@ final class CasePathsTests: XCTestCase {
       fooBarSome.extract(from: .bar(none: 42))
     )
 
-    XCTAssertEqual(
-      .some(42),
-      fooBarNone.extract(from: .bar(none: 42))
-    )
-    XCTAssertNil(
-      fooBarNone.extract(from: .bar(some: 42))
-    )
+    #if compiler(>=5.3)
+      XCTAssertEqual(
+        .some(42),
+        fooBarNone.extract(from: .bar(none: 42))
+      )
+      XCTAssertNil(
+        fooBarNone.extract(from: .bar(some: 42))
+      )
+    #endif
   }
 
   func testMultiCases() {
