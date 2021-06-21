@@ -85,14 +85,14 @@ final class CasePathsTests: XCTestCase {
       fooBarSome.extract(from: .bar(none: 42))
     )
 
-//    let fooBarNone = /Foo.bar(none:)
-//      XCTAssertEqual(
-//        .some(42),
-//        fooBarNone.extract(from: .bar(none: 42))
-//      )
-//      XCTAssertNil(
-//        fooBarNone.extract(from: .bar(some: 42))
-//      )
+    //    let fooBarNone = /Foo.bar(none:)
+    //      XCTAssertEqual(
+    //        .some(42),
+    //        fooBarNone.extract(from: .bar(none: 42))
+    //      )
+    //      XCTAssertNil(
+    //        fooBarNone.extract(from: .bar(some: 42))
+    //      )
   }
 
   func testMultiCases() {
