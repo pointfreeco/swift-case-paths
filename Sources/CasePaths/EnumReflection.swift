@@ -88,9 +88,9 @@ public func extract<Root, Value>(_ embed: @escaping (Value) -> Root) -> (Root) -
       return ([childLabel] + childMirror.children.map { $0.label }, value)
     }
     guard
-      let (rootLabel, value) = extractHelp(from: root),
-      let (embedLabel, _) = extractHelp(from: embed(value)),
-      rootLabel == embedLabel
+      let (rootLabels, value) = extractHelp(from: root),
+      let (embedLabels, _) = extractHelp(from: embed(value)),
+      rootLabels == embedLabels
     else { return nil }
     return value
   }
