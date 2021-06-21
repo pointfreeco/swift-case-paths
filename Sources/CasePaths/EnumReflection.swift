@@ -8,7 +8,7 @@ extension CasePath {
   public static func `case`(_ embed: @escaping (Value) -> Root) -> CasePath {
     return self.init(
       embed: embed,
-      extract: { CasePaths.extract(case: embed, from: $0) }
+      extract: CasePaths.extract(embed)
     )
   }
 }
@@ -46,32 +46,8 @@ extension CasePath where Value == Void {
 ///   - root: A root enum value.
 /// - Returns: Values iff they can be extracted from the given enum case initializer and root enum,
 ///   otherwise `nil`.
-public func extract<Root, Value>(case embed: (Value) -> Root, from root: Root) -> Value? {
-  func extractHelp(from root: Root) -> (path: [String?], value: Value)? {
-    let mirror = Mirror(reflecting: root)
-    assert(mirror.displayStyle == .enum || mirror.displayStyle == .optional)
-    guard
-      let child = mirror.children.first,
-      let childLabel = child.label,
-      case let childMirror = Mirror(reflecting: child.value),
-      let value = child.value as? Value ?? childMirror.children.first?.value as? Value
-    else {
-      #if compiler(<5.2)
-        // https://bugs.swift.org/browse/SR-12044
-        if MemoryLayout<Value>.size == 0, !isUninhabitedEnum(Value.self) {
-          return (["\(root)"], unsafeBitCast((), to: Value.self))
-        }
-      #endif
-      return nil
-    }
-    return ([childLabel] + childMirror.children.map { $0.label }, value)
-  }
-  guard
-    let (rootPath, value) = extractHelp(from: root),
-    let (embedPath, _) = extractHelp(from: embed(value)),
-    rootPath == embedPath
-  else { return nil }
-  return value
+public func extract<Root, Value>(case embed: @escaping (Value) -> Root, from root: Root) -> Value? {
+  extract(embed)(root)
 }
 
 /// Returns a function that can attempt to extract associated values from the given enum case
@@ -92,7 +68,31 @@ public func extract<Root, Value>(case embed: (Value) -> Root, from root: Root) -
 /// - Returns: A function that can attempt to extract associated values from an enum.
 public func extract<Root, Value>(_ embed: @escaping (Value) -> Root) -> (Root) -> (Value?) {
   return { root in
-    return extract(case: embed, from: root)
+    func extractHelp(from root: Root) -> (labels: [String?], value: Value)? {
+      let mirror = Mirror(reflecting: root)
+      assert(mirror.displayStyle == .enum || mirror.displayStyle == .optional)
+      guard
+        let child = mirror.children.first,
+        let childLabel = child.label,
+        case let childMirror = Mirror(reflecting: child.value),
+        let value = child.value as? Value ?? childMirror.children.first?.value as? Value
+      else {
+        #if compiler(<5.2)
+          // https://bugs.swift.org/browse/SR-12044
+          if MemoryLayout<Value>.size == 0, !isUninhabitedEnum(Value.self) {
+            return (["\(root)"], unsafeBitCast((), to: Value.self))
+          }
+        #endif
+        return nil
+      }
+      return ([childLabel] + childMirror.children.map { $0.label }, value)
+    }
+    guard
+      let (rootLabel, value) = extractHelp(from: root),
+      let (embedLabel, _) = extractHelp(from: embed(value)),
+      rootLabel == embedLabel
+    else { return nil }
+    return value
   }
 }
 
