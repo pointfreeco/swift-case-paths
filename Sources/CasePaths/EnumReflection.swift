@@ -66,13 +66,23 @@ public func extract<Root, Value>(case embed: (Value) -> Root, from root: Root) -
     }
     return ([childLabel] + childMirror.children.map { $0.label }, value)
   }
+  defer {
+    print("successCount", successCount, "failCount", failCount)
+  }
   guard
     let (rootPath, value) = extractHelp(from: root),
     let (embedPath, _) = extractHelp(from: embed(value)),
     rootPath == embedPath
-  else { return nil }
+  else {
+    failCount += 1
+    return nil
+  }
+  successCount += 1
   return value
 }
+
+public var successCount = 0
+public var failCount = 0
 
 /// Returns a function that can attempt to extract associated values from the given enum case
 /// initializer.
