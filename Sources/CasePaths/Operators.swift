@@ -38,54 +38,6 @@ public prefix func / <Root>(
   .case(root)
 }
 
-/// Returns a case path for the given embed function.
-///
-/// - Note: This operator is only intended to be used with enum cases that have no associated
-///   values. Its behavior is otherwise undefined.
-/// - Parameter embed: An embed function.
-/// - Returns: A case path.
-public prefix func / <Root, A, B>(
-  embed: @escaping (A, B) -> Root
-) -> CasePath<Root, (A, B)> {
-  .case(embed)
-}
-
-/// Returns a case path for the given embed function.
-///
-/// - Note: This operator is only intended to be used with enum cases that have no associated
-///   values. Its behavior is otherwise undefined.
-/// - Parameter embed: An embed function.
-/// - Returns: A case path.
-public prefix func / <Root, A, B, C>(
-  embed: @escaping (A, B, C) -> Root
-) -> CasePath<Root, (A, B, C)> {
-  .case(embed)
-}
-
-/// Returns a case path for the given embed function.
-///
-/// - Note: This operator is only intended to be used with enum cases that have no associated
-///   values. Its behavior is otherwise undefined.
-/// - Parameter embed: An embed function.
-/// - Returns: A case path.
-public prefix func / <Root, A, B, C, D>(
-  embed: @escaping (A, B, C, D) -> Root
-) -> CasePath<Root, (A, B, C, D)> {
-  .case(embed)
-}
-
-/// Returns a case path for the given embed function.
-///
-/// - Note: This operator is only intended to be used with enum cases that have no associated
-///   values. Its behavior is otherwise undefined.
-/// - Parameter embed: An embed function.
-/// - Returns: A case path.
-public prefix func / <Root, A, B, C, D, E>(
-  embed: @escaping (A, B, C, D, E) -> Root
-) -> CasePath<Root, (A, B, C, D, E)> {
-  .case(embed)
-}
-
 /// Returns the identity case path for the given type. Enables `/MyType.self` syntax.
 ///
 /// - Parameter type: A type for which to return the identity case path.
