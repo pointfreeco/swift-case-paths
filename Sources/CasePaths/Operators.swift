@@ -65,9 +65,11 @@ public prefix func / <Root>(
 /// Use this operator to create new transform functions to pass to higher-order methods like
 /// `compactMap`:
 ///
-///     [Result<Int, Error>.success(42), .failure(MyError()]
-///       .compactMap(/Result.success)
-///     // [42]
+/// ```swift
+/// [Result<Int, Error>.success(42), .failure(MyError()]
+///   .compactMap(/Result.success)
+/// // [42]
+/// ```
 ///
 /// - Note: This operator is only intended to be used with enum case initializers. Its behavior is
 ///   otherwise undefined.
@@ -102,8 +104,8 @@ infix operator ..: CasePathCompositionPrecedence
 extension CasePath {
   /// Returns a new case path created by appending the given case path to this one.
   ///
-  /// The operator version of `CasePath.appending(path:)`. Use this method to extend this case path
-  /// to the value type of another case path.
+  /// The operator version of ``appending(path:)``. Use this method to extend this case path to the
+  /// value type of another case path.
   ///
   /// - Parameters:
   ///   - lhs: A case path from a root to a value.
@@ -121,7 +123,8 @@ extension CasePath {
   /// - Parameters:
   ///   - lhs: A case path from a root to a value.
   ///   - rhs: An embed function from an appended value.
-  /// - Returns: A new case path from the first case path's root to the second embed function's value.
+  /// - Returns: A new case path from the first case path's root to the second embed function's
+  ///   value.
   public static func .. <AppendedValue>(
     lhs: CasePath,
     rhs: @escaping (AppendedValue) -> Value
@@ -134,9 +137,11 @@ extension CasePath {
 ///
 /// Useful when composing extract functions together.
 ///
-///     [Result<Int?, Error>.success(.some(42)), .success(nil), .failure(MyError())]
-///       .compactMap(/Result.success..Optional.some)
-///     // [42]
+/// ```swift
+/// [Result<Int?, Error>.success(.some(42)), .success(nil), .failure(MyError())]
+///   .compactMap(/Result.success..Optional.some)
+/// // [42]
+/// ```
 ///
 /// - Parameters:
 ///   - lhs: An extract function from a root to a value.
