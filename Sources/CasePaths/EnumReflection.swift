@@ -68,35 +68,55 @@ public func extract<Root, Value>(case embed: @escaping (Value) -> Root, from roo
 /// - Returns: A function that can attempt to extract associated values from an enum.
 public func extract<Root, Value>(_ embed: @escaping (Value) -> Root) -> (Root) -> Value? {
   return { root in
-    func extractHelp(from root: Root) -> (labels: [String?], value: Value)? {
+    func extractHelp(from root: Root) -> Value? {
       let mirror = Mirror(reflecting: root)
       assert(mirror.displayStyle == .enum || mirror.displayStyle == .optional)
       guard
         let child = mirror.children.first,
-        let childLabel = child.label,
+//        let childLabel = child.label,
         case let childMirror = Mirror(reflecting: child.value),
         let value = child.value as? Value ?? childMirror.children.first?.value as? Value
       else {
         #if compiler(<5.2)
           // https://bugs.swift.org/browse/SR-12044
           if MemoryLayout<Value>.size == 0, !isUninhabitedEnum(Value.self) {
-            return (["\(root)"], unsafeBitCast((), to: Value.self))
+            return unsafeBitCast((), to: Value.self)
           }
         #endif
         return nil
       }
-      return ([childLabel] + childMirror.children.map { $0.label }, value)
+      return value
     }
     guard
-      let (rootLabels, value) = extractHelp(from: root),
-      let (embedLabels, _) = extractHelp(from: embed(value)),
-      rootLabels == embedLabels
+      let value = extractHelp(from: root),
+//      let _ = extractHelp(from: embed(value)),
+      enumTag(root) == enumTag(embed(value))
+//      rootLabels == embedLabels
     else { return nil }
     return value
   }
 }
 
 // MARK: - Private Helpers
+
+private func enumTag<Case>(_ `case`: Case) -> UInt32? {
+  let metadataPtr = unsafeBitCast(type(of: `case`), to: UnsafeRawPointer.self)
+  let kind = metadataPtr.load(as: Int.self)
+  let isEnumOrOptional = kind == 0x201 || kind == 0x202
+  guard isEnumOrOptional else { return nil }
+  let vwtPtr = (metadataPtr - MemoryLayout<UnsafeRawPointer>.size).load(as: UnsafeRawPointer.self)
+  let vwt = vwtPtr.load(as: EnumValueWitnessTable.self)
+  return withUnsafePointer(to: `case`) { vwt.getEnumTag($0, metadataPtr) }
+}
+
+private struct EnumValueWitnessTable {
+  let f1, f2, f3, f4, f5, f6, f7, f8: UnsafeRawPointer
+  let f9, f10: Int
+  let f11, f12: UInt32
+  let getEnumTag: @convention(c) (UnsafeRawPointer, UnsafeRawPointer) -> UInt32
+  let f13, f14: UnsafeRawPointer
+}
+
 
 private struct EnumMetadata {
   let kind: Int
