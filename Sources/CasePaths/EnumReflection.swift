@@ -1,5 +1,3 @@
-import func Foundation.memcmp
-
 extension CasePath {
   /// Returns a case path that extracts values associated with a given enum case initializer.
   ///
