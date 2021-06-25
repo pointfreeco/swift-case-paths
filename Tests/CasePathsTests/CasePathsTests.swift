@@ -323,4 +323,11 @@ final class CasePathsTests: XCTestCase {
       XCTFail()
     }
   }
+
+  func testCustomStringConvertible() {
+    XCTAssertEqual(
+      "\(/Result<String, Error>.success)",
+      "CasePath<Result<String, Error>, String>"
+    )
+  }
 }
