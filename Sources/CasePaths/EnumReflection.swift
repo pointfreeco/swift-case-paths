@@ -66,7 +66,7 @@ public func extract<Root, Value>(case embed: @escaping (Value) -> Root, from roo
 ///   otherwise undefined.
 /// - Parameter embed: An enum case initializer.
 /// - Returns: A function that can attempt to extract associated values from an enum.
-public func extract<Root, Value>(_ embed: @escaping (Value) -> Root) -> (Root) -> (Value?) {
+public func extract<Root, Value>(_ embed: @escaping (Value) -> Root) -> (Root) -> Value? {
   return { root in
     func extractHelp(from root: Root) -> (labels: [String?], value: Value)? {
       let mirror = Mirror(reflecting: root)
