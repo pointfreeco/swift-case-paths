@@ -40,5 +40,5 @@ let failure = BenchmarkSuite(name: "Failure") {
 
 Benchmark.main([
   success,
-  failure
+  failure,
 ])
