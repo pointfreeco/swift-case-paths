@@ -11,7 +11,7 @@ let package = Package(
     ),
   ],
   dependencies: [
-    .package(url: "https://github.com/google/swift-benchmark", from: "0.1.0"),
+    .package(name: "Benchmark", url: "https://github.com/google/swift-benchmark", from: "0.1.0"),
   ],
   targets: [
     .target(
@@ -25,7 +25,7 @@ let package = Package(
       name: "swift-case-paths-benchmark",
       dependencies: [
         "CasePaths",
-        .product(name: "Benchmark", package: "swift-benchmark"),
+        .product(name: "Benchmark", package: "Benchmark"),
       ]
     ),
   ]
