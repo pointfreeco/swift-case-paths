@@ -2,6 +2,231 @@ import CasePaths
 import XCTest
 
 final class CasePathsTests: XCTestCase {
+  func testSimplePayload() {
+    enum Enum { case payload(Int) }
+    let path = /Enum.payload
+    for _ in 1...2 {
+      XCTAssertEqual(path.extract(from: .payload(42)), 42)
+    }
+  }
+
+  func testSimpleLabeledPayload() {
+    enum Enum { case payload(label: Int) }
+    let path = /Enum.payload(label:)
+    for _ in 1...2 {
+      XCTAssertEqual(path.extract(from: .payload(label: 42)), 42)
+    }
+  }
+
+  func testSimpleOverloadedPayload() {
+    enum Enum { case payload(a: Int), payload(b: Int) }
+    let pathA = /Enum.payload(a:)
+    let pathB = /Enum.payload(b:)
+    for _ in 1...2 {
+      XCTAssertEqual(pathA.extract(from: .payload(a: 42)), 42)
+      XCTAssertEqual(pathA.extract(from: .payload(b: 42)), nil)
+      XCTAssertEqual(pathB.extract(from: .payload(a: 42)), nil)
+      XCTAssertEqual(pathB.extract(from: .payload(b: 42)), 42)
+    }
+  }
+
+  func testMultiPayload() {
+    enum Enum { case payload(Int, String) }
+    let path: CasePath<Enum, (Int, String)> = /Enum.payload
+    for _ in 1...2 {
+      XCTAssert(try XCTUnwrap(path.extract(from: .payload(42, "Blob"))) == (42, "Blob"))
+    }
+  }
+
+  func testMultiLabeledPayload() {
+    enum Enum { case payload(a: Int, b: String) }
+    let path: CasePath<Enum, (Int, String)> = /Enum.payload
+    for _ in 1...2 {
+      XCTAssert(
+        try XCTUnwrap(path.extract(from: .payload(a: 42, b: "Blob"))) == (42, "Blob")
+      )
+      XCTAssert(
+        try XCTUnwrap(path.extract(from: .payload(a: 42, b: "Blob"))) == (a: 42, b: "Blob")
+      )
+    }
+  }
+
+  func testNoPayload() {
+    enum Enum { case a, b }
+    let pathA = /Enum.a
+    let pathB = /Enum.b
+    for _ in 1...2 {
+      XCTAssertNotNil(pathA.extract(from: .a))
+      XCTAssertNotNil(pathB.extract(from: .b))
+      XCTAssertNil(pathA.extract(from: .b))
+      XCTAssertNil(pathB.extract(from: .a))
+    }
+  }
+
+  func testZeroMemoryLayoutPayload() {
+    struct Unit1 {}
+    enum Unit2 { case unit }
+    enum Enum { case void(Void), unit1(Unit1), unit2(Unit2) }
+    let path1 = /Enum.void
+    let path2 = /Enum.unit1
+    let path3 = /Enum.unit2
+    for _ in 1...2 {
+      XCTAssertNotNil(path1.extract(from: .void(())))
+      XCTAssertNotNil(path2.extract(from: .unit1(.init())))
+      XCTAssertNotNil(path3.extract(from: .unit2(.unit)))
+      XCTAssertNil(path1.extract(from: .unit1(.init())))
+      XCTAssertNil(path1.extract(from: .unit2(.unit)))
+      XCTAssertNil(path2.extract(from: .void(())))
+      XCTAssertNil(path2.extract(from: .unit2(.unit)))
+      XCTAssertNil(path3.extract(from: .void(())))
+      XCTAssertNil(path3.extract(from: .unit1(.init())))
+    }
+  }
+
+  func testUninhabitedPayload() {
+    enum Uninhabited {}
+    enum Enum { case never(Never), uninhabited(Uninhabited), value }
+    let path1 = /Enum.never
+    let path2 = /Enum.uninhabited
+    for _ in 1...2 {
+      XCTAssertNil(path1.extract(from: .value))
+      XCTAssertNil(path2.extract(from: .value))
+    }
+  }
+
+  func testClosurePayload() throws {
+    enum Enum { case closure(() -> Void) }
+    let path = /Enum.closure
+    for _ in 1...2 {
+      var invoked = false
+      let closure = try XCTUnwrap(path.extract(from: .closure { invoked = true }))
+      closure()
+      XCTAssertTrue(invoked)
+    }
+  }
+
+  func testRecursivePayload() {
+    indirect enum Enum: Equatable {
+      case indirect(Enum)
+      case direct
+    }
+    let shallowPath = /Enum.indirect
+    let deepPath = /Enum.indirect
+    for _ in 1...2 {
+      XCTAssertEqual(shallowPath.extract(from: .indirect(.direct)), .direct)
+      XCTAssertEqual(
+        deepPath.extract(from: .indirect(.indirect(.direct))), .indirect(.direct)
+      )
+    }
+  }
+
+  func testOptionalPayload() {
+    enum Enum { case int(Int?) }
+    let path = /Enum.int
+    for _ in 1...2 {
+      XCTAssertEqual(path.extract(from: .int(.some(42))), .some(.some(42)))
+      XCTAssertEqual(path.extract(from: .int(.none)), .some(.none))
+    }
+  }
+
+  func testAnyPayload() {
+    enum Enum { case any(Any) }
+    let path = /Enum.any
+    for _ in 1...2 {
+      XCTAssertEqual(path.extract(from: .any(42)) as? Int, 42)
+    }
+  }
+
+  func testAnyObjectPayload() {
+    class Class {}
+    enum Enum { case anyObject(AnyObject) }
+    let object = Class()
+    let nsObject = NSObject()
+    let path = /Enum.anyObject
+    for _ in 1...2 {
+      XCTAssert(try XCTUnwrap(path.extract(from: .anyObject(object))) === object)
+      XCTAssert(try XCTUnwrap(path.extract(from: .anyObject(nsObject))) === nsObject)
+    }
+  }
+
+  func testProtocolPayload() {
+    struct Error: Swift.Error, Equatable {}
+    enum Enum { case error(Swift.Error) }
+    let path = /Enum.error
+    for _ in 1...2 {
+      XCTAssertEqual(path.extract(from: .error(Error())) as? Error, Error())
+    }
+  }
+
+  func testSubclassPayload() {
+    class Superclass {}
+    class Subclass: Superclass {}
+    enum Enum { case superclass(Superclass), subclass(Subclass) }
+    let superclass = Superclass()
+    let subclass = Subclass()
+    let superclassPath = /Enum.superclass
+    let subclassPath = /Enum.subclass
+    for _ in 1...2 {
+      XCTAssert(
+        try XCTUnwrap(superclassPath.extract(from: .superclass(superclass))) === superclass
+      )
+      XCTAssert(
+        try XCTUnwrap(superclassPath.extract(from: .superclass(subclass))) === subclass
+      )
+      XCTAssert(
+        try XCTUnwrap(subclassPath.extract(from: .subclass(subclass))) === subclass
+      )
+    }
+  }
+
+  func testDefaults() {
+    enum Enum { case n(Int, m: Int? = nil, file: String = #file, line: UInt = #line) }
+    let path: CasePath<Enum, (Int, Int?, String, UInt)> = /Enum.n
+    for _ in 1...2 {
+      XCTAssert(
+        try XCTUnwrap(path.extract(from: .n(42))) == (42, nil, #file, #line)
+      )
+    }
+  }
+
+  func testDifferentMemoryLayouts() {
+    struct Struct { var array: [Int] = [1, 2, 3], string: String = "Blob" }
+    enum Enum { case bool(Bool), int(Int), void(Void), structure(Struct), any(Any) }
+
+    let boolPath = /Enum.bool
+    let intPath = /Enum.int
+    let voidPath = /Enum.void
+    let structPath = /Enum.structure
+    let anyPath = /Enum.any
+    for _ in 1...2 {
+      XCTAssertNil(boolPath.extract(from: .int(42)))
+      XCTAssertNil(boolPath.extract(from: .void(())))
+      XCTAssertNil(boolPath.extract(from: .structure(.init())))
+      XCTAssertNil(boolPath.extract(from: .any("Blob")))
+      XCTAssertNil(intPath.extract(from: .bool(true)))
+      XCTAssertNil(intPath.extract(from: .void(())))
+      XCTAssertNil(intPath.extract(from: .structure(.init())))
+      XCTAssertNil(intPath.extract(from: .any("Blob")))
+      XCTAssertNil(voidPath.extract(from: .bool(true)))
+      XCTAssertNil(voidPath.extract(from: .int(42)))
+      XCTAssertNil(voidPath.extract(from: .structure(.init())))
+      XCTAssertNil(voidPath.extract(from: .any("Blob")))
+      XCTAssertNil(structPath.extract(from: .bool(true)))
+      XCTAssertNil(structPath.extract(from: .int(42)))
+      XCTAssertNil(structPath.extract(from: .void(())))
+      XCTAssertNil(structPath.extract(from: .any("Blob")))
+      XCTAssertNil(anyPath.extract(from: .bool(true)))
+      XCTAssertNil(anyPath.extract(from: .int(42)))
+      XCTAssertNil(anyPath.extract(from: .void(())))
+      XCTAssertNil(anyPath.extract(from: .structure(.init())))
+
+      XCTAssertNotNil(boolPath.extract(from: .bool(true)))
+      XCTAssertNotNil(intPath.extract(from: .int(42)))
+      XCTAssertNotNil(voidPath.extract(from: .void(())))
+      XCTAssertNotNil(anyPath.extract(from: .any("Blob")))
+    }
+  }
+
   func testEmbed() {
     enum Foo: Equatable { case bar(Int) }
 
