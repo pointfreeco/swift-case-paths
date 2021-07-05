@@ -5,7 +5,8 @@ final class CasePathsTests: XCTestCase {
   func testEmbed() {
     enum Foo: Equatable { case bar(Int) }
 
-    XCTAssertEqual(.bar(42), (/Foo.bar).embed(42))
+    let fooBar = /Foo.bar
+    XCTAssertEqual(.bar(42), fooBar.embed(42))
     XCTAssertEqual(.bar(42), (/Foo.self).embed(Foo.bar(42)))
   }
 
@@ -13,54 +14,54 @@ final class CasePathsTests: XCTestCase {
     enum Foo: Equatable { case bar(Bar) }
     enum Bar: Equatable { case baz(Int) }
 
-    XCTAssertEqual(.bar(.baz(42)), (/Foo.bar .. Bar.baz).embed(42))
+    let fooBaz = /Foo.bar .. Bar.baz
+    XCTAssertEqual(.bar(.baz(42)), fooBaz.embed(42))
   }
 
   func testVoidCasePath() {
     enum Foo: Equatable { case bar }
 
-    XCTAssertEqual(.bar, (/Foo.bar).embed(()))
+    let fooBar = /Foo.bar
+    XCTAssertEqual(.bar, fooBar.embed(()))
   }
 
   func testCasePaths() {
+    let some = /String?.some
     XCTAssertEqual(
       .some("Hello"),
-      (/String?.some)
-        .extract(from: "Hello")
+      some.extract(from: "Hello")
     )
     XCTAssertNil(
-      (/String?.some)
-        .extract(from: .none)
+      some.extract(from: .none)
     )
 
+    let success = /Result<String, Error>.success
+    let failure = /Result<String, Error>.failure
     XCTAssertEqual(
       .some("Hello"),
-      (/Result<String, Error>.success)
-        .extract(from: .success("Hello"))
+      success.extract(from: .success("Hello"))
     )
     XCTAssertNil(
-      (/Result<String, Error>.failure)
-        .extract(from: .success("Hello"))
+      failure.extract(from: .success("Hello"))
     )
 
     struct MyError: Equatable, Error {}
-
+    let mySuccess = /Result<String, MyError>.success
+    let myFailure = /Result<String, MyError>.failure
     XCTAssertEqual(
       .some(MyError()),
-      (/Result<String, Error>.failure)
-        .extract(from: .failure(MyError()))
+      myFailure.extract(from: .failure(MyError()))
     )
     XCTAssertNil(
-      (/Result<String, Error>.success)
-        .extract(from: .failure(MyError()))
+      mySuccess.extract(from: .failure(MyError()))
     )
   }
 
   func testIdentity() {
+    let id = /Int.self
     XCTAssertEqual(
       .some(42),
-      (/Int.self)
-        .extract(from: 42)
+      id.extract(from: 42)
     )
 
     XCTAssertEqual(
@@ -76,14 +77,13 @@ final class CasePathsTests: XCTestCase {
       case bar(none: Int)
     }
 
+    let fooBarSome = /Foo.bar(some:)
     XCTAssertEqual(
       .some(42),
-      (/Foo.bar(some:))
-        .extract(from: .bar(some: 42))
+      fooBarSome.extract(from: .bar(some: 42))
     )
     XCTAssertNil(
-      (/Foo.bar(some:))
-        .extract(from: .bar(none: 42))
+      fooBarSome.extract(from: .bar(none: 42))
     )
   }
 
@@ -92,9 +92,7 @@ final class CasePathsTests: XCTestCase {
       case bar(Int, String)
     }
 
-    guard
-      let fizzBuzz = (/Foo.bar)
-        .extract(from: .bar(42, "Blob"))
+    guard let fizzBuzz = (/Foo.bar).extract(from: .bar(42, "Blob"))
     else {
       XCTFail()
       return
@@ -108,9 +106,8 @@ final class CasePathsTests: XCTestCase {
       case bar(fizz: Int, buzz: String)
     }
 
-    guard
-      let fizzBuzz = CasePath<Foo, (fizz: Int, buzz: String)>.case(Foo.bar)
-        .extract(from: .bar(fizz: 42, buzz: "Blob"))
+    let fooBar: CasePath<Foo, (fizz: Int, buzz: String)> = /Foo.bar(fizz:buzz:)
+    guard let fizzBuzz = fooBar.extract(from: .bar(fizz: 42, buzz: "Blob"))
     else {
       XCTFail()
       return
@@ -124,9 +121,7 @@ final class CasePathsTests: XCTestCase {
       case bar(Int, buzz: String)
     }
 
-    guard
-      let fizzBuzz = (/Foo.bar)
-        .extract(from: .bar(42, buzz: "Blob"))
+    guard let fizzBuzz = (/Foo.bar).extract(from: .bar(42, buzz: "Blob"))
     else {
       XCTFail()
       return
@@ -143,10 +138,10 @@ final class CasePathsTests: XCTestCase {
       case baz
     }
 
+    let fooBar = /Foo.bar
     XCTAssertEqual(
       .baz,
-      (/Foo.bar)
-        .extract(from: .bar(.baz))
+      fooBar.extract(from: .bar(.baz))
     )
   }
 
@@ -159,15 +154,11 @@ final class CasePathsTests: XCTestCase {
       case baz(Never)
     }
 
-    XCTAssertNil(
-      (/Foo.bar)
-        .extract(from: Foo.foo)
-    )
+    let fooBar = /Foo.bar
+    XCTAssertNil(fooBar.extract(from: Foo.foo))
 
-    XCTAssertNil(
-      (/Foo.baz)
-        .extract(from: Foo.foo)
-    )
+    let fooBaz = /Foo.baz
+    XCTAssertNil(fooBaz.extract(from: Foo.foo))
   }
 
   func testEnumsWithoutAssociatedValues() {
@@ -201,9 +192,8 @@ final class CasePathsTests: XCTestCase {
     }
 
     var didRun = false
-    guard
-      let bar = (/Foo.bar)
-        .extract(from: .bar { didRun = true })
+    let fooBar = /Foo.bar
+    guard let bar = fooBar.extract(from: .bar { didRun = true })
     else {
       XCTFail()
       return
@@ -259,13 +249,21 @@ final class CasePathsTests: XCTestCase {
         .compactMap(/Authentication.unauthenticated)
         .count
     )
+
+    enum Foo { case bar(Int, Int) }
+    XCTAssertEqual(
+      [3],
+      [Foo.bar(1, 2)].compactMap(/Foo.bar).map(+)
+    )
   }
 
   func testAppending() {
+    let success = /Result<Int?, Error>.success
+    let int = /Int?.some
+    let success2int = success .. int
     XCTAssertEqual(
       .some(42),
-      (/Result<Int?, Error>.success .. /Int?.some)
-        .extract(from: .success(.some(42)))
+      success2int.extract(from: .success(.some(42)))
     )
   }
 
@@ -326,5 +324,12 @@ final class CasePathsTests: XCTestCase {
     default:
       XCTFail()
     }
+  }
+
+  func testCustomStringConvertible() {
+    XCTAssertEqual(
+      "\(/Result<String, Error>.success)",
+      "CasePath<Result<String, Error>, String>"
+    )
   }
 }

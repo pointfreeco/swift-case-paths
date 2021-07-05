@@ -32,10 +32,12 @@ extension CasePath where Value == Void {
 
 /// Attempts to extract values associated with a given enum case initializer from a given root enum.
 ///
-///     extract(case: Result<Int, Error>.success, from: .success(42))
-///     // 42
-///     extract(case: Result<Int, Error>.success, from: .failure(MyError())
-///     // nil
+/// ```swift
+/// extract(case: Result<Int, Error>.success, from: .success(42))
+/// // 42
+/// extract(case: Result<Int, Error>.success, from: .failure(MyError())
+/// // nil
+/// ```
 ///
 /// - Note: This function is only intended to be used with enum case initializers. Its behavior is
 ///   otherwise undefined.
@@ -54,9 +56,11 @@ public func extract<Root, Value>(case embed: @escaping (Value) -> Root, from roo
 /// Use this function to create new transform functions to pass to higher-order methods like
 /// `compactMap`:
 ///
-///     [Result<Int, Error>.success(42), .failure(MyError()]
-///       .compactMap(extract(Result.success))
-///     // [42]
+/// ```swift
+/// [Result<Int, Error>.success(42), .failure(MyError()]
+///   .compactMap(extract(Result.success))
+/// // [42]
+/// ```
 ///
 /// - Note: This function is only intended to be used with enum case initializers. Its behavior is
 ///   otherwise undefined.
