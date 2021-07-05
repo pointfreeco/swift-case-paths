@@ -70,7 +70,12 @@ public func extract<Root, Value>(_ embed: @escaping (Value) -> Root) -> (Root) -
   var cachedTag: UInt32?
   return { root in
     guard let rootTag = enumTag(root) else { return nil }
-    if let cachedTag = cachedTag, cachedTag != rootTag { return nil }
+
+    if let cachedTag = cachedTag {
+      guard cachedTag == rootTag else { return nil }
+      return associatedValues(of: root)
+    }
+
     guard
       let value = (Mirror(reflecting: root).children.first?.value)
         .flatMap({ $0 as? Value ?? Mirror(reflecting: $0).children.first?.value as? Value })
@@ -131,19 +136,43 @@ private func isUninhabitedEnum(_ type: Any.Type) -> Bool {
 }
 
 private func enumTag<Case>(_ `case`: Case) -> UInt32? {
-  let metadataPtr = unsafeBitCast(type(of: `case`), to: UnsafeRawPointer.self)
+  guard let (metadataPtr, vwt) = enumBits(for: Case.self) else { return nil }
+  return withUnsafePointer(to: `case`) { vwt.getEnumTag($0, metadataPtr) }
+}
+
+private func associatedValues<Enum, Values>(of `enum`: Enum) -> Values {
+  let (metadataPtr, vwt) = enumBits(for: Enum.self)!
+  let enumPtr = UnsafeMutablePointer<Enum>.allocate(capacity: 1)
+  enumPtr.initialize(to: `enum`)
+  let untypedPtr = UnsafeMutableRawPointer(enumPtr)
+  vwt.destructiveProjectEnumData(untypedPtr, metadataPtr)
+  // Maybe this should be .bindMemory instead of .assumingMemoryBound?
+  let valuesPtr = untypedPtr.assumingMemoryBound(to: Values.self)
+  defer {
+    valuesPtr.deinitialize(count: 1)
+    valuesPtr.deallocate()
+  }
+  return valuesPtr.pointee
+}
+
+private func enumBits<Enum>(for `enum`: Enum.Type) -> (metadataPtr: UnsafeRawPointer, vwt: EnumValueWitnessTable)? {
+  let metadataPtr = unsafeBitCast(`enum`, to: UnsafeRawPointer.self)
   let kind = metadataPtr.load(as: Int.self)
   let isEnumOrOptional = kind == 0x201 || kind == 0x202
   guard isEnumOrOptional else { return nil }
   let vwtPtr = (metadataPtr - MemoryLayout<UnsafeRawPointer>.size).load(as: UnsafeRawPointer.self)
   let vwt = vwtPtr.load(as: EnumValueWitnessTable.self)
-  return withUnsafePointer(to: `case`) { vwt.getEnumTag($0, metadataPtr) }
+  return (metadataPtr: metadataPtr, vwt: vwt)
 }
 
 private struct EnumValueWitnessTable {
   let f1, f2, f3, f4, f5, f6, f7, f8: UnsafeRawPointer
   let f9, f10: Int
   let f11, f12: UInt32
-  let getEnumTag: @convention(c) (UnsafeRawPointer, UnsafeRawPointer) -> UInt32
-  let f13, f14: UnsafeRawPointer
+  let getEnumTag: @convention(c) (_ value: UnsafeRawPointer, _ metadata: UnsafeRawPointer) -> UInt32
+
+  // This witness transforms an enum value into its associated values, in place.
+  let destructiveProjectEnumData: @convention(c) (_ value: UnsafeMutableRawPointer, _ metadata: UnsafeRawPointer) -> Void
+
+  let f14: UnsafeRawPointer
 }
