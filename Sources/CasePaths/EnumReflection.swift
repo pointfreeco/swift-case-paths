@@ -73,7 +73,7 @@ public func extract<Root, Value>(_ embed: @escaping (Value) -> Root) -> (Root) -
 
     if let cachedTag = cachedTag {
       guard cachedTag == rootTag else { return nil }
-      return associatedValues(of: root)
+      return .some(associatedValues(of: root))
     }
 
     guard

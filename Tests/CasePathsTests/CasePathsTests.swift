@@ -124,8 +124,11 @@ final class CasePathsTests: XCTestCase {
     enum Enum { case int(Int?) }
     let path = /Enum.int
     for _ in 1...2 {
-      XCTAssertEqual(path.extract(from: .int(.some(42))), .some(.some(42)))
-      XCTAssertEqual(path.extract(from: .int(.none)), .some(.none))
+      let actual1 = path.extract(from: .int(.some(42)))
+      XCTAssertEqual(actual1, .some(.some(42)))
+
+      let actual2 = path.extract(from: .int(.none))
+      XCTAssertEqual(actual2, .some(.none))
     }
   }
 
