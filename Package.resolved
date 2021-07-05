@@ -11,7 +11,7 @@
         }
       },
       {
-        "package": "swift-benchmark",
+        "package": "Benchmark",
         "repositoryURL": "https://github.com/google/swift-benchmark",
         "state": {
           "branch": null,
