@@ -146,7 +146,6 @@ private func associatedValues<Enum, Values>(of `enum`: Enum) -> Values {
   enumPtr.initialize(to: `enum`)
   let untypedPtr = UnsafeMutableRawPointer(enumPtr)
   vwt.destructiveProjectEnumData(untypedPtr, metadataPtr)
-  // Maybe this should be .bindMemory instead of .assumingMemoryBound?
   let valuesPtr = untypedPtr.assumingMemoryBound(to: Values.self)
   defer {
     valuesPtr.deinitialize(count: 1)
