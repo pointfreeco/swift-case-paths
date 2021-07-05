@@ -66,7 +66,8 @@ final class CasePathsTests: XCTestCase {
 
     XCTAssertEqual(
       .some(42),
-      (/.self).extract(from: 42)
+      (/.self)
+        .extract(from: 42)
     )
   }
 
@@ -84,15 +85,6 @@ final class CasePathsTests: XCTestCase {
     XCTAssertNil(
       fooBarSome.extract(from: .bar(none: 42))
     )
-
-    //    let fooBarNone = /Foo.bar(none:)
-    //      XCTAssertEqual(
-    //        .some(42),
-    //        fooBarNone.extract(from: .bar(none: 42))
-    //      )
-    //      XCTAssertNil(
-    //        fooBarNone.extract(from: .bar(some: 42))
-    //      )
   }
 
   func testMultiCases() {
@@ -175,13 +167,23 @@ final class CasePathsTests: XCTestCase {
       case baz
     }
 
-    let fooBar = /Foo.bar
-    XCTAssertNotNil(fooBar.extract(from: .bar))
-    XCTAssertNil(fooBar.extract(from: .baz))
+    XCTAssertNotNil(
+      (/Foo.bar)
+        .extract(from: .bar)
+    )
+    XCTAssertNil(
+      (/Foo.bar)
+        .extract(from: .baz)
+    )
 
-    let fooBaz = /Foo.baz
-    XCTAssertNotNil(fooBaz.extract(from: .baz))
-    XCTAssertNil(fooBaz.extract(from: .bar))
+    XCTAssertNotNil(
+      (/Foo.baz)
+        .extract(from: .baz)
+    )
+    XCTAssertNil(
+      (/Foo.baz)
+        .extract(from: .bar)
+    )
   }
 
   func testEnumsWithClosures() {

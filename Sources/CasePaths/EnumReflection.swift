@@ -8,7 +8,7 @@ extension CasePath {
   public static func `case`(_ embed: @escaping (Value) -> Root) -> CasePath {
     return self.init(
       embed: embed,
-      extract: { CasePaths.extract(case: embed, from: $0) }
+      extract: CasePaths.extract(embed)
     )
   }
 }
@@ -46,32 +46,8 @@ extension CasePath where Value == Void {
 ///   - root: A root enum value.
 /// - Returns: Values iff they can be extracted from the given enum case initializer and root enum,
 ///   otherwise `nil`.
-public func extract<Root, Value>(case embed: (Value) -> Root, from root: Root) -> Value? {
-  func extractHelp(from root: Root) -> (path: [String?], value: Value)? {
-    let mirror = Mirror(reflecting: root)
-    assert(mirror.displayStyle == .enum || mirror.displayStyle == .optional)
-    guard
-      let child = mirror.children.first,
-      let childLabel = child.label,
-      case let childMirror = Mirror(reflecting: child.value),
-      let value = child.value as? Value ?? childMirror.children.first?.value as? Value
-    else {
-      #if compiler(<5.2)
-        // https://bugs.swift.org/browse/SR-12044
-        if MemoryLayout<Value>.size == 0, !isUninhabitedEnum(Value.self) {
-          return (["\(root)"], unsafeBitCast((), to: Value.self))
-        }
-      #endif
-      return nil
-    }
-    return ([childLabel] + childMirror.children.map { $0.label }, value)
-  }
-  guard
-    let (rootPath, value) = extractHelp(from: root),
-    let (embedPath, _) = extractHelp(from: embed(value)),
-    rootPath == embedPath
-  else { return nil }
-  return value
+public func extract<Root, Value>(case embed: @escaping (Value) -> Root, from root: Root) -> Value? {
+  CasePaths.extract(embed)(root)
 }
 
 /// Returns a function that can attempt to extract associated values from the given enum case
@@ -91,8 +67,26 @@ public func extract<Root, Value>(case embed: (Value) -> Root, from root: Root) -
 /// - Parameter embed: An enum case initializer.
 /// - Returns: A function that can attempt to extract associated values from an enum.
 public func extract<Root, Value>(_ embed: @escaping (Value) -> Root) -> (Root) -> (Value?) {
+  var cachedTag: UInt32?
   return { root in
-    return extract(case: embed, from: root)
+    guard let rootTag = enumTag(root) else { return nil }
+    if let cachedTag = cachedTag, cachedTag != rootTag { return nil }
+    guard let value = (Mirror(reflecting: root).children.first?.value)
+      .flatMap({ $0 as? Value ?? Mirror(reflecting: $0).children.first?.value as? Value })
+    else {
+      #if compiler(<5.2)
+        // https://bugs.swift.org/browse/SR-12044
+        if MemoryLayout<Value>.size == 0, !isUninhabitedEnum(Value.self) {
+          return unsafeBitCast((), to: Value.self)
+        }
+      #endif
+      return nil
+    }
+    if rootTag == cachedTag { return value }
+    guard let embedTag = enumTag(embed(value)) else { return nil }
+    cachedTag = embedTag
+    if rootTag == embedTag { return value }
+    return nil
   }
 }
 
@@ -133,4 +127,22 @@ private func isUninhabitedEnum(_ type: Any.Type) -> Bool {
 
   let numCases = enumTypeDescriptor.numPayloadCases + enumTypeDescriptor.numEmptyCases
   return numCases == 0
+}
+
+private func enumTag<Case>(_ `case`: Case) -> UInt32? {
+  let metadataPtr = unsafeBitCast(type(of: `case`), to: UnsafeRawPointer.self)
+  let kind = metadataPtr.load(as: Int.self)
+  let isEnumOrOptional = kind == 0x201 || kind == 0x202
+  guard isEnumOrOptional else { return nil }
+  let vwtPtr = (metadataPtr - MemoryLayout<UnsafeRawPointer>.size).load(as: UnsafeRawPointer.self)
+  let vwt = vwtPtr.load(as: EnumValueWitnessTable.self)
+  return withUnsafePointer(to: `case`) { vwt.getEnumTag($0, metadataPtr) }
+}
+
+private struct EnumValueWitnessTable {
+  let f1, f2, f3, f4, f5, f6, f7, f8: UnsafeRawPointer
+  let f9, f10: Int
+  let f11, f12: UInt32
+  let getEnumTag: @convention(c) (UnsafeRawPointer, UnsafeRawPointer) -> UInt32
+  let f13, f14: UnsafeRawPointer
 }
