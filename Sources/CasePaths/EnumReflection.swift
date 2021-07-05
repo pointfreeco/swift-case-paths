@@ -71,8 +71,9 @@ public func extract<Root, Value>(_ embed: @escaping (Value) -> Root) -> (Root) -
   return { root in
     guard let rootTag = enumTag(root) else { return nil }
     if let cachedTag = cachedTag, cachedTag != rootTag { return nil }
-    guard let value = (Mirror(reflecting: root).children.first?.value)
-      .flatMap({ $0 as? Value ?? Mirror(reflecting: $0).children.first?.value as? Value })
+    guard
+      let value = (Mirror(reflecting: root).children.first?.value)
+        .flatMap({ $0 as? Value ?? Mirror(reflecting: $0).children.first?.value as? Value })
     else {
       #if compiler(<5.2)
         // https://bugs.swift.org/browse/SR-12044
