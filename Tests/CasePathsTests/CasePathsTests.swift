@@ -454,12 +454,6 @@ final class CasePathsTests: XCTestCase {
         .compactMap(/Result.success .. Optional.some)
     )
 
-    XCTAssertEqual(
-      [1],
-      [Result.success(1), .success(nil), .failure(MyError())]
-        .compactMap(/{ .success(.some($0)) })
-    )
-
     enum Authentication {
       case authenticated(token: String)
       case unauthenticated
