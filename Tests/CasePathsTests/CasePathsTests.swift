@@ -18,10 +18,12 @@ final class CasePathsTests: XCTestCase {
     }
   }
 
+#if compiler(<5.3)
+    // This test crashes Xcode 11.7's compiler.
+#else
   func testSimpleOverloadedPayload() {
-    enum Enum { case payload(a: Int), payload(b: Int) }
-    let pathA = /Enum.payload(a:)
-    let pathB = /Enum.payload(b:)
+    let pathA = /SimpleOverloadedEnum.payload(a:)
+    let pathB = /SimpleOverloadedEnum.payload(b:)
     for _ in 1...2 {
       XCTAssertEqual(pathA.extract(from: .payload(a: 42)), 42)
       XCTAssertEqual(pathA.extract(from: .payload(b: 42)), nil)
@@ -29,6 +31,7 @@ final class CasePathsTests: XCTestCase {
       XCTAssertEqual(pathB.extract(from: .payload(b: 42)), 42)
     }
   }
+#endif
 
   func testMultiPayload() {
     enum Enum { case payload(Int, String) }
