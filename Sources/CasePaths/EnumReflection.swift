@@ -324,7 +324,6 @@ private struct FieldDescriptor {
   /// The size of a FieldRecord as stored in the executable.
   var recordSize: Int { Int(ptr.advanced(by: 2 * 4 + 2).load(as: UInt16.self)) }
 
-  var fieldCount: UInt32 { ptr.advanced(by: 2 * 4 + 2 * 2).load(as: UInt32.self) }
 
   func field(atIndex i: UInt32) -> FieldRecord {
     return FieldRecord(
