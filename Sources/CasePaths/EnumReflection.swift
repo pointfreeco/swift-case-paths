@@ -100,7 +100,6 @@ public func extract<Root, Value>(_ embed: @escaping (Value) -> Root) -> (Root) -
       #endif
       return nil
     }
-    if rootTag == cachedTag { return value }
     let embedTag = metadata.tag(of: embed(value))
     cachedTag = embedTag
     if rootTag == embedTag { return value }
