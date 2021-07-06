@@ -183,11 +183,6 @@ extension Metadata {
 
   var kind: MetadataKind { ptr.load(as: MetadataKind.self) }
 
-  var typeDescriptor: EnumTypeDescriptor {
-    return EnumTypeDescriptor(
-      ptr: ptr.advanced(by: pointerSize).load(as: UnsafeRawPointer.self))
-  }
-
   func initialize(_ dest: UnsafeMutableRawPointer, byCopying source: UnsafeMutableRawPointer) {
     _ = valueWitnessTable.initializeWithCopy(dest, source, ptr)
   }
@@ -207,6 +202,11 @@ private struct EnumMetadata: Metadata {
   init?(_ type: Any.Type) {
     ptr = unsafeBitCast(type, to: UnsafeRawPointer.self)
     guard kind == .enumeration || kind == .optional else { return nil }
+  }
+
+  var typeDescriptor: EnumTypeDescriptor {
+    return EnumTypeDescriptor(
+      ptr: ptr.advanced(by: pointerSize).load(as: UnsafeRawPointer.self))
   }
 
   func tag<Enum>(of value: Enum) -> UInt32 {
@@ -305,6 +305,7 @@ private struct EnumTypeDescriptor {
       ptr: ptr.advanced(by: 4 * 4).loadRelativePointer())
   }
 
+  #if compiler(<5.2)
   var numPayloadCases: Int32 {
     return ptr.advanced(by: 5 * 4).load(as: Int32.self) & 0xFFFFFF
   }
@@ -314,6 +315,7 @@ private struct EnumTypeDescriptor {
   }
 
   var isInhabited: Bool { numPayloadCases + numEmptyCases > 0 }
+  #endif
 }
 
 private struct FieldDescriptor {
