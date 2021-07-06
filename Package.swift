@@ -15,7 +15,11 @@ let package = Package(
   ],
   targets: [
     .target(
-      name: "CasePaths"
+        name: "CCasePaths"
+    ),
+    .target(
+      name: "CasePaths",
+      dependencies: ["CCasePaths"]
     ),
     .testTarget(
       name: "CasePathsTests",

@@ -1,3 +1,5 @@
+import CCasePaths
+
 extension CasePath {
   /// Returns a case path that extracts values associated with a given enum case initializer.
   ///
@@ -69,11 +71,16 @@ public func extract<Root, Value>(case embed: @escaping (Value) -> Root, from roo
 public func extract<Root, Value>(_ embed: @escaping (Value) -> Root) -> (Root) -> (Value?) {
   var cachedTag: UInt32?
   return { root in
-    guard let rootTag = enumTag(root) else { return nil }
+    guard let metadata = EnumMetadata(Root.self) else { return nil }
+    let rootTag = metadata.tag(of: root)
 
     if let cachedTag = cachedTag {
       guard cachedTag == rootTag else { return nil }
-      return .some(associatedValues(of: root))
+      if metadata.typeDescriptor.fieldDescriptor.field(atIndex: rootTag).isIndirectCase {
+        return .some(metadata.indirectAssociatedValue(of: root, as: Value.self))
+      } else {
+        return .some(metadata.directAssociatedValue(of: root, as: Value.self))
+      }
     }
 
     guard
@@ -82,14 +89,19 @@ public func extract<Root, Value>(_ embed: @escaping (Value) -> Root) -> (Root) -
     else {
       #if compiler(<5.2)
         // https://bugs.swift.org/browse/SR-12044
-        if MemoryLayout<Value>.size == 0, !isUninhabitedEnum(Value.self) {
+        if
+          MemoryLayout<Value>.size == 0,
+          let valueMetadata = EnumMetadata(Value.self),
+          valueMetadata.kind == .enumeration,
+          valueMetadata.typeDescriptor.isInhabited
+        {
           return unsafeBitCast((), to: Value.self)
         }
       #endif
       return nil
     }
     if rootTag == cachedTag { return value }
-    guard let embedTag = enumTag(embed(value)) else { return nil }
+    let embedTag = metadata.tag(of: embed(value))
     cachedTag = embedTag
     if rootTag == embedTag { return value }
     return nil
@@ -98,80 +110,238 @@ public func extract<Root, Value>(_ embed: @escaping (Value) -> Root) -> (Root) -
 
 // MARK: - Private Helpers
 
-private struct EnumMetadata {
-  let kind: Int
-  let typeDescriptor: UnsafePointer<EnumTypeDescriptor>
-}
+// This is the size of any Unsafe*Pointer and also the size of Int and UInt.
+private let pointerSize = MemoryLayout<UnsafeRawPointer>.size
 
-private struct EnumTypeDescriptor {
-  // These fields are not modeled because we don't need them.
-  // They are the type descriptor flags and various pointer offsets.
-  let flags, p1, p2, p3, p4: Int32
+private typealias OpaqueExistentialContainer = (UnsafeMutableRawPointer?, UnsafeMutableRawPointer?, UnsafeMutableRawPointer?, metadata: UnsafeMutableRawPointer?)
 
-  let numPayloadCasesAndPayloadSizeOffset: Int32
-  let numEmptyCases: Int32
+private typealias BoxPair = (heapObject: UnsafeMutableRawPointer, buffer: UnsafeMutableRawPointer)
 
-  var numPayloadCases: Int32 {
-    numPayloadCasesAndPayloadSizeOffset & 0xFFFFFF
+extension UnsafeRawPointer {
+  fileprivate func loadInferredType<Type>() -> Type {
+    return load(as: Type.self)
+  }
+
+  fileprivate func loadRelativePointer() -> UnsafeRawPointer {
+    return self + Int(load(as: Int32.self))
   }
 }
 
-private func isUninhabitedEnum(_ type: Any.Type) -> Bool {
-  // Load the type kind from the common type metadata area. Memory layout reference:
-  // https://github.com/apple/swift/blob/master/docs/ABI/TypeMetadata.rst
-  let metadataPtr = unsafeBitCast(type, to: UnsafeRawPointer.self)
-  let metadataKind = metadataPtr.load(as: Int.self)
+private struct ValueWitnessTable {
+  let ptr: UnsafeRawPointer
 
-  // Check that this is an enum. Value reference:
-  // https://github.com/apple/swift/blob/master/stdlib/public/core/ReflectionMirror.swift
-  let isEnum = metadataKind == 0x201
-  guard isEnum else { return false }
+  var flags: Flags {
+    return Flags(rawValue: ptr.advanced(by: 10 * pointerSize).load(as: UInt32.self))
+  }
 
-  // Access enum type descriptor
-  let enumMetadata = metadataPtr.load(as: EnumMetadata.self)
-  let enumTypeDescriptor = enumMetadata.typeDescriptor.pointee
+  var initializeWithCopy: @convention(c) (_ dest: UnsafeMutableRawPointer, _ source: UnsafeMutableRawPointer, _ metadata: UnsafeRawPointer) -> UnsafeMutableRawPointer {
+    return ptr.advanced(by: 2 * pointerSize).loadInferredType()
+  }
 
-  let numCases = enumTypeDescriptor.numPayloadCases + enumTypeDescriptor.numEmptyCases
-  return numCases == 0
+  var initializeWithTake: @convention(c) (_ dest: UnsafeMutableRawPointer, _ source: UnsafeMutableRawPointer, _ metadata: UnsafeRawPointer) -> UnsafeMutableRawPointer {
+    return ptr.advanced(by: 4 * pointerSize).loadInferredType()
+  }
+
+  var getEnumTag: @convention(c) (_ value: UnsafeRawPointer, _ metadata: UnsafeRawPointer) -> UInt32 {
+    return ptr.advanced(by: 10 * pointerSize + 2 * 4).loadInferredType()
+  }
+
+  // This witness transforms an enum value into its associated value, in place.
+  var destructiveProjectEnumData: @convention(c) (_ value: UnsafeMutableRawPointer, _ metadata: UnsafeRawPointer) -> Void {
+    return ptr.advanced(by: 11 * pointerSize + 2 * 4).loadInferredType()
+  }
 }
 
-private func enumTag<Case>(_ `case`: Case) -> UInt32? {
-  guard let (metadataPtr, vwt) = enumBits(for: Case.self) else { return nil }
-  return withUnsafePointer(to: `case`) { vwt.getEnumTag($0, metadataPtr) }
+extension ValueWitnessTable {
+  struct Flags: OptionSet {
+    var rawValue: UInt32
+
+    static var isNonInline: Self { .init(rawValue: 0x020000) }
+  }
 }
 
-private func associatedValues<Enum, Values>(of `enum`: Enum) -> Values {
-  let (metadataPtr, vwt) = enumBits(for: Enum.self)!
-  let enumPtr = UnsafeMutablePointer<Enum>.allocate(capacity: 1)
-  enumPtr.initialize(to: `enum`)
-  let untypedPtr = UnsafeMutableRawPointer(enumPtr)
-  vwt.destructiveProjectEnumData(untypedPtr, metadataPtr)
-  let valuesPtr = untypedPtr.assumingMemoryBound(to: Values.self)
-  defer {
+private struct MetadataKind: Equatable {
+  var rawValue: UInt
+
+  // https://github.com/apple/swift/blob/master/include/swift/ABI/MetadataValues.h
+  // https://github.com/apple/swift/blob/master/include/swift/ABI/MetadataKind.def
+  // 0x201 = MetadataKind::Enum
+  // 0x202 = MetadataKind::Optional
+  static var enumeration: Self { .init(rawValue: 0x201) }
+  static var optional: Self { .init(rawValue: 0x202) }
+}
+
+private protocol Metadata {
+  var ptr: UnsafeRawPointer { get }
+}
+
+extension Metadata {
+  var valueWitnessTable: ValueWitnessTable {
+    return ValueWitnessTable(
+      ptr: ptr.advanced(by: -pointerSize).load(as: UnsafeRawPointer.self))
+  }
+
+  var kind: MetadataKind { ptr.load(as: MetadataKind.self) }
+
+  var typeDescriptor: EnumTypeDescriptor {
+    return EnumTypeDescriptor(
+      ptr: ptr.advanced(by: pointerSize).load(as: UnsafeRawPointer.self))
+  }
+
+  func initialize(_ dest: UnsafeMutableRawPointer, byCopying source: UnsafeMutableRawPointer) {
+    _ = valueWitnessTable.initializeWithCopy(dest, source, ptr)
+  }
+
+  func initialize(_ dest: UnsafeMutableRawPointer, byTaking source: UnsafeMutableRawPointer) {
+    _ = valueWitnessTable.initializeWithTake(dest, source, ptr)
+  }
+}
+
+private struct NativeObjectMetadata: Metadata {
+  let ptr: UnsafeRawPointer
+}
+
+private struct EnumMetadata: Metadata {
+  let ptr: UnsafeRawPointer
+
+  init?(_ type: Any.Type) {
+    ptr = unsafeBitCast(type, to: UnsafeRawPointer.self)
+    guard kind == .enumeration || kind == .optional else { return nil }
+  }
+
+  func tag<Enum>(of value: Enum) -> UInt32 {
+    return withUnsafePointer(to: value) {
+      valueWitnessTable.getEnumTag($0, self.ptr)
+    }
+  }
+
+  func directAssociatedValue<Enum, Value>(of enumCase: Enum, as type: Value.Type) -> Value {
+    let enumPtr = UnsafeMutablePointer<Enum>.allocate(capacity: 1)
+    enumPtr.initialize(to: enumCase)
+
+    let untypedPtr = UnsafeMutableRawPointer(enumPtr)
+    valueWitnessTable.destructiveProjectEnumData(untypedPtr, ptr)
+
+    let valuesPtr = untypedPtr.assumingMemoryBound(to: Value.self)
+    let values = valuesPtr.pointee
+
     valuesPtr.deinitialize(count: 1)
     valuesPtr.deallocate()
+
+    return values
   }
-  return valuesPtr.pointee
+
+  func indirectAssociatedValue<Enum, Value>(of enumCase: Enum, as type: Value.Type) -> Value {
+    // This is closely based on EnumImpl::subscript.
+    // https://github.com/apple/swift/blob/master/stdlib/public/runtime/ReflectionMirror.cpp
+
+    // I'll need access to this thing's bytes, which means it has to be a var.
+    var enumCase = enumCase
+
+    // Storage for an existential container with no conformances. In the C++ code, this is declared `Any enumCopy`, but `Any` is a `using` alias for `OpaqueExistentialContainer`.
+    var enumCopy = OpaqueExistentialContainer(nil, nil, nil, metadata: nil)
+
+    let answer: Value = withUnsafeMutablePointer(to: &enumCopy) { enumCopy in
+      // A “box” here means a value stored as the payload of a HeapObject.
+
+      let enumCopyContainer = allocateBoxForExistential(in: enumCopy)
+      initialize(enumCopyContainer, byCopying: &enumCase)
+
+      valueWitnessTable.destructiveProjectEnumData(enumCopyContainer, ptr)
+
+      // Note that this getter returns the pointer to the “full” metadata, which must be advanced by a word to become a normal metadata pointer.
+      let boxType = NativeObjectMetadata(
+        ptr: getBuiltinNativeObjectFullMetadata().advanced(by: pointerSize))
+      let pair = swift_allocBox(for: boxType.ptr)
+      boxType.initialize(pair.buffer, byTaking: enumCopyContainer)
+      deallocateBoxForExistential(in: enumCopy)
+
+      var valuePtr = pair.buffer
+      // The payload is always indirect in this method, so we have to open the box.
+      valuePtr = valuePtr.load(as: UnsafeMutableRawPointer.self)
+      valuePtr = swift_projectBox(valuePtr)
+
+      let value = valuePtr.load(as: type)
+      swift_release(pair.heapObject)
+      return value
+    }
+
+    return answer
+  }
+
+  func allocateBoxForExistential(in buffer: UnsafeMutableRawPointer) -> UnsafeMutableRawPointer {
+    guard valueWitnessTable.flags.contains(.isNonInline) else {
+      return buffer
+    }
+
+    let (heapObject: heapObject, buffer: boxBuffer) = swift_allocBox(for: ptr)
+    buffer.storeBytes(of: heapObject, as: UnsafeMutableRawPointer.self)
+    return boxBuffer
+  }
+
+  func deallocateBoxForExistential(in buffer: UnsafeMutableRawPointer) {
+    guard valueWitnessTable.flags.contains(.isNonInline) else { return }
+    swift_deallocBox(buffer.load(as: UnsafeMutableRawPointer.self))
+  }
 }
 
-private func enumBits<Enum>(for `enum`: Enum.Type) -> (metadataPtr: UnsafeRawPointer, vwt: EnumValueWitnessTable)? {
-  let metadataPtr = unsafeBitCast(`enum`, to: UnsafeRawPointer.self)
-  let kind = metadataPtr.load(as: Int.self)
-  let isEnumOrOptional = kind == 0x201 || kind == 0x202
-  guard isEnumOrOptional else { return nil }
-  let vwtPtr = (metadataPtr - MemoryLayout<UnsafeRawPointer>.size).load(as: UnsafeRawPointer.self)
-  let vwt = vwtPtr.load(as: EnumValueWitnessTable.self)
-  return (metadataPtr: metadataPtr, vwt: vwt)
+@_silgen_name("swift_allocBox")
+private func swift_allocBox(for metadata: UnsafeRawPointer) -> BoxPair
+
+@_silgen_name("swift_allocBox")
+private func swift_deallocBox(_ heapObject: UnsafeMutableRawPointer)
+
+@_silgen_name("swift_projectBox")
+private func swift_projectBox(_ heapObject: UnsafeMutableRawPointer) -> UnsafeMutableRawPointer
+
+@_silgen_name("swift_release")
+private func swift_release(_ heapObject: UnsafeMutableRawPointer)
+
+private struct EnumTypeDescriptor {
+  let ptr: UnsafeRawPointer
+
+  var fieldDescriptor: FieldDescriptor {
+    return FieldDescriptor(
+      ptr: ptr.advanced(by: 4 * 4).loadRelativePointer())
+  }
+
+  var numPayloadCases: Int32 {
+    return ptr.advanced(by: 5 * 4).load(as: Int32.self) & 0xFFFFFF
+  }
+
+  var numEmptyCases: Int32 {
+    return ptr.advanced(by: 6 * 4).load(as: Int32.self)
+  }
+
+  var isInhabited: Bool { numPayloadCases + numEmptyCases > 0 }
 }
 
-private struct EnumValueWitnessTable {
-  let f1, f2, f3, f4, f5, f6, f7, f8: UnsafeRawPointer
-  let f9, f10: Int
-  let f11, f12: UInt32
-  let getEnumTag: @convention(c) (_ value: UnsafeRawPointer, _ metadata: UnsafeRawPointer) -> UInt32
+private struct FieldDescriptor {
+  let ptr: UnsafeRawPointer
 
-  // This witness transforms an enum value into its associated values, in place.
-  let destructiveProjectEnumData: @convention(c) (_ value: UnsafeMutableRawPointer, _ metadata: UnsafeRawPointer) -> Void
+  /// The size of a FieldRecord as stored in the executable.
+  var recordSize: Int { Int(ptr.advanced(by: 2 * 4 + 2).load(as: UInt16.self)) }
 
-  let f14: UnsafeRawPointer
+  var fieldCount: UInt32 { ptr.advanced(by: 2 * 4 + 2 * 2).load(as: UInt32.self) }
+
+  func field(atIndex i: UInt32) -> FieldRecord {
+    return FieldRecord(
+      ptr: ptr.advanced(by: 2 * 4 + 2 * 2 + 4).advanced(by: Int(i) * recordSize))
+  }
+}
+
+private struct FieldRecord {
+  let ptr: UnsafeRawPointer
+
+  var flags: Flags { Flags(rawValue: ptr.load(as: UInt32.self)) }
+
+  var isIndirectCase: Bool { flags.contains(.isIndirectCase) }
+}
+
+extension FieldRecord {
+  struct Flags: OptionSet {
+    var rawValue: UInt32
+
+    static var isIndirectCase: Self { .init(rawValue: 1) }
+  }
 }
