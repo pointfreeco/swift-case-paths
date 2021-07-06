@@ -153,31 +153,39 @@ final class CasePathsTests: XCTestCase {
     }
   }
 
+  fileprivate class Object: Equatable {
+    static func == (lhs: Object, rhs: Object) -> Bool {
+      return lhs === rhs
+    }
+  }
+
   func testIndirectCompoundPayload() throws {
+    let object = Object()
+
     enum Enum: Equatable {
-      indirect case indirect(Int, NSObject?, Int, NSObject?)
-      case direct(Int, NSObject?, Int, NSObject?)
+      indirect case indirect(Int, Object?, Int, Object?)
+      case direct(Int, Object?, Int, Object?)
     }
 
-    let indirectPath: CasePath<Enum, (Int, NSObject?, Int, NSObject?)> = /Enum.indirect
-    let directPath: CasePath<Enum, (Int, NSObject?, Int, NSObject?)> = /Enum.direct
+    let indirectPath: CasePath<Enum, (Int, Object?, Int, Object?)> = /Enum.indirect
+    let directPath: CasePath<Enum, (Int, Object?, Int, Object?)> = /Enum.direct
 
     for _ in 1...2 {
       do {
-        let actual = indirectPath.extract(from: .indirect(42, nil, 43, self))
-        XCTAssert(try XCTUnwrap(actual) == (42, nil, 43, self))
+        let actual = indirectPath.extract(from: .indirect(42, nil, 43, object))
+        XCTAssert(try XCTUnwrap(actual) == (42, nil, 43, object))
       }
       do {
-        let actual = indirectPath.extract(from: .direct(42, nil, 43, self))
+        let actual = indirectPath.extract(from: .direct(42, nil, 43, object))
         XCTAssertNil(actual)
       }
       do {
-        let actual = directPath.extract(from: .indirect(42, nil, 43, self))
+        let actual = directPath.extract(from: .indirect(42, nil, 43, object))
         XCTAssertNil(actual)
       }
       do {
-        let actual = directPath.extract(from: .direct(42, nil, 43, self))
-        XCTAssert(try XCTUnwrap(actual) == (42, nil, 43, self))
+        let actual = directPath.extract(from: .direct(42, nil, 43, object))
+        XCTAssert(try XCTUnwrap(actual) == (42, nil, 43, object))
       }
     }
   }
