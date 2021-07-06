@@ -85,18 +85,8 @@ public func extract<Root, Value>(_ embed: @escaping (Value) -> Root) -> (Root) -
     guard
       let value = (Mirror(reflecting: root).children.first?.value)
         .flatMap({ $0 as? Value ?? Mirror(reflecting: $0).children.first?.value as? Value })
+        ?? workaroundForSR12044(Value.self)
     else {
-      #if compiler(<5.2)
-        // https://bugs.swift.org/browse/SR-12044
-        if
-          MemoryLayout<Value>.size == 0,
-          let valueMetadata = EnumMetadata(Value.self),
-          valueMetadata.kind == .enumeration,
-          valueMetadata.typeDescriptor.isInhabited
-        {
-          return unsafeBitCast((), to: Value.self)
-        }
-      #endif
       return nil
     }
     let embedTag = metadata.tag(of: embed(value))
@@ -302,18 +292,6 @@ private struct EnumTypeDescriptor {
     return FieldDescriptor(
       ptr: ptr.advanced(by: 4 * 4).loadRelativePointer())
   }
-
-  #if compiler(<5.2)
-  var numPayloadCases: Int32 {
-    return ptr.advanced(by: 5 * 4).load(as: Int32.self) & 0xFFFFFF
-  }
-
-  var numEmptyCases: Int32 {
-    return ptr.advanced(by: 6 * 4).load(as: Int32.self)
-  }
-
-  var isInhabited: Bool { numPayloadCases + numEmptyCases > 0 }
-  #endif
 }
 
 private struct FieldDescriptor {
@@ -344,3 +322,46 @@ extension FieldRecord {
     static var isIndirectCase: Self { .init(rawValue: 1) }
   }
 }
+
+#if compiler(<5.2)
+
+// https://bugs.swift.org/browse/SR-12044
+private func workaroundForSR12044<Value>(_ type: Value.Type) -> Value? {
+  // If Value is an inhabited type with a size of zero, Mirror doesn't notice it as the associated value of an enum case due to incorrect metadata. But, being inhabited with a size of zero, it has only one possible inhabitant, so I create the inhabitant here using unsafeBitCast.
+
+  // An uninhabited type like Never also has a size of zero, and I have to be careful not to create a value of an uninhabited type.
+
+  // It's possible for a tuple, struct, or class to be uninhabited by having an uninhabited stored property. But detecting such a type is difficult as I'd have to scrounge through even more metadata. So instead I'm just checking for the common case of an uninhabited enum. If you do something like `enum E { case c(Never, Never) }`... you have my sincere apology.
+
+  if
+    MemoryLayout<Value>.size == 0,
+    !isUninhabitedEnum(Value.self)
+  {
+    return unsafeBitCast((), to: Value.self)
+  }
+  return nil
+}
+
+private func isUninhabitedEnum(_ type: Any.Type) -> Bool {
+  // If it lacks enum metadata, it's definitely not an uninhabited enum.
+  guard let metadata = EnumMetadata(type) else { return false }
+  return !metadata.typeDescriptor.isInhabited
+}
+
+extension EnumTypeDescriptor {
+  var numPayloadCases: Int32 {
+    return ptr.advanced(by: 5 * 4).load(as: Int32.self) & 0xFFFFFF
+  }
+
+  var numEmptyCases: Int32 {
+    return ptr.advanced(by: 6 * 4).load(as: Int32.self)
+  }
+
+  var isInhabited: Bool { numPayloadCases + numEmptyCases > 0 }
+}
+
+#else
+
+private func workaroundForSR12044<Value>(_ type: Value.Type) -> Value? { nil }
+
+#endif
