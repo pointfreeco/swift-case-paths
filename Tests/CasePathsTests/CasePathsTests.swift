@@ -178,6 +178,16 @@ final class CasePathsTests: XCTestCase {
     }
   }
 
+  func testNonEnumExtract() {
+    // This is a bogus CasePath, intended to verify that it just returns nil.
+    let path: CasePath<Int, Int> = /{ $0 }
+
+    for _ in 1...2 {
+      let actual = path.extract(from: 42)
+      XCTAssertNil(actual)
+    }
+  }
+
   func testOptionalPayload() {
     enum Enum { case int(Int?) }
     let path = /Enum.int
