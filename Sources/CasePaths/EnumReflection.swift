@@ -249,7 +249,7 @@ private struct EnumMetadata: Metadata {
 
       // Note that this getter returns the pointer to the “full” metadata, which must be advanced by a word to become a normal metadata pointer.
       let boxType = NativeObjectMetadata(
-        ptr: getBuiltinNativeObjectFullMetadata().advanced(by: pointerSize))
+        ptr: getBuiltinNativeObjectFullMetadata()!.advanced(by: pointerSize))
       let pair = swift_allocBox(for: boxType.ptr)
       boxType.initialize(pair.buffer, byTaking: enumCopyContainer)
       deallocateBoxForExistential(in: enumCopy)

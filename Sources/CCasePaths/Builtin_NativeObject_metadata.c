@@ -3,6 +3,6 @@
 // This is the mangled name of Builtin.NativeObject's metadata.
 extern void $sBoN;
 
-void const *__nonnull getBuiltinNativeObjectFullMetadata() {
+void const *getBuiltinNativeObjectFullMetadata() {
     return &$sBoN;
 }
