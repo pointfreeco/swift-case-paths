@@ -15,15 +15,15 @@ let package = Package(
   ],
   targets: [
     .target(
-        name: "CCasePaths"
-    ),
-    .target(
       name: "CasePaths",
       dependencies: ["CCasePaths"]
     ),
     .testTarget(
       name: "CasePathsTests",
       dependencies: ["CasePaths"]
+    ),
+    .target(
+      name: "CCasePaths"
     ),
     .target(
       name: "swift-case-paths-benchmark",
