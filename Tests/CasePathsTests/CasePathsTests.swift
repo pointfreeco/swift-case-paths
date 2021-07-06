@@ -1,6 +1,13 @@
 import CasePaths
 import XCTest
 
+// Replace this with XCTUnwrap when we drop support for Xcode 11.3.
+fileprivate func unwrap<Wrapped>(_ optional: Wrapped?) throws -> Wrapped {
+  guard let wrapped = optional else { throw UnexpectedNil() }
+  return wrapped
+}
+fileprivate struct UnexpectedNil: Error { }
+
 final class CasePathsTests: XCTestCase {
   func testSimplePayload() {
     enum Enum { case payload(Int) }
@@ -38,7 +45,7 @@ final class CasePathsTests: XCTestCase {
     enum Enum { case payload(Int, String) }
     let path: CasePath<Enum, (Int, String)> = /Enum.payload
     for _ in 1...2 {
-      XCTAssert(try XCTUnwrap(path.extract(from: .payload(42, "Blob"))) == (42, "Blob"))
+      XCTAssert(try unwrap(path.extract(from: .payload(42, "Blob"))) == (42, "Blob"))
     }
   }
 
@@ -47,10 +54,10 @@ final class CasePathsTests: XCTestCase {
     let path: CasePath<Enum, (Int, String)> = /Enum.payload
     for _ in 1...2 {
       XCTAssert(
-        try XCTUnwrap(path.extract(from: .payload(a: 42, b: "Blob"))) == (42, "Blob")
+        try unwrap(path.extract(from: .payload(a: 42, b: "Blob"))) == (42, "Blob")
       )
       XCTAssert(
-        try XCTUnwrap(path.extract(from: .payload(a: 42, b: "Blob"))) == (a: 42, b: "Blob")
+        try unwrap(path.extract(from: .payload(a: 42, b: "Blob"))) == (a: 42, b: "Blob")
       )
     }
   }
@@ -103,7 +110,7 @@ final class CasePathsTests: XCTestCase {
     let path = /Enum.closure
     for _ in 1...2 {
       var invoked = false
-      let closure = try XCTUnwrap(path.extract(from: .closure { invoked = true }))
+      let closure = try unwrap(path.extract(from: .closure { invoked = true }))
       closure()
       XCTAssertTrue(invoked)
     }
@@ -173,7 +180,7 @@ final class CasePathsTests: XCTestCase {
     for _ in 1...2 {
       do {
         let actual = indirectPath.extract(from: .indirect(42, nil, 43, object))
-        XCTAssert(try XCTUnwrap(actual) == (42, nil, 43, object))
+        XCTAssert(try unwrap(actual) == (42, nil, 43, object))
       }
       do {
         let actual = indirectPath.extract(from: .direct(42, nil, 43, object))
@@ -185,7 +192,7 @@ final class CasePathsTests: XCTestCase {
       }
       do {
         let actual = directPath.extract(from: .direct(42, nil, 43, object))
-        XCTAssert(try XCTUnwrap(actual) == (42, nil, 43, object))
+        XCTAssert(try unwrap(actual) == (42, nil, 43, object))
       }
     }
   }
@@ -227,8 +234,8 @@ final class CasePathsTests: XCTestCase {
     let nsObject = NSObject()
     let path = /Enum.anyObject
     for _ in 1...2 {
-      XCTAssert(try XCTUnwrap(path.extract(from: .anyObject(object))) === object)
-      XCTAssert(try XCTUnwrap(path.extract(from: .anyObject(nsObject))) === nsObject)
+      XCTAssert(try unwrap(path.extract(from: .anyObject(object))) === object)
+      XCTAssert(try unwrap(path.extract(from: .anyObject(nsObject))) === nsObject)
     }
   }
 
@@ -251,13 +258,13 @@ final class CasePathsTests: XCTestCase {
     let subclassPath = /Enum.subclass
     for _ in 1...2 {
       XCTAssert(
-        try XCTUnwrap(superclassPath.extract(from: .superclass(superclass))) === superclass
+        try unwrap(superclassPath.extract(from: .superclass(superclass))) === superclass
       )
       XCTAssert(
-        try XCTUnwrap(superclassPath.extract(from: .superclass(subclass))) === subclass
+        try unwrap(superclassPath.extract(from: .superclass(subclass))) === subclass
       )
       XCTAssert(
-        try XCTUnwrap(subclassPath.extract(from: .subclass(subclass))) === subclass
+        try unwrap(subclassPath.extract(from: .subclass(subclass))) === subclass
       )
     }
   }
@@ -267,7 +274,7 @@ final class CasePathsTests: XCTestCase {
     let path: CasePath<Enum, (Int, Int?, String, UInt)> = /Enum.n
     for _ in 1...2 {
       XCTAssert(
-        try XCTUnwrap(path.extract(from: .n(42))) == (42, nil, #file, #line)
+        try unwrap(path.extract(from: .n(42))) == (42, nil, #file, #line)
       )
     }
   }
