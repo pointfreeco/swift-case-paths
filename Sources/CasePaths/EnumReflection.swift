@@ -76,11 +76,10 @@ public func extract<Root, Value>(_ embed: @escaping (Value) -> Root) -> (Root) -
 
     if let cachedTag = cachedTag {
       guard cachedTag == rootTag else { return nil }
-      if metadata.typeDescriptor.fieldDescriptor.field(atIndex: rootTag).isIndirectCase {
-        return .some(metadata.indirectAssociatedValue(of: root, as: Value.self))
-      } else {
-        return .some(metadata.directAssociatedValue(of: root, as: Value.self))
-      }
+      return .some(
+        metadata.typeDescriptor.fieldDescriptor.field(atIndex: rootTag).isIndirectCase
+          ? metadata.indirectAssociatedValue(of: root, as: Value.self)
+          : metadata.directAssociatedValue(of: root, as: Value.self))
     }
 
     guard
