@@ -288,7 +288,7 @@ private struct EnumMetadata: Metadata {
 @_silgen_name("swift_allocBox")
 private func swift_allocBox(for metadata: UnsafeRawPointer) -> BoxPair
 
-@_silgen_name("swift_allocBox")
+@_silgen_name("swift_deallocBox")
 private func swift_deallocBox(_ heapObject: UnsafeMutableRawPointer)
 
 @_silgen_name("swift_projectBox")
