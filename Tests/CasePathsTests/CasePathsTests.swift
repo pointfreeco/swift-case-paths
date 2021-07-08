@@ -2,11 +2,11 @@ import CasePaths
 import XCTest
 
 // Replace this with XCTUnwrap when we drop support for Xcode 11.3.
-fileprivate func unwrap<Wrapped>(_ optional: Wrapped?) throws -> Wrapped {
+private func unwrap<Wrapped>(_ optional: Wrapped?) throws -> Wrapped {
   guard let wrapped = optional else { throw UnexpectedNil() }
   return wrapped
 }
-fileprivate struct UnexpectedNil: Error { }
+private struct UnexpectedNil: Error {}
 
 final class CasePathsTests: XCTestCase {
   func testSimplePayload() {
@@ -25,21 +25,24 @@ final class CasePathsTests: XCTestCase {
     }
   }
 
-#if compiler(<5.3)
+  #if compiler(<5.3)
     // This test crashes Xcode 11.7's compiler.
-#else
-  func testSimpleOverloadedPayload() {
-    enum Enum { case payload(a: Int), payload(b: Int) }
-    let pathA = /Enum.payload(a:)
-    let pathB = /Enum.payload(b:)
-    for _ in 1...2 {
-      XCTAssertEqual(pathA.extract(from: .payload(a: 42)), 42)
-      XCTAssertEqual(pathA.extract(from: .payload(b: 42)), nil)
-      XCTAssertEqual(pathB.extract(from: .payload(a: 42)), nil)
-      XCTAssertEqual(pathB.extract(from: .payload(b: 42)), 42)
+  #else
+    func testSimpleOverloadedPayload() {
+      enum Enum {
+        case payload(a: Int)
+        case payload(b: Int)
+      }
+      let pathA = /Enum.payload(a:)
+      let pathB = /Enum.payload(b:)
+      for _ in 1...2 {
+        XCTAssertEqual(pathA.extract(from: .payload(a: 42)), 42)
+        XCTAssertEqual(pathA.extract(from: .payload(b: 42)), nil)
+        XCTAssertEqual(pathB.extract(from: .payload(a: 42)), nil)
+        XCTAssertEqual(pathB.extract(from: .payload(b: 42)), 42)
+      }
     }
-  }
-#endif
+  #endif
 
   func testMultiPayload() {
     enum Enum { case payload(Int, String) }
@@ -77,7 +80,11 @@ final class CasePathsTests: XCTestCase {
   func testZeroMemoryLayoutPayload() {
     struct Unit1 {}
     enum Unit2 { case unit }
-    enum Enum { case void(Void), unit1(Unit1), unit2(Unit2) }
+    enum Enum {
+      case void(Void)
+      case unit1(Unit1)
+      case unit2(Unit2)
+    }
     let path1 = /Enum.void
     let path2 = /Enum.unit1
     let path3 = /Enum.unit2
@@ -96,7 +103,11 @@ final class CasePathsTests: XCTestCase {
 
   func testUninhabitedPayload() {
     enum Uninhabited {}
-    enum Enum { case never(Never), uninhabited(Uninhabited), value }
+    enum Enum {
+      case never(Never)
+      case uninhabited(Uninhabited)
+      case value
+    }
     let path1 = /Enum.never
     let path2 = /Enum.uninhabited
     for _ in 1...2 {
@@ -251,7 +262,10 @@ final class CasePathsTests: XCTestCase {
   func testSubclassPayload() {
     class Superclass {}
     class Subclass: Superclass {}
-    enum Enum { case superclass(Superclass), subclass(Subclass) }
+    enum Enum {
+      case superclass(Superclass)
+      case subclass(Subclass)
+    }
     let superclass = Superclass()
     let subclass = Subclass()
     let superclassPath = /Enum.superclass
@@ -281,7 +295,13 @@ final class CasePathsTests: XCTestCase {
 
   func testDifferentMemoryLayouts() {
     struct Struct { var array: [Int] = [1, 2, 3], string: String = "Blob" }
-    enum Enum { case bool(Bool), int(Int), void(Void), structure(Struct), any(Any) }
+    enum Enum {
+      case bool(Bool)
+      case int(Int)
+      case void(Void)
+      case structure(Struct)
+      case any(Any)
+    }
 
     let boolPath = /Enum.bool
     let intPath = /Enum.int

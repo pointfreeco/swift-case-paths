@@ -101,7 +101,10 @@ public func extract<Root, Value>(_ embed: @escaping (Value) -> Root) -> (Root) -
 // This is the size of any Unsafe*Pointer and also the size of Int and UInt.
 private let pointerSize = MemoryLayout<UnsafeRawPointer>.size
 
-private typealias OpaqueExistentialContainer = (UnsafeMutableRawPointer?, UnsafeMutableRawPointer?, UnsafeMutableRawPointer?, metadata: UnsafeMutableRawPointer?)
+private typealias OpaqueExistentialContainer = (
+  UnsafeMutableRawPointer?, UnsafeMutableRawPointer?, UnsafeMutableRawPointer?,
+  metadata: UnsafeMutableRawPointer?
+)
 
 private typealias BoxPair = (heapObject: UnsafeMutableRawPointer, buffer: UnsafeMutableRawPointer)
 
@@ -122,20 +125,33 @@ private struct ValueWitnessTable {
     return Flags(rawValue: ptr.advanced(by: 10 * pointerSize).load(as: UInt32.self))
   }
 
-  var initializeWithCopy: @convention(c) (_ dest: UnsafeMutableRawPointer, _ source: UnsafeMutableRawPointer, _ metadata: UnsafeRawPointer) -> UnsafeMutableRawPointer {
+  var initializeWithCopy:
+    @convention(c) (
+      _ dest: UnsafeMutableRawPointer, _ source: UnsafeMutableRawPointer,
+      _ metadata: UnsafeRawPointer
+    ) -> UnsafeMutableRawPointer
+  {
     return ptr.advanced(by: 2 * pointerSize).loadInferredType()
   }
 
-  var initializeWithTake: @convention(c) (_ dest: UnsafeMutableRawPointer, _ source: UnsafeMutableRawPointer, _ metadata: UnsafeRawPointer) -> UnsafeMutableRawPointer {
+  var initializeWithTake:
+    @convention(c) (
+      _ dest: UnsafeMutableRawPointer, _ source: UnsafeMutableRawPointer,
+      _ metadata: UnsafeRawPointer
+    ) -> UnsafeMutableRawPointer
+  {
     return ptr.advanced(by: 4 * pointerSize).loadInferredType()
   }
 
-  var getEnumTag: @convention(c) (_ value: UnsafeRawPointer, _ metadata: UnsafeRawPointer) -> UInt32 {
+  var getEnumTag: @convention(c) (_ value: UnsafeRawPointer, _ metadata: UnsafeRawPointer) -> UInt32
+  {
     return ptr.advanced(by: 10 * pointerSize + 2 * 4).loadInferredType()
   }
 
   // This witness transforms an enum value into its associated value, in place.
-  var destructiveProjectEnumData: @convention(c) (_ value: UnsafeMutableRawPointer, _ metadata: UnsafeRawPointer) -> Void {
+  var destructiveProjectEnumData:
+    @convention(c) (_ value: UnsafeMutableRawPointer, _ metadata: UnsafeRawPointer) -> Void
+  {
     return ptr.advanced(by: 11 * pointerSize + 2 * 4).loadInferredType()
   }
 }
@@ -262,7 +278,7 @@ private struct EnumMetadata: Metadata {
       return buffer
     }
 
-    let (heapObject: heapObject, buffer: boxBuffer) = swift_allocBox(for: ptr)
+    let (heapObject:heapObject, buffer:boxBuffer) = swift_allocBox(for: ptr)
     buffer.storeBytes(of: heapObject, as: UnsafeMutableRawPointer.self)
     return boxBuffer
   }
@@ -300,7 +316,6 @@ private struct FieldDescriptor {
   /// The size of a FieldRecord as stored in the executable.
   var recordSize: Int { Int(ptr.advanced(by: 2 * 4 + 2).load(as: UInt16.self)) }
 
-
   func field(atIndex i: UInt32) -> FieldRecord {
     return FieldRecord(
       ptr: ptr.advanced(by: 2 * 4 + 2 * 2 + 4).advanced(by: Int(i) * recordSize))
@@ -325,43 +340,42 @@ extension FieldRecord {
 
 #if compiler(<5.2)
 
-// https://bugs.swift.org/browse/SR-12044
-private func workaroundForSR12044<Value>(_ type: Value.Type) -> Value? {
-  // If Value is an inhabited type with a size of zero, Mirror doesn't notice it as the associated value of an enum case due to incorrect metadata. But, being inhabited with a size of zero, it has only one possible inhabitant, so I create the inhabitant here using unsafeBitCast.
+  // https://bugs.swift.org/browse/SR-12044
+  private func workaroundForSR12044<Value>(_ type: Value.Type) -> Value? {
+    // If Value is an inhabited type with a size of zero, Mirror doesn't notice it as the associated value of an enum case due to incorrect metadata. But, being inhabited with a size of zero, it has only one possible inhabitant, so I create the inhabitant here using unsafeBitCast.
 
-  // An uninhabited type like Never also has a size of zero, and I have to be careful not to create a value of an uninhabited type.
+    // An uninhabited type like Never also has a size of zero, and I have to be careful not to create a value of an uninhabited type.
 
-  // It's possible for a tuple, struct, or class to be uninhabited by having an uninhabited stored property. But detecting such a type is difficult as I'd have to scrounge through even more metadata. So instead I'm just checking for the common case of an uninhabited enum. If you do something like `enum E { case c(Never, Never) }`... you have my sincere apology.
+    // It's possible for a tuple, struct, or class to be uninhabited by having an uninhabited stored property. But detecting such a type is difficult as I'd have to scrounge through even more metadata. So instead I'm just checking for the common case of an uninhabited enum. If you do something like `enum E { case c(Never, Never) }`... you have my sincere apology.
 
-  if
-    MemoryLayout<Value>.size == 0,
-    !isUninhabitedEnum(Value.self)
-  {
-    return unsafeBitCast((), to: Value.self)
-  }
-  return nil
-}
-
-private func isUninhabitedEnum(_ type: Any.Type) -> Bool {
-  // If it lacks enum metadata, it's definitely not an uninhabited enum.
-  guard let metadata = EnumMetadata(type) else { return false }
-  return !metadata.typeDescriptor.isInhabited
-}
-
-extension EnumTypeDescriptor {
-  var numPayloadCases: Int32 {
-    return ptr.advanced(by: 5 * 4).load(as: Int32.self) & 0xFFFFFF
+    if MemoryLayout<Value>.size == 0,
+      !isUninhabitedEnum(Value.self)
+    {
+      return unsafeBitCast((), to: Value.self)
+    }
+    return nil
   }
 
-  var numEmptyCases: Int32 {
-    return ptr.advanced(by: 6 * 4).load(as: Int32.self)
+  private func isUninhabitedEnum(_ type: Any.Type) -> Bool {
+    // If it lacks enum metadata, it's definitely not an uninhabited enum.
+    guard let metadata = EnumMetadata(type) else { return false }
+    return !metadata.typeDescriptor.isInhabited
   }
 
-  var isInhabited: Bool { numPayloadCases + numEmptyCases > 0 }
-}
+  extension EnumTypeDescriptor {
+    var numPayloadCases: Int32 {
+      return ptr.advanced(by: 5 * 4).load(as: Int32.self) & 0xFFFFFF
+    }
+
+    var numEmptyCases: Int32 {
+      return ptr.advanced(by: 6 * 4).load(as: Int32.self)
+    }
+
+    var isInhabited: Bool { numPayloadCases + numEmptyCases > 0 }
+  }
 
 #else
 
-private func workaroundForSR12044<Value>(_ type: Value.Type) -> Value? { nil }
+  private func workaroundForSR12044<Value>(_ type: Value.Type) -> Value? { nil }
 
 #endif
