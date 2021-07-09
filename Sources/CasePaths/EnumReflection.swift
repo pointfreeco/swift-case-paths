@@ -171,8 +171,8 @@ extension ValueWitnessTable {
 private struct MetadataKind: Equatable {
   var rawValue: UInt
 
-  // https://github.com/apple/swift/blob/master/include/swift/ABI/MetadataValues.h
-  // https://github.com/apple/swift/blob/master/include/swift/ABI/MetadataKind.def
+  // https://github.com/apple/swift/blob/main/include/swift/ABI/MetadataValues.h
+  // https://github.com/apple/swift/blob/main/include/swift/ABI/MetadataKind.def
   // 0x201 = MetadataKind::Enum
   // 0x202 = MetadataKind::Optional
   static var enumeration: Self { .init(rawValue: 0x201) }
@@ -241,7 +241,7 @@ private struct EnumMetadata: Metadata {
 
   func indirectAssociatedValue<Enum, Value>(of enumCase: Enum, as type: Value.Type) -> Value {
     // This is closely based on EnumImpl::subscript.
-    // https://github.com/apple/swift/blob/master/stdlib/public/runtime/ReflectionMirror.cpp
+    // https://github.com/apple/swift/blob/main/stdlib/public/runtime/ReflectionMirror.cpp
 
     // I'll need access to this thing's bytes, which means it has to be a var.
     var enumCase = enumCase
