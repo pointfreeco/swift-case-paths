@@ -69,9 +69,16 @@ public func extract<Root, Value>(case embed: @escaping (Value) -> Root, from roo
 /// - Parameter embed: An enum case initializer.
 /// - Returns: A function that can attempt to extract associated values from an enum.
 public func extract<Root, Value>(_ embed: @escaping (Value) -> Root) -> (Root) -> (Value?) {
-  guard EnumMetadata(Root.self) != nil else {
+  guard let metadata = EnumMetadata(Root.self) else {
     #if DEBUG
     print("\(#function) (#file:#line) can never extract values from \(Root.self) because \(Root.self) isn't an enum!")
+    #endif
+    return { _ in nil }
+  }
+
+  guard metadata.typeDescriptor.fieldDescriptor != nil else {
+    #if DEBUG
+    print("\(#function) (#file:#line) can never extract values from \(Root.self) because the metadata for \(Root.self) is incomplete!")
     #endif
     return { _ in nil }
   }
@@ -84,6 +91,27 @@ public func extract<Root, Value>(_ embed: @escaping (Value) -> Root) -> (Root) -
 
     let metadata = EnumMetadata(assumingEnum: Root.self)
 
+    #if true
+
+    guard
+      let rootExtractor = Extractor<Root, Value>(root: root),
+      let value = rootExtractor.extract(from: root)
+    else {
+      return nil
+    }
+
+    let embedTag = metadata.tag(of: embed(value))
+    guard embedTag == rootExtractor.tag else {
+      // Well at least now I know the tag I'm looking for.
+      cachedExtractor = .init(tag: embedTag)
+      return nil
+    }
+
+    cachedExtractor = rootExtractor
+    return value
+
+    #else
+
     guard
       let value = (Mirror(reflecting: root).children.first?.value)
         .flatMap({ $0 as? Value ?? Mirror(reflecting: $0).children.first?.value as? Value })
@@ -95,12 +123,9 @@ public func extract<Root, Value>(_ embed: @escaping (Value) -> Root) -> (Root) -
     let embedTag = metadata.tag(of: embed(value))
     let extractor = Extractor<Root, Value>(tag: embedTag)
     cachedExtractor = extractor
-    // We could do this to avoid extracting the value again:
-    //
-    // return metadata.tag(of: root) == embedTag ? value : nil
-    //
-    // But for now I'm extracting a second time (but only the first time I find the tag I'm looking for!) to ensure that every test case that returns a value exercises the extractor.
-    return extractor.extract(from: root)
+    return metadata.tag(of: root) == embedTag ? value : nil
+
+    #endif
   }
 }
 
@@ -191,8 +216,10 @@ private struct MetadataKind: Equatable {
   // https://github.com/apple/swift/blob/main/include/swift/ABI/MetadataKind.def
   // 0x201 = MetadataKind::Enum
   // 0x202 = MetadataKind::Optional
+  // 0x301 = MetadataKind::Tuple
   static var enumeration: Self { .init(rawValue: 0x201) }
   static var optional: Self { .init(rawValue: 0x202) }
+  static var tuple: Self { .init(rawValue: 0x301) }
 }
 
 private protocol Metadata {
@@ -281,7 +308,7 @@ private struct EnumMetadata: Metadata {
 }
 
 extension EnumMetadata {
-  func payloadType(forTag tag: UInt32) -> Any.Type? {
+  func associatedValueType(forTag tag: UInt32) -> Any.Type? {
     // If the tag represents a case without a payload, there's no type information stored for the tag. In that case, I can safely treat the payload as Void.
     guard tag < numPayloadCases else { return Void.self }
 
@@ -308,9 +335,6 @@ extension EnumMetadata {
 
 /// The strategy to use to extract the associated value of a specific case of `Enum` as a `Value`.
 private enum Extractor<Enum, Value> {
-  // The runtime metadata doesn't explain the associated value layout.
-  case unknown
-
   // The case is layout-compatible with `Value`, after tag-stripping (aka projection).
   case direct(tag: UInt32)
 
@@ -325,31 +349,67 @@ private enum Extractor<Enum, Value> {
 }
 
 extension Extractor {
-  init(tag: UInt32) {
-    guard
-      let fieldDescriptor = EnumMetadata(assumingEnum: Enum.self)
-        .typeDescriptor
-        .fieldDescriptor
-    else {
-      #if DEBUG
-      print("Extractor<\(Enum.self), \(Value.self)> will never extract values because the metadata for \(Enum.self) is incomplete!")
-      #endif
-      self = .unknown
-      return
+  var tag: UInt32 {
+    switch self {
+    case
+      .direct(tag: let tag),
+      .indirect(tag: let tag),
+      .directExistential(tag: let tag),
+      .indirectExistential(tag: let tag):
+      return tag
     }
+  }
+}
 
-    self = fieldDescriptor.field(atIndex: tag).isIndirectCase
+extension Extractor {
+  init(tag: UInt32) {
+    self = EnumMetadata(assumingEnum: Enum.self)
+      .typeDescriptor
+      .fieldDescriptor!
+      .field(atIndex: tag).isIndirectCase
       ? .indirect(tag: tag)
       : .direct(tag: tag)
   }
 }
 
 extension Extractor {
-  func extract<Enum, Value>(from root: Enum) -> Value? {
-    switch self {
-    case .unknown:
-      return nil
+  init?(root: Enum) {
+    let metadata = EnumMetadata(assumingEnum: Enum.self)
+    let tag = metadata.tag(of: root)
+    guard let avType = metadata.associatedValueType(forTag: tag) else { return nil }
 
+    guard avType != Value.self else {
+      self = .init(tag: tag)
+      return
+    }
+
+    // Consider this: `enum E { case c(l: Int) }`
+    //
+    // At the metadata level, c's associated value has type `(l: Int)`, which is a single-element tuple.
+    //
+    // But Swift doesn't support single-element tuples in Swift source code, so `CasePath<E, (l: Int)>` isn't allowed.
+    //
+    // The case path for `c` therefore has type `CasePath<E, Int>`.
+    //
+    // The types `(l: Int)` and `Int` use the same memory layout.
+    //
+    // So if avType is a single-element tuple and Value is the type of that tuple's single element, I can extract a Value from root.
+    if
+      let tupleMetadata = TupleMetadata(avType),
+      tupleMetadata.elementCount == 1,
+      tupleMetadata.element(at: 0).type == Value.self
+    {
+      self = .init(tag: tag)
+      return
+    }
+
+    return nil
+  }
+}
+
+extension Extractor {
+  func extract(from root: Enum) -> Value? {
+    switch self {
     case .direct(let tag):
       return extractDirect(from: root, tag: tag)
 
@@ -364,13 +424,13 @@ extension Extractor {
     }
   }
 
-  private func extractDirect<Enum, Value>(from root: Enum, tag: UInt32) -> Value? {
+  private func extractDirect(from root: Enum, tag: UInt32) -> Value? {
     guard EnumMetadata(assumingEnum: Enum.self).tag(of: root) == tag else { return nil }
 
     return withProjectedPayload(of: root, tag: tag) { .some($0.load(as: Value.self)) }
   }
 
-  private func extractIndirect<Enum, Value>(from root: Enum, tag: UInt32) -> Value? {
+  private func extractIndirect(from root: Enum, tag: UInt32) -> Value? {
     guard EnumMetadata(assumingEnum: Enum.self).tag(of: root) == tag else { return nil }
 
     return withProjectedPayload(of: root, tag: tag) {
@@ -508,6 +568,37 @@ private struct MangledTypeName {
         p = p.advanced(by: 1)
       }
     }
+  }
+}
+
+private struct TupleMetadata: Metadata {
+  let ptr: UnsafeRawPointer
+
+  init?(_ type: Any.Type) {
+    ptr = unsafeBitCast(type, to: UnsafeRawPointer.self)
+    guard kind == .tuple else { return nil }
+  }
+
+  var genericArguments: GenericArgumentVector? { nil }
+
+  var elementCount: UInt { ptr.advanced(by: pointerSize).load(as: UInt.self) }
+
+  func element(at i: Int) -> Element {
+    return Element(
+      ptr: ptr
+        .advanced(by: pointerSize) // kind
+        .advanced(by: pointerSize) // elementCount
+        .advanced(by: pointerSize) // labels pointer
+        .advanced(by: i * 2 * pointerSize))
+  }
+}
+
+extension TupleMetadata {
+  struct Element {
+    let ptr: UnsafeRawPointer
+
+    var type: Any.Type { ptr.load(as: Any.Type.self) }
+    var offset: UInt { ptr.advanced(by: pointerSize).load(as: UInt.self) }
   }
 }
 
