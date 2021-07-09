@@ -69,21 +69,20 @@ public func extract<Root, Value>(case embed: @escaping (Value) -> Root, from roo
 /// - Parameter embed: An enum case initializer.
 /// - Returns: A function that can attempt to extract associated values from an enum.
 public func extract<Root, Value>(_ embed: @escaping (Value) -> Root) -> (Root) -> (Value?) {
-  var cachedTag: UInt32?
-  return { root in
-    guard let metadata = EnumMetadata(Root.self) else { return nil }
-    let rootTag = metadata.tag(of: root)
+  guard EnumMetadata(Root.self) != nil else {
+    #if DEBUG
+    print("\(#function) (#file:#line) can never extract values from \(Root.self) because \(Root.self) isn't an enum!")
+    #endif
+    return { _ in nil }
+  }
 
-    if let cachedTag = cachedTag {
-      guard
-        cachedTag == rootTag,
-        let fieldDescriptor = metadata.typeDescriptor.fieldDescriptor
-        else { return nil }
-      return .some(
-        fieldDescriptor.field(atIndex: rootTag).isIndirectCase
-          ? metadata.indirectAssociatedValue(of: root, as: Value.self)
-          : metadata.directAssociatedValue(of: root, as: Value.self))
+  var cachedExtractor: Extractor<Root, Value>? = nil
+  return { root in
+    if let extractor = cachedExtractor {
+      return extractor.extract(from: root)
     }
+
+    let metadata = EnumMetadata(assumingEnum: Root.self)
 
     guard
       let value = (Mirror(reflecting: root).children.first?.value)
@@ -92,10 +91,16 @@ public func extract<Root, Value>(_ embed: @escaping (Value) -> Root) -> (Root) -
     else {
       return nil
     }
+
     let embedTag = metadata.tag(of: embed(value))
-    cachedTag = embedTag
-    if rootTag == embedTag { return value }
-    return nil
+    let extractor = Extractor<Root, Value>(tag: embedTag)
+    cachedExtractor = extractor
+    // We could do this to avoid extracting the value again:
+    //
+    // return metadata.tag(of: root) == embedTag ? value : nil
+    //
+    // But for now I'm extracting a second time (but only the first time I find the tag I'm looking for!) to ensure that every test case that returns a value exercises the extractor.
+    return extractor.extract(from: root)
   }
 }
 
@@ -106,7 +111,7 @@ private let pointerSize = MemoryLayout<UnsafeRawPointer>.size
 
 private typealias OpaqueExistentialContainer = (
   UnsafeMutableRawPointer?, UnsafeMutableRawPointer?, UnsafeMutableRawPointer?,
-  metadata: UnsafeMutableRawPointer?
+  metadata: UnsafeRawPointer?
 )
 
 private typealias BoxPair = (heapObject: UnsafeMutableRawPointer, buffer: UnsafeMutableRawPointer)
@@ -158,6 +163,13 @@ private struct ValueWitnessTable {
   {
     return ptr.advanced(by: 11 * pointerSize + 2 * 4).loadInferredType()
   }
+
+  // This witness transforms an associated value into its enum value, in place.
+  var destructiveInjectEnumData:
+    @convention(c) (_ value: UnsafeMutableRawPointer, _ tag: UInt32, _ metadata: UnsafeRawPointer) -> Void
+  {
+    return ptr.advanced(by: 12 * pointerSize + 2 * 4).loadInferredType()
+  }
 }
 
 extension ValueWitnessTable {
@@ -204,25 +216,50 @@ extension Metadata {
   func initialize(_ dest: UnsafeMutableRawPointer, byTaking source: UnsafeMutableRawPointer) {
     _ = valueWitnessTable.initializeWithTake(dest, source, ptr)
   }
+
+  func allocateBoxForExistential(in buffer: UnsafeMutableRawPointer) -> UnsafeMutableRawPointer {
+    guard valueWitnessTable.flags.contains(.isNonInline) else {
+      return buffer
+    }
+
+    let (heapObject:heapObject, buffer:boxBuffer) = swift_allocBox(for: ptr)
+    buffer.storeBytes(of: heapObject, as: UnsafeMutableRawPointer.self)
+    return boxBuffer
+  }
+
+  func deallocateBoxForExistential(in buffer: UnsafeMutableRawPointer) {
+    guard valueWitnessTable.flags.contains(.isNonInline) else { return }
+    swift_deallocBox(buffer.load(as: UnsafeMutableRawPointer.self))
+  }
 }
 
-private struct NativeObjectMetadata: Metadata {
+private struct UnknownMetadata: Metadata {
   let ptr: UnsafeRawPointer
 
   var genericArguments: GenericArgumentVector? { nil }
 }
 
+extension UnknownMetadata {
+  init(_ type: Any.Type) {
+    ptr = unsafeBitCast(type, to: UnsafeRawPointer.self)
+  }
+}
+
 private struct EnumMetadata: Metadata {
   let ptr: UnsafeRawPointer
+
+  init(assumingEnum type: Any.Type) {
+    ptr = unsafeBitCast(type, to: UnsafeRawPointer.self)
+  }
+
+  init?(_ type: Any.Type) {
+    self.init(assumingEnum: type)
+    guard kind == .enumeration || kind == .optional else { return nil }
+  }
 
   var genericArguments: GenericArgumentVector? {
     guard isGeneric else { return nil }
     return .init(ptr: ptr.advanced(by: 2 * pointerSize))
-  }
-
-  init?(_ type: Any.Type) {
-    ptr = unsafeBitCast(type, to: UnsafeRawPointer.self)
-    guard kind == .enumeration || kind == .optional else { return nil }
   }
 
   var typeDescriptor: EnumTypeDescriptor {
@@ -241,7 +278,9 @@ private struct EnumMetadata: Metadata {
   var numPayloadCases: Int32 {
     return ptr.advanced(by: 5 * 4).load(as: Int32.self) & 0xFFFFFF
   }
+}
 
+extension EnumMetadata {
   func payloadType(forTag tag: UInt32) -> Any.Type? {
     // If the tag represents a case without a payload, there's no type information stored for the tag. In that case, I can safely treat the payload as Void.
     guard tag < numPayloadCases else { return Void.self }
@@ -255,74 +294,117 @@ private struct EnumMetadata: Metadata {
       genericContext: typeDescriptor.ptr,
       genericArguments: genericArguments?.ptr)
   }
+}
 
-  func directAssociatedValue<Enum, Value>(of enumCase: Enum, as type: Value.Type) -> Value {
-    let enumPtr = UnsafeMutablePointer<Enum>.allocate(capacity: 1)
-    enumPtr.initialize(to: enumCase)
-
-    let untypedPtr = UnsafeMutableRawPointer(enumPtr)
-    valueWitnessTable.destructiveProjectEnumData(untypedPtr, ptr)
-
-    let valuesPtr = untypedPtr.assumingMemoryBound(to: Value.self)
-    let values = valuesPtr.pointee
-
-    valuesPtr.deinitialize(count: 1)
-    valuesPtr.deallocate()
-
-    return values
+extension EnumMetadata {
+  func destructivelyProjectPayload(of value: UnsafeMutableRawPointer) {
+    valueWitnessTable.destructiveProjectEnumData(value, ptr)
   }
 
-  func indirectAssociatedValue<Enum, Value>(of enumCase: Enum, as type: Value.Type) -> Value {
-    // This is closely based on EnumImpl::subscript.
-    // https://github.com/apple/swift/blob/main/stdlib/public/runtime/ReflectionMirror.cpp
+  func destructivelyInjectTag(_ tag: UInt32, intoPayload payload: UnsafeMutableRawPointer) {
+    valueWitnessTable.destructiveInjectEnumData(payload, tag, ptr)
+  }
+}
 
-    // I'll need access to this thing's bytes, which means it has to be a var.
-    var enumCase = enumCase
+/// The strategy to use to extract the associated value of a specific case of `Enum` as a `Value`.
+private enum Extractor<Enum, Value> {
+  // The runtime metadata doesn't explain the associated value layout.
+  case unknown
 
-    // Storage for an existential container with no conformances. In the C++ code, this is declared `Any enumCopy`, but `Any` is a `using` alias for `OpaqueExistentialContainer`.
-    var enumCopy = OpaqueExistentialContainer(nil, nil, nil, metadata: nil)
+  // The case is layout-compatible with `Value`, after tag-stripping (aka projection).
+  case direct(tag: UInt32)
 
-    let answer: Value = withUnsafeMutablePointer(to: &enumCopy) { enumCopy in
-      // A “box” here means a value stored as the payload of a HeapObject.
+  // The case stores its associated value indirectly. The case payload is a pointer to a heap object. The heap object's payload is layout-compatible with `Value`.
+  case indirect(tag: UInt32)
 
-      let enumCopyContainer = allocateBoxForExistential(in: enumCopy)
-      initialize(enumCopyContainer, byCopying: &enumCase)
+  // The case directly stores a protocol existential. `Value` conforms to that protocol.
+  case directExistential(tag: UInt32)
 
-      valueWitnessTable.destructiveProjectEnumData(enumCopyContainer, ptr)
+  // The case indirectly stores a protocol existential. `Value` conforms to that protocol.
+  case indirectExistential(tag: UInt32)
+}
 
-      // Note that this getter returns the pointer to the “full” metadata, which must be advanced by a word to become a normal metadata pointer.
-      let boxType = NativeObjectMetadata(
-        ptr: getBuiltinNativeObjectFullMetadata()!.advanced(by: pointerSize))
-      let pair = swift_allocBox(for: boxType.ptr)
-      boxType.initialize(pair.buffer, byTaking: enumCopyContainer)
-      deallocateBoxForExistential(in: enumCopy)
-
-      var valuePtr = pair.buffer
-      // The payload is always indirect in this method, so we have to open the box.
-      valuePtr = valuePtr.load(as: UnsafeMutableRawPointer.self)
-      valuePtr = swift_projectBox(valuePtr)
-
-      let value = valuePtr.load(as: type)
-      swift_release(pair.heapObject)
-      return value
+extension Extractor {
+  init(tag: UInt32) {
+    guard
+      let fieldDescriptor = EnumMetadata(assumingEnum: Enum.self)
+        .typeDescriptor
+        .fieldDescriptor
+    else {
+      #if DEBUG
+      print("Extractor<\(Enum.self), \(Value.self)> will never extract values because the metadata for \(Enum.self) is incomplete!")
+      #endif
+      self = .unknown
+      return
     }
 
+    self = fieldDescriptor.field(atIndex: tag).isIndirectCase
+      ? .indirect(tag: tag)
+      : .direct(tag: tag)
+  }
+}
+
+extension Extractor {
+  func extract<Enum, Value>(from root: Enum) -> Value? {
+    switch self {
+    case .unknown:
+      return nil
+
+    case .direct(let tag):
+      return extractDirect(from: root, tag: tag)
+
+    case .indirect(let tag):
+      return extractIndirect(from: root, tag: tag)
+
+    case .directExistential(tag: _):
+      fatalError()
+
+    case .indirectExistential(tag: _):
+      fatalError()
+    }
+  }
+
+  private func extractDirect<Enum, Value>(from root: Enum, tag: UInt32) -> Value? {
+    guard EnumMetadata(assumingEnum: Enum.self).tag(of: root) == tag else { return nil }
+
+    return withProjectedPayload(of: root, tag: tag) { .some($0.load(as: Value.self)) }
+  }
+
+  private func extractIndirect<Enum, Value>(from root: Enum, tag: UInt32) -> Value? {
+    guard EnumMetadata(assumingEnum: Enum.self).tag(of: root) == tag else { return nil }
+
+    return withProjectedPayload(of: root, tag: tag) {
+      // In an indirect enum case, the payload is a pointer to a heap object. The heap object's payload is the associated value.
+      return $0
+        .load(as: UnsafeRawPointer.self) // Load the heap object pointer.
+        .advanced(by: 2 * pointerSize) // Skip the heap object header.
+        .load(as: Value.self)
+    }
+  }
+
+  private func withProjectedPayload<Enum, Answer>(
+    of root: Enum,
+    tag: UInt32,
+    do body: (UnsafeRawPointer) -> Answer
+  ) -> Answer {
+    var root = root
+    let answer: Answer = withUnsafeMutableBytes(of: &root) { rawBuffer in
+      let pointer = rawBuffer.baseAddress!
+      let metadata = EnumMetadata(assumingEnum: Enum.self)
+
+      // On entry, pointer points to some `Enum` value known to the Swift compiler. So on exit, it still needs to point to that `Enum` value, because the compiler wants to destroy the value in the usual way.
+
+      metadata.destructivelyProjectPayload(of: pointer)
+      // `pointer` now points to an `Enum` case payload. Tag bits have been set to zero as needed.
+
+      let answer = body(pointer)
+
+      metadata.destructivelyInjectTag(tag, intoPayload: pointer)
+      // `pointer` now points to an `Enum` again.
+
+      return answer
+    }
     return answer
-  }
-
-  func allocateBoxForExistential(in buffer: UnsafeMutableRawPointer) -> UnsafeMutableRawPointer {
-    guard valueWitnessTable.flags.contains(.isNonInline) else {
-      return buffer
-    }
-
-    let (heapObject:heapObject, buffer:boxBuffer) = swift_allocBox(for: ptr)
-    buffer.storeBytes(of: heapObject, as: UnsafeMutableRawPointer.self)
-    return boxBuffer
-  }
-
-  func deallocateBoxForExistential(in buffer: UnsafeMutableRawPointer) {
-    guard valueWitnessTable.flags.contains(.isNonInline) else { return }
-    swift_deallocBox(buffer.load(as: UnsafeMutableRawPointer.self))
   }
 }
 
