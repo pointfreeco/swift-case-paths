@@ -372,24 +372,33 @@ final class CasePathsTests: XCTestCase {
 
     let success = /Result<String, Error>.success
     let failure = /Result<String, Error>.failure
-    XCTAssertEqual(
-      .some("Hello"),
-      success.extract(from: .success("Hello"))
-    )
-    XCTAssertNil(
-      failure.extract(from: .success("Hello"))
-    )
-
     struct MyError: Equatable, Error {}
     let mySuccess = /Result<String, MyError>.success
     let myFailure = /Result<String, MyError>.failure
-    XCTAssertEqual(
-      .some(MyError()),
-      myFailure.extract(from: .failure(MyError()))
-    )
-    XCTAssertNil(
-      mySuccess.extract(from: .failure(MyError()))
-    )
+
+    for _ in 1...2 {
+      XCTAssertEqual(
+        .some("Hello"),
+        success.extract(from: .success("Hello"))
+      )
+      XCTAssertNil(
+        failure.extract(from: .success("Hello"))
+      )
+      XCTAssertEqual(
+        .some(MyError()),
+        failure.extract(from: .failure(MyError())) as? MyError
+      )
+      XCTAssertNil(
+        success.extract(from: .failure(MyError()))
+      )
+      XCTAssertEqual(
+        .some(MyError()),
+        myFailure.extract(from: .failure(MyError()))
+      )
+      XCTAssertNil(
+        mySuccess.extract(from: .failure(MyError()))
+      )
+    }
   }
 
   func testIdentity() {
