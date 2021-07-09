@@ -358,6 +358,13 @@ private struct FieldRecord {
 
   var flags: Flags { Flags(rawValue: ptr.load(as: UInt32.self)) }
 
+  var typeName: MangledTypeName? {
+    return ptr
+      .advanced(by: 4)
+      .loadRelativePointer()
+      .map { MangledTypeName(ptr: $0.assumingMemoryBound(to: UInt8.self)) }
+  }
+
   var isIndirectCase: Bool { flags.contains(.isIndirectCase) }
 }
 
@@ -366,6 +373,33 @@ extension FieldRecord {
     var rawValue: UInt32
 
     static var isIndirectCase: Self { .init(rawValue: 1) }
+  }
+}
+
+private struct MangledTypeName {
+  let ptr: UnsafePointer<UInt8>
+
+  var length: UInt {
+    // Type name mangling is described here:
+    // https://github.com/apple/swift/blob/main/docs/ABI/Mangling.rst
+    // Since a mangled name can contain NUL bytes, I can't just use `strlen` or equivalent.
+
+    var p = ptr
+    while true {
+      switch p.pointee {
+      case 0:
+        return UInt(bitPattern: p - ptr)
+      case 0x01...0x17:
+        // Relative symbolic reference.
+        p = p.advanced(by: 5)
+      case 0x18...0x1f:
+        // Absolute symbolic reference
+        p = p.advanced(by: 1 + pointerSize)
+      default:
+        // Just a humble character.
+        p = p.advanced(by: 1)
+      }
+    }
   }
 }
 
