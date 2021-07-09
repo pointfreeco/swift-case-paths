@@ -168,6 +168,10 @@ extension ValueWitnessTable {
   }
 }
 
+private struct GenericArgumentVector {
+  let ptr: UnsafeRawPointer
+}
+
 private struct MetadataKind: Equatable {
   var rawValue: UInt
 
@@ -181,6 +185,8 @@ private struct MetadataKind: Equatable {
 
 private protocol Metadata {
   var ptr: UnsafeRawPointer { get }
+
+  var genericArguments: GenericArgumentVector? { get }
 }
 
 extension Metadata {
@@ -202,10 +208,17 @@ extension Metadata {
 
 private struct NativeObjectMetadata: Metadata {
   let ptr: UnsafeRawPointer
+
+  var genericArguments: GenericArgumentVector? { nil }
 }
 
 private struct EnumMetadata: Metadata {
   let ptr: UnsafeRawPointer
+
+  var genericArguments: GenericArgumentVector? {
+    guard isGeneric else { return nil }
+    return .init(ptr: ptr.advanced(by: 2 * pointerSize))
+  }
 
   init?(_ type: Any.Type) {
     ptr = unsafeBitCast(type, to: UnsafeRawPointer.self)
@@ -216,6 +229,8 @@ private struct EnumMetadata: Metadata {
     return EnumTypeDescriptor(
       ptr: ptr.advanced(by: pointerSize).load(as: UnsafeRawPointer.self))
   }
+
+  var isGeneric: Bool { typeDescriptor.flags.contains(.isGeneric) }
 
   func tag<Enum>(of value: Enum) -> UInt32 {
     return withUnsafePointer(to: value) {
@@ -308,11 +323,21 @@ private func swift_release(_ heapObject: UnsafeMutableRawPointer)
 private struct EnumTypeDescriptor {
   let ptr: UnsafeRawPointer
 
+  var flags: Flags { Flags(rawValue: ptr.load(as: UInt32.self)) }
+
   var fieldDescriptor: FieldDescriptor? {
     return ptr
       .advanced(by: 4 * 4)
       .loadRelativePointer()
       .map(FieldDescriptor.init)
+  }
+}
+
+extension EnumTypeDescriptor {
+  struct Flags: OptionSet {
+    let rawValue: UInt32
+
+    static var isGeneric: Self { .init(rawValue: 0x80) }
   }
 }
 
