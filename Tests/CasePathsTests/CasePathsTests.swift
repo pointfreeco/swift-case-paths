@@ -358,6 +358,28 @@ final class CasePathsTests: XCTestCase {
     }
   }
 
+  func testContravariantEmbed() {
+    enum Enum {
+      case p(TestProtocol)
+    }
+
+    // This is intentionally too big to fit in the three-word buffer of a protocol existential, so that it is stored indirectly.
+    struct Conformer: TestProtocol, Equatable {
+      var a, b, c, d: Int
+      init() {
+        (a, b, c, d) = (100, 300, 200, 400)
+      }
+    }
+
+    let path: CasePath<Enum, Conformer> = /Enum.p
+
+    for _ in 1...2 {
+      XCTAssertEqual(
+        path.extract(from: .p(Conformer())),
+        .some(Conformer()))
+    }
+  }
+
   func testEmbed() {
     enum Foo: Equatable { case bar(Int) }
 
