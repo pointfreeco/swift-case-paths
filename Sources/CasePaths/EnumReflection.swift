@@ -75,9 +75,12 @@ public func extract<Root, Value>(_ embed: @escaping (Value) -> Root) -> (Root) -
     let rootTag = metadata.tag(of: root)
 
     if let cachedTag = cachedTag {
-      guard cachedTag == rootTag else { return nil }
+      guard
+        cachedTag == rootTag,
+        let fieldDescriptor = metadata.typeDescriptor.fieldDescriptor
+        else { return nil }
       return .some(
-        metadata.typeDescriptor.fieldDescriptor.field(atIndex: rootTag).isIndirectCase
+        fieldDescriptor.field(atIndex: rootTag).isIndirectCase
           ? metadata.indirectAssociatedValue(of: root, as: Value.self)
           : metadata.directAssociatedValue(of: root, as: Value.self))
     }
@@ -113,8 +116,9 @@ extension UnsafeRawPointer {
     return load(as: Type.self)
   }
 
-  fileprivate func loadRelativePointer() -> UnsafeRawPointer {
-    return self + Int(load(as: Int32.self))
+  fileprivate func loadRelativePointer() -> UnsafeRawPointer? {
+    let offset = Int(load(as: Int32.self))
+    return offset == 0 ? nil : self + offset
   }
 }
 
@@ -304,9 +308,11 @@ private func swift_release(_ heapObject: UnsafeMutableRawPointer)
 private struct EnumTypeDescriptor {
   let ptr: UnsafeRawPointer
 
-  var fieldDescriptor: FieldDescriptor {
-    return FieldDescriptor(
-      ptr: ptr.advanced(by: 4 * 4).loadRelativePointer())
+  var fieldDescriptor: FieldDescriptor? {
+    return ptr
+      .advanced(by: 4 * 4)
+      .loadRelativePointer()
+      .map(FieldDescriptor.init)
   }
 }
 
