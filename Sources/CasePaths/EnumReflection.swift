@@ -301,25 +301,22 @@ private struct EnumMetadata: Metadata {
       valueWitnessTable.getEnumTag($0, self.ptr)
     }
   }
-
-  var numPayloadCases: Int32 {
-    return ptr.advanced(by: 5 * 4).load(as: Int32.self) & 0xFFFFFF
-  }
 }
 
 extension EnumMetadata {
-  func associatedValueType(forTag tag: UInt32) -> Any.Type? {
-    // If the tag represents a case without a payload, there's no type information stored for the tag. In that case, I can safely treat the payload as Void.
-    guard tag < numPayloadCases else { return Void.self }
-
+  func associatedValueType(forTag tag: UInt32) -> Any.Type {
     guard
       let typeName = typeDescriptor.fieldDescriptor?.field(atIndex: tag).typeName
-    else { return nil }
+    else {
+      // There's not really a good answer for this. Void is a safe answer since it's zero-size.
+      return Void.self
+    }
 
     return swift_getTypeByMangledNameInContext(
       typeName.ptr, typeName.length,
       genericContext: typeDescriptor.ptr,
       genericArguments: genericArguments?.ptr)
+      ?? Void.self
   }
 }
 
@@ -376,7 +373,7 @@ extension Extractor {
   init?(root: Enum) {
     let metadata = EnumMetadata(assumingEnum: Enum.self)
     let tag = metadata.tag(of: root)
-    guard let avType = metadata.associatedValueType(forTag: tag) else { return nil }
+    let avType = metadata.associatedValueType(forTag: tag)
 
     guard avType != Value.self else {
       self = .init(tag: tag)
@@ -393,11 +390,29 @@ extension Extractor {
     //
     // The types `(l: Int)` and `Int` use the same memory layout.
     //
-    // So if avType is a single-element tuple and Value is the type of that tuple's single element, I can extract a Value from root.
+    // So if `avType` is a single-element tuple and `Value` is the type of that tuple's single element, I can extract a `Value` from `root`.
     if
-      let tupleMetadata = TupleMetadata(avType),
-      tupleMetadata.elementCount == 1,
-      tupleMetadata.element(at: 0).type == Value.self
+      let avMetadata = TupleMetadata(avType),
+      avMetadata.elementCount == 1,
+      avMetadata.element(at: 0).type == Value.self
+    {
+      self = .init(tag: tag)
+      return
+    }
+
+    // Consider these: `enum F { case d(a: Int, b: String) }`
+    //
+    // Certainly we should allow `CasePath<F, (a: Int, b: String)>` to match this.
+    //
+    // We would also like `CasePath<F, (Int, String)> to match this.
+    //
+    // So if `avType` is a tuple, and `Value` is a tuple with no labels, and the two types have identical elements types, I can extract a `Value` from `root`.
+    //
+    // If `Value` has labels, that doesn't change its memory layout. But I don't want to silently transform a tuple that was created as `(x: 1, y: 2)` into a differently-labeled tuple `(y: 1, x: 2)`.
+    if
+      TupleMetadata(avType) != nil,
+      let valueMetadata = TupleMetadata(Value.self),
+      valueMetadata.labels == nil
     {
       self = .init(tag: tag)
       return
@@ -499,6 +514,10 @@ private struct EnumTypeDescriptor {
       .loadRelativePointer()
       .map(FieldDescriptor.init)
   }
+
+  var numPayloadCases: Int32 {
+    return ptr.advanced(by: 5 * 4).load(as: Int32.self) & 0xFFFFFF
+  }
 }
 
 extension EnumTypeDescriptor {
@@ -581,7 +600,18 @@ private struct TupleMetadata: Metadata {
 
   var genericArguments: GenericArgumentVector? { nil }
 
-  var elementCount: UInt { ptr.advanced(by: pointerSize).load(as: UInt.self) }
+  var elementCount: UInt {
+    return ptr
+      .advanced(by: pointerSize) // kind
+      .load(as: UInt.self)
+  }
+
+  var labels: UnsafePointer<UInt8>? {
+    return ptr
+      .advanced(by: pointerSize) // kind
+      .advanced(by: pointerSize) // elementCount
+      .load(as: UnsafePointer<UInt8>?.self)
+  }
 
   func element(at i: Int) -> Element {
     return Element(
