@@ -360,7 +360,25 @@ final class CasePathsTests: XCTestCase {
 
   func testContravariantEmbed() {
     enum Enum {
-      case p(TestProtocol)
+      // associated value type is TestProtocol existential
+      case directExistential(TestProtocol)
+
+      // associated value type is single-element tuple (TestProtocol existential)
+      case directTuple(label: TestProtocol)
+
+      indirect case indirectExistential(TestProtocol)
+
+      indirect case indirectTuple(label: TestProtocol)
+
+      static let cdeCase = Enum.directExistential(Conformer())
+      static let cdtCase = Enum.directTuple(label: Conformer())
+      static let cieCase = Enum.indirectExistential(Conformer())
+      static let citCase = Enum.indirectTuple(label: Conformer())
+
+      static let ideCase = Enum.directExistential(100)
+      static let idtCase = Enum.directTuple(label: 100)
+      static let iieCase = Enum.indirectExistential(100)
+      static let iitCase = Enum.indirectTuple(label: 100)
     }
 
     // This is intentionally too big to fit in the three-word buffer of a protocol existential, so that it is stored indirectly.
@@ -371,12 +389,48 @@ final class CasePathsTests: XCTestCase {
       }
     }
 
-    let path: CasePath<Enum, Conformer> = /Enum.p
+    let dePath: CasePath<Enum, Conformer> = /Enum.directExistential
+    let dtPath: CasePath<Enum, Conformer> = /Enum.directTuple
+    let iePath: CasePath<Enum, Conformer> = /Enum.indirectExistential
+    let itPath: CasePath<Enum, Conformer> = /Enum.indirectTuple
 
     for _ in 1...2 {
-      XCTAssertEqual(
-        path.extract(from: .p(Conformer())),
-        .some(Conformer()))
+      XCTAssertNil(dePath.extract(from: .cdtCase))
+      XCTAssertNil(dePath.extract(from: .cieCase))
+      XCTAssertNil(dePath.extract(from: .citCase))
+      XCTAssertNil(dePath.extract(from: .ideCase))
+      XCTAssertNil(dePath.extract(from: .idtCase))
+      XCTAssertNil(dePath.extract(from: .iieCase))
+      XCTAssertNil(dePath.extract(from: .iitCase))
+      XCTAssertEqual(dePath.extract(from: .cdeCase), .some(Conformer()))
+
+      XCTAssertNil(dtPath.extract(from: .cdeCase))
+      XCTAssertNil(dtPath.extract(from: .cieCase))
+      XCTAssertNil(dtPath.extract(from: .citCase))
+      XCTAssertNil(dtPath.extract(from: .ideCase))
+      XCTAssertNil(dtPath.extract(from: .idtCase))
+      XCTAssertNil(dtPath.extract(from: .iieCase))
+      XCTAssertNil(dtPath.extract(from: .iitCase))
+      XCTAssertEqual(dtPath.extract(from: .cdtCase), .some(Conformer()))
+
+      XCTAssertNil(iePath.extract(from: .cdeCase))
+      XCTAssertNil(iePath.extract(from: .cdtCase))
+      XCTAssertNil(iePath.extract(from: .cieCase))
+      XCTAssertNil(iePath.extract(from: .citCase))
+      XCTAssertNil(iePath.extract(from: .ideCase))
+      XCTAssertNil(iePath.extract(from: .idtCase))
+      XCTAssertNil(iePath.extract(from: .iieCase))
+      XCTAssertNil(iePath.extract(from: .iitCase))
+      XCTAssertEqual(iePath.extract(from: .cieCase), .some(Conformer()))
+
+      XCTAssertNil(itPath.extract(from: .cdeCase))
+      XCTAssertNil(itPath.extract(from: .cdtCase))
+      XCTAssertNil(itPath.extract(from: .cieCase))
+      XCTAssertNil(itPath.extract(from: .ideCase))
+      XCTAssertNil(itPath.extract(from: .idtCase))
+      XCTAssertNil(itPath.extract(from: .iieCase))
+      XCTAssertNil(itPath.extract(from: .iitCase))
+      XCTAssertEqual(itPath.extract(from: .citCase), .some(Conformer()))
     }
   }
 
