@@ -238,6 +238,24 @@ private struct EnumMetadata: Metadata {
     }
   }
 
+  var numPayloadCases: Int32 {
+    return ptr.advanced(by: 5 * 4).load(as: Int32.self) & 0xFFFFFF
+  }
+
+  func payloadType(forTag tag: UInt32) -> Any.Type? {
+    // If the tag represents a case without a payload, there's no type information stored for the tag. In that case, I can safely treat the payload as Void.
+    guard tag < numPayloadCases else { return Void.self }
+
+    guard
+      let typeName = typeDescriptor.fieldDescriptor?.field(atIndex: tag).typeName
+    else { return nil }
+
+    return swift_getTypeByMangledNameInContext(
+      typeName.ptr, typeName.length,
+      genericContext: typeDescriptor.ptr,
+      genericArguments: genericArguments?.ptr)
+  }
+
   func directAssociatedValue<Enum, Value>(of enumCase: Enum, as type: Value.Type) -> Value {
     let enumPtr = UnsafeMutablePointer<Enum>.allocate(capacity: 1)
     enumPtr.initialize(to: enumCase)
@@ -319,6 +337,14 @@ private func swift_projectBox(_ heapObject: UnsafeMutableRawPointer) -> UnsafeMu
 
 @_silgen_name("swift_release")
 private func swift_release(_ heapObject: UnsafeMutableRawPointer)
+
+@_silgen_name("swift_getTypeByMangledNameInContext")
+private func swift_getTypeByMangledNameInContext(
+  _ name: UnsafePointer<UInt8>,
+  _ nameLength: UInt,
+  genericContext: UnsafeRawPointer?,
+  genericArguments: UnsafeRawPointer?)
+-> Any.Type?
 
 private struct EnumTypeDescriptor {
   let ptr: UnsafeRawPointer
@@ -428,10 +454,6 @@ private struct MangledTypeName {
   }
 
   extension EnumTypeDescriptor {
-    var numPayloadCases: Int32 {
-      return ptr.advanced(by: 5 * 4).load(as: Int32.self) & 0xFFFFFF
-    }
-
     var numEmptyCases: Int32 {
       return ptr.advanced(by: 6 * 4).load(as: Int32.self)
     }
