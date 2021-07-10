@@ -395,6 +395,7 @@ final class CasePathsTests: XCTestCase {
     let itPath: CasePath<Enum, Conformer> = /Enum.indirectTuple
 
     for _ in 1...2 {
+
       XCTAssertNil(dePath.extract(from: .cdtCase))
       XCTAssertNil(dePath.extract(from: .cieCase))
       XCTAssertNil(dePath.extract(from: .citCase))
@@ -415,7 +416,6 @@ final class CasePathsTests: XCTestCase {
 
       XCTAssertNil(iePath.extract(from: .cdeCase))
       XCTAssertNil(iePath.extract(from: .cdtCase))
-      XCTAssertNil(iePath.extract(from: .cieCase))
       XCTAssertNil(iePath.extract(from: .citCase))
       XCTAssertNil(iePath.extract(from: .ideCase))
       XCTAssertNil(iePath.extract(from: .idtCase))
@@ -431,6 +431,19 @@ final class CasePathsTests: XCTestCase {
       XCTAssertNil(itPath.extract(from: .iieCase))
       XCTAssertNil(itPath.extract(from: .iitCase))
       XCTAssertEqual(itPath.extract(from: .citCase), .some(Conformer()))
+    }
+  }
+
+  func testUnreasonableContravariantEmbed() {
+    enum Enum {
+      case c(TestProtocol, Int)
+    }
+
+    // The library doesn't handle this crazy esoteric case, but it detects it and returns nil instead of garbage.
+    let path: CasePath<Enum, (Int, Int)> = /Enum.c
+
+    for _ in 1...2 {
+      XCTAssertNil(path.extract(from: .c(34, 12)))
     }
   }
 
