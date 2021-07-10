@@ -84,11 +84,12 @@ public func extract<Root, Value>(_ embed: @escaping (Value) -> Root) -> (Root) -
 
   var cachedExtractor: Extractor<Root, Value>? = nil
   return { root in
-    if let extractor = cachedExtractor {
-      return extractor.extract(from: root)
-    }
-
     let metadata = EnumMetadata(assumingEnum: Root.self)
+
+    if let cachedTag = cachedExtractor?.tag {
+      guard metadata.tag(of: root) == cachedTag else { return nil }
+      return cachedExtractor.unsafelyUnwrapped.extract(from: root)
+    }
 
     guard
       let rootExtractor = Extractor<Root, Value>(tag: metadata.tag(of: root)),
