@@ -70,213 +70,80 @@ public func extract<Root, Value>(case embed: @escaping (Value) -> Root, from roo
 public func extract<Root, Value>(_ embed: @escaping (Value) -> Root) -> (Root) -> (Value?) {
   guard let metadata = EnumMetadata(Root.self) else {
     #if DEBUG
-    print("\(#function) \(#file):\(#line) can never extract values from \(Root.self) because \(Root.self) isn't an enum!")
+    print("\(#function) can never extract values from \(Root.self) because \(Root.self) isn't an enum!")
     #endif
     return { _ in nil }
   }
 
   guard metadata.typeDescriptor.fieldDescriptor != nil else {
     #if DEBUG
-    print("\(#function) \(#file):\(#line) can never extract values from \(Root.self) because the metadata for \(Root.self) is incomplete!")
+    print("\(#function) can never extract values from \(Root.self) because the metadata for \(Root.self) is incomplete!")
     #endif
     return { _ in nil }
   }
 
-  var cachedExtractor: Extractor<Root, Value>? = nil
+  var cachedTag: UInt32? = nil
+  var cachedStrategy: Strategy<Root, Value> = .unimplemented
   return { root in
     let metadata = EnumMetadata(assumingEnum: Root.self)
+    let rootTag = metadata.tag(of: root)
 
-    if let cachedTag = cachedExtractor?.tag {
-      guard metadata.tag(of: root) == cachedTag else { return nil }
-      return cachedExtractor.unsafelyUnwrapped.extract(from: root)
+    if let cachedTag = cachedTag {
+      guard rootTag == cachedTag else { return nil }
+      return cachedStrategy.extract(from: root, tag: rootTag)
     }
 
     guard
-      let rootExtractor = Extractor<Root, Value>(tag: metadata.tag(of: root)),
-      let value = rootExtractor.extract(from: root)
+      let rootStrategy = Strategy<Root, Value>(tag: metadata.tag(of: root)),
+      let value = rootStrategy.extract(from: root, tag: rootTag)
     else {
       return nil
     }
 
-    let embedTag = metadata.tag(of: embed(value))
-    guard embedTag == rootExtractor.tag else {
-      // Well at least now I know the tag I'm looking for.
-      cachedExtractor = Extractor(tag: embedTag)
+    let embeddedValue = embed(value)
+    let embedTag = metadata.tag(of: embeddedValue)
+    cachedTag = embedTag
+
+    guard cachedTag == rootTag else {
+      // I have the correct tag now, so I can now pick the correct strategy, even if I won't use it this time.
+      if let embedStrategy = Strategy<Root, Value>(tag: embedTag) {
+        cachedStrategy = embedStrategy
+      } else {
+        #if DEBUG
+        print("\(#function) can never extract values from a \(Root.self) case like \(embeddedValue) because I don't know how to convert its associated value to \(Value.self)!")
+        #endif
+        cachedStrategy = .unimplemented
+      }
+
       return nil
     }
 
-    cachedExtractor = rootExtractor
+    cachedStrategy = rootStrategy
     return value
   }
 }
 
 // MARK: - Private Helpers
 
-// This is the size of any Unsafe*Pointer and also the size of Int and UInt.
-private let pointerSize = MemoryLayout<UnsafeRawPointer>.size
-
-extension UnsafeRawPointer {
-  fileprivate func loadInferredType<Type>() -> Type {
-    return load(as: Type.self)
-  }
-
-  fileprivate func loadRelativePointer() -> UnsafeRawPointer? {
-    let offset = Int(load(as: Int32.self))
-    return offset == 0 ? nil : self + offset
-  }
-}
-
-private struct ValueWitnessTable {
-  let ptr: UnsafeRawPointer
-
-  var getEnumTag: @convention(c) (_ value: UnsafeRawPointer, _ metadata: UnsafeRawPointer) -> UInt32
-  {
-    return ptr.advanced(by: 10 * pointerSize + 2 * 4).loadInferredType()
-  }
-
-  // This witness transforms an enum value into its associated value, in place.
-  var destructiveProjectEnumData:
-    @convention(c) (_ value: UnsafeMutableRawPointer, _ metadata: UnsafeRawPointer) -> Void
-  {
-    return ptr.advanced(by: 11 * pointerSize + 2 * 4).loadInferredType()
-  }
-
-  // This witness transforms an associated value into its enum value, in place.
-  var destructiveInjectEnumData:
-    @convention(c) (_ value: UnsafeMutableRawPointer, _ tag: UInt32, _ metadata: UnsafeRawPointer) -> Void
-  {
-    return ptr.advanced(by: 12 * pointerSize + 2 * 4).loadInferredType()
-  }
-}
-
-private struct GenericArgumentVector {
-  let ptr: UnsafeRawPointer
-}
-
-private struct MetadataKind: Equatable {
-  var rawValue: UInt
-
-  // https://github.com/apple/swift/blob/main/include/swift/ABI/MetadataValues.h
-  // https://github.com/apple/swift/blob/main/include/swift/ABI/MetadataKind.def
-  // 0x201 = MetadataKind::Enum
-  // 0x202 = MetadataKind::Optional
-  // 0x301 = MetadataKind::Tuple
-  // 0x303 = MetadataKind::Existential
-  static var enumeration: Self { .init(rawValue: 0x201) }
-  static var optional: Self { .init(rawValue: 0x202) }
-  static var tuple: Self { .init(rawValue: 0x301) }
-  static var existential: Self { .init(rawValue: 0x303) }
-}
-
-private protocol Metadata {
-  var ptr: UnsafeRawPointer { get }
-}
-
-extension Metadata {
-  var valueWitnessTable: ValueWitnessTable {
-    return ValueWitnessTable(
-      ptr: ptr.advanced(by: -pointerSize).load(as: UnsafeRawPointer.self))
-  }
-
-  var kind: MetadataKind { ptr.load(as: MetadataKind.self) }
-}
-
-private struct EnumMetadata: Metadata {
-  let ptr: UnsafeRawPointer
-
-  init(assumingEnum type: Any.Type) {
-    ptr = unsafeBitCast(type, to: UnsafeRawPointer.self)
-  }
-
-  init?(_ type: Any.Type) {
-    self.init(assumingEnum: type)
-    guard kind == .enumeration || kind == .optional else { return nil }
-  }
-
-  var genericArguments: GenericArgumentVector? {
-    guard typeDescriptor.flags.contains(.isGeneric) else { return nil }
-    return .init(ptr: ptr.advanced(by: 2 * pointerSize))
-  }
-
-  var typeDescriptor: EnumTypeDescriptor {
-    return EnumTypeDescriptor(
-      ptr: ptr.advanced(by: pointerSize).load(as: UnsafeRawPointer.self))
-  }
-
-  func tag<Enum>(of value: Enum) -> UInt32 {
-    return withUnsafePointer(to: value) {
-      valueWitnessTable.getEnumTag($0, self.ptr)
-    }
-  }
-}
-
-extension EnumMetadata {
-  func associatedValueType(forTag tag: UInt32) -> Any.Type {
-    guard
-      let typeName = typeDescriptor.fieldDescriptor?.field(atIndex: tag).typeName,
-      let type = swift_getTypeByMangledNameInContext(
-        typeName.ptr, typeName.length,
-        genericContext: typeDescriptor.ptr,
-        genericArguments: genericArguments?.ptr)
-    else {
-      // There's not really a good answer for this. Void is a safe answer since it's zero-size.
-      return Void.self
-    }
-
-    return type
-  }
-}
-
-extension EnumMetadata {
-  func destructivelyProjectPayload(of value: UnsafeMutableRawPointer) {
-    valueWitnessTable.destructiveProjectEnumData(value, ptr)
-  }
-
-  func destructivelyInjectTag(_ tag: UInt32, intoPayload payload: UnsafeMutableRawPointer) {
-    valueWitnessTable.destructiveInjectEnumData(payload, tag, ptr)
-  }
-}
-
-private func isUninhabitedEnum(_ type: Any.Type) -> Bool {
-  // If it lacks enum metadata, it's definitely not an uninhabited enum.
-  guard let metadata = EnumMetadata(type) else { return false }
-  return metadata.typeDescriptor.emptyCaseCount == 0
-    && metadata.typeDescriptor.payloadCaseCount == 0
-}
-
-/// The strategy to use to extract the associated value of a specific case of `Enum` as a `Value`.
-private enum Extractor<Enum, Value> {
-  case unimplemented(tag: UInt32)
+/// A `Strategy` is a way of extracting an associated value from an enum case.
+enum Strategy<Enum, Value> {
+  case unimplemented
 
   /// The case's associated type is a zero-size inhabited type, so it only has a single possible inhabitant, which I can synthesize.
-  case void(tag: UInt32)
+  case void
 
   /// The case is layout-compatible with `Value`, after tag-stripping (aka projection).
-  case direct(tag: UInt32)
+  case direct
 
   /// The case stores its associated value indirectly. The case payload is a pointer to a heap object. The heap object's payload is layout-compatible with `Value`.
-  case indirect(tag: UInt32)
+  case indirect
 
-  /// The case stores a protocol existential, either directly or indirectly. This extractor type is only used when the enum case's associated value type is a protocol existential and the `CasePath`'s `Value` is a type that conforms to the protocol (but is not itself the protocol existential).
-  case existential(tag: UInt32, get: (Enum) -> Any?)
+  /// The case stores a protocol existential, either directly or indirectly. This strategy is used when the enum case's associated value type is a protocol existential and the `CasePath`'s `Value` is a type that conforms to the protocol (but is not itself the protocol existential).
+  case existential(get: (Enum) -> Any?)
 }
 
-extension Extractor {
-  var tag: UInt32 {
-    switch self {
-    case
-      .unimplemented(tag: let tag),
-      .void(tag: let tag),
-      .direct(tag: let tag),
-      .indirect(tag: let tag),
-      .existential(tag: let tag, get: _):
-      return tag
-    }
-  }
-}
-
-extension Extractor {
-  /// Create the appropriate `Extractor` to extract a `Value` from an `Enum` if that `Enum`'s case tag is `tag`. If `assumedAssociatedValueType` is nil, I'll look up the associated value type in the `Enum` metadata.
+extension Strategy {
+  /// Choose the appropriate `Strategy` to extract a `Value` from an `Enum` if that `Enum`'s case tag is `tag`. If `assumedAssociatedValueType` is nil, I'll look up the associated value type in the `Enum` metadata.
   init?(tag: UInt32, assumedAssociatedValueType: Any.Type? = nil) {
     let metadata = EnumMetadata(assumingEnum: Enum.self)
     let avType = assumedAssociatedValueType ?? metadata.associatedValueType(forTag: tag)
@@ -289,7 +156,14 @@ extension Extractor {
       #endif
     }
 
+    var isUninhabitedEnum: Bool {
+      // If it lacks enum metadata, it's definitely not an uninhabited enum.
+      return metadata.typeDescriptor.emptyCaseCount == 0
+        && metadata.typeDescriptor.payloadCaseCount == 0
+    }
+
     if avType == Value.self {
+      // The `CasePath`'s `Value` type is exactly the case's associated value type.
       self = .init(nonExistentialTag: tag)
     }
 
@@ -306,8 +180,8 @@ extension Extractor {
     else if
       shouldWorkAroundSR12044,
       MemoryLayout<Value>.size == 0,
-      !isUninhabitedEnum(Value.self) {
-      self = .void(tag: tag)
+      !isUninhabitedEnum {
+      self = .void
     }
 
     // Consider this: `enum E { case c(l: Int) }`
@@ -360,12 +234,11 @@ extension Extractor {
         #if DEBUG
         print("CasePath<\(Enum.self), \(Value.self)> has not been programmed to convert an \(avType) to a \(Value.self).")
         #endif
-        self = .unimplemented(tag: tag)
+        self = .unimplemented
         return
       }
 
       self.init(tag: tag, assumedAssociatedValueType: Value.self)
-      return
     }
 
     // Consider this:
@@ -397,11 +270,12 @@ extension Extractor {
       ExistentialMetadata(avType) != nil
     {
       // I can use `Any` as the value type because it's compatible with any protocol existential.
-      let anyExtractor = Extractor<Enum, Any>(nonExistentialTag: tag)
-      self = .existential(tag: tag) { anyExtractor.extract(from: $0) }
+      let anyStrategy = Strategy<Enum, Any>(nonExistentialTag: tag)
+      self = .existential { anyStrategy.extract(from: $0, tag: tag) }
     }
 
     else {
+      // I can't extract a `Value` from the case for `tag`. Presumably it's because the case's associated value is a completely different, unrelated type.
       return nil
     }
   }
@@ -413,62 +287,37 @@ extension Extractor {
       .field(atIndex: tag)
       .flags
       .contains(.isIndirectCase)
-      ? .indirect(tag: tag)
-      : .direct(tag: tag)
+      ? .indirect
+      : .direct
   }
-}
 
-extension Extractor {
-  func extract(from root: Enum) -> Value? {
+  func extract(from root: Enum, tag: UInt32) -> Value? {
     switch self {
-    case .unimplemented(tag: _):
+    case .unimplemented:
       return nil
 
-    case .void(tag: let tag):
-      return extractVoid(from: root, tag: tag)
+    case .void:
+      return .some(unsafeBitCast((), to: Value.self))
 
-    case .direct(tag: let tag):
-      return extractDirect(from: root, tag: tag)
+    case .direct:
+      return withProjectedPayload(of: root, tag: tag) { .some($0.load(as: Value.self)) }
 
-    case .indirect(tag: let tag):
-      return extractIndirect(from: root, tag: tag)
+    case .indirect:
+      return withProjectedPayload(of: root, tag: tag) {
+        // In an indirect enum case, the payload is a pointer to a heap object. The heap object's payload is the associated value.
+        return $0
+          .load(as: UnsafeRawPointer.self) // Load the heap object pointer.
+          .advanced(by: 2 * pointerSize) // Skip the heap object header.
+          .load(as: Value.self)
+      }
 
-    case .existential(tag: let tag, get: let get):
-      return extractThroughExistential(from: root, tag: tag, get: get)
+    case .existential(get: let get):
+      guard
+        let any = get(root),
+        let value = any as? Value
+      else { return nil }
+      return .some(value)
     }
-  }
-
-  private func extractVoid(from root: Enum, tag: UInt32) -> Value? {
-    guard EnumMetadata(assumingEnum: Enum.self).tag(of: root) == tag else { return nil }
-
-    return .some(unsafeBitCast((), to: Value.self))
-  }
-
-  private func extractDirect(from root: Enum, tag: UInt32) -> Value? {
-    guard EnumMetadata(assumingEnum: Enum.self).tag(of: root) == tag else { return nil }
-
-    return withProjectedPayload(of: root, tag: tag) { .some($0.load(as: Value.self)) }
-  }
-
-  private func extractIndirect(from root: Enum, tag: UInt32) -> Value? {
-    guard EnumMetadata(assumingEnum: Enum.self).tag(of: root) == tag else { return nil }
-
-    return withProjectedPayload(of: root, tag: tag) {
-      // In an indirect enum case, the payload is a pointer to a heap object. The heap object's payload is the associated value.
-      return $0
-        .load(as: UnsafeRawPointer.self) // Load the heap object pointer.
-        .advanced(by: 2 * pointerSize) // Skip the heap object header.
-        .load(as: Value.self)
-    }
-  }
-
-  private func extractThroughExistential(from root: Enum, tag: UInt32, get: (Enum) -> Any?) -> Value? {
-    guard
-      EnumMetadata(assumingEnum: Enum.self).tag(of: root) == tag,
-      let any = get(root),
-      let value = any as? Value
-    else { return nil }
-    return .some(value)
   }
 
   private func withProjectedPayload<Enum, Answer>(
@@ -497,6 +346,84 @@ extension Extractor {
   }
 }
 
+// MARK: -
+
+private protocol Metadata {
+  var ptr: UnsafeRawPointer { get }
+}
+
+extension Metadata {
+  var valueWitnessTable: ValueWitnessTable {
+    return ValueWitnessTable(
+      ptr: ptr.advanced(by: -pointerSize).load(as: UnsafeRawPointer.self))
+  }
+
+  var kind: MetadataKind { ptr.load(as: MetadataKind.self) }
+}
+
+private struct MetadataKind: Equatable {
+  var rawValue: UInt
+
+  // https://github.com/apple/swift/blob/main/include/swift/ABI/MetadataValues.h
+  // https://github.com/apple/swift/blob/main/include/swift/ABI/MetadataKind.def
+  // 0x201 = MetadataKind::Enum
+  // 0x202 = MetadataKind::Optional
+  // 0x301 = MetadataKind::Tuple
+  // 0x303 = MetadataKind::Existential
+  static var enumeration: Self { .init(rawValue: 0x201) }
+  static var optional: Self { .init(rawValue: 0x202) }
+  static var tuple: Self { .init(rawValue: 0x301) }
+  static var existential: Self { .init(rawValue: 0x303) }
+}
+
+// MARK: -
+
+private struct EnumMetadata: Metadata {
+  let ptr: UnsafeRawPointer
+
+  init(assumingEnum type: Any.Type) {
+    ptr = unsafeBitCast(type, to: UnsafeRawPointer.self)
+  }
+
+  init?(_ type: Any.Type) {
+    self.init(assumingEnum: type)
+    guard kind == .enumeration || kind == .optional else { return nil }
+  }
+
+  var genericArguments: GenericArgumentVector? {
+    guard typeDescriptor.flags.contains(.isGeneric) else { return nil }
+    return .init(ptr: ptr.advanced(by: 2 * pointerSize))
+  }
+
+  var typeDescriptor: EnumTypeDescriptor {
+    return EnumTypeDescriptor(
+      ptr: ptr.advanced(by: pointerSize).load(as: UnsafeRawPointer.self))
+  }
+
+  func tag<Enum>(of value: Enum) -> UInt32 {
+    return withUnsafePointer(to: value) {
+      valueWitnessTable.getEnumTag($0, self.ptr)
+    }
+  }
+}
+
+extension EnumMetadata {
+  func associatedValueType(forTag tag: UInt32) -> Any.Type {
+    guard
+      let typeName = typeDescriptor.fieldDescriptor?.field(atIndex: tag).typeName,
+      let type = swift_getTypeByMangledNameInContext(
+        typeName.ptr, typeName.length,
+        genericContext: typeDescriptor.ptr,
+        genericArguments: genericArguments?.ptr)
+    else {
+      // There's not really a good answer for this. Void is a safe answer since it's zero-size.
+      return Void.self
+    }
+
+    return type
+  }
+}
+
 @_silgen_name("swift_getTypeByMangledNameInContext")
 private func swift_getTypeByMangledNameInContext(
   _ name: UnsafePointer<UInt8>,
@@ -504,6 +431,18 @@ private func swift_getTypeByMangledNameInContext(
   genericContext: UnsafeRawPointer?,
   genericArguments: UnsafeRawPointer?)
 -> Any.Type?
+
+extension EnumMetadata {
+  func destructivelyProjectPayload(of value: UnsafeMutableRawPointer) {
+    valueWitnessTable.destructiveProjectEnumData(value, ptr)
+  }
+
+  func destructivelyInjectTag(_ tag: UInt32, intoPayload payload: UnsafeMutableRawPointer) {
+    valueWitnessTable.destructiveInjectEnumData(payload, tag, ptr)
+  }
+}
+
+// MARK: -
 
 private struct EnumTypeDescriptor {
   let ptr: UnsafeRawPointer
@@ -529,6 +468,72 @@ extension EnumTypeDescriptor {
     static var isGeneric: Self { .init(rawValue: 0x80) }
   }
 }
+
+// MARK: -
+
+private struct TupleMetadata: Metadata {
+  let ptr: UnsafeRawPointer
+
+  init?(_ type: Any.Type) {
+    ptr = unsafeBitCast(type, to: UnsafeRawPointer.self)
+    guard kind == .tuple else { return nil }
+  }
+
+  var elementCount: UInt {
+    return ptr
+      .advanced(by: pointerSize) // kind
+      .load(as: UInt.self)
+  }
+
+  var labels: UnsafePointer<UInt8>? {
+    return ptr
+      .advanced(by: pointerSize) // kind
+      .advanced(by: pointerSize) // elementCount
+      .load(as: UnsafePointer<UInt8>?.self)
+  }
+
+  func element(at i: Int) -> Element {
+    return Element(
+      ptr: ptr
+        .advanced(by: pointerSize) // kind
+        .advanced(by: pointerSize) // elementCount
+        .advanced(by: pointerSize) // labels pointer
+        .advanced(by: i * 2 * pointerSize))
+  }
+}
+
+extension TupleMetadata {
+  struct Element: Equatable {
+    let ptr: UnsafeRawPointer
+
+    var type: Any.Type { ptr.load(as: Any.Type.self) }
+    var offset: UInt { ptr.advanced(by: pointerSize).load(as: UInt.self) }
+
+    static func ==(lhs: Element, rhs: Element) -> Bool {
+      return lhs.type == rhs.type && lhs.offset == rhs.offset
+    }
+  }
+}
+
+extension TupleMetadata {
+  func hasSameLayout(as other: TupleMetadata) -> Bool {
+    return self.elementCount == other.elementCount &&
+      (0 ..< Int(elementCount)).allSatisfy { self.element(at: $0) == other.element(at: $0) }
+  }
+}
+
+// MARK: -
+
+private struct ExistentialMetadata: Metadata {
+  let ptr: UnsafeRawPointer
+
+  init?(_ type: Any.Type?) {
+    ptr = unsafeBitCast(type, to: UnsafeRawPointer.self)
+    guard kind == .existential else { return nil }
+  }
+}
+
+// MARK: -
 
 private struct FieldDescriptor {
   let ptr: UnsafeRawPointer
@@ -590,62 +595,49 @@ private struct MangledTypeName {
   }
 }
 
-private struct TupleMetadata: Metadata {
+// MARK: -
+
+private struct ValueWitnessTable {
   let ptr: UnsafeRawPointer
 
-  init?(_ type: Any.Type) {
-    ptr = unsafeBitCast(type, to: UnsafeRawPointer.self)
-    guard kind == .tuple else { return nil }
+  var getEnumTag: @convention(c) (_ value: UnsafeRawPointer, _ metadata: UnsafeRawPointer) -> UInt32
+  {
+    return ptr.advanced(by: 10 * pointerSize + 2 * 4).loadInferredType()
   }
 
-  var elementCount: UInt {
-    return ptr
-      .advanced(by: pointerSize) // kind
-      .load(as: UInt.self)
+  // This witness transforms an enum value into its associated value, in place.
+  var destructiveProjectEnumData:
+    @convention(c) (_ value: UnsafeMutableRawPointer, _ metadata: UnsafeRawPointer) -> Void
+  {
+    return ptr.advanced(by: 11 * pointerSize + 2 * 4).loadInferredType()
   }
 
-  var labels: UnsafePointer<UInt8>? {
-    return ptr
-      .advanced(by: pointerSize) // kind
-      .advanced(by: pointerSize) // elementCount
-      .load(as: UnsafePointer<UInt8>?.self)
-  }
-
-  func element(at i: Int) -> Element {
-    return Element(
-      ptr: ptr
-        .advanced(by: pointerSize) // kind
-        .advanced(by: pointerSize) // elementCount
-        .advanced(by: pointerSize) // labels pointer
-        .advanced(by: i * 2 * pointerSize))
+  // This witness transforms an associated value into its enum value, in place.
+  var destructiveInjectEnumData:
+    @convention(c) (_ value: UnsafeMutableRawPointer, _ tag: UInt32, _ metadata: UnsafeRawPointer) -> Void
+  {
+    return ptr.advanced(by: 12 * pointerSize + 2 * 4).loadInferredType()
   }
 }
 
-extension TupleMetadata {
-  struct Element: Equatable {
-    let ptr: UnsafeRawPointer
+// MARK: -
 
-    var type: Any.Type { ptr.load(as: Any.Type.self) }
-    var offset: UInt { ptr.advanced(by: pointerSize).load(as: UInt.self) }
-
-    static func ==(lhs: Element, rhs: Element) -> Bool {
-      return lhs.type == rhs.type && lhs.offset == rhs.offset
-    }
-  }
-}
-
-extension TupleMetadata {
-  func hasSameLayout(as other: TupleMetadata) -> Bool {
-    return self.elementCount == other.elementCount &&
-      (0 ..< Int(elementCount)).allSatisfy { self.element(at: $0) == other.element(at: $0) }
-  }
-}
-
-private struct ExistentialMetadata: Metadata {
+private struct GenericArgumentVector {
   let ptr: UnsafeRawPointer
+}
 
-  init?(_ type: Any.Type?) {
-    ptr = unsafeBitCast(type, to: UnsafeRawPointer.self)
-    guard kind == .existential else { return nil }
+// MARK: -
+
+extension UnsafeRawPointer {
+  fileprivate func loadInferredType<Type>() -> Type {
+    return load(as: Type.self)
+  }
+
+  fileprivate func loadRelativePointer() -> UnsafeRawPointer? {
+    let offset = Int(load(as: Int32.self))
+    return offset == 0 ? nil : self + offset
   }
 }
+
+// This is the size of any Unsafe*Pointer and also the size of Int and UInt.
+private let pointerSize = MemoryLayout<UnsafeRawPointer>.size
