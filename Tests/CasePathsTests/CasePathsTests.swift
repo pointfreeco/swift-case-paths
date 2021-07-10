@@ -590,6 +590,21 @@ final class CasePathsTests: XCTestCase {
     )
   }
 
+  func testCompoundUninhabitedType() {
+    // Under Swift 5.1 (Xcode 11.3), this test creates a bogus instance of the tuple `(Never, Never)`, but remarkably, doesn't cause a crash and extracts the correct answer (nil).
+
+    enum Enum {
+      case nevers(Never, Never)
+      case something(Void)
+    }
+
+    let path: CasePath<Enum, (Never, Never)> = /Enum.nevers(_:_:)
+
+    for _ in 1...2 {
+      XCTAssertNil(path.extract(from: Enum.something(())))
+    }
+  }
+
   func testNestedUninhabitedTypes() {
     enum Uninhabited {}
 

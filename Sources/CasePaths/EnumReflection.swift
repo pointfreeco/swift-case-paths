@@ -70,14 +70,14 @@ public func extract<Root, Value>(case embed: @escaping (Value) -> Root, from roo
 public func extract<Root, Value>(_ embed: @escaping (Value) -> Root) -> (Root) -> (Value?) {
   guard let metadata = EnumMetadata(Root.self) else {
     #if DEBUG
-    print("\(#function) (#file:#line) can never extract values from \(Root.self) because \(Root.self) isn't an enum!")
+    print("\(#function) \(#file):\(#line) can never extract values from \(Root.self) because \(Root.self) isn't an enum!")
     #endif
     return { _ in nil }
   }
 
   guard metadata.typeDescriptor.fieldDescriptor != nil else {
     #if DEBUG
-    print("\(#function) (#file:#line) can never extract values from \(Root.self) because the metadata for \(Root.self) is incomplete!")
+    print("\(#function) \(#file):\(#line) can never extract values from \(Root.self) because the metadata for \(Root.self) is incomplete!")
     #endif
     return { _ in nil }
   }
@@ -100,7 +100,7 @@ public func extract<Root, Value>(_ embed: @escaping (Value) -> Root) -> (Root) -
     let embedTag = metadata.tag(of: embed(value))
     guard embedTag == rootExtractor.tag else {
       // Well at least now I know the tag I'm looking for.
-      cachedExtractor = .init(tag: embedTag)
+      cachedExtractor = Extractor(tag: embedTag)
       return nil
     }
 
@@ -236,9 +236,19 @@ extension EnumMetadata {
   }
 }
 
+private func isUninhabitedEnum(_ type: Any.Type) -> Bool {
+  // If it lacks enum metadata, it's definitely not an uninhabited enum.
+  guard let metadata = EnumMetadata(type) else { return false }
+  return metadata.typeDescriptor.emptyCaseCount == 0
+    && metadata.typeDescriptor.payloadCaseCount == 0
+}
+
 /// The strategy to use to extract the associated value of a specific case of `Enum` as a `Value`.
 private enum Extractor<Enum, Value> {
   case unimplemented(tag: UInt32)
+
+  /// The case's associated type is a zero-size inhabited type, so it only has a single possible inhabitant, which I can synthesize.
+  case void(tag: UInt32)
 
   /// The case is layout-compatible with `Value`, after tag-stripping (aka projection).
   case direct(tag: UInt32)
@@ -255,6 +265,7 @@ extension Extractor {
     switch self {
     case
       .unimplemented(tag: let tag),
+      .void(tag: let tag),
       .direct(tag: let tag),
       .indirect(tag: let tag),
       .existential(tag: let tag, get: _):
@@ -269,8 +280,33 @@ extension Extractor {
     let metadata = EnumMetadata(assumingEnum: Enum.self)
     let avType = assumedAssociatedValueType ?? metadata.associatedValueType(forTag: tag)
 
+    var shouldWorkAroundSR12044: Bool {
+      #if compiler(<5.2)
+      return true
+      #else
+      return false
+      #endif
+    }
+
     if avType == Value.self {
       self = .init(nonExistentialTag: tag)
+    }
+
+    // If `Value` is an inhabited type with size zero, it has a single inhabitant which I can synthesize by bit-casting `()`.
+    //
+    // I handle this specially because it works around a Swift 5.1 bug:
+    // https://bugs.swift.org/browse/SR-12044
+    //
+    // When the payload is a size-zero type, Swift 5.1 omits the typeName in the metadata describing the `tag` case, and `associatedValueType(forTag:)` returns `Void.self` in that case. This bug was corrected in Swift 5.2.
+    //
+    // An uninhabited type like Never also has a size of zero. I have to be careful not to create a value of an uninhabited type.
+    //
+    // If you do something like `enum E { case c(Never, Never) }`, I don't detect that it's an uninhabited tuple and I'll end up creating a bogus value of type `(Never, Never)` and it'll get passed to the `E.c` initializer. Remarkably, the initializer doesn't care! It creates the `E` value anyway. Since there is no safe way to create an `E.c` value, the `E.c` tag can't match the tag of the actual `E` value being checked by the `CasePath`. So the `CasePath` won't end up extracting a bogus value.
+    else if
+      shouldWorkAroundSR12044,
+      MemoryLayout<Value>.size == 0,
+      !isUninhabitedEnum(Value.self) {
+      self = .void(tag: tag)
     }
 
     // Consider this: `enum E { case c(l: Int) }`
@@ -387,6 +423,9 @@ extension Extractor {
     case .unimplemented(tag: _):
       return nil
 
+    case .void(tag: let tag):
+      return extractVoid(from: root, tag: tag)
+
     case .direct(tag: let tag):
       return extractDirect(from: root, tag: tag)
 
@@ -396,6 +435,12 @@ extension Extractor {
     case .existential(tag: let tag, get: let get):
       return extractThroughExistential(from: root, tag: tag, get: get)
     }
+  }
+
+  private func extractVoid(from root: Enum, tag: UInt32) -> Value? {
+    guard EnumMetadata(assumingEnum: Enum.self).tag(of: root) == tag else { return nil }
+
+    return .some(unsafeBitCast((), to: Value.self))
   }
 
   private func extractDirect(from root: Enum, tag: UInt32) -> Value? {
@@ -470,6 +515,10 @@ private struct EnumTypeDescriptor {
       .loadRelativePointer()
       .map(FieldDescriptor.init)
   }
+
+  var payloadCaseCount: UInt32 { ptr.advanced(by: 5 * 4).load(as: UInt32.self) & 0xffffff }
+
+  var emptyCaseCount: UInt32 { ptr.advanced(by: 6 * 4).load(as: UInt32.self) }
 }
 
 extension EnumTypeDescriptor {
