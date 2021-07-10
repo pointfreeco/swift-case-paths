@@ -94,7 +94,7 @@ public func extract<Root, Value>(_ embed: @escaping (Value) -> Root) -> (Root) -
     }
 
     guard
-      let rootStrategy = Strategy<Root, Value>(tag: metadata.tag(of: root)),
+      let rootStrategy = Strategy<Root, Value>(tag: rootTag),
       let value = rootStrategy.extract(from: root, tag: rootTag)
     else {
       return nil
