@@ -8,8 +8,8 @@ private func unwrap<Wrapped>(_ optional: Wrapped?) throws -> Wrapped {
 }
 private struct UnexpectedNil: Error {}
 
-protocol TestProtocol { }
-extension Int: TestProtocol { }
+protocol TestProtocol {}
+extension Int: TestProtocol {}
 
 final class CasePathsTests: XCTestCase {
   func testSimplePayload() {
@@ -342,19 +342,19 @@ final class CasePathsTests: XCTestCase {
 
   func testAssociatedValueIsExistential() {
     enum Enum {
-        case proto(TestProtocol)
-        case int(Int)
+      case proto(TestProtocol)
+      case int(Int)
     }
 
     let protoPath = /Enum.proto
     let intPath = /Enum.int
 
     for _ in 1...2 {
-        XCTAssertNil(protoPath.extract(from: .int(100)))
-        XCTAssertEqual(protoPath.extract(from: .proto(100)) as? Int, 100)
+      XCTAssertNil(protoPath.extract(from: .int(100)))
+      XCTAssertEqual(protoPath.extract(from: .proto(100)) as? Int, 100)
 
-        XCTAssertNil(intPath.extract(from: .proto(100)))
-        XCTAssertEqual(intPath.extract(from: .int(100)), 100)
+      XCTAssertNil(intPath.extract(from: .proto(100)))
+      XCTAssertEqual(intPath.extract(from: .int(100)), 100)
     }
   }
 

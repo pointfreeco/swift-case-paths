@@ -1,4 +1,3 @@
-
 extension CasePath {
   /// Returns a case path that extracts values associated with a given enum case initializer.
   ///
@@ -70,14 +69,18 @@ public func extract<Root, Value>(case embed: @escaping (Value) -> Root, from roo
 public func extract<Root, Value>(_ embed: @escaping (Value) -> Root) -> (Root) -> (Value?) {
   guard let metadata = EnumMetadata(Root.self) else {
     #if DEBUG
-    print("\(#function) can never extract values from \(Root.self) because \(Root.self) isn't an enum!")
+      print(
+        "\(#function) can never extract values from \(Root.self) because \(Root.self) isn't an enum!"
+      )
     #endif
     return { _ in nil }
   }
 
   guard metadata.typeDescriptor.fieldDescriptor != nil else {
     #if DEBUG
-    print("\(#function) can never extract values from \(Root.self) because the metadata for \(Root.self) is incomplete!")
+      print(
+        "\(#function) can never extract values from \(Root.self) because the metadata for \(Root.self) is incomplete!"
+      )
     #endif
     return { _ in nil }
   }
@@ -110,7 +113,9 @@ public func extract<Root, Value>(_ embed: @escaping (Value) -> Root) -> (Root) -
         cachedStrategy = embedStrategy
       } else {
         #if DEBUG
-        print("\(#function) can never extract values from a \(Root.self) case like \(embeddedValue) because I don't know how to convert its associated value to \(Value.self)!")
+          print(
+            "\(#function) can never extract values from a \(Root.self) case like \(embeddedValue) because I don't know how to convert its associated value to \(Value.self)!"
+          )
         #endif
         cachedStrategy = .unimplemented
       }
@@ -150,9 +155,9 @@ extension Strategy {
 
     var shouldWorkAroundSR12044: Bool {
       #if compiler(<5.2)
-      return true
+        return true
       #else
-      return false
+        return false
       #endif
     }
 
@@ -177,10 +182,10 @@ extension Strategy {
     // An uninhabited type like Never also has a size of zero. I have to be careful not to create a value of an uninhabited type.
     //
     // If you do something like `enum E { case c(Never, Never) }`, I don't detect that it's an uninhabited tuple and I'll end up creating a bogus value of type `(Never, Never)` and it'll get passed to the `E.c` initializer. Remarkably, the initializer doesn't care! It creates the `E` value anyway. Since there is no safe way to create an `E.c` value, the `E.c` tag can't match the tag of the actual `E` value being checked by the `CasePath`. So the `CasePath` won't end up extracting a bogus value.
-    else if
-      shouldWorkAroundSR12044,
+    else if shouldWorkAroundSR12044,
       MemoryLayout<Value>.size == 0,
-      !isUninhabitedEnum {
+      !isUninhabitedEnum
+    {
       self = .void
     }
 
@@ -195,8 +200,7 @@ extension Strategy {
     // The types `(l: Int)` and `Int` use the same memory layout.
     //
     // So if `avType` is a single-element tuple and `Value` is the type of that tuple's single element, I can extract a `Value` from `root`.
-    else if
-      let avMetadata = TupleMetadata(avType),
+    else if let avMetadata = TupleMetadata(avType),
       avMetadata.elementCount == 1
     {
       self.init(tag: tag, assumedAssociatedValueType: avMetadata.element(at: 0).type)
@@ -211,8 +215,7 @@ extension Strategy {
     // So if `avType` is a tuple, and `Value` is a tuple with no labels, and the two types have identical elements types, I can extract a `Value` from `root`.
     //
     // If `Value` has labels, that doesn't change its memory layout. But I don't want to silently transform a tuple that was created as `(x: 1, y: 2)` into a differently-labeled tuple `(y: 1, x: 2)`.
-    else if
-      let avMetadata = TupleMetadata(avType),
+    else if let avMetadata = TupleMetadata(avType),
       let valueMetadata = TupleMetadata(Value.self),
       valueMetadata.labels == nil
     {
@@ -232,7 +235,9 @@ extension Strategy {
       // This is an extremely rare scenario and I think it's too much work to try to handle it.
       guard avMetadata.hasSameLayout(as: valueMetadata) else {
         #if DEBUG
-        print("CasePath<\(Enum.self), \(Value.self)> has not been programmed to convert an \(avType) to a \(Value.self).")
+          print(
+            "CasePath<\(Enum.self), \(Value.self)> has not been programmed to convert an \(avType) to a \(Value.self)."
+          )
         #endif
         self = .unimplemented
         return
@@ -266,9 +271,7 @@ extension Strategy {
     // If `avType` is a protocol existential (a “box”), then I can extract the box from `root` and look at the boxed type. If the boxed type is `Value`, then I can extract `Value` from the box.
     //
     // Ideally I would check that Value actually conforms to avType's protocol. Unfortunately, the metedata doesn't include conformance information. I'd have to dig through the conformance sections of the executable file and shared libraries. It's not worth the trouble.
-    else if
-      ExistentialMetadata(avType) != nil
-    {
+    else if ExistentialMetadata(avType) != nil {
       // I can use `Any` as the value type because it's compatible with any protocol existential.
       let anyStrategy = Strategy<Enum, Any>(nonExistentialTag: tag)
       self = .existential { anyStrategy.extract(from: $0, tag: tag) }
@@ -281,12 +284,13 @@ extension Strategy {
   }
 
   init(nonExistentialTag tag: UInt32) {
-    self = EnumMetadata(assumingEnum: Enum.self)
-      .typeDescriptor
-      .fieldDescriptor!
-      .field(atIndex: tag)
-      .flags
-      .contains(.isIndirectCase)
+    self =
+      EnumMetadata(assumingEnum: Enum.self)
+        .typeDescriptor
+        .fieldDescriptor!
+        .field(atIndex: tag)
+        .flags
+        .contains(.isIndirectCase)
       ? .indirect
       : .direct
   }
@@ -305,13 +309,14 @@ extension Strategy {
     case .indirect:
       return withProjectedPayload(of: root, tag: tag) {
         // In an indirect enum case, the payload is a pointer to a heap object. The heap object's payload is the associated value.
-        return $0
-          .load(as: UnsafeRawPointer.self) // Load the heap object pointer.
-          .advanced(by: 2 * pointerSize) // Skip the heap object header.
+        return
+          $0
+          .load(as: UnsafeRawPointer.self)  // Load the heap object pointer.
+          .advanced(by: 2 * pointerSize)  // Skip the heap object header.
           .load(as: Value.self)
       }
 
-    case .existential(get: let get):
+    case .existential(let get):
       guard
         let any = get(root),
         let value = any as? Value
@@ -429,8 +434,9 @@ private func swift_getTypeByMangledNameInContext(
   _ name: UnsafePointer<UInt8>,
   _ nameLength: UInt,
   genericContext: UnsafeRawPointer?,
-  genericArguments: UnsafeRawPointer?)
--> Any.Type?
+  genericArguments: UnsafeRawPointer?
+)
+  -> Any.Type?
 
 extension EnumMetadata {
   func destructivelyProjectPayload(of value: UnsafeMutableRawPointer) {
@@ -450,7 +456,8 @@ private struct EnumTypeDescriptor {
   var flags: Flags { Flags(rawValue: ptr.load(as: UInt32.self)) }
 
   var fieldDescriptor: FieldDescriptor? {
-    return ptr
+    return
+      ptr
       .advanced(by: 4 * 4)
       .loadRelativePointer()
       .map(FieldDescriptor.init)
@@ -480,24 +487,27 @@ private struct TupleMetadata: Metadata {
   }
 
   var elementCount: UInt {
-    return ptr
-      .advanced(by: pointerSize) // kind
+    return
+      ptr
+      .advanced(by: pointerSize)  // kind
       .load(as: UInt.self)
   }
 
   var labels: UnsafePointer<UInt8>? {
-    return ptr
-      .advanced(by: pointerSize) // kind
-      .advanced(by: pointerSize) // elementCount
+    return
+      ptr
+      .advanced(by: pointerSize)  // kind
+      .advanced(by: pointerSize)  // elementCount
       .load(as: UnsafePointer<UInt8>?.self)
   }
 
   func element(at i: Int) -> Element {
     return Element(
-      ptr: ptr
-        .advanced(by: pointerSize) // kind
-        .advanced(by: pointerSize) // elementCount
-        .advanced(by: pointerSize) // labels pointer
+      ptr:
+        ptr
+        .advanced(by: pointerSize)  // kind
+        .advanced(by: pointerSize)  // elementCount
+        .advanced(by: pointerSize)  // labels pointer
         .advanced(by: i * 2 * pointerSize))
   }
 }
@@ -509,7 +519,7 @@ extension TupleMetadata {
     var type: Any.Type { ptr.load(as: Any.Type.self) }
     var offset: UInt { ptr.advanced(by: pointerSize).load(as: UInt.self) }
 
-    static func ==(lhs: Element, rhs: Element) -> Bool {
+    static func == (lhs: Element, rhs: Element) -> Bool {
       return lhs.type == rhs.type && lhs.offset == rhs.offset
     }
   }
@@ -517,8 +527,8 @@ extension TupleMetadata {
 
 extension TupleMetadata {
   func hasSameLayout(as other: TupleMetadata) -> Bool {
-    return self.elementCount == other.elementCount &&
-      (0 ..< Int(elementCount)).allSatisfy { self.element(at: $0) == other.element(at: $0) }
+    return self.elementCount == other.elementCount
+      && (0..<Int(elementCount)).allSatisfy { self.element(at: $0) == other.element(at: $0) }
   }
 }
 
@@ -553,7 +563,8 @@ private struct FieldRecord {
   var flags: Flags { Flags(rawValue: ptr.load(as: UInt32.self)) }
 
   var typeName: MangledTypeName? {
-    return ptr
+    return
+      ptr
       .advanced(by: 4)
       .loadRelativePointer()
       .map { MangledTypeName(ptr: $0.assumingMemoryBound(to: UInt8.self)) }
@@ -614,7 +625,8 @@ private struct ValueWitnessTable {
 
   // This witness transforms an associated value into its enum value, in place.
   var destructiveInjectEnumData:
-    @convention(c) (_ value: UnsafeMutableRawPointer, _ tag: UInt32, _ metadata: UnsafeRawPointer) -> Void
+    @convention(c) (_ value: UnsafeMutableRawPointer, _ tag: UInt32, _ metadata: UnsafeRawPointer)
+      -> Void
   {
     return ptr.advanced(by: 12 * pointerSize + 2 * 4).loadInferredType()
   }
