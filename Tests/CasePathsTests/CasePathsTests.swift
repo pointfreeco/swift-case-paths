@@ -28,9 +28,8 @@ final class CasePathsTests: XCTestCase {
     }
   }
 
-  #if compiler(<5.3)
-    // This test crashes Xcode 11.7's compiler.
-  #else
+  // This test crashes Xcode 11.7's compiler.
+  #if compiler(>=5.3)
     func testSimpleOverloadedPayload() {
       enum Enum {
         case payload(a: Int)
@@ -381,7 +380,8 @@ final class CasePathsTests: XCTestCase {
       static let iitCase = Enum.indirectTuple(label: 100)
     }
 
-    // This is intentionally too big to fit in the three-word buffer of a protocol existential, so that it is stored indirectly.
+    // This is intentionally too big to fit in the three-word buffer of a protocol existential, so
+    // that it is stored indirectly.
     struct Conformer: TestProtocol, Equatable {
       var a, b, c, d: Int
       init() {
@@ -439,7 +439,8 @@ final class CasePathsTests: XCTestCase {
       case c(TestProtocol, Int)
     }
 
-    // The library doesn't handle this crazy esoteric case, but it detects it and returns nil instead of garbage.
+    // The library doesn't handle this crazy esoteric case, but it detects it and returns nil
+    // instead of garbage.
     let path: CasePath<Enum, (Int, Int)> = /Enum.c
 
     for _ in 1...2 {
@@ -600,7 +601,9 @@ final class CasePathsTests: XCTestCase {
   }
 
   func testCompoundUninhabitedType() {
-    // Under Swift 5.1 (Xcode 11.3), this test creates a bogus instance of the tuple `(Never, Never)`, but remarkably, doesn't cause a crash and extracts the correct answer (nil).
+    // Under Swift 5.1 (Xcode 11.3), this test creates a bogus instance of the tuple
+    // `(Never, Never)`, but remarkably, doesn't cause a crash and extracts the correct answer
+    // (`nil`).
 
     enum Enum {
       case nevers(Never, Never)

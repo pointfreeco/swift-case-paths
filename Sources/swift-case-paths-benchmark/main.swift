@@ -26,6 +26,10 @@ let success = BenchmarkSuite(name: "Success") {
   $0.benchmark("Reflection") {
     precondition(reflection.extract(from: enumCase) == 42)
   }
+
+  $0.benchmark("Reflection (uncached)") {
+    precondition((/Enum.associatedValue).extract(from: enumCase) == 42)
+  }
 }
 
 let failure = BenchmarkSuite(name: "Failure") {
@@ -35,6 +39,10 @@ let failure = BenchmarkSuite(name: "Failure") {
 
   $0.benchmark("Reflection") {
     precondition(reflection.extract(from: anotherCase) == nil)
+  }
+
+  $0.benchmark("Reflection (uncached)") {
+    precondition((/Enum.associatedValue).extract(from: anotherCase) == nil)
   }
 }
 
