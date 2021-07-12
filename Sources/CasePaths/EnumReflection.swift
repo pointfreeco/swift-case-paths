@@ -94,7 +94,7 @@ public func extract<Root, Value>(_ embed: @escaping (Value) -> Root) -> (Root) -
     cachedTag = embedTag
     cachedStrategy = Strategy<Root, Value>(tag: embedTag)
 
-    guard cachedTag == rootTag else { return nil }
+    guard embedTag == rootTag else { return nil }
 
     return value
   }
