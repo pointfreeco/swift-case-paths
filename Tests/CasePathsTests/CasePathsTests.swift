@@ -8,6 +8,9 @@ private func unwrap<Wrapped>(_ optional: Wrapped?) throws -> Wrapped {
 }
 private struct UnexpectedNil: Error {}
 
+protocol TestProtocol { }
+extension Int: TestProtocol { }
+
 final class CasePathsTests: XCTestCase {
   func testSimplePayload() {
     enum Enum { case payload(Int) }
@@ -337,6 +340,113 @@ final class CasePathsTests: XCTestCase {
     }
   }
 
+  func testAssociatedValueIsExistential() {
+    enum Enum {
+        case proto(TestProtocol)
+        case int(Int)
+    }
+
+    let protoPath = /Enum.proto
+    let intPath = /Enum.int
+
+    for _ in 1...2 {
+        XCTAssertNil(protoPath.extract(from: .int(100)))
+        XCTAssertEqual(protoPath.extract(from: .proto(100)) as? Int, 100)
+
+        XCTAssertNil(intPath.extract(from: .proto(100)))
+        XCTAssertEqual(intPath.extract(from: .int(100)), 100)
+    }
+  }
+
+  func testContravariantEmbed() {
+    enum Enum {
+      // associated value type is TestProtocol existential
+      case directExistential(TestProtocol)
+
+      // associated value type is single-element tuple (TestProtocol existential)
+      case directTuple(label: TestProtocol)
+
+      indirect case indirectExistential(TestProtocol)
+
+      indirect case indirectTuple(label: TestProtocol)
+
+      static let cdeCase = Enum.directExistential(Conformer())
+      static let cdtCase = Enum.directTuple(label: Conformer())
+      static let cieCase = Enum.indirectExistential(Conformer())
+      static let citCase = Enum.indirectTuple(label: Conformer())
+
+      static let ideCase = Enum.directExistential(100)
+      static let idtCase = Enum.directTuple(label: 100)
+      static let iieCase = Enum.indirectExistential(100)
+      static let iitCase = Enum.indirectTuple(label: 100)
+    }
+
+    // This is intentionally too big to fit in the three-word buffer of a protocol existential, so that it is stored indirectly.
+    struct Conformer: TestProtocol, Equatable {
+      var a, b, c, d: Int
+      init() {
+        (a, b, c, d) = (100, 300, 200, 400)
+      }
+    }
+
+    let dePath: CasePath<Enum, Conformer> = /Enum.directExistential
+    let dtPath: CasePath<Enum, Conformer> = /Enum.directTuple
+    let iePath: CasePath<Enum, Conformer> = /Enum.indirectExistential
+    let itPath: CasePath<Enum, Conformer> = /Enum.indirectTuple
+
+    for _ in 1...2 {
+
+      XCTAssertNil(dePath.extract(from: .cdtCase))
+      XCTAssertNil(dePath.extract(from: .cieCase))
+      XCTAssertNil(dePath.extract(from: .citCase))
+      XCTAssertNil(dePath.extract(from: .ideCase))
+      XCTAssertNil(dePath.extract(from: .idtCase))
+      XCTAssertNil(dePath.extract(from: .iieCase))
+      XCTAssertNil(dePath.extract(from: .iitCase))
+      XCTAssertEqual(dePath.extract(from: .cdeCase), .some(Conformer()))
+
+      XCTAssertNil(dtPath.extract(from: .cdeCase))
+      XCTAssertNil(dtPath.extract(from: .cieCase))
+      XCTAssertNil(dtPath.extract(from: .citCase))
+      XCTAssertNil(dtPath.extract(from: .ideCase))
+      XCTAssertNil(dtPath.extract(from: .idtCase))
+      XCTAssertNil(dtPath.extract(from: .iieCase))
+      XCTAssertNil(dtPath.extract(from: .iitCase))
+      XCTAssertEqual(dtPath.extract(from: .cdtCase), .some(Conformer()))
+
+      XCTAssertNil(iePath.extract(from: .cdeCase))
+      XCTAssertNil(iePath.extract(from: .cdtCase))
+      XCTAssertNil(iePath.extract(from: .citCase))
+      XCTAssertNil(iePath.extract(from: .ideCase))
+      XCTAssertNil(iePath.extract(from: .idtCase))
+      XCTAssertNil(iePath.extract(from: .iieCase))
+      XCTAssertNil(iePath.extract(from: .iitCase))
+      XCTAssertEqual(iePath.extract(from: .cieCase), .some(Conformer()))
+
+      XCTAssertNil(itPath.extract(from: .cdeCase))
+      XCTAssertNil(itPath.extract(from: .cdtCase))
+      XCTAssertNil(itPath.extract(from: .cieCase))
+      XCTAssertNil(itPath.extract(from: .ideCase))
+      XCTAssertNil(itPath.extract(from: .idtCase))
+      XCTAssertNil(itPath.extract(from: .iieCase))
+      XCTAssertNil(itPath.extract(from: .iitCase))
+      XCTAssertEqual(itPath.extract(from: .citCase), .some(Conformer()))
+    }
+  }
+
+  func testUnreasonableContravariantEmbed() {
+    enum Enum {
+      case c(TestProtocol, Int)
+    }
+
+    // The library doesn't handle this crazy esoteric case, but it detects it and returns nil instead of garbage.
+    let path: CasePath<Enum, (Int, Int)> = /Enum.c
+
+    for _ in 1...2 {
+      XCTAssertNil(path.extract(from: .c(34, 12)))
+    }
+  }
+
   func testEmbed() {
     enum Foo: Equatable { case bar(Int) }
 
@@ -487,6 +597,21 @@ final class CasePathsTests: XCTestCase {
       .baz,
       fooBar.extract(from: .bar(.baz))
     )
+  }
+
+  func testCompoundUninhabitedType() {
+    // Under Swift 5.1 (Xcode 11.3), this test creates a bogus instance of the tuple `(Never, Never)`, but remarkably, doesn't cause a crash and extracts the correct answer (nil).
+
+    enum Enum {
+      case nevers(Never, Never)
+      case something(Void)
+    }
+
+    let path: CasePath<Enum, (Never, Never)> = /Enum.nevers(_:_:)
+
+    for _ in 1...2 {
+      XCTAssertNil(path.extract(from: Enum.something(())))
+    }
   }
 
   func testNestedUninhabitedTypes() {
