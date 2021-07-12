@@ -70,7 +70,10 @@ public func extract<Root, Value>(_ embed: @escaping (Value) -> Root) -> (Root) -
   guard
     let metadata = EnumMetadata(Root.self),
     metadata.typeDescriptor.fieldDescriptor != nil
-  else { return { _ in nil } }
+  else {
+    assertionFailure("embed parameter must be a valid enum case initializer")
+    return { _ in nil }
+  }
 
   var cachedTag: UInt32?
   var cachedStrategy: Strategy<Root, Value>?
