@@ -141,8 +141,7 @@ extension Strategy {
       // Drop payload label from metadata, e.g., treat `(foo: Foo)` as `Foo`.
       self.init(tag: tag, assumedAssociatedValueType: avMetadata.element(at: 0).type)
 
-    } else if
-      let avMetadata = TupleMetadata(avType),
+    } else if let avMetadata = TupleMetadata(avType),
       let valueMetadata = TupleMetadata(Value.self),
       valueMetadata.labels == nil
     {
