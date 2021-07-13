@@ -87,16 +87,19 @@ public func extract<Root, Value>(_ embed: @escaping (Value) -> Root) -> (Root) -
       return cachedStrategy.extract(from: root, tag: rootTag)
     }
 
-    guard let value = Strategy<Root, Value>(tag: rootTag).extract(from: root, tag: rootTag)
+    let rootStrategy = Strategy<Root, Value>(tag: rootTag)
+    guard let value = rootStrategy.extract(from: root, tag: rootTag)
     else { return nil }
 
     let embedTag = metadata.tag(of: embed(value))
     cachedTag = embedTag
-    cachedStrategy = Strategy<Root, Value>(tag: embedTag)
-
-    guard embedTag == rootTag else { return nil }
-
-    return value
+    if embedTag == rootTag {
+      cachedStrategy = rootStrategy
+      return value
+    } else {
+      cachedStrategy = Strategy<Root, Value>(tag: embedTag)
+      return nil
+    }
   }
 }
 
