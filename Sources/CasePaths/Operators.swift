@@ -115,7 +115,7 @@ extension CasePath {
     lhs: CasePath,
     rhs: CasePath<Value, AppendedValue>
   ) -> CasePath<Root, AppendedValue> {
-    return lhs.appending(path: rhs)
+    lhs.appending(path: rhs)
   }
 
   /// Returns a new case path created by appending the given embed function.
