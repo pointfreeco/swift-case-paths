@@ -137,17 +137,16 @@ extension Strategy {
       // Workaround for https://bugs.swift.org/browse/SR-12044
       self = .void
 
-    } else if
+    } else if let avMetadata = TupleMetadata(avType), avMetadata.elementCount == 1 {
       // Drop payload label from metadata, e.g., treat `(foo: Foo)` as `Foo`.
-      let avMetadata = TupleMetadata(avType), avMetadata.elementCount == 1 {
       self.init(tag: tag, assumedAssociatedValueType: avMetadata.element(at: 0).type)
 
     } else if
-      // Drop payload labels from metadata, e.g., treat `(foo: Foo, bar: Bar)` as `(Foo, Bar)`.
       let avMetadata = TupleMetadata(avType),
       let valueMetadata = TupleMetadata(Value.self),
       valueMetadata.labels == nil
     {
+      // Drop payload labels from metadata, e.g., treat `(foo: Foo, bar: Bar)` as `(Foo, Bar)`.
       guard avMetadata.hasSameLayout(as: valueMetadata) else {
         self = .unimplemented
         return
