@@ -321,7 +321,7 @@ extension EnumMetadata {
   }
 
   func isOptional() -> Bool {
-    // All Optional types shared a common EnumTypeDescriptor.
+    // All Optional types share a common EnumTypeDescriptor.
     let optionalTypeDescriptor = EnumMetadata(assumingEnum: Void?.self).typeDescriptor
     return typeDescriptor == optionalTypeDescriptor
   }
