@@ -162,11 +162,6 @@ extension Strategy {
       }
       self.init(tag: tag, assumedAssociatedValueType: Value.self)
 
-    } else if metadata.wrappedTypeIfOptional() == avType {
-      // Enum == Optional<Inner>
-      //
-      self = .unimplemented
-
     } else if ExistentialMetadata(avType) != nil {
       // Convert protocol existentials to `Any` so that they can be cast (`as? Value`).
       let anyStrategy = Strategy<Enum, Any>(nonExistentialTag: tag)
