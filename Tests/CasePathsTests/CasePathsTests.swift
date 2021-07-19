@@ -450,6 +450,38 @@ final class CasePathsTests: XCTestCase {
     }
   }
 
+  #if !DEBUG
+  func testDirectExtractFromOptionalRoot() {
+    // https://github.com/pointfreeco/swift-case-paths/issues/40
+
+    enum Authentication {
+      case authenticated(token: String)
+      case unauthenticated
+    }
+
+    let root: Authentication? = .authenticated(token: "deadbeef")
+    // The following statement asserts in a DEBUG build.
+    let actual = extract(case: Authentication.authenticated, from: root)
+    // The “correct” answer is "deadbeef", but it's too hard to implement.
+    XCTAssertNil(actual)
+  }
+
+  func testPathExtractFromOptionalRoot() {
+    // https://github.com/pointfreeco/swift-case-paths/issues/40
+
+    enum Authentication {
+      case authenticated(token: String)
+      case unauthenticated
+    }
+
+    let root: Authentication? = .authenticated(token: "deadbeef")
+    // The following statement asserts in a DEBUG build.
+    let actual = (/Authentication.authenticated).extract(from: root)
+    // The “correct” answer is "deadbeef", but it's too hard to implement.
+    XCTAssertNil(actual)
+  }
+  #endif
+
   func testEmbed() {
     enum Foo: Equatable { case bar(Int) }
 

@@ -75,6 +75,16 @@ public func extract<Root, Value>(_ embed: @escaping (Value) -> Root) -> (Root) -
     return { _ in nil }
   }
 
+  // https://github.com/pointfreeco/swift-case-paths/issues/40
+  if
+    let wrappedType = metadata.wrappedTypeIfOptional(),
+    wrappedType != Value.self,
+    EnumMetadata(wrappedType) != nil
+  {
+    assertionFailure("embed parameter must not be promoted to return Optional (https://github.com/pointfreeco/swift-case-paths/issues/40)")
+    return { _ in nil }
+  }
+
   var cachedTag: UInt32?
   var cachedStrategy: Strategy<Root, Value>?
 
@@ -152,6 +162,11 @@ extension Strategy {
       }
       self.init(tag: tag, assumedAssociatedValueType: Value.self)
 
+    } else if metadata.wrappedTypeIfOptional() == avType {
+      // Enum == Optional<Inner>
+      //
+      self = .unimplemented
+
     } else if ExistentialMetadata(avType) != nil {
       // Convert protocol existentials to `Any` so that they can be cast (`as? Value`).
       let anyStrategy = Strategy<Enum, Any>(nonExistentialTag: tag)
@@ -198,7 +213,7 @@ extension Strategy {
     }
   }
 
-  private func withProjectedPayload<Enum, Answer>(
+  private func withProjectedPayload<Answer>(
     of root: Enum,
     tag: UInt32,
     do body: (UnsafeRawPointer) -> Answer
@@ -305,9 +320,21 @@ extension EnumMetadata {
   }
 }
 
+extension EnumMetadata {
+  func wrappedTypeIfOptional() -> Any.Type? {
+    isOptional() ? genericArguments?.type(atIndex: 0) : nil
+  }
+
+  func isOptional() -> Bool {
+    // All Optional types shared a common EnumTypeDescriptor.
+    let optionalTypeDescriptor = EnumMetadata(assumingEnum: Void?.self).typeDescriptor
+    return typeDescriptor == optionalTypeDescriptor
+  }
+}
+
 // MARK: -
 
-private struct EnumTypeDescriptor {
+private struct EnumTypeDescriptor: Equatable {
   let ptr: UnsafeRawPointer
 
   var flags: Flags { Flags(rawValue: self.ptr.load(as: UInt32.self)) }
@@ -482,6 +509,12 @@ private struct ValueWitnessTable {
 
 private struct GenericArgumentVector {
   let ptr: UnsafeRawPointer
+}
+
+extension GenericArgumentVector {
+  func type(atIndex i: Int) -> Any.Type {
+    return ptr.load(fromByteOffset: i * pointerSize, as: Any.Type.self)
+  }
 }
 
 extension UnsafeRawPointer {
