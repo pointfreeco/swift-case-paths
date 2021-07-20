@@ -140,7 +140,7 @@ extension Strategy {
     }
 
     if avType == Value.self {
-      self = .init(nonExistentialTag: tag)
+      self = .init(metadata: metadata, nonExistentialTag: tag)
 
     } else if shouldWorkAroundSR12044, MemoryLayout<Value>.size == 0, !isUninhabitedEnum {
       // Workaround for https://bugs.swift.org/browse/SR-12044
@@ -165,7 +165,7 @@ extension Strategy {
 
     } else if ExistentialMetadata(avType) != nil {
       // Convert protocol existentials to `Any` so that they can be cast (`as? Value`).
-      let anyStrategy = Strategy<Enum, Any>(nonExistentialTag: tag)
+      let anyStrategy = Strategy<Enum, Any>(metadata: metadata, nonExistentialTag: tag)
       self = .existential { anyStrategy.extract(from: $0, tag: tag) }
 
     } else {
@@ -173,9 +173,9 @@ extension Strategy {
     }
   }
 
-  init(nonExistentialTag tag: UInt32) {
+  init(metadata: EnumMetadata, nonExistentialTag tag: UInt32) {
     self =
-      EnumMetadata(assumingEnum: Enum.self)
+      metadata
         .typeDescriptor
         .fieldDescriptor!
         .field(atIndex: tag)
