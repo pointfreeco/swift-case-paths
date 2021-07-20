@@ -68,18 +68,28 @@ public func extract<Root, Value>(case embed: @escaping (Value) -> Root, from roo
 /// - Returns: A function that can attempt to extract associated values from an enum.
 public func extract<Root, Value>(_ embed: @escaping (Value) -> Root) -> (Root) -> (Value?) {
   guard
-    let metadata = EnumMetadata(Root.self),
+    var metadata = EnumMetadata(Root.self),
     metadata.typeDescriptor.fieldDescriptor != nil
   else {
     assertionFailure("embed parameter must be a valid enum case initializer")
     return { _ in nil }
   }
 
+  if let wrappedType = metadata.wrappedTypeIfOptional(), wrappedType != Value.self {
+    guard
+      let wrappedMetadata = EnumMetadata(wrappedType),
+      metadata.typeDescriptor.fieldDescriptor != nil
+    else {
+      assertionFailure("embed parameter must be a valid enum case initializer")
+      return { _ in nil }
+    }
+    metadata = wrappedMetadata
+  }
+
   var cachedTag: UInt32?
   var cachedStrategy: Strategy<Root, Value>?
 
   return { root in
-    let metadata = EnumMetadata(assumingEnum: Root.self)
     let rootTag = metadata.tag(of: root)
 
     if let cachedTag = cachedTag, let cachedStrategy = cachedStrategy {
@@ -87,7 +97,7 @@ public func extract<Root, Value>(_ embed: @escaping (Value) -> Root) -> (Root) -
       return cachedStrategy.extract(from: root, tag: rootTag)
     }
 
-    let rootStrategy = Strategy<Root, Value>(tag: rootTag)
+    let rootStrategy = Strategy<Root, Value>(metadata: metadata, tag: rootTag)
     guard let value = rootStrategy.extract(from: root, tag: rootTag)
     else { return nil }
 
@@ -97,7 +107,7 @@ public func extract<Root, Value>(_ embed: @escaping (Value) -> Root) -> (Root) -
       cachedStrategy = rootStrategy
       return value
     } else {
-      cachedStrategy = Strategy<Root, Value>(tag: embedTag)
+      cachedStrategy = Strategy<Root, Value>(metadata: metadata, tag: embedTag)
       return nil
     }
   }
@@ -114,8 +124,7 @@ private enum Strategy<Enum, Value> {
 }
 
 extension Strategy {
-  init(tag: UInt32, assumedAssociatedValueType: Any.Type? = nil) {
-    let metadata = EnumMetadata(assumingEnum: Enum.self)
+  init(metadata: EnumMetadata, tag: UInt32, assumedAssociatedValueType: Any.Type? = nil) {
     let avType = assumedAssociatedValueType ?? metadata.associatedValueType(forTag: tag)
 
     var shouldWorkAroundSR12044: Bool {
@@ -139,7 +148,9 @@ extension Strategy {
 
     } else if let avMetadata = TupleMetadata(avType), avMetadata.elementCount == 1 {
       // Drop payload label from metadata, e.g., treat `(foo: Foo)` as `Foo`.
-      self.init(tag: tag, assumedAssociatedValueType: avMetadata.element(at: 0).type)
+      self.init(
+        metadata: metadata, tag: tag, assumedAssociatedValueType: avMetadata.element(at: 0).type
+      )
 
     } else if let avMetadata = TupleMetadata(avType),
       let valueMetadata = TupleMetadata(Value.self),
@@ -150,7 +161,7 @@ extension Strategy {
         self = .unimplemented
         return
       }
-      self.init(tag: tag, assumedAssociatedValueType: Value.self)
+      self.init(metadata: metadata, tag: tag, assumedAssociatedValueType: Value.self)
 
     } else if ExistentialMetadata(avType) != nil {
       // Convert protocol existentials to `Any` so that they can be cast (`as? Value`).
@@ -186,8 +197,7 @@ extension Strategy {
       return self.withProjectedPayload(of: root, tag: tag) {
         $0
           .load(as: UnsafeRawPointer.self)  // Load the heap object pointer.
-          .advanced(by: 2 * pointerSize)  // Skip the heap object header.
-          .load(as: Value.self)
+          .load(fromByteOffset: 2 * pointerSize, as: Value.self)  // Skip the heap object header.
       }
 
     case .unimplemented:
@@ -284,6 +294,16 @@ extension EnumMetadata {
 
     return type
   }
+
+  func wrappedTypeIfOptional() -> Any.Type? {
+    self.isOptional ? self.genericArguments?.type(atIndex: 0) : nil
+  }
+
+  var isOptional: Bool {
+    // All Optional types share a common EnumTypeDescriptor.
+    let optionalTypeDescriptor = EnumMetadata(assumingEnum: Void?.self).typeDescriptor
+    return typeDescriptor == optionalTypeDescriptor
+  }
 }
 
 @_silgen_name("swift_getTypeByMangledNameInContext")
@@ -297,17 +317,15 @@ private func swift_getTypeByMangledNameInContext(
 
 extension EnumMetadata {
   func destructivelyProjectPayload(of value: UnsafeMutableRawPointer) {
-    self.valueWitnessTable.destructiveProjectEnumData(value, ptr)
+    self.valueWitnessTable.destructiveProjectEnumData(value, self.ptr)
   }
 
   func destructivelyInjectTag(_ tag: UInt32, intoPayload payload: UnsafeMutableRawPointer) {
-    self.valueWitnessTable.destructiveInjectEnumData(payload, tag, ptr)
+    self.valueWitnessTable.destructiveInjectEnumData(payload, tag, self.ptr)
   }
 }
 
-// MARK: -
-
-private struct EnumTypeDescriptor {
+private struct EnumTypeDescriptor: Equatable {
   let ptr: UnsafeRawPointer
 
   var flags: Flags { Flags(rawValue: self.ptr.load(as: UInt32.self)) }
@@ -331,8 +349,6 @@ extension EnumTypeDescriptor {
     static var isGeneric: Self { .init(rawValue: 0x80) }
   }
 }
-
-// MARK: -
 
 private struct TupleMetadata: Metadata {
   let ptr: UnsafeRawPointer
@@ -387,8 +403,6 @@ extension TupleMetadata {
       && (0..<Int(self.elementCount)).allSatisfy { self.element(at: $0) == other.element(at: $0) }
   }
 }
-
-// MARK: -
 
 private struct ExistentialMetadata: Metadata {
   let ptr: UnsafeRawPointer
@@ -482,6 +496,12 @@ private struct ValueWitnessTable {
 
 private struct GenericArgumentVector {
   let ptr: UnsafeRawPointer
+}
+
+extension GenericArgumentVector {
+  func type(atIndex i: Int) -> Any.Type {
+    return ptr.load(fromByteOffset: i * pointerSize, as: Any.Type.self)
+  }
 }
 
 extension UnsafeRawPointer {

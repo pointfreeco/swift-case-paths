@@ -802,13 +802,30 @@ final class CasePathsTests: XCTestCase {
   }
 
   func testExtractFromOptionalRoot() {
-    enum Authentication {
-      case authenticated(token: String)
-      case unauthenticated
+    enum Foo {
+      case foo(String)
+      case bar(String)
+      case baz
     }
 
-    // Fails
-    let optionalAuthentication: Authentication? = .authenticated(token: "deadbeef")
-    XCTAssertNotNil(extract(case: Authentication.authenticated, from: optionalAuthentication))
+    var opt: Foo? = .foo("blob1")
+    XCTAssertEqual("blob1", (/Foo.foo).extract(from: opt))
+    XCTAssertNil((/Foo.bar).extract(from: opt))
+    XCTAssertNil((/Foo.baz).extract(from: opt))
+
+    opt = .bar("blob2")
+    XCTAssertNil((/Foo.foo).extract(from: opt))
+    XCTAssertEqual("blob2", (/Foo.bar).extract(from: opt))
+    XCTAssertNil((/Foo.baz).extract(from: opt))
+
+    opt = .baz
+    XCTAssertNil((/Foo.foo).extract(from: opt))
+    XCTAssertNil((/Foo.bar).extract(from: opt))
+    XCTAssertNotNil((/Foo.baz).extract(from: opt))
+
+    opt = nil
+    XCTAssertNil((/Foo.foo).extract(from: opt))
+    XCTAssertNil((/Foo.bar).extract(from: opt))
+    XCTAssertNil((/Foo.baz).extract(from: opt))
   }
 }
