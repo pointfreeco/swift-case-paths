@@ -800,4 +800,15 @@ final class CasePathsTests: XCTestCase {
       "CasePath<Result<String, Error>, String>"
     )
   }
+
+  func testExtractFromOptionalRoot() {
+    enum Authentication {
+      case authenticated(token: String)
+      case unauthenticated
+    }
+
+    // Fails
+    let optionalAuthentication: Authentication? = .authenticated(token: "deadbeef")
+    XCTAssertNotNil(extract(case: Authentication.authenticated, from: optionalAuthentication))
+  }
 }
