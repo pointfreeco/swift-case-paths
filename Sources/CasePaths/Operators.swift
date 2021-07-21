@@ -26,6 +26,12 @@ public prefix func / <Root, Value>(
   .case(embed)
 }
 
+public prefix func / <Root, Value>(
+  embed: @escaping (Value) -> Root?
+) -> CasePath<Root?, Value> {
+  .optionalCase(embed)
+}
+
 /// Returns a void case path for a case with no associated value.
 ///
 /// - Note: This operator is only intended to be used with enum cases that have no associated

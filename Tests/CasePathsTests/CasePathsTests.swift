@@ -450,6 +450,36 @@ final class CasePathsTests: XCTestCase {
     }
   }
 
+  func testDirectExtractFromOptionalRoot() {
+    // https://github.com/pointfreeco/swift-case-paths/issues/40
+
+    enum Authentication {
+      case authenticated(token: String)
+      case unauthenticated
+    }
+
+    let root: Authentication? = .authenticated(token: "deadbeef")
+    let embed: (String) -> Authentication? = Authentication.authenticated
+    let actual = extract(case: embed, from: root)
+    XCTAssertEqual(actual, "deadbeef")
+  }
+
+  func testPathExtractFromOptionalRoot() {
+    // https://github.com/pointfreeco/swift-case-paths/issues/40
+
+    enum Authentication {
+      case authenticated(token: String)
+      case unauthenticated
+    }
+
+    let root: Authentication? = .authenticated(token: "deadbeef")
+    let path: CasePath<Authentication?, String> = /Authentication.authenticated
+    for _ in 1...2 {
+      let actual = path.extract(from: root)
+      XCTAssertEqual(actual, "deadbeef")
+    }
+  }
+
   func testEmbed() {
     enum Foo: Equatable { case bar(Int) }
 
@@ -800,4 +830,61 @@ final class CasePathsTests: XCTestCase {
       "CasePath<Result<String, Error>, String>"
     )
   }
+
+  func testExtractFromOptionalRoot() {
+    enum Foo {
+      case foo(String)
+      case bar(String)
+      case baz
+    }
+
+    var opt: Foo? = .foo("blob1")
+    XCTAssertEqual("blob1", (/Foo.foo).extract(from: opt))
+    XCTAssertNil((/Foo.bar).extract(from: opt))
+    XCTAssertNil((/Foo.baz).extract(from: opt))
+
+    opt = .bar("blob2")
+    XCTAssertNil((/Foo.foo).extract(from: opt))
+    XCTAssertEqual("blob2", (/Foo.bar).extract(from: opt))
+    XCTAssertNil((/Foo.baz).extract(from: opt))
+
+    opt = .baz
+    XCTAssertNil((/Foo.foo).extract(from: opt))
+    XCTAssertNil((/Foo.bar).extract(from: opt))
+    XCTAssertNotNil((/Foo.baz).extract(from: opt))
+
+    opt = nil
+    XCTAssertNil((/Foo.foo).extract(from: opt))
+    XCTAssertNil((/Foo.bar).extract(from: opt))
+    XCTAssertNil((/Foo.baz).extract(from: opt))
+  }
+
+  func testExtractFromOptionalRootWithEmbeddedTagBits() {
+    enum E {
+      case c1(TestObject)
+      case c2(TestObject)
+    }
+
+    let o = TestObject()
+    let c1Path: CasePath<E?, TestObject> = /E.c1
+    let c2Path: CasePath<E?, TestObject> = /E.c2
+
+    func check(_ path: CasePath<E?, TestObject>, _ input: E?, _ expected: TestObject?) {
+      let actual = path.extract(from: input)
+      XCTAssertEqual(actual, expected)
+    }
+
+    for _ in 1...2 {
+      check(c1Path, nil, nil)
+      check(c1Path, .c1(o), o)
+      check(c1Path, .c2(o), nil)
+      check(c2Path, nil, nil)
+      check(c2Path, .c1(o), nil)
+      check(c2Path, .c2(o), o)
+    }
+  }
+}
+
+fileprivate class TestObject: Equatable {
+  static func == (lhs: TestObject, rhs: TestObject) -> Bool { lhs === rhs }
 }

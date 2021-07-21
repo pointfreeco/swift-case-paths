@@ -11,6 +11,13 @@ extension CasePath {
       extract: CasePaths.extract(embed)
     )
   }
+
+  public static func optionalCase<Wrapped>(_ embed: @escaping (Value) -> Wrapped?) -> CasePath where Root == Wrapped? {
+    self.init(
+      embed: embed,
+      extract: CasePaths.extract(embed)
+    )
+  }
 }
 
 extension CasePath where Value == Void {
@@ -50,6 +57,10 @@ public func extract<Root, Value>(case embed: @escaping (Value) -> Root, from roo
   CasePaths.extract(embed)(root)
 }
 
+public func extract<Root, Value>(case embed: @escaping (Value) -> Root?, from root: Root?) -> Value? {
+  CasePaths.extract(embed)(root)
+}
+
 /// Returns a function that can attempt to extract associated values from the given enum case
 /// initializer.
 ///
@@ -66,12 +77,22 @@ public func extract<Root, Value>(case embed: @escaping (Value) -> Root, from roo
 ///   otherwise undefined.
 /// - Parameter embed: An enum case initializer.
 /// - Returns: A function that can attempt to extract associated values from an enum.
-public func extract<Root, Value>(_ embed: @escaping (Value) -> Root) -> (Root) -> (Value?) {
+public func extract<Root, Value>(_ embed: @escaping (Value) -> Root) -> (Root) -> Value? {
   guard
     let metadata = EnumMetadata(Root.self),
     metadata.typeDescriptor.fieldDescriptor != nil
   else {
     assertionFailure("embed parameter must be a valid enum case initializer")
+    return { _ in nil }
+  }
+
+  // https://github.com/pointfreeco/swift-case-paths/issues/40
+  if
+    let wrappedType = metadata.wrappedTypeIfOptional(),
+    wrappedType != Value.self,
+    EnumMetadata(wrappedType) != nil
+  {
+    assertionFailure("embed parameter must not be promoted to return Optional (https://github.com/pointfreeco/swift-case-paths/issues/40)")
     return { _ in nil }
   }
 
@@ -92,6 +113,49 @@ public func extract<Root, Value>(_ embed: @escaping (Value) -> Root) -> (Root) -
     else { return nil }
 
     let embedTag = metadata.tag(of: embed(value))
+    cachedTag = embedTag
+    if embedTag == rootTag {
+      cachedStrategy = rootStrategy
+      return value
+    } else {
+      cachedStrategy = Strategy<Root, Value>(tag: embedTag)
+      return nil
+    }
+  }
+}
+
+public func extract<Root, Value>(_ embed: @escaping (Value) -> Root?) -> (Root?) -> Value? {
+  if Root.self == Value.self {
+    return { $0 as! Value? }
+  }
+
+  guard
+    EnumMetadata(Root.self)?.typeDescriptor.fieldDescriptor != nil
+  else {
+    assertionFailure("embed parameter must be a valid enum case initializer")
+    return { _ in nil }
+  }
+
+  var cachedTag: UInt32?
+  var cachedStrategy: Strategy<Root, Value>?
+
+  return { optionalRoot in
+    guard let root = optionalRoot else { return nil }
+
+    let metadata = EnumMetadata(assumingEnum: Root.self)
+    let rootTag = metadata.tag(of: root)
+
+    if let cachedTag = cachedTag, let cachedStrategy = cachedStrategy {
+      guard rootTag == cachedTag else { return nil }
+      return cachedStrategy.extract(from: root, tag: rootTag)
+    }
+
+    let rootStrategy = Strategy<Root, Value>(tag: rootTag)
+    guard let value = rootStrategy.extract(from: root, tag: rootTag)
+    else { return nil }
+
+    guard let embedded = embed(value) else { return nil }
+    let embedTag = metadata.tag(of: embedded)
     cachedTag = embedTag
     if embedTag == rootTag {
       cachedStrategy = rootStrategy
@@ -198,7 +262,7 @@ extension Strategy {
     }
   }
 
-  private func withProjectedPayload<Enum, Answer>(
+  private func withProjectedPayload<Answer>(
     of root: Enum,
     tag: UInt32,
     do body: (UnsafeRawPointer) -> Answer
@@ -305,9 +369,21 @@ extension EnumMetadata {
   }
 }
 
+extension EnumMetadata {
+  func wrappedTypeIfOptional() -> Any.Type? {
+    isOptional() ? genericArguments?.type(atIndex: 0) : nil
+  }
+
+  func isOptional() -> Bool {
+    // All Optional types share a common EnumTypeDescriptor.
+    let optionalTypeDescriptor = EnumMetadata(assumingEnum: Void?.self).typeDescriptor
+    return typeDescriptor == optionalTypeDescriptor
+  }
+}
+
 // MARK: -
 
-private struct EnumTypeDescriptor {
+private struct EnumTypeDescriptor: Equatable {
   let ptr: UnsafeRawPointer
 
   var flags: Flags { Flags(rawValue: self.ptr.load(as: UInt32.self)) }
@@ -482,6 +558,12 @@ private struct ValueWitnessTable {
 
 private struct GenericArgumentVector {
   let ptr: UnsafeRawPointer
+}
+
+extension GenericArgumentVector {
+  func type(atIndex i: Int) -> Any.Type {
+    return ptr.load(fromByteOffset: i * pointerSize, as: Any.Type.self)
+  }
 }
 
 extension UnsafeRawPointer {
