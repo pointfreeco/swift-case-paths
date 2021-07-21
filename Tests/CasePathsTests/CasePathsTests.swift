@@ -450,23 +450,7 @@ final class CasePathsTests: XCTestCase {
     }
   }
 
-  func testDirectExtractFromOptionalRoot() {
-    // https://github.com/pointfreeco/swift-case-paths/issues/40
-
-    enum Authentication {
-      case authenticated(token: String)
-      case unauthenticated
-    }
-
-    let root: Authentication? = .authenticated(token: "deadbeef")
-    let embed: (String) -> Authentication? = Authentication.authenticated
-    let actual = extract(case: embed, from: root)
-    XCTAssertEqual(actual, "deadbeef")
-  }
-
   func testPathExtractFromOptionalRoot() {
-    // https://github.com/pointfreeco/swift-case-paths/issues/40
-
     enum Authentication {
       case authenticated(token: String)
       case unauthenticated
@@ -766,8 +750,8 @@ final class CasePathsTests: XCTestCase {
   }
 
   func testExample() {
-    XCTAssertEqual("Blob", extract(case: Result<String, Error>.success, from: .success("Blob")))
-    XCTAssertNil(extract(case: Result<String, Error>.failure, from: .success("Blob")))
+    XCTAssertEqual("Blob", (/Result<String, Error>.success).extract(from: .success("Blob")))
+    XCTAssertNil((/Result<String, Error>.failure).extract(from: .success("Blob")))
 
     XCTAssertEqual(42, (/Int??.some .. Int?.some).extract(from: Optional(Optional(42))))
   }
