@@ -885,6 +885,6 @@ final class CasePathsTests: XCTestCase {
   }
 }
 
-fileprivate class TestObject: Equatable {
+private class TestObject: Equatable {
   static func == (lhs: TestObject, rhs: TestObject) -> Bool { lhs === rhs }
 }

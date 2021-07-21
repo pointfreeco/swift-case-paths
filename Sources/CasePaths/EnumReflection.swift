@@ -12,7 +12,8 @@ extension CasePath {
     )
   }
 
-  public static func optionalCase<Wrapped>(_ embed: @escaping (Value) -> Wrapped?) -> CasePath where Root == Wrapped? {
+  public static func optionalCase<Wrapped>(_ embed: @escaping (Value) -> Wrapped?) -> CasePath
+  where Root == Wrapped? {
     self.init(
       embed: embed,
       extract: CasePaths.extract(embed)
@@ -57,7 +58,8 @@ public func extract<Root, Value>(case embed: @escaping (Value) -> Root, from roo
   CasePaths.extract(embed)(root)
 }
 
-public func extract<Root, Value>(case embed: @escaping (Value) -> Root?, from root: Root?) -> Value? {
+public func extract<Root, Value>(case embed: @escaping (Value) -> Root?, from root: Root?) -> Value?
+{
   CasePaths.extract(embed)(root)
 }
 
@@ -87,12 +89,13 @@ public func extract<Root, Value>(_ embed: @escaping (Value) -> Root) -> (Root) -
   }
 
   // https://github.com/pointfreeco/swift-case-paths/issues/40
-  if
-    let wrappedType = metadata.wrappedTypeIfOptional(),
+  if let wrappedType = metadata.wrappedTypeIfOptional(),
     wrappedType != Value.self,
     EnumMetadata(wrappedType) != nil
   {
-    assertionFailure("embed parameter must not be promoted to return Optional (https://github.com/pointfreeco/swift-case-paths/issues/40)")
+    assertionFailure(
+      "embed parameter must not be promoted to return Optional (https://github.com/pointfreeco/swift-case-paths/issues/40)"
+    )
     return { _ in nil }
   }
 
