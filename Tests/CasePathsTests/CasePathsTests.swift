@@ -831,6 +831,15 @@ final class CasePathsTests: XCTestCase {
     )
   }
 
+  func testOptionalInsideResult() {
+    let result: Result<String?, Error> = .success("hello, world")
+    let path: CasePath<Result<String?, Error>, String> = /Result.success
+    let actual = path.extract(from: result)
+    XCTAssertEqual(
+      actual,
+      "hello, world")
+  }
+
   func testExtractFromOptionalRoot() {
     enum Foo {
       case foo(String)

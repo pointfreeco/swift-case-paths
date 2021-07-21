@@ -176,6 +176,7 @@ private enum Strategy<Enum, Value> {
   case direct
   case existential(extract: (Enum) -> Any?)
   case indirect
+  case optional(extract: (Enum) -> Value?)
   case unimplemented
   case void
 }
@@ -224,6 +225,18 @@ extension Strategy {
       let anyStrategy = Strategy<Enum, Any>(nonExistentialTag: tag)
       self = .existential { anyStrategy.extract(from: $0, tag: tag) }
 
+    } else if EnumMetadata(avType)?.isOptional() ?? false {
+      // Maybe the embed function's argument was promoted out
+      // of Optional, e.g. (String?) -> Result<String?, Error>
+      // was promoted to (String) -> Result<String?, Error>.
+
+      let wrappedStrategy = Strategy<Enum, Value?>(tag: tag, assumedAssociatedValueType: avType)
+      if case .unimplemented = wrappedStrategy {
+        self = .unimplemented
+      } else {
+        self = .optional { wrappedStrategy.extract(from: $0, tag: tag).flatMap { $0 } }
+      }
+
     } else {
       self = .unimplemented
     }
@@ -256,6 +269,9 @@ extension Strategy {
           .advanced(by: 2 * pointerSize)  // Skip the heap object header.
           .load(as: Value.self)
       }
+
+    case let .optional(extract):
+      return extract(root)
 
     case .unimplemented:
       return nil
