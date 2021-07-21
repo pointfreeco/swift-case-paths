@@ -35,7 +35,7 @@ public prefix func / <Root, Value>(
 public prefix func / <Root, Value>(
   embed: @escaping (Value) -> Root?
 ) -> CasePath<Root?, Value> {
-  .init(embed: embed,  extract: optionalPromotedExtractHelp(embed))
+  .init(embed: embed, extract: optionalPromotedExtractHelp(embed))
 }
 
 /// Returns a void case path for a case with no associated value.

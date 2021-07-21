@@ -47,7 +47,11 @@ extension CasePath where Value == Void {
 ///   - root: A root enum value.
 /// - Returns: Values iff they can be extracted from the given enum case initializer and root enum,
 ///   otherwise `nil`.
-@available(*, deprecated, message: "Use case path literal syntax (e.g., '/Root.caseName'), or '(/Root.caseName).extract(from:)'")
+@available(
+  *, deprecated,
+  message:
+    "Use case path literal syntax (e.g., '/Root.caseName'), or '(/Root.caseName).extract(from:)'"
+)
 public func extract<Root, Value>(case embed: @escaping (Value) -> Root, from root: Root) -> Value? {
   CasePaths.extract(embed)(root)
 }
@@ -68,7 +72,11 @@ public func extract<Root, Value>(case embed: @escaping (Value) -> Root, from roo
 ///   - root: A root enum value.
 /// - Returns: Values iff they can be extracted from the given enum case initializer and root enum,
 ///   otherwise `nil`.
-@available(*, deprecated, message: "Use case path literal syntax (e.g., '/Root.caseName'), or '(/Root.caseName).extract(from:)'")
+@available(
+  *, deprecated,
+  message:
+    "Use case path literal syntax (e.g., '/Root.caseName'), or '(/Root.caseName).extract(from:)'"
+)
 public func extract<Root, Value>(case embed: @escaping (Value) -> Root?, from root: Root?) -> Value?
 {
   CasePaths.extract(embed)(root)
