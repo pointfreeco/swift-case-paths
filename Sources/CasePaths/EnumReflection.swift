@@ -11,14 +11,6 @@ extension CasePath {
       extract: CasePaths.extract(embed)
     )
   }
-
-  public static func optionalCase<Wrapped>(_ embed: @escaping (Value) -> Wrapped?) -> CasePath
-  where Root == Wrapped? {
-    self.init(
-      embed: embed,
-      extract: CasePaths.extract(embed)
-    )
-  }
 }
 
 extension CasePath where Value == Void {
@@ -30,10 +22,9 @@ extension CasePath where Value == Void {
   /// - Parameter value: An enum case with no associated values.
   /// - Returns: A case path that extracts `()` if the case matches, otherwise `nil`.
   public static func `case`(_ value: Root) -> CasePath {
-    let label = "\(value)"
-    return CasePath(
+    CasePath(
       embed: { value },
-      extract: { "\($0)" == label ? () : nil }
+      extract: extractVoidHelp(value)
     )
   }
 }
@@ -58,6 +49,22 @@ public func extract<Root, Value>(case embed: @escaping (Value) -> Root, from roo
   CasePaths.extract(embed)(root)
 }
 
+/// Attempts to extract values associated with a given enum case initializer from a given root enum.
+///
+/// ```swift
+/// extract(case: Result<Int, Error>.success, from: .success(42))
+/// // 42
+/// extract(case: Result<Int, Error>.success, from: .failure(MyError())
+/// // nil
+/// ```
+///
+/// - Note: This function is only intended to be used with enum case initializers. Its behavior is
+///   otherwise undefined.
+/// - Parameters:
+///   - embed: An enum case initializer.
+///   - root: A root enum value.
+/// - Returns: Values iff they can be extracted from the given enum case initializer and root enum,
+///   otherwise `nil`.
 public func extract<Root, Value>(case embed: @escaping (Value) -> Root?, from root: Root?) -> Value?
 {
   CasePaths.extract(embed)(root)
@@ -80,6 +87,32 @@ public func extract<Root, Value>(case embed: @escaping (Value) -> Root?, from ro
 /// - Parameter embed: An enum case initializer.
 /// - Returns: A function that can attempt to extract associated values from an enum.
 public func extract<Root, Value>(_ embed: @escaping (Value) -> Root) -> (Root) -> Value? {
+  extractHelp(embed)
+}
+
+/// Returns a function that can attempt to extract associated values from the given enum case
+/// initializer.
+///
+/// Use this function to create new transform functions to pass to higher-order methods like
+/// `compactMap`:
+///
+/// ```swift
+/// [Result<Int, Error>.success(42), .failure(MyError()]
+///   .compactMap(extract(Result.success))
+/// // [42]
+/// ```
+///
+/// - Note: This function is only intended to be used with enum case initializers. Its behavior is
+///   otherwise undefined.
+/// - Parameter embed: An enum case initializer.
+/// - Returns: A function that can attempt to extract associated values from an enum.
+public func extract<Root, Value>(_ embed: @escaping (Value) -> Root?) -> (Root?) -> Value? {
+  optionalPromotedExtractHelp(embed)
+}
+
+// MARK: - Extraction helpers
+
+func extractHelp<Root, Value>(_ embed: @escaping (Value) -> Root) -> (Root) -> Value? {
   guard
     let metadata = EnumMetadata(Root.self),
     metadata.typeDescriptor.fieldDescriptor != nil
@@ -88,22 +121,10 @@ public func extract<Root, Value>(_ embed: @escaping (Value) -> Root) -> (Root) -
     return { _ in nil }
   }
 
-  // https://github.com/pointfreeco/swift-case-paths/issues/40
-  if let wrappedType = metadata.wrappedTypeIfOptional(),
-    wrappedType != Value.self,
-    EnumMetadata(wrappedType) != nil
-  {
-    assertionFailure(
-      "embed parameter must not be promoted to return Optional (https://github.com/pointfreeco/swift-case-paths/issues/40)"
-    )
-    return { _ in nil }
-  }
-
   var cachedTag: UInt32?
   var cachedStrategy: Strategy<Root, Value>?
 
   return { root in
-    let metadata = EnumMetadata(assumingEnum: Root.self)
     let rootTag = metadata.tag(of: root)
 
     if let cachedTag = cachedTag, let cachedStrategy = cachedStrategy {
@@ -127,13 +148,13 @@ public func extract<Root, Value>(_ embed: @escaping (Value) -> Root) -> (Root) -
   }
 }
 
-public func extract<Root, Value>(_ embed: @escaping (Value) -> Root?) -> (Root?) -> Value? {
-  if Root.self == Value.self {
-    return { $0 as! Value? }
-  }
-
+func optionalPromotedExtractHelp<Root, Value>(
+  _ embed: @escaping (Value) -> Root?
+) -> (Root?) -> Value? {
+  guard Root.self != Value.self else { return { $0 as! Value? } }
   guard
-    EnumMetadata(Root.self)?.typeDescriptor.fieldDescriptor != nil
+    let metadata = EnumMetadata(Root.self),
+    metadata.typeDescriptor.fieldDescriptor != nil
   else {
     assertionFailure("embed parameter must be a valid enum case initializer")
     return { _ in nil }
@@ -145,7 +166,6 @@ public func extract<Root, Value>(_ embed: @escaping (Value) -> Root?) -> (Root?)
   return { optionalRoot in
     guard let root = optionalRoot else { return nil }
 
-    let metadata = EnumMetadata(assumingEnum: Root.self)
     let rootTag = metadata.tag(of: root)
 
     if let cachedTag = cachedTag, let cachedStrategy = cachedStrategy {
@@ -170,7 +190,34 @@ public func extract<Root, Value>(_ embed: @escaping (Value) -> Root?) -> (Root?)
   }
 }
 
-// MARK: - Private Helpers
+func extractVoidHelp<Root>(_ root: Root) -> (Root) -> Void? {
+  guard
+    let metadata = EnumMetadata(Root.self),
+    metadata.typeDescriptor.fieldDescriptor != nil
+  else {
+    assertionFailure("value must be a valid enum case")
+    return { _ in nil }
+  }
+
+  let cachedTag = metadata.tag(of: root)
+  return { root in metadata.tag(of: root) == cachedTag ? () : nil }
+}
+
+func optionalPromotedExtractVoidHelp<Root>(_ root: Root?) -> (Root?) -> Void? {
+  guard
+    let root = root,
+    let metadata = EnumMetadata(Root.self),
+    metadata.typeDescriptor.fieldDescriptor != nil
+  else {
+    assertionFailure("value must be a valid enum case")
+    return { _ in nil }
+  }
+
+  let cachedTag = metadata.tag(of: root)
+  return { root in root.flatMap(metadata.tag(of:)) == cachedTag ? () : nil }
+}
+
+// MARK: - Runtime reflection
 
 private enum Strategy<Enum, Value> {
   case direct
@@ -384,8 +431,6 @@ extension EnumMetadata {
   }
 }
 
-// MARK: -
-
 private struct EnumTypeDescriptor: Equatable {
   let ptr: UnsafeRawPointer
 
@@ -410,8 +455,6 @@ extension EnumTypeDescriptor {
     static var isGeneric: Self { .init(rawValue: 0x80) }
   }
 }
-
-// MARK: -
 
 private struct TupleMetadata: Metadata {
   let ptr: UnsafeRawPointer
@@ -466,8 +509,6 @@ extension TupleMetadata {
       && (0..<Int(self.elementCount)).allSatisfy { self.element(at: $0) == other.element(at: $0) }
   }
 }
-
-// MARK: -
 
 private struct ExistentialMetadata: Metadata {
   let ptr: UnsafeRawPointer
