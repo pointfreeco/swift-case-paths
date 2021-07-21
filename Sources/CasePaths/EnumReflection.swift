@@ -5,6 +5,7 @@ extension CasePath {
   ///   otherwise undefined.
   /// - Parameter embed: An enum case initializer.
   /// - Returns: A case path that extracts associated values from enum cases.
+  @available(*, deprecated, message: "Use case path literal syntax (e.g., '/Root.caseName')")
   public static func `case`(_ embed: @escaping (Value) -> Root) -> CasePath {
     self.init(
       embed: embed,
@@ -21,6 +22,7 @@ extension CasePath where Value == Void {
   ///   values. Its behavior is otherwise undefined.
   /// - Parameter value: An enum case with no associated values.
   /// - Returns: A case path that extracts `()` if the case matches, otherwise `nil`.
+  @available(*, deprecated, message: "Use case path literal syntax (e.g., '/Root.caseName')")
   public static func `case`(_ value: Root) -> CasePath {
     CasePath(
       embed: { value },
@@ -45,6 +47,7 @@ extension CasePath where Value == Void {
 ///   - root: A root enum value.
 /// - Returns: Values iff they can be extracted from the given enum case initializer and root enum,
 ///   otherwise `nil`.
+@available(*, deprecated, message: "Use case path literal syntax (e.g., '/Root.caseName', or '(/Root.caseName).extract(from:)')")
 public func extract<Root, Value>(case embed: @escaping (Value) -> Root, from root: Root) -> Value? {
   CasePaths.extract(embed)(root)
 }
@@ -65,6 +68,7 @@ public func extract<Root, Value>(case embed: @escaping (Value) -> Root, from roo
 ///   - root: A root enum value.
 /// - Returns: Values iff they can be extracted from the given enum case initializer and root enum,
 ///   otherwise `nil`.
+@available(*, deprecated, message: "Use case path literal syntax (e.g., '/Root.caseName', or '(/Root.caseName).extract(from:)')")
 public func extract<Root, Value>(case embed: @escaping (Value) -> Root?, from root: Root?) -> Value?
 {
   CasePaths.extract(embed)(root)
@@ -86,6 +90,7 @@ public func extract<Root, Value>(case embed: @escaping (Value) -> Root?, from ro
 ///   otherwise undefined.
 /// - Parameter embed: An enum case initializer.
 /// - Returns: A function that can attempt to extract associated values from an enum.
+@available(*, deprecated, message: "Use case path literal syntax (e.g., '/Root.caseName')")
 public func extract<Root, Value>(_ embed: @escaping (Value) -> Root) -> (Root) -> Value? {
   extractHelp(embed)
 }
@@ -106,6 +111,7 @@ public func extract<Root, Value>(_ embed: @escaping (Value) -> Root) -> (Root) -
 ///   otherwise undefined.
 /// - Parameter embed: An enum case initializer.
 /// - Returns: A function that can attempt to extract associated values from an enum.
+@available(*, deprecated, message: "Use case path literal syntax (e.g., '/Root.caseName')")
 public func extract<Root, Value>(_ embed: @escaping (Value) -> Root?) -> (Root?) -> Value? {
   optionalPromotedExtractHelp(embed)
 }
