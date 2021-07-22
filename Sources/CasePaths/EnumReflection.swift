@@ -287,17 +287,14 @@ extension Strategy {
       self = .existential { anyStrategy.extract(from: $0, tag: tag) }
 
     } else if EnumMetadata(avType)?.isOptional() ?? false {
-      // Maybe the embed function's argument was promoted out
-      // of Optional, e.g. (String?) -> Result<String?, Error>
-      // was promoted to (String) -> Result<String?, Error>.
-
+      // Handle contravariant optional demotion, e.g. embed function
+      // `(String?) -> Result<String?, Error>)` interpreted as `(String) -> Result<String?, Error>`
       let wrappedStrategy = Strategy<Enum, Value?>(tag: tag, assumedAssociatedValueType: avType)
       if case .unimplemented = wrappedStrategy {
         self = .unimplemented
       } else {
         self = .optional { wrappedStrategy.extract(from: $0, tag: tag).flatMap { $0 } }
       }
-
     } else {
       self = .unimplemented
     }
