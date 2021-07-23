@@ -286,7 +286,7 @@ extension Strategy {
       let anyStrategy = Strategy<Enum, Any>(nonExistentialTag: tag)
       self = .existential { anyStrategy.extract(from: $0, tag: tag) }
 
-    } else if EnumMetadata(avType)?.isOptional() ?? false {
+    } else if avType == Value?.self {
       // Handle contravariant optional demotion, e.g. embed function
       // `(String?) -> Result<String?, Error>)` interpreted as `(String) -> Result<String?, Error>`
       let wrappedStrategy = Strategy<Enum, Value?>(tag: tag, assumedAssociatedValueType: avType)
@@ -443,18 +443,6 @@ extension EnumMetadata {
 
   func destructivelyInjectTag(_ tag: UInt32, intoPayload payload: UnsafeMutableRawPointer) {
     self.valueWitnessTable.destructiveInjectEnumData(payload, tag, ptr)
-  }
-}
-
-extension EnumMetadata {
-  func wrappedTypeIfOptional() -> Any.Type? {
-    isOptional() ? genericArguments?.type(atIndex: 0) : nil
-  }
-
-  func isOptional() -> Bool {
-    // All Optional types share a common EnumTypeDescriptor.
-    let optionalTypeDescriptor = EnumMetadata(assumingEnum: Void?.self).typeDescriptor
-    return typeDescriptor == optionalTypeDescriptor
   }
 }
 
