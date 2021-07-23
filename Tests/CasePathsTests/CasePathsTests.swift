@@ -824,6 +824,11 @@ final class CasePathsTests: XCTestCase {
       "hello, world")
 
     XCTAssertNil((/Result.failure).extract(from: result))
+
+    let success: (Result<String?, Error>) -> String? = /Result.success
+    XCTAssertEqual(success(result), "hello, world")
+    let failure: (Result<String?, Error>) -> Error? = /Result.failure
+    XCTAssertNil(failure(result))
   }
 
   func testExtractFromOptionalRoot() {
