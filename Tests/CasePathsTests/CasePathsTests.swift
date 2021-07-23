@@ -822,6 +822,8 @@ final class CasePathsTests: XCTestCase {
     XCTAssertEqual(
       actual,
       "hello, world")
+
+    XCTAssertNil((/Result.failure).extract(from: result))
   }
 
   func testExtractFromOptionalRoot() {
@@ -875,6 +877,21 @@ final class CasePathsTests: XCTestCase {
       check(c2Path, .c1(o), nil)
       check(c2Path, .c2(o), o)
     }
+  }
+
+  func testExtractionFailureOfOptional() {
+    enum Action {
+      case child1(Child1)
+      case child2(Child2?)
+    }
+    enum Child1 {
+      case a
+    }
+    enum Child2 {
+      case b
+    }
+
+    XCTAssertNil((/Action.child1).extract(from: .child2(.b)))
   }
 }
 
