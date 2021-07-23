@@ -852,6 +852,18 @@ final class CasePathsTests: XCTestCase {
     XCTAssertNil((/Foo.foo).extract(from: opt))
     XCTAssertNil((/Foo.bar).extract(from: opt))
     XCTAssertNil((/Foo.baz).extract(from: opt))
+
+    let extractExpression: (Foo?) -> String? = /Foo.foo
+    XCTAssertNotNil(extractExpression(.some(.foo("blob1"))))
+    XCTAssertNil(extractExpression(.some(.bar("blob2"))))
+    XCTAssertNil(extractExpression(.some(.baz)))
+    XCTAssertNil(extractExpression(nil))
+
+    let voidExtractExpression: (Foo?) -> Void? = /Foo.baz
+    XCTAssertNil(voidExtractExpression(.some(.foo("blob1"))))
+    XCTAssertNil(voidExtractExpression(.some(.bar("blob2"))))
+    XCTAssertNotNil(voidExtractExpression(.some(.baz)))
+    XCTAssertNil(voidExtractExpression(nil))
   }
 
   func testExtractFromOptionalRootWithEmbeddedTagBits() {

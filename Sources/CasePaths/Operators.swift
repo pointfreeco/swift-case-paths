@@ -142,6 +142,19 @@ public prefix func / <Root>(
   (/root).extract(from:)
 }
 
+/// Returns a void case path for a case with no associated value.
+///
+/// - Note: This operator is only intended to be used with enum cases that have no associated
+///   values. Its behavior is otherwise undefined.
+/// - Parameter root: A case with no an associated value.
+/// - Returns: A void case path.
+@_disfavoredOverload
+public prefix func / <Root>(
+  root: Root
+) -> (Root?) -> Void? {
+  (/root).extract(from:)
+}
+
 precedencegroup CasePathCompositionPrecedence {
   associativity: right
 }
