@@ -45,7 +45,7 @@ extension CasePath where Value == Void {
 /// - Parameters:
 ///   - embed: An enum case initializer.
 ///   - root: A root enum value.
-/// - Returns: Values iff they can be extracted from the given enum case initializer and root enum,
+/// - Returns: Values if they can be extracted from the given enum case initializer and root enum,
 ///   otherwise `nil`.
 @available(
   *, deprecated,
@@ -70,7 +70,7 @@ public func extract<Root, Value>(case embed: @escaping (Value) -> Root, from roo
 /// - Parameters:
 ///   - embed: An enum case initializer.
 ///   - root: A root enum value.
-/// - Returns: Values iff they can be extracted from the given enum case initializer and root enum,
+/// - Returns: Values if they can be extracted from the given enum case initializer and root enum,
 ///   otherwise `nil`.
 @available(
   *, deprecated,
