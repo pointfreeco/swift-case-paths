@@ -27,9 +27,21 @@ public struct CasePath<Root, Value> {
   /// Attempts to extract a value from a root.
   ///
   /// - Parameter root: A root to extract from.
-  /// - Returns: A value iff it can be extracted from the given root, otherwise `nil`.
+  /// - Returns: A value if it can be extracted from the given root, otherwise `nil`.
   public func extract(from root: Root) -> Value? {
     self._extract(root)
+  }
+
+  /// Attempts to modify a value in a root.
+  ///
+  /// - Parameters:
+  ///   - root: A root to modify if the case path matches.
+  ///   - update: A closure that can mutate the case's associated value. If the closure throws, the
+  ///     root will be left unmodified.
+  public func modify(_ root: inout Root, _ update: (inout Value) throws -> Void) throws {
+    guard var value = self.extract(from: root) else { throw ExtractionFailed() }
+    try update(&value)
+    root = self.embed(value)
   }
 
   /// Returns a new case path created by appending the given case path to this one.
@@ -53,3 +65,5 @@ extension CasePath: CustomStringConvertible {
     "CasePath<\(Root.self), \(Value.self)>"
   }
 }
+
+struct ExtractionFailed: Error {}

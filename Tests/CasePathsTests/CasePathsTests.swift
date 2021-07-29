@@ -893,6 +893,13 @@ final class CasePathsTests: XCTestCase {
 
     XCTAssertNil((/Action.child1).extract(from: .child2(.b)))
   }
+
+  func testModify() throws {
+    enum Foo: Equatable { case bar(Int) }
+    var foo = Foo.bar(42)
+    try (/Foo.bar).modify(&foo) { $0 *= 2 }
+    XCTAssertEqual(foo, .bar(84))
+  }
 }
 
 private class TestObject: Equatable {
