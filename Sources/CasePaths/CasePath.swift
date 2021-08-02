@@ -36,12 +36,17 @@ public struct CasePath<Root, Value> {
   ///
   /// - Parameters:
   ///   - root: A root to modify if the case path matches.
-  ///   - update: A closure that can mutate the case's associated value. If the closure throws, the
-  ///     root will be left unmodified.
-  public func modify(_ root: inout Root, _ update: (inout Value) throws -> Void) throws {
+  ///   - body: A closure that can mutate the case's associated value. If the closure throws, the root
+  ///     will be left unmodified.
+  /// - Returns: The return value, if any, of the body closure.
+  public func modify<Result>(
+    _ root: inout Root,
+    _ body: (inout Value) throws -> Result
+  ) throws -> Result {
     guard var value = self.extract(from: root) else { throw ExtractionFailed() }
-    try update(&value)
+    let result = try body(&value)
     root = self.embed(value)
+    return result
   }
 
   /// Returns a new case path created by appending the given case path to this one.
