@@ -44,8 +44,9 @@ public struct CasePath<Root, Value> {
     _ body: (inout Value) throws -> Result
   ) throws -> Result {
     guard var value = self.extract(from: root) else { throw ExtractionFailed() }
-    try body(&value)
+    let result = try body(&value)
     root = self.embed(value)
+    return result
   }
 
   /// Returns a new case path created by appending the given case path to this one.
