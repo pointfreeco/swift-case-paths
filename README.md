@@ -109,35 +109,8 @@ authentications.compactMap(/Authentication.authenticated)
 CasePaths uses Swift reflection to automatically and extract associated values from _any_ enum in a single, short expression. This helpful utility is made available as a public module function that can be used in your own libraries and apps:
 
 ``` swift
-extract(case: Authentication.authenticated, from: .authenticated("cafebeef"))
+(/Authentication.authenticated).extract(from: .authenticated("cafebeef"))
 // Optional("cafebeef")
-```
-
-## Case paths without operators
-
-The operators included with CasePaths make working with case paths feel a lot like working with key paths, but if your team or code base is operator-averse, they are not required.
-
-``` swift
-// With operators:
-/Authentication.authenticated
-// Without:
-CasePath.case(Authentication.authenticated)
-
-// With operators:
-authentications.compactMap(/Authentication.authenticated)
-// Without:
-authentications.compactMap(extract(Authentication.authenticated))
-
-// With operators:
-/Result<Authentication, Error>.success..Authentication.authenticated
-// Without:
-CasePath.case(Result<Authentication, Error>.success)
-  .appending(path: .case(Authentication.authenticated))
-
-// With operators:
-/Authentication.self
-// Without operators:
-CasePath<Authentication, Authentication>.self
 ```
 
 ## Installation
