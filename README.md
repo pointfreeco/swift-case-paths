@@ -109,7 +109,7 @@ authentications.compactMap(/Authentication.authenticated)
 CasePaths uses Swift reflection to automatically and extract associated values from _any_ enum in a single, short expression. This helpful utility is made available as a public module function that can be used in your own libraries and apps:
 
 ``` swift
-extract(case: Authentication.authenticated, from: .authenticated("cafebeef"))
+(/Authentication.authenticated).extract(from: .authenticated("cafebeef"))
 // Optional("cafebeef")
 ```
 
