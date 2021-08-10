@@ -282,6 +282,16 @@ extension Strategy {
       self.init(tag: tag, assumedAssociatedValueType: Value.self)
 
     } else if ExistentialMetadata(avType) != nil {
+#if _runtime(_ObjC)
+        if avType == Error.self {
+          // https://github.com/pointfreeco/swift-case-paths/issues/53
+          // For Objective-C interop, the Error existential is a pointer to an NSError-compatible (and thus AnyObject-compatible) object.
+          let errorStrategy = Strategy<Enum, AnyObject>(nonExistentialTag: tag)
+          self = .existential { errorStrategy.extract(from: $0, tag: tag) }
+          return
+        }
+#endif
+
       // Convert protocol existentials to `Any` so that they can be cast (`as? Value`).
       let anyStrategy = Strategy<Enum, Any>(nonExistentialTag: tag)
       self = .existential { anyStrategy.extract(from: $0, tag: tag) }
