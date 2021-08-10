@@ -113,33 +113,6 @@ CasePaths uses Swift reflection to automatically and extract associated values f
 // Optional("cafebeef")
 ```
 
-## Case paths without operators
-
-The operators included with CasePaths make working with case paths feel a lot like working with key paths, but if your team or code base is operator-averse, they are not required.
-
-``` swift
-// With operators:
-/Authentication.authenticated
-// Without:
-CasePath.case(Authentication.authenticated)
-
-// With operators:
-authentications.compactMap(/Authentication.authenticated)
-// Without:
-authentications.compactMap(extract(Authentication.authenticated))
-
-// With operators:
-/Result<Authentication, Error>.success..Authentication.authenticated
-// Without:
-CasePath.case(Result<Authentication, Error>.success)
-  .appending(path: .case(Authentication.authenticated))
-
-// With operators:
-/Authentication.self
-// Without operators:
-CasePath<Authentication, Authentication>.self
-```
-
 ## Installation
 
 You can add CasePaths to an Xcode project by adding it as a package dependency.
