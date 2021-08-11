@@ -896,7 +896,7 @@ final class CasePathsTests: XCTestCase {
     }
   }
 
-  func testExtractSuccessFromFailedResultWithErrorProtocolError() throws {
+  func testExtractSuccessFromFailedResultWithErrorProtocolError() {
     let path = /Result<String, Error>.success
 
     func check(_ error: Error) {
@@ -908,16 +908,16 @@ final class CasePathsTests: XCTestCase {
     }
 
     struct LittleError: Error {
-      var a: Int = 42
+      var a = 42
     }
 
     struct BigError: Error {
-      var a: String = ""
-      var b: String = ""
-      var c: String = ""
-      var d: String = ""
-      var e: String = ""
-      var f: String = ""
+      var a = ""
+      var b = ""
+      var c = ""
+      var d = ""
+      var e = ""
+      var f = ""
     }
 
     for _ in 1...2 {
