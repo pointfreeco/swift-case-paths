@@ -896,6 +896,38 @@ final class CasePathsTests: XCTestCase {
     }
   }
 
+  func testExtractSuccessFromFailedResultWithErrorProtocolError() {
+    let path = /Result<String, Error>.success
+
+    func check(_ error: Error) {
+      let result = Result<String, Error>.failure(error)
+      XCTAssertNil(path.extract(from: result))
+    }
+
+    struct EmptyError: Error {
+    }
+
+    struct LittleError: Error {
+      var a = 42
+    }
+
+    struct BigError: Error {
+      var a = ""
+      var b = ""
+      var c = ""
+      var d = ""
+      var e = ""
+      var f = ""
+    }
+
+    for _ in 1...2 {
+      check(EmptyError())
+      check(LittleError())
+      check(BigError())
+      XCTAssertEqual(path.extract(from: .success("hello")), "hello")
+    }
+  }
+
   func testExtractionFailureOfOptional() {
     enum Action {
       case child1(Child1)
