@@ -146,7 +146,7 @@ The design of this library was explored in the following [Point-Free](https://ww
   - [Episode 89](https://www.pointfree.co/episodes/ep89-case-paths-for-free): Case Paths for Free
 
 <a href="https://www.pointfree.co/episodes/ep87-the-case-for-case-paths-introduction">
-  <img alt="video poster image" src="https://i.vimeocdn.com/video/848203050.jpg" width="480">
+  <img alt="video poster image" src="https://d3rccdn33rt8ze.cloudfront.net/episodes/0087.jpeg" width="480">
 </a>
 
 ## License
