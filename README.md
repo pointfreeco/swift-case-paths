@@ -106,7 +106,7 @@ authentications.compactMap(/Authentication.authenticated)
 
 ## Ergonomic associated value access
 
-CasePaths uses Swift reflection to automatically and extract associated values from _any_ enum in a single, short expression. This helpful utility is made available as a public module function that can be used in your own libraries and apps:
+CasePaths uses Swift reflection to automatically embed and extract associated values from _any_ enum in a single, short expression. This helpful utility is made available as a public module function that can be used in your own libraries and apps:
 
 ``` swift
 (/Authentication.authenticated).extract(from: .authenticated("cafebeef"))
