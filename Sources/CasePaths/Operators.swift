@@ -214,3 +214,18 @@ public func .. <Root, Value, AppendedValue>(
 ) -> (Root) -> AppendedValue? {
   return { root in lhs(root).flatMap((/rhs).extract(from:)) }
 }
+
+/// Returns a new extract function by appending the next extract function.
+/// Useful when composing optional-returning functions together.
+///
+/// - Parameters:
+///   - lhs: An extract function from a root to a value.
+///   - rhs: An extract function from a value other appended value.
+/// - Returns: A new extract function from the first extract function's root to the
+///   function's appended value.
+public func .. <Root, Value, AppendedValue>(
+  lhs: @escaping (Root) -> Value?,
+  rhs: @escaping (Value) -> AppendedValue?
+) -> (Root) -> AppendedValue? {
+  return { root in lhs(root).flatMap(rhs) }
+}
