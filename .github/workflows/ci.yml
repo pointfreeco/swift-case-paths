@@ -3,24 +3,51 @@ name: CI
 on:
   push:
     branches:
-      - master
+      - main
   pull_request:
     branches:
       - '*'
 
 jobs:
-  build:
-    name: MacOS
-    runs-on: macOS-latest
+  macos-11:
+    name: MacOS 11
+    runs-on: macos-11
+    strategy:
+      matrix:
+        xcode:
+          - 12.5.1
+          - '13.0'
     steps:
-    - uses: actions/checkout@v2
-    - name: Run tests
-      run: make test-swift
+      - uses: actions/checkout@v2
+      - name: Select Xcode ${{ matrix.xcode }}
+        run: sudo xcode-select -s /Applications/Xcode_${{ matrix.xcode }}.app
+      - name: Print Swift version
+        run: swift --version
+      - name: Run tests
+        run: make test-swift
 
-  ubuntu:
+  macos-10-15:
+    name: MacOS 10.15
+    runs-on: macos-10.15
+    strategy:
+      matrix:
+        xcode:
+          - 11.3
+          - 11.7
+          - 12.4
+    steps:
+      - uses: actions/checkout@v2
+      - name: Select Xcode ${{ matrix.xcode }}
+        run: sudo xcode-select -s /Applications/Xcode_${{ matrix.xcode }}.app
+      - name: Print Swift version
+        run: swift --version
+      - name: Run tests
+        run: make test-swift
+
+  linux:
     name: Ubuntu
     runs-on: ubuntu-latest
     steps:
-    - uses: actions/checkout@v2
-    - name: Run tests
-      run: make test-linux
+      - uses: actions/checkout@v2
+      - name: Run tests
+        run: make test-linux

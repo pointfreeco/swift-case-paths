@@ -3,21 +3,25 @@ name: Format
 on:
   push:
     branches:
-      - master
+      - main
 
 jobs:
   swift_format:
     name: swift-format
-    runs-on: macOS-latest
+    runs-on: macOS-11
     steps:
       - uses: actions/checkout@v2
+      - name: Xcode Select
+        run: sudo xcode-select -s /Applications/Xcode_13.0.app
+      - name: Tap
+        run: brew tap pointfreeco/formulae
       - name: Install
-        run: brew install swift-format
+        run: brew install Formulae/swift-format@5.5
       - name: Format
         run: make format
-      - uses: stefanzweifel/git-auto-commit-action@v4.1.6
+      - uses: stefanzweifel/git-auto-commit-action@v4
         with:
           commit_message: Run swift-format
-          branch: 'master'
+          branch: 'main'
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}

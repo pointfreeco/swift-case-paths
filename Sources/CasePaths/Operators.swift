@@ -1,5 +1,19 @@
 prefix operator /
 
+/// Returns whether or not a root value matches a particular case path.
+///
+///     [Result<Int, Error>.success(1), .success(2), .failure(NSError()), .success(4)]
+///       .prefix(while: { /Result.success ~= $0 })
+///     // [.success(1), .success(2)]
+///
+/// - Parameters:
+///   - pattern: A case path.
+///   - value: A root value.
+/// - Returns: Whether or not a root value matches a particular case path
+public func ~= <Root, Value>(pattern: CasePath<Root, Value>, value: Root) -> Bool {
+  pattern.extract(from: value) != nil
+}
+
 /// Returns a case path for the given embed function.
 ///
 /// - Note: This operator is only intended to be used with enum cases that have no associated
@@ -9,7 +23,19 @@ prefix operator /
 public prefix func / <Root, Value>(
   embed: @escaping (Value) -> Root
 ) -> CasePath<Root, Value> {
-  .case(embed)
+  .init(embed: embed, extract: extractHelp(embed))
+}
+
+/// Returns a case path for the given embed function.
+///
+/// - Note: This operator is only intended to be used with enum cases that have no associated
+///   values. Its behavior is otherwise undefined.
+/// - Parameter embed: An embed function.
+/// - Returns: A case path.
+public prefix func / <Root, Value>(
+  embed: @escaping (Value) -> Root?
+) -> CasePath<Root?, Value> {
+  .init(embed: embed, extract: optionalPromotedExtractHelp(embed))
 }
 
 /// Returns a void case path for a case with no associated value.
@@ -21,7 +47,19 @@ public prefix func / <Root, Value>(
 public prefix func / <Root>(
   root: Root
 ) -> CasePath<Root, Void> {
-  .case(root)
+  .init(embed: { root }, extract: extractVoidHelp(root))
+}
+
+/// Returns a void case path for a case with no associated value.
+///
+/// - Note: This operator is only intended to be used with enum cases that have no associated
+///   values. Its behavior is otherwise undefined.
+/// - Parameter root: A case with no an associated value.
+/// - Returns: A void case path.
+public prefix func / <Root>(
+  root: Root?
+) -> CasePath<Root?, Void> {
+  .init(embed: { root }, extract: optionalPromotedExtractVoidHelp(root))
 }
 
 /// Returns the identity case path for the given type. Enables `/MyType.self` syntax.
@@ -51,18 +89,44 @@ public prefix func / <Root>(
 /// Use this operator to create new transform functions to pass to higher-order methods like
 /// `compactMap`:
 ///
-///     [Result<Int, Error>.success(42), .failure(MyError()]
-///       .compactMap(/Result.success)
-///     // [42]
+/// ```swift
+/// [Result<Int, Error>.success(42), .failure(MyError()]
+///   .compactMap(/Result.success)
+/// // [42]
+/// ```
 ///
 /// - Note: This operator is only intended to be used with enum case initializers. Its behavior is
 ///   otherwise undefined.
-/// - Parameter case: An enum case initializer.
+/// - Parameter embed: An enum case initializer.
 /// - Returns: A function that can attempt to extract associated values from an enum.
+@_disfavoredOverload
 public prefix func / <Root, Value>(
-  case: @escaping (Value) -> Root
+  embed: @escaping (Value) -> Root
 ) -> (Root) -> Value? {
-  extract(`case`)
+  (/embed).extract(from:)
+}
+
+/// Returns a function that can attempt to extract associated values from the given enum case
+/// initializer.
+///
+/// Use this operator to create new transform functions to pass to higher-order methods like
+/// `compactMap`:
+///
+/// ```swift
+/// [Result<Int, Error>.success(42), .failure(MyError()]
+///   .compactMap(/Result.success)
+/// // [42]
+/// ```
+///
+/// - Note: This operator is only intended to be used with enum case initializers. Its behavior is
+///   otherwise undefined.
+/// - Parameter embed: An enum case initializer.
+/// - Returns: A function that can attempt to extract associated values from an enum.
+@_disfavoredOverload
+public prefix func / <Root, Value>(
+  embed: @escaping (Value) -> Root?
+) -> (Root?) -> Value? {
+  (/embed).extract(from:)
 }
 
 /// Returns a void case path for a case with no associated value.
@@ -71,10 +135,24 @@ public prefix func / <Root, Value>(
 ///   values. Its behavior is otherwise undefined.
 /// - Parameter root: A case with no an associated value.
 /// - Returns: A void case path.
+@_disfavoredOverload
 public prefix func / <Root>(
   root: Root
 ) -> (Root) -> Void? {
-  (/root).extract
+  (/root).extract(from:)
+}
+
+/// Returns a void case path for a case with no associated value.
+///
+/// - Note: This operator is only intended to be used with enum cases that have no associated
+///   values. Its behavior is otherwise undefined.
+/// - Parameter root: A case with no an associated value.
+/// - Returns: A void case path.
+@_disfavoredOverload
+public prefix func / <Root>(
+  root: Root
+) -> (Root?) -> Void? {
+  (/root).extract(from:)
 }
 
 precedencegroup CasePathCompositionPrecedence {
@@ -86,8 +164,8 @@ infix operator ..: CasePathCompositionPrecedence
 extension CasePath {
   /// Returns a new case path created by appending the given case path to this one.
   ///
-  /// The operator version of `CasePath.appending(path:)`. Use this method to extend this case path
-  /// to the value type of another case path.
+  /// The operator version of ``appending(path:)``. Use this method to extend this case path to the
+  /// value type of another case path.
   ///
   /// - Parameters:
   ///   - lhs: A case path from a root to a value.
@@ -97,7 +175,7 @@ extension CasePath {
     lhs: CasePath,
     rhs: CasePath<Value, AppendedValue>
   ) -> CasePath<Root, AppendedValue> {
-    return lhs.appending(path: rhs)
+    lhs.appending(path: rhs)
   }
 
   /// Returns a new case path created by appending the given embed function.
@@ -105,12 +183,13 @@ extension CasePath {
   /// - Parameters:
   ///   - lhs: A case path from a root to a value.
   ///   - rhs: An embed function from an appended value.
-  /// - Returns: A new case path from the first case path's root to the second embed function's value.
+  /// - Returns: A new case path from the first case path's root to the second embed function's
+  ///   value.
   public static func .. <AppendedValue>(
     lhs: CasePath,
     rhs: @escaping (AppendedValue) -> Value
   ) -> CasePath<Root, AppendedValue> {
-    lhs.appending(path: .case(rhs))
+    lhs.appending(path: /rhs)
   }
 }
 
@@ -118,9 +197,11 @@ extension CasePath {
 ///
 /// Useful when composing extract functions together.
 ///
-///     [Result<Int?, Error>.success(.some(42)), .success(nil), .failure(MyError())]
-///       .compactMap(/Result.success..Optional.some)
-///     // [42]
+/// ```swift
+/// [Result<Int?, Error>.success(.some(42)), .success(nil), .failure(MyError())]
+///   .compactMap(/Result.success..Optional.some)
+/// // [42]
+/// ```
 ///
 /// - Parameters:
 ///   - lhs: An extract function from a root to a value.
@@ -131,5 +212,5 @@ public func .. <Root, Value, AppendedValue>(
   lhs: @escaping (Root) -> Value?,
   rhs: @escaping (AppendedValue) -> Value
 ) -> (Root) -> AppendedValue? {
-  return { root in lhs(root).flatMap(extract(rhs)) }
+  return { root in lhs(root).flatMap((/rhs).extract(from:)) }
 }

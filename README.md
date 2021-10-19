@@ -1,9 +1,8 @@
 # 🧰 CasePaths
 
-[![Swift 5.3](https://img.shields.io/badge/swift-5.3-ED523F.svg?style=flat)](https://swift.org/download/)
-[![Swift 5.2](https://img.shields.io/badge/swift-5.2-ED523F.svg?style=flat)](https://swift.org/download/)
 [![CI](https://github.com/pointfreeco/swift-case-paths/workflows/CI/badge.svg)](https://actions-badge.atrox.dev/pointfreeco/swift-case-paths/goto)
-[![@pointfreeco](https://img.shields.io/badge/contact-@pointfreeco-5AA9E7.svg?style=flat)](https://twitter.com/pointfreeco)
+[![](https://img.shields.io/endpoint?url=https%3A%2F%2Fswiftpackageindex.com%2Fapi%2Fpackages%2Fpointfreeco%2Fswift-case-paths%2Fbadge%3Ftype%3Dswift-versions)](https://swiftpackageindex.com/pointfreeco/swift-case-paths)
+[![](https://img.shields.io/endpoint?url=https%3A%2F%2Fswiftpackageindex.com%2Fapi%2Fpackages%2Fpointfreeco%2Fswift-case-paths%2Fbadge%3Ftype%3Dplatforms)](https://swiftpackageindex.com/pointfreeco/swift-case-paths)
 
 Case paths bring the power and ergonomics of key paths to enums!
 
@@ -107,38 +106,11 @@ authentications.compactMap(/Authentication.authenticated)
 
 ## Ergonomic associated value access
 
-CasePaths uses Swift reflection to automatically and extract associated values from _any_ enum in a single, short expression. This helpful utility is made available as a public module function that can be used in your own libraries and apps:
+CasePaths uses Swift reflection to automatically embed and extract associated values from _any_ enum in a single, short expression. This helpful utility is made available as a public module function that can be used in your own libraries and apps:
 
 ``` swift
-extract(case: Authentication.authenticated, from: .authenticated("cafebeef"))
+(/Authentication.authenticated).extract(from: .authenticated("cafebeef"))
 // Optional("cafebeef")
-```
-
-## Case paths without operators
-
-The operators included with CasePaths make working with case paths feel a lot like working with key paths, but if your team or code base is operator-averse, they are not required.
-
-``` swift
-// With operators:
-/Authentication.authenticated
-// Without:
-CasePath.case(Authentication.authenticated)
-
-// With operators:
-authentications.compactMap(/Authentication.authenticated)
-// Without:
-authentications.compactMap(extract(Authentication.authenticated))
-
-// With operators:
-/Result<Authentication, Error>.success..Authentication.authenticated
-// Without:
-CasePath.case(Result<Authentication, Error>.success)
-  .appending(path: .case(Authentication.authenticated))
-
-// With operators:
-/Authentication.self
-// Without operators:
-CasePath<Authentication, Authentication>.self
 ```
 
 ## Installation
@@ -151,7 +123,7 @@ If you want to use CasePaths in a [SwiftPM](https://swift.org/package-manager/) 
 
 ``` swift
 dependencies: [
-  .package(url: "https://github.com/pointfreeco/swift-case-paths.git", from: "0.1.2")
+  .package(url: "https://github.com/pointfreeco/swift-case-paths.git", from: "0.4.0")
 ]
 ```
 
@@ -174,7 +146,7 @@ The design of this library was explored in the following [Point-Free](https://ww
   - [Episode 89](https://www.pointfree.co/episodes/ep89-case-paths-for-free): Case Paths for Free
 
 <a href="https://www.pointfree.co/episodes/ep87-the-case-for-case-paths-introduction">
-  <img alt="video poster image" src="https://i.vimeocdn.com/video/848203050.jpg" width="480">
+  <img alt="video poster image" src="https://d3rccdn33rt8ze.cloudfront.net/episodes/0087.jpeg" width="480">
 </a>
 
 ## License
