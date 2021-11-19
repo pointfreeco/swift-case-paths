@@ -949,6 +949,19 @@ final class CasePathsTests: XCTestCase {
     try (/Foo.bar).modify(&foo) { $0 *= 2 }
     XCTAssertEqual(foo, .bar(84))
   }
+
+  func testAccessWithSubscript() throws {
+    enum Foo: AssociatedValueAccessible { case bar(Int) }
+    let foo = Foo.bar(42)
+    XCTAssertEqual(foo[/Foo.bar], 42)
+  }
+
+  func testModifyWithSubscript() throws {
+    enum Foo: AssociatedValueAccessible { case bar(Int) }
+    var foo = Foo.bar(42)
+    foo[/Foo.bar] = 84
+    XCTAssertEqual(foo[/Foo.bar], 84)
+  }
 }
 
 private class TestObject: Equatable {
