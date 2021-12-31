@@ -374,7 +374,7 @@ final class CasePathsTests: XCTestCase {
 
     for _ in 1...2 {
       XCTAssertNil(protoPath.extract(from: .int(100)))
-      XCTAssertIdentical(protoPath.extract(from: .proto(object)) as? Class, object)
+      XCTAssertTrue(protoPath.extract(from: .proto(object)) === object)
 
       XCTAssertNil(intPath.extract(from: .proto(object)))
       XCTAssertEqual(intPath.extract(from: .int(100)), 100)
