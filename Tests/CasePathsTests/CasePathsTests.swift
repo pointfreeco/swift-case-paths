@@ -361,7 +361,7 @@ final class CasePathsTests: XCTestCase {
     }
   }
 
-  func testClassConstrainedExistensial() {
+  func testClassConstrainedExistential() {
     class Class: TestClassProtocol {}
     enum Enum {
       case proto(TestClassProtocol)
