@@ -11,6 +11,8 @@ private struct UnexpectedNil: Error {}
 protocol TestProtocol {}
 extension Int: TestProtocol {}
 
+protocol TestClassProtocol: AnyObject {}
+
 final class CasePathsTests: XCTestCase {
   func testSimplePayload() {
     enum Enum { case payload(Int) }
@@ -355,6 +357,26 @@ final class CasePathsTests: XCTestCase {
       XCTAssertEqual(protoPath.extract(from: .proto(100)) as? Int, 100)
 
       XCTAssertNil(intPath.extract(from: .proto(100)))
+      XCTAssertEqual(intPath.extract(from: .int(100)), 100)
+    }
+  }
+
+  func testClassConstrainedExistential() {
+    class Class: TestClassProtocol {}
+    enum Enum {
+      case proto(TestClassProtocol)
+      case int(Int)
+    }
+    let protoPath = /Enum.proto
+    let intPath = /Enum.int
+
+    let object = Class()
+
+    for _ in 1...2 {
+      XCTAssertNil(protoPath.extract(from: .int(100)))
+      XCTAssertTrue(protoPath.extract(from: .proto(object)) === object)
+
+      XCTAssertNil(intPath.extract(from: .proto(object)))
       XCTAssertEqual(intPath.extract(from: .int(100)), 100)
     }
   }
