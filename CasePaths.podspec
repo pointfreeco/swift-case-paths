@@ -1,6 +1,6 @@
 Pod::Spec.new do |s|
   s.name        = "CasePaths"
-  s.version     = "0.1.3"
+  s.version     = "0.1.4"
   s.summary     = "🎶 A collection of types and functions that enhance the Swift language."
   s.homepage    = "https://github.com/tutu-ru-mobile/swift-case-paths"
   s.license     = { :type => "MIT" }
