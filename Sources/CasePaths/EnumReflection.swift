@@ -518,7 +518,7 @@ extension TupleMetadata {
 
     var type: Any.Type { self.ptr.load(as: Any.Type.self) }
 
-    var offset: UInt { self.ptr.load(fromByteOffset: pointerSize, as: UInt.self) }
+    var offset: UInt { self.ptr.load(fromByteOffset: pointerSize, as: UInt32.self) }
 
     static func == (lhs: Element, rhs: Element) -> Bool {
       lhs.type == rhs.type && lhs.offset == rhs.offset
