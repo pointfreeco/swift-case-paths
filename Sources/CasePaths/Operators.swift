@@ -156,7 +156,7 @@ public prefix func / <Root>(
 }
 
 precedencegroup CasePathCompositionPrecedence {
-  associativity: right
+  associativity: left
 }
 
 infix operator ..: CasePathCompositionPrecedence
