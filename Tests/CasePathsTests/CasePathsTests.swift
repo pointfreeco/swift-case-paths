@@ -759,6 +759,22 @@ final class CasePathsTests: XCTestCase {
       [3],
       [Foo.bar(1, 2)].compactMap(/Foo.bar).map(+)
     )
+
+    enum Case {
+      case one(One)
+      case none
+    }
+    enum One {
+      case two(Two)
+    }
+    enum Two {
+      case value(Int)
+    }
+
+    XCTAssertEqual(
+      [1],
+      [Case.one(.two(.value(1))), .none].compactMap(/Case.one..One.two..Two.value)
+    )
   }
 
   func testAppending() {
