@@ -773,7 +773,7 @@ final class CasePathsTests: XCTestCase {
 
     XCTAssertEqual(
       [1],
-      [Case.one(.two(.value(1))), .none].compactMap(/Case.one..One.two..Two.value)
+      [Case.one(.two(.value(1))), .none].compactMap(/Case.one .. One.two .. Two.value)
     )
   }
 
