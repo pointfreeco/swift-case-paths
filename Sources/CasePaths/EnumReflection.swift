@@ -1,4 +1,58 @@
 extension CasePath {
+  /// Returns a case path for the given embed function.
+  ///
+  /// - Note: This operator is only intended to be used with enum cases that have no associated
+  ///   values. Its behavior is otherwise undefined.
+  /// - Parameter embed: An embed function.
+  /// - Returns: A case path.
+  public init(_ embed: @escaping (Value) -> Root) {
+    self.init(embed: embed, extract: extractHelp(embed))
+  }
+
+  /// Returns a case path for the given embed function.
+  ///
+  /// - Note: This operator is only intended to be used with enum cases that have no associated
+  ///   values. Its behavior is otherwise undefined.
+  /// - Parameter embed: An embed function.
+  /// - Returns: A case path.
+  public init<Wrapped>(_ embed: @escaping (Value) -> Root) where Root == Wrapped? {
+    self.init(embed: embed, extract: optionalPromotedExtractHelp(embed))
+  }
+}
+
+extension CasePath where Value == Void {
+  /// Returns a void case path for a case with no associated value.
+  ///
+  /// - Note: This operator is only intended to be used with enum cases that have no associated
+  ///   values. Its behavior is otherwise undefined.
+  /// - Parameter root: A case with no an associated value.
+  /// - Returns: A void case path.
+  public init(_ root: Root) {
+    self.init(embed: { root }, extract: extractVoidHelp(root))
+  }
+
+  /// Returns a void case path for a case with no associated value.
+  ///
+  /// - Note: This operator is only intended to be used with enum cases that have no associated
+  ///   values. Its behavior is otherwise undefined.
+  /// - Parameter root: A case with no an associated value.
+  /// - Returns: A void case path.
+  public init<Wrapped>(_ root: Root) where Root == Wrapped? {
+    self.init(embed: { root }, extract: optionalPromotedExtractVoidHelp(root))
+  }
+}
+
+extension CasePath where Root == Value {
+  /// Returns the identity case path for the given type. Enables `CasePath(MyType.self)` syntax.
+  ///
+  /// - Parameter type: A type for which to return the identity case path.
+  /// - Returns: An identity case path.
+  public init(_ type: Root.Type) {
+    self = .self
+  }
+}
+
+extension CasePath {
   /// Returns a case path that extracts values associated with a given enum case initializer.
   ///
   /// - Note: This function is only intended to be used with enum case initializers. Its behavior is
