@@ -7,11 +7,13 @@ extension CasePath {
   /// - Returns: A case path.
   public init(_ embed: @escaping (Value) -> Root) {
     func open<Wrapped>(_: Wrapped.Type) -> (Root) -> Value? {
-      optionalPromotedExtractHelp(embed as! (Value) -> Wrapped?) as! (Root) -> Value?
+      optionalPromotedExtractHelp(unsafeBitCast(embed, to: ((Value) -> Wrapped?).self))
+        as! (Root) -> Value?
     }
-    let extract = ((_Witness<Root>.self as? _AnyOptional.Type)?.wrappedType)
+    let extract =
+      ((_Witness<Root>.self as? _AnyOptional.Type)?.wrappedType)
       .map { _openExistential($0, do: open) }
-    ?? extractHelp(embed)
+      ?? extractHelp(embed)
     self.init(
       embed: embed,
       extract: extract
@@ -28,9 +30,10 @@ extension CasePath where Value == Void {
   /// - Returns: A void case path.
   public init(_ root: Root) {
     func open<Wrapped>(_: Wrapped.Type) -> (Root) -> Void? {
-      optionalPromotedExtractVoidHelp(root as! Wrapped?) as! (Root) -> Void?
+      optionalPromotedExtractVoidHelp(unsafeBitCast(root, to: Wrapped?.self)) as! (Root) -> Void?
     }
-    let extract = ((_Witness<Root>.self as? _AnyOptional.Type)?.wrappedType)
+    let extract =
+      ((_Witness<Root>.self as? _AnyOptional.Type)?.wrappedType)
       .map { _openExistential($0, do: open) }
       ?? extractVoidHelp(root)
     self.init(embed: { root }, extract: extract)
