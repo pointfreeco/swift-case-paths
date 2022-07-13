@@ -82,7 +82,7 @@ final class CasePathsTests: XCTestCase {
     )
     XCTAssert(
       try unwrap(CasePath(Enum.payload).extract(from: .payload(a: 42, b: "Blob")))
-      == (a: 42, b: "Blob")
+        == (a: 42, b: "Blob")
     )
   }
 
@@ -227,7 +227,7 @@ final class CasePathsTests: XCTestCase {
     for _ in 1...2 {
       XCTAssert(
         try unwrap(indirectPath.extract(from: .indirect(42, nil, 43, object)))
-        == (42, nil, 43, object)
+          == (42, nil, 43, object)
       )
       XCTAssertNil(indirectPath.extract(from: .direct(42, nil, 43, object)))
       XCTAssertNil(directPath.extract(from: .indirect(42, nil, 43, object)))
@@ -237,12 +237,14 @@ final class CasePathsTests: XCTestCase {
     }
     XCTAssert(
       try unwrap(CasePath(Enum.indirect).extract(from: .indirect(42, nil, 43, object)))
-      == (42, nil, 43, object)
+        == (42, nil, 43, object)
     )
     XCTAssertNil(CasePath(Enum.indirect).extract(from: .direct(42, nil, 43, object)))
     XCTAssertNil(CasePath(Enum.direct).extract(from: .indirect(42, nil, 43, object)))
     XCTAssert(
-      try unwrap(CasePath(Enum.direct).extract(from: .direct(42, nil, 43, object))) == (42, nil, 43, object)
+      try unwrap(CasePath(Enum.direct).extract(from: .direct(42, nil, 43, object))) == (
+        42, nil, 43, object
+      )
     )
   }
 
