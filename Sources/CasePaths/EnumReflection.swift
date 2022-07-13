@@ -6,17 +6,18 @@ extension CasePath {
   /// - Parameter embed: An embed function.
   /// - Returns: A case path.
   public init(_ embed: @escaping (Value) -> Root) {
-    self.init(embed: embed, extract: extractHelp(embed))
-  }
-
-  /// Returns a case path for the given embed function.
-  ///
-  /// - Note: This operator is only intended to be used with enum cases that have no associated
-  ///   values. Its behavior is otherwise undefined.
-  /// - Parameter embed: An embed function.
-  /// - Returns: A case path.
-  public init<Wrapped>(_ embed: @escaping (Value) -> Root) where Root == Wrapped? {
-    self.init(embed: embed, extract: optionalPromotedExtractHelp(embed))
+    func open<Wrapped>(_: Wrapped.Type) -> (Root) -> Value? {
+      optionalPromotedExtractHelp(unsafeBitCast(embed, to: ((Value) -> Wrapped?).self))
+        as! (Root) -> Value?
+    }
+    let extract =
+      ((_Witness<Root>.self as? _AnyOptional.Type)?.wrappedType)
+      .map { _openExistential($0, do: open) }
+      ?? extractHelp(embed)
+    self.init(
+      embed: embed,
+      extract: extract
+    )
   }
 }
 
@@ -28,17 +29,14 @@ extension CasePath where Value == Void {
   /// - Parameter root: A case with no an associated value.
   /// - Returns: A void case path.
   public init(_ root: Root) {
-    self.init(embed: { root }, extract: extractVoidHelp(root))
-  }
-
-  /// Returns a void case path for a case with no associated value.
-  ///
-  /// - Note: This operator is only intended to be used with enum cases that have no associated
-  ///   values. Its behavior is otherwise undefined.
-  /// - Parameter root: A case with no an associated value.
-  /// - Returns: A void case path.
-  public init<Wrapped>(_ root: Root) where Root == Wrapped? {
-    self.init(embed: { root }, extract: optionalPromotedExtractVoidHelp(root))
+    func open<Wrapped>(_: Wrapped.Type) -> (Root) -> Void? {
+      optionalPromotedExtractVoidHelp(unsafeBitCast(root, to: Wrapped?.self)) as! (Root) -> Void?
+    }
+    let extract =
+      ((_Witness<Root>.self as? _AnyOptional.Type)?.wrappedType)
+      .map { _openExistential($0, do: open) }
+      ?? extractVoidHelp(root)
+    self.init(embed: { root }, extract: extract)
   }
 }
 
@@ -704,3 +702,17 @@ extension UnsafeRawPointer {
 
 // This is the size of any Unsafe*Pointer and also the size of Int and UInt.
 private let pointerSize = MemoryLayout<UnsafeRawPointer>.size
+
+private protocol _Optional {
+  associatedtype Wrapped
+}
+extension Optional: _Optional {}
+private enum _Witness<A> {}
+private protocol _AnyOptional {
+  static var wrappedType: Any.Type { get }
+}
+extension _Witness: _AnyOptional where A: _Optional {
+  static var wrappedType: Any.Type {
+    A.Wrapped.self
+  }
+}
