@@ -1163,7 +1163,7 @@ final class CasePathsTests: XCTestCase {
     XCTAssertEqual(foo, .bar(84))
   }
 
-  #if swift(>=5.5)
+  #if canImport(_Concurrency)
     func testConcurrency_SharedCasePath() async throws {
       enum Enum { case payload(Int) }
       let casePath = /Enum.payload

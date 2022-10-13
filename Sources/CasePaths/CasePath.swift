@@ -78,7 +78,7 @@ public struct CasePath<Root, Value> {
   }
 }
 
-#if swift(>=5.5)
+#if canImport(_Concurrency)
   extension CasePath: @unchecked Sendable {}
 #endif
 
