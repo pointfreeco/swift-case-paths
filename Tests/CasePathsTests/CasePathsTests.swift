@@ -1174,16 +1174,35 @@ final class CasePathsTests: XCTestCase {
   #if swift(>=5.5)
     func testConcurrency() async throws {
       enum Enum { case payload(Int) }
-      let root = Enum.payload(42)
       let casePath = /Enum.payload
 
       await withTaskGroup(of: Void.self) { group in
-        for _ in 1...10_000 {
+        for index in 1...100_000 {
           group.addTask {
-            XCTAssertEqual(casePath.extract(from: root), 42)
+            XCTAssertEqual(casePath.extract(from: Enum.payload(index)), index)
           }
         }
       }
+    }
+
+    func testConcurrency_NonSendableEmbed() async throws {
+      enum Enum { case payload(Int) }
+      let iterationCount = 100_000
+      var count = 0
+
+      await withTaskGroup(of: Void.self) { group in
+        for index in 1...iterationCount {
+          let casePath = CasePath<Enum, Int> {
+            count += 1
+            return .payload($0)
+          }
+          group.addTask {
+            XCTAssertEqual(casePath.extract(from: Enum.payload(index)), index)
+          }
+        }
+      }
+
+      XCTAssertEqual(count, iterationCount)
     }
   #endif
 }

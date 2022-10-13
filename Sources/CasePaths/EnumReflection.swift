@@ -191,12 +191,8 @@ func extractHelp<Root, Value>(_ embed: @escaping (Value) -> Root) -> (Root) -> V
 
   var cachedTag: UInt32?
   var cachedStrategy: Strategy<Root, Value>?
-  let lock = NSLock()
 
   return { root in
-    lock.lock()
-    defer { lock.unlock() }
-
     let rootTag = metadata.tag(of: root)
 
     if let cachedTag = cachedTag, let cachedStrategy = cachedStrategy {
@@ -234,12 +230,8 @@ func optionalPromotedExtractHelp<Root, Value>(
 
   var cachedTag: UInt32?
   var cachedStrategy: Strategy<Root, Value>?
-  let lock = NSLock()
 
   return { optionalRoot in
-    lock.lock()
-    defer { lock.unlock() }
-
     guard let root = optionalRoot else { return nil }
 
     let rootTag = metadata.tag(of: root)
