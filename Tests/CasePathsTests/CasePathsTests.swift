@@ -1184,18 +1184,27 @@ final class CasePathsTests: XCTestCase {
 
       await withTaskGroup(of: Void.self) { group in
         for index in 1...iterationCount {
-          let casePath = CasePath<Enum, Int> {
+          let casePath1 = CasePath<Enum, Int> {
             count += 1
             return .payload($0)
           }
           group.addTask {
-            XCTAssertEqual(casePath.extract(from: Enum.payload(index)), index)
-            XCTAssertEqual(casePath.embed(index), .payload(index))
+            XCTAssertEqual(casePath1.extract(from: Enum.payload(index)), index)
+            XCTAssertEqual(casePath1.embed(index), .payload(index))
+          }
+
+          let casePath2 = CasePath<Enum, Int> {
+            count += 1
+            return .payload($0)
+          }
+          group.addTask {
+            XCTAssertEqual(casePath2.extract(from: Enum.payload(index)), index)
+            XCTAssertEqual(casePath2.embed(index), .payload(index))
           }
         }
       }
 
-      XCTAssertEqual(count, iterationCount * 2)
+      XCTAssertEqual(count, iterationCount * 4)
     }
   #endif
 }
