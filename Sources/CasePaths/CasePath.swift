@@ -78,7 +78,7 @@ public struct CasePath<Root, Value> {
   }
 }
 
-#if canImport(_Concurrency)
+#if canImport(_Concurrency) && compiler(>=5.5.2)
   extension CasePath: @unchecked Sendable {}
 #endif
 
