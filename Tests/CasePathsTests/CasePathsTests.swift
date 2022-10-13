@@ -739,6 +739,13 @@ final class CasePathsTests: XCTestCase {
     )
   }
 
+  func testSome() {
+    XCTAssertEqual(
+      (/.some).extract(from: Optional(42)),
+      .some(42)
+    )
+  }
+
   func testLabeledCases() {
     enum Foo: Equatable {
       case bar(some: Int)
