@@ -8,6 +8,13 @@ extension CasePath where Root == Value {
   }
 }
 
+extension CasePath where Root: _OptionalProtocol, Value == Root.Wrapped {
+  /// The optional case path: a case path that unwraps an optional value.
+  public static var some: CasePath {
+    .init(embed: Root.init, extract: { $0.optional })
+  }
+}
+
 extension CasePath where Root == Void {
   /// Returns a case path that always successfully extracts the given constant value.
   ///
@@ -53,4 +60,14 @@ extension CasePath where Value: LosslessStringConvertible, Root == String {
       extract: Value.init
     )
   }
+}
+
+public protocol _OptionalProtocol {
+  associatedtype Wrapped
+  var optional: Wrapped? { get }
+  init(_ some: Wrapped)
+}
+
+extension Optional: _OptionalProtocol {
+  public var optional: Wrapped? { self }
 }
