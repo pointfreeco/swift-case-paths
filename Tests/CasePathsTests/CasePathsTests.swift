@@ -1171,7 +1171,7 @@ final class CasePathsTests: XCTestCase {
     XCTAssertEqual(foo, .bar(84))
   }
 
-  func testSendable() async throws {
+  func testConcurrency() async throws {
     enum Enum { case payload(Int) }
     let root = Enum.payload(42)
     let casePath = /Enum.payload

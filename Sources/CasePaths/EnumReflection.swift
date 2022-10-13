@@ -1,3 +1,5 @@
+import Foundation
+
 extension CasePath {
   /// Returns a case path for the given embed function.
   ///
@@ -177,8 +179,6 @@ public func extract<Root, Value>(_ embed: @escaping (Value) -> Root?) -> (Root?)
 }
 
 // MARK: - Extraction helpers
-
-import Foundation
 
 func extractHelp<Root, Value>(_ embed: @escaping (Value) -> Root) -> (Root) -> Value? {
   guard
