@@ -2,7 +2,7 @@
 /// value.
 ///
 /// This type defines key path-like semantics for enum cases.
-public struct CasePath<Root, Value>: @unchecked Sendable {
+public struct CasePath<Root, Value> {
   private let _embed: (Value) -> Root
   private let _extract: (Root) -> Value?
 
@@ -64,6 +64,10 @@ public struct CasePath<Root, Value>: @unchecked Sendable {
     )
   }
 }
+
+#if swift(>=5.5)
+  extension CasePath: @unchecked Sendable {}
+#endif
 
 extension CasePath: CustomStringConvertible {
   public var description: String {
