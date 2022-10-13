@@ -2,7 +2,7 @@
 /// value.
 ///
 /// This type defines key path-like semantics for enum cases.
-public struct CasePath<Root, Value> {
+public struct CasePath<Root, Value>: @unchecked Sendable {
   private let _embed: (Value) -> Root
   private let _extract: (Root) -> Value?
 
