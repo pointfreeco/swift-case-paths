@@ -10,7 +10,9 @@ test-linux:
 
 test-swift:
 	swift test \
-		--enable-test-discovery \
+		--parallel
+	swift test \
+	  -c release \
 		--parallel
 
 format:
