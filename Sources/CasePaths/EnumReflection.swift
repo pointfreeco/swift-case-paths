@@ -1,5 +1,3 @@
-import Foundation
-
 extension CasePath {
   /// Returns a case path for the given embed function.
   ///
