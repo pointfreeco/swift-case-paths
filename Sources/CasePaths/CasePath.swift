@@ -1,3 +1,5 @@
+import Foundation
+
 /// A path that supports embedding a value in a root and attempting to extract a root's embedded
 /// value.
 ///
@@ -11,9 +13,20 @@ public struct CasePath<Root, Value> {
   /// - Parameters:
   ///   - embed: A function that always succeeds in embedding a value in a root.
   ///   - extract: A function that can optionally fail in extracting a value from a root.
-  public init(embed: @escaping (Value) -> Root, extract: @escaping (Root) -> Value?) {
-    self._embed = embed
-    self._extract = extract
+  public init(
+    embed: @escaping (Value) -> Root,
+    extract: @escaping (Root) -> Value?
+  ) {
+    self._embed = {
+      lock.lock()
+      defer { lock.unlock() }
+      return embed($0)
+    }
+    self._extract = {
+      lock.lock()
+      defer { lock.unlock() }
+      return extract($0)
+    }
   }
 
   /// Returns a root by embedding a value.
@@ -65,6 +78,10 @@ public struct CasePath<Root, Value> {
   }
 }
 
+#if canImport(_Concurrency) && compiler(>=5.5.2)
+  extension CasePath: @unchecked Sendable {}
+#endif
+
 extension CasePath: CustomStringConvertible {
   public var description: String {
     "CasePath<\(Root.self), \(Value.self)>"
@@ -72,3 +89,5 @@ extension CasePath: CustomStringConvertible {
 }
 
 struct ExtractionFailed: Error {}
+
+private let lock = NSRecursiveLock()

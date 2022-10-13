@@ -1,16 +1,8 @@
 import CasePaths
 import XCTest
 
-// Replace this with XCTUnwrap when we drop support for Xcode 11.3.
-private func unwrap<Wrapped>(_ optional: Wrapped?) throws -> Wrapped {
-  guard let wrapped = optional else { throw UnexpectedNil() }
-  return wrapped
-}
-private struct UnexpectedNil: Error {}
-
 protocol TestProtocol {}
 extension Int: TestProtocol {}
-
 protocol TestClassProtocol: AnyObject {}
 
 final class CasePathsTests: XCTestCase {
@@ -1177,8 +1169,60 @@ final class CasePathsTests: XCTestCase {
     try (/Foo.bar).modify(&foo) { $0 *= 2 }
     XCTAssertEqual(foo, .bar(84))
   }
+
+  #if canImport(_Concurrency) && compiler(>=5.5.2)
+    func testConcurrency_SharedCasePath() async throws {
+      enum Enum { case payload(Int) }
+      let casePath = /Enum.payload
+
+      await withTaskGroup(of: Void.self) { group in
+        for index in 1...100_000 {
+          group.addTask {
+            XCTAssertEqual(casePath.extract(from: Enum.payload(index)), index)
+          }
+        }
+      }
+    }
+
+    func testConcurrency_NonSendableEmbed() async throws {
+      enum Enum: Equatable { case payload(Int) }
+      let iterationCount = 100_000
+      var count = 0
+
+      await withTaskGroup(of: Void.self) { group in
+        for index in 1...iterationCount {
+          let casePath1 = CasePath<Enum, Int> {
+            count += 1
+            return .payload($0)
+          }
+          group.addTask {
+            XCTAssertEqual(casePath1.extract(from: Enum.payload(index)), index)
+            XCTAssertEqual(casePath1.embed(index), .payload(index))
+          }
+
+          let casePath2 = CasePath<Enum, Int> {
+            count += 1
+            return .payload($0)
+          }
+          group.addTask {
+            XCTAssertEqual(casePath2.extract(from: Enum.payload(index)), index)
+            XCTAssertEqual(casePath2.embed(index), .payload(index))
+          }
+        }
+      }
+
+      XCTAssertEqual(count, iterationCount * 4)
+    }
+  #endif
 }
 
 private class TestObject: Equatable {
   static func == (lhs: TestObject, rhs: TestObject) -> Bool { lhs === rhs }
 }
+
+// Replace this with XCTUnwrap when we drop support for Xcode 11.3.
+private func unwrap<Wrapped>(_ optional: Wrapped?) throws -> Wrapped {
+  guard let wrapped = optional else { throw UnexpectedNil() }
+  return wrapped
+}
+private struct UnexpectedNil: Error {}
