@@ -1,16 +1,8 @@
 import CasePaths
 import XCTest
 
-// Replace this with XCTUnwrap when we drop support for Xcode 11.3.
-private func unwrap<Wrapped>(_ optional: Wrapped?) throws -> Wrapped {
-  guard let wrapped = optional else { throw UnexpectedNil() }
-  return wrapped
-}
-private struct UnexpectedNil: Error {}
-
 protocol TestProtocol {}
 extension Int: TestProtocol {}
-
 protocol TestClassProtocol: AnyObject {}
 
 final class CasePathsTests: XCTestCase {
@@ -1211,3 +1203,10 @@ final class CasePathsTests: XCTestCase {
 private class TestObject: Equatable {
   static func == (lhs: TestObject, rhs: TestObject) -> Bool { lhs === rhs }
 }
+
+// Replace this with XCTUnwrap when we drop support for Xcode 11.3.
+private func unwrap<Wrapped>(_ optional: Wrapped?) throws -> Wrapped {
+  guard let wrapped = optional else { throw UnexpectedNil() }
+  return wrapped
+}
+private struct UnexpectedNil: Error {}
