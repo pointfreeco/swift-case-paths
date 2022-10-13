@@ -1186,7 +1186,7 @@ final class CasePathsTests: XCTestCase {
     }
 
     func testConcurrency_NonSendableEmbed() async throws {
-      enum Enum { case payload(Int) }
+      enum Enum: Equatable { case payload(Int) }
       let iterationCount = 100_000
       var count = 0
 
@@ -1198,11 +1198,12 @@ final class CasePathsTests: XCTestCase {
           }
           group.addTask {
             XCTAssertEqual(casePath.extract(from: Enum.payload(index)), index)
+            XCTAssertEqual(casePath.embed(index), .payload(index))
           }
         }
       }
 
-      XCTAssertEqual(count, iterationCount)
+      XCTAssertEqual(count, iterationCount * 2)
     }
   #endif
 }
