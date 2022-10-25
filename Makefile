@@ -13,7 +13,7 @@ test-swift:
  		--enable-test-discovery \
 		--parallel
 	swift test \
-	  -c release \
+		-c release \
  		--enable-test-discovery \
 		--parallel
 

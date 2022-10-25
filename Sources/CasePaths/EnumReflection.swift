@@ -464,7 +464,10 @@ private struct EnumMetadata: Metadata {
   }
 
   func tag<Enum>(of value: Enum) -> UInt32 {
-    withUnsafePointer(to: value) {
+    // NB: Workaround for https://github.com/apple/swift/issues/61708
+    guard self.typeDescriptor.emptyCaseCount + self.typeDescriptor.payloadCaseCount > 1
+    else { return 0 }
+    return withUnsafePointer(to: value) {
       self.valueWitnessTable.getEnumTag($0, self.ptr)
     }
   }
