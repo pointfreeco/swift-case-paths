@@ -1170,6 +1170,25 @@ final class CasePathsTests: XCTestCase {
     XCTAssertEqual(foo, .bar(84))
   }
 
+  func testRegression_gh72() throws {
+    enum E1 {
+      case c1(E2)
+    }
+
+    enum E2 {
+      case c1(Bool)
+      case c2(Bool)
+      case c3(Any)
+    }
+
+    XCTAssertNotNil(
+      (/E1.c1).extract(from: .c1(.c1(true)))
+    )
+    XCTAssertNotNil(
+      (/E1.c1).extract(from: .c1(.c2(true)))
+    )
+  }
+
   #if canImport(_Concurrency) && compiler(>=5.5.2)
     func testConcurrency_SharedCasePath() async throws {
       enum Enum { case payload(Int) }
