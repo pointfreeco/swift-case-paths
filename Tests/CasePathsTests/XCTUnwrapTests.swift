@@ -1,4 +1,4 @@
-#if DEBUG
+#if DEBUG && (os(iOS) || os(macOS) || os(watchOS) || os(tvOS))
   import CasePaths
   import XCTest
 
