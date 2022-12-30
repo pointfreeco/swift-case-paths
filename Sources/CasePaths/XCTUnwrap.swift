@@ -13,7 +13,7 @@ public func XCTUnwrap<Root, Case>(
   _ expression: @autoclosure () throws -> Root,
   case extract: (Root) -> Case?,
   _ message: @autoclosure () -> String = "",
-  file: StaticString = #filePath,
+  file: StaticString = #file,
   line: UInt = #line
 ) throws -> Case {
   guard let value = try extract(expression())
