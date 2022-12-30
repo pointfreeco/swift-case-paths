@@ -19,7 +19,7 @@ let package = Package(
   dependencies: [
     .package(name: "Benchmark", url: "https://github.com/google/swift-benchmark", from: "0.1.0"),
     //.package(url: "https://github.com/pointfreeco/xctest-dynamic-overlay.git", from: "0.5.0"),
-    .package(url: "https://github.com/pointfreeco/xctest-dynamic-overlay.git", revision: "7bd4ee4"),
+    .package(url: "https://github.com/pointfreeco/xctest-dynamic-overlay.git", branch: "spi-current-test-case"),
   ],
   targets: [
     .target(
@@ -32,7 +32,7 @@ let package = Package(
       name: "CasePathsTests",
       dependencies: ["CasePaths"]
     ),
-    .target(
+    .executableTarget(
       name: "swift-case-paths-benchmark",
       dependencies: [
         "CasePaths",
