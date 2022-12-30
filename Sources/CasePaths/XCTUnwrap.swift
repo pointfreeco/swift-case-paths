@@ -21,7 +21,9 @@ public func XCTUnwrap<Root, Case>(
 ) throws -> Case {
   guard let value = try extract(expression())
   else {
-    _ = XCTCurrentTestCase?.perform(Selector(("setContinueAfterFailure:")), with: false)
+    #if canImport(ObjectiveC)
+      _ = XCTCurrentTestCase?.perform(Selector(("setContinueAfterFailure:")), with: false)
+    #endif
     let message = message()
     XCTFail(
       """
