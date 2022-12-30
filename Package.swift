@@ -18,8 +18,8 @@ let package = Package(
   ],
   dependencies: [
     .package(name: "Benchmark", url: "https://github.com/google/swift-benchmark", from: "0.1.0"),
-    //.package(url: "https://github.com/pointfreeco/xctest-dynamic-overlay.git", from: "0.5.0"),
-    .package(url: "https://github.com/pointfreeco/xctest-dynamic-overlay.git", branch: "spi-current-test-case"),
+    //.package(url: "https://github.com/pointfreeco/xctest-dynamic-overlay", from: "0.5.0"),
+    .package(url: "https://github.com/pointfreeco/xctest-dynamic-overlay", branch: "spi-current-test-case"),
   ],
   targets: [
     .target(
