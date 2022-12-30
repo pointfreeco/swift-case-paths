@@ -11,9 +11,9 @@ test-linux:
 test-swift:
 	swift test \
 		--parallel
-# 	swift test \
-# 		-c release \
-# 		--parallel
+	swift test \
+		-c release \
+		--parallel
 
 format:
 	swift format --in-place --recursive .
