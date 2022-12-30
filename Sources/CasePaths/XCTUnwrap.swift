@@ -5,13 +5,10 @@ import Foundation
 ///
 /// - Parameters:
 ///   - expression: An enum value.
-///   - casePath: The case you want to extract from the enum.
+///   - extract: A closure that attempts to extract a particular case from the enum. You can supply
+///     a case path literal here, like '/Enum.case'.
 ///   - message: An optional description of a failure.
-///   - file: The file where the failure occurs. The default is the filename of the test case where
-///     you call this function.
-///   - line: The line number where the failure occurs. The default is the line number where you
-///     call this function.
-/// - Returns: Associated value from the matched case on the enum.
+/// - Returns: The unwrapped associated value from the matched case of the enum.
 public func XCTUnwrap<Root, Case>(
   _ expression: @autoclosure () throws -> Root,
   case extract: (Root) -> Case?,
