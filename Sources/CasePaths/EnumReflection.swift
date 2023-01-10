@@ -440,30 +440,30 @@ private struct MetadataKind: Equatable {
   static var existential: Self { .init(rawValue: 0x303) }
 }
 
-private struct EnumMetadata: Metadata {
+@_spi(Reflection) public struct EnumMetadata: Metadata {
   let ptr: UnsafeRawPointer
 
-  init(assumingEnum type: Any.Type) {
+  fileprivate init(assumingEnum type: Any.Type) {
     self.ptr = unsafeBitCast(type, to: UnsafeRawPointer.self)
   }
 
-  init?(_ type: Any.Type) {
+  @_spi(Reflection) public init?(_ type: Any.Type) {
     self.init(assumingEnum: type)
     guard self.kind == .enumeration || self.kind == .optional else { return nil }
   }
 
-  var genericArguments: GenericArgumentVector? {
+  fileprivate var genericArguments: GenericArgumentVector? {
     guard typeDescriptor.flags.contains(.isGeneric) else { return nil }
     return .init(ptr: self.ptr.advanced(by: 2 * pointerSize))
   }
 
-  var typeDescriptor: EnumTypeDescriptor {
+  @_spi(Reflection) public var typeDescriptor: EnumTypeDescriptor {
     EnumTypeDescriptor(
       ptr: self.ptr.load(fromByteOffset: pointerSize, as: UnsafeRawPointer.self)
     )
   }
 
-  func tag<Enum>(of value: Enum) -> UInt32 {
+  @_spi(Reflection) public func tag<Enum>(of value: Enum) -> UInt32 {
     // NB: Workaround for https://github.com/apple/swift/issues/61708
     guard self.typeDescriptor.emptyCaseCount + self.typeDescriptor.payloadCaseCount > 1
     else { return 0 }
@@ -474,9 +474,9 @@ private struct EnumMetadata: Metadata {
 }
 
 extension EnumMetadata {
-  func associatedValueType(forTag tag: UInt32) -> Any.Type {
+  @_spi(Reflection) public func associatedValueType(forTag tag: UInt32) -> Any.Type {
     guard
-      let typeName = self.typeDescriptor.fieldDescriptor?.field(atIndex: tag).typeName,
+      let typeName = dump(self.typeDescriptor.fieldDescriptor)?.field(atIndex: tag).typeName,
       let type = swift_getTypeByMangledNameInContext(
         typeName.ptr, typeName.length,
         genericContext: self.typeDescriptor.ptr,
@@ -509,12 +509,12 @@ extension EnumMetadata {
   }
 }
 
-private struct EnumTypeDescriptor: Equatable {
+@_spi(Reflection) public struct EnumTypeDescriptor: Equatable {
   let ptr: UnsafeRawPointer
 
   var flags: Flags { Flags(rawValue: self.ptr.load(as: UInt32.self)) }
 
-  var fieldDescriptor: FieldDescriptor? {
+  fileprivate var fieldDescriptor: FieldDescriptor? {
     self.ptr
       .advanced(by: 4 * 4)
       .loadRelativePointer()
