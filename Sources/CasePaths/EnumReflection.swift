@@ -476,7 +476,7 @@ private struct MetadataKind: Equatable {
 extension EnumMetadata {
   @_spi(Reflection) public func associatedValueType(forTag tag: UInt32) -> Any.Type {
     guard
-      let typeName = dump(self.typeDescriptor.fieldDescriptor)?.field(atIndex: tag).typeName,
+      let typeName = self.typeDescriptor.fieldDescriptor?.field(atIndex: tag).typeName,
       let type = swift_getTypeByMangledNameInContext(
         typeName.ptr, typeName.length,
         genericContext: self.typeDescriptor.ptr,
