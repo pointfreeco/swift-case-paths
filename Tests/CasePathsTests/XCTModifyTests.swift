@@ -8,12 +8,12 @@
 
       XCTExpectFailure {
         $0.compactDescription == """
-          XCTModify failed: expected non-nil value of type "Int"
+          XCTModify failed: expected to extract value of type "Int" from "Result<Int, Error>"
           """
       }
 
       var result = Result<Int, Error>.failure(SomeError())
-      try XCTModify(&result, case: /Result.success) {
+      XCTModify(&result, case: /Result.success) {
         $0 += 1
       }
     }
@@ -23,12 +23,13 @@
 
       XCTExpectFailure {
         $0.compactDescription == """
-          XCTModify failed: expected non-nil value of type "Int"
+          XCTModify failed: expected to extract value of type "Int" from \
+          "Optional<Result<Int, Error>>"
           """
       }
 
       var result = Optional(Result<Int, Error>.failure(SomeError()))
-      try XCTModify(&result, case: /Result.success) {
+      XCTModify(&result, case: /Result.success) {
         $0 += 1
       }
     }
@@ -38,12 +39,13 @@
 
       XCTExpectFailure {
         $0.compactDescription == """
-          XCTModify failed: expected non-nil value of type "Int"
+          XCTModify failed: expected to extract value of type "Int" from \
+          "Optional<Result<Int, Error>>"
           """
       }
 
       var result = Optional<Result<Int, Error>>.none
-      try XCTModify(&result, case: /Result.success) {
+      XCTModify(&result, case: /Result.success) {
         $0 += 1
       }
     }
@@ -53,12 +55,13 @@
 
       XCTExpectFailure {
         $0.compactDescription == """
-          XCTModify failed: expected non-nil value of type "Int" - Should be success
+          XCTModify failed: expected to extract value of type "Int" from "Result<Int, Error>" - \
+          Should be success
           """
       }
 
       var result = Result<Int, Error>.failure(SomeError())
-      try XCTModify(&result, case: /Result.success, "Should be success") {
+      XCTModify(&result, case: /Result.success, "Should be success") {
         $0 += 1
       }
     }
@@ -67,13 +70,9 @@
       try XCTSkipIf(ProcessInfo.processInfo.environment["CI"] != nil)
 
       var result = Result<Int, SomeError>.success(2)
-      XCTAssertEqual(
-        try XCTModify(&result, case: /Result.success) {
-          $0 += 1
-          return $0
-        },
-        3
-      )
+      XCTModify(&result, case: /Result.success) {
+        $0 += 1
+      }
       XCTAssertEqual(result, .success(3))
     }
 
@@ -81,13 +80,9 @@
       try XCTSkipIf(ProcessInfo.processInfo.environment["CI"] != nil)
 
       var result = Optional(Result<Int, SomeError>.success(2))
-      XCTAssertEqual(
-        try XCTModify(&result, case: /Result.success) {
-          $0 += 1
-          return $0
-        },
-        3
-      )
+      XCTModify(&result, case: /Result.success) {
+        $0 += 1
+      }
       XCTAssertEqual(result, .success(3))
     }
 
@@ -101,12 +96,9 @@
       }
 
       var result = Result<Int, SomeError>.success(2)
-      XCTAssertEqual(
-        try XCTModify(&result, case: /Result.success) {
-          $0
-        },
-        2
-      )
+      XCTModify(&result, case: /Result.success) {
+        _ = $0
+      }
       XCTAssertEqual(result, .success(2))
     }
   }
