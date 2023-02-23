@@ -101,6 +101,22 @@
       }
       XCTAssertEqual(result, .success(2))
     }
+
+    func testXCTModify_BodyThrowsError() throws {
+      try XCTSkipIf(ProcessInfo.processInfo.environment["CI"] != nil)
+
+      XCTExpectFailure {
+        $0.compactDescription == """
+          Threw error: SomeError()
+          """
+      }
+
+      var result = Result<Int, SomeError>.success(2)
+      XCTModify(&result, case: /Result.success) { _ in
+        throw SomeError()
+      }
+      XCTAssertEqual(result, .success(2))
+    }
   }
 
   private struct SomeError: Error, Equatable {}
