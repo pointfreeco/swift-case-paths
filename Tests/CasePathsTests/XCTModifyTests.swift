@@ -11,8 +11,9 @@
           XCTModify failed: expected non-nil value of type "Int"
           """
       }
-      struct SomeError: Error {}
-      try XCTModify(Result<Int, Error>.failure(SomeError()), case: /Result.success) {
+
+      var result = Result<Int, Error>.failure(SomeError())
+      try XCTModify(&result, case: /Result.success) {
         $0 += 1
       }
     }
@@ -25,8 +26,9 @@
           XCTModify failed: expected non-nil value of type "Int"
           """
       }
-      struct SomeError: Error {}
-      try XCTModify(Optional(Result<Int, Error>.failure(SomeError())), case: /Result.success) {
+
+      var result = Optional(Result<Int, Error>.failure(SomeError()))
+      try XCTModify(&result, case: /Result.success) {
         $0 += 1
       }
     }
@@ -39,8 +41,9 @@
           XCTModify failed: expected non-nil value of type "Int"
           """
       }
-      struct SomeError: Error {}
-      try XCTModify(Optional<Result<Int, Error>>.none, case: /Result.success) {
+
+      var result = Optional<Result<Int, Error>>.none
+      try XCTModify(&result, case: /Result.success) {
         $0 += 1
       }
     }
@@ -54,10 +57,8 @@
           """
       }
 
-      struct SomeError: Error {}
-      try XCTModify(
-        Result<Int, Error>.failure(SomeError()), case: /Result.success, "Should be success"
-      ) {
+      var result = Result<Int, Error>.failure(SomeError())
+      try XCTModify(&result, case: /Result.success, "Should be success") {
         $0 += 1
       }
     }
@@ -65,25 +66,29 @@
     func testXCTModifyPass() throws {
       try XCTSkipIf(ProcessInfo.processInfo.environment["CI"] != nil)
 
+      var result = Result<Int, SomeError>.success(2)
       XCTAssertEqual(
-        try XCTModify(Result<Int, Error>.success(2), case: /Result.success) {
+        try XCTModify(&result, case: /Result.success) {
           $0 += 1
           return $0
         },
         3
       )
+      XCTAssertEqual(result, .success(3))
     }
 
     func testXCTModifyPass_OptionalPromotion() throws {
       try XCTSkipIf(ProcessInfo.processInfo.environment["CI"] != nil)
 
+      var result = Optional(Result<Int, SomeError>.success(2))
       XCTAssertEqual(
-        try XCTModify(Optional(Result<Int, Error>.success(2)), case: /Result.success) {
+        try XCTModify(&result, case: /Result.success) {
           $0 += 1
           return $0
         },
         3
       )
+      XCTAssertEqual(result, .success(3))
     }
 
     func testXCTModifyFailUnchangedEquatable() throws {
@@ -95,12 +100,16 @@
           """
       }
 
+      var result = Result<Int, SomeError>.success(2)
       XCTAssertEqual(
-        try XCTModify(Result<Int, Error>.success(2), case: /Result.success) {
+        try XCTModify(&result, case: /Result.success) {
           $0
         },
         2
       )
+      XCTAssertEqual(result, .success(2))
     }
   }
+
+  private struct SomeError: Error, Equatable {}
 #endif

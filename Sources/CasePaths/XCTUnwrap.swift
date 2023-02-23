@@ -36,14 +36,14 @@ public func XCTUnwrap<Root, Case>(
 }
 
 public func XCTModify<Root, Case, Result>(
-  _ expression: @autoclosure () throws -> Root,
+  _ root: inout Root,
   case casePath: CasePath<Root, Case>,
   _ message: @autoclosure () -> String = "",
   file: StaticString = #file,
   line: UInt = #line,
   _ body: (inout Case) throws -> Result
 ) throws -> Result {
-  guard var value = try casePath.extract(from: expression())
+  guard var value = casePath.extract(from: root)
   else {
     #if canImport(ObjectiveC)
       _ = XCTCurrentTestCase?.perform(Selector(("setContinueAfterFailure:")), with: false)
@@ -68,8 +68,8 @@ public func XCTModify<Root, Case, Result>(
       """)
   }
 
+  root = casePath.embed(value)
   return result
 }
 
 private struct UnwrappingCase: Error {}
-
