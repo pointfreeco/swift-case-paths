@@ -35,4 +35,41 @@ public func XCTUnwrap<Root, Case>(
   return value
 }
 
+public func XCTModify<Root, Case, Result>(
+  _ expression: @autoclosure () throws -> Root,
+  case casePath: CasePath<Root, Case>,
+  _ message: @autoclosure () -> String = "",
+  file: StaticString = #file,
+  line: UInt = #line,
+  _ body: (inout Case) throws -> Result
+) throws -> Result {
+  guard var value = try casePath.extract(from: expression())
+  else {
+    #if canImport(ObjectiveC)
+      _ = XCTCurrentTestCase?.perform(Selector(("setContinueAfterFailure:")), with: false)
+    #endif
+    let message = message()
+    XCTFail(
+      """
+      XCTModify failed: expected non-nil value of type "\(Case.self)"\
+      \(message.isEmpty ? "" : " - " + message)
+      """,
+      file: file,
+      line: line
+    )
+    throw UnwrappingCase()
+  }
+  let before = value
+  let result = try body(&value)
+
+  if let isEqual = _isEqual(before, value), isEqual {
+    XCTFail("""
+      XCTModify failed: expected "\(Case.self)" value to be modified but it was unchanged.
+      """)
+  }
+
+  return result
+}
+
 private struct UnwrappingCase: Error {}
+
