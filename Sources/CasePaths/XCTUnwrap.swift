@@ -35,4 +35,45 @@ public func XCTUnwrap<Root, Case>(
   return value
 }
 
+public func XCTModify<Root, Case>(
+  _ root: inout Root,
+  case casePath: CasePath<Root, Case>,
+  _ message: @autoclosure () -> String = "",
+  file: StaticString = #file,
+  line: UInt = #line,
+  _ body: (inout Case) throws -> Void
+) {
+  guard var value = casePath.extract(from: root)
+  else {
+    #if canImport(ObjectiveC)
+      _ = XCTCurrentTestCase?.perform(Selector(("setContinueAfterFailure:")), with: false)
+    #endif
+    let message = message()
+    XCTFail(
+      """
+      XCTModify failed: expected to extract value of type "\(Case.self)" from "\(Root.self)"\
+      \(message.isEmpty ? "" : " - " + message)
+      """,
+      file: file,
+      line: line
+    )
+    return
+  }
+  let before = value
+  do {
+    try body(&value)
+  } catch {
+    XCTFail("Threw error: \(error)", file: file, line: line)
+    return
+  }
+
+  if let isEqual = _isEqual(before, value), isEqual {
+    XCTFail("""
+      XCTModify failed: expected "\(Case.self)" value to be modified but it was unchanged.
+      """)
+  }
+
+  root = casePath.embed(value)
+}
+
 private struct UnwrappingCase: Error {}
