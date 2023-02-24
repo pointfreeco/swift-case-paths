@@ -68,7 +68,8 @@ public func XCTModify<Root, Case>(
   }
 
   if let isEqual = _isEqual(before, value), isEqual {
-    XCTFail("""
+    XCTFail(
+      """
       XCTModify failed: expected "\(Case.self)" value to be modified but it was unchanged.
       """)
   }
