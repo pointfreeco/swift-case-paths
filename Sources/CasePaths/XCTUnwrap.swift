@@ -67,7 +67,11 @@ public func XCTModify<Root, Case>(
     return
   }
 
-  if let isEqual = _isEqual(before, value), isEqual {
+  if
+    XCTModifyLocals.isExhaustive,
+    let isEqual = _isEqual(before, value),
+    isEqual
+  {
     XCTFail(
       """
       XCTModify failed: expected "\(Case.self)" value to be modified but it was unchanged.
@@ -75,6 +79,10 @@ public func XCTModify<Root, Case>(
   }
 
   root = casePath.embed(value)
+}
+
+@_spi(Internals) public enum XCTModifyLocals {
+  @TaskLocal public static var isExhaustive = true
 }
 
 private struct UnwrappingCase: Error {}
