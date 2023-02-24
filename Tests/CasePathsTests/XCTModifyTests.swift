@@ -1,5 +1,5 @@
 #if DEBUG && (os(iOS) || os(macOS) || os(tvOS) || os(watchOS))
-  import CasePaths
+  @_spi(Internals) import CasePaths
   import XCTest
 
   final class XCTModifyTests: XCTestCase {
@@ -115,6 +115,17 @@
       XCTModify(&result, case: /Result.success) { _ in
         throw SomeError()
       }
+      XCTAssertEqual(result, .success(2))
+    }
+
+    func testXCTModifyFailUnchangedEquatable_NonExhaustive() throws {
+      try XCTSkipIf(ProcessInfo.processInfo.environment["CI"] != nil)
+
+      var result = Result<Int, SomeError>.success(2)
+      XCTModifyLocals.$isExhaustive.withValue(false) {
+        XCTModify(&result, case: /Result.success) {
+          _ = $0
+        }}
       XCTAssertEqual(result, .success(2))
     }
   }
