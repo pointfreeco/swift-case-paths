@@ -67,8 +67,7 @@ public func XCTModify<Root, Case>(
     return
   }
 
-  if
-    XCTModifyLocals.isExhaustive,
+  if XCTModifyLocals.isExhaustive,
     let isEqual = _isEqual(before, value),
     isEqual
   {
