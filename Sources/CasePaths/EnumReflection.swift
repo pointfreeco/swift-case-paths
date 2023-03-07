@@ -507,6 +507,40 @@ extension EnumMetadata {
   func destructivelyInjectTag(_ tag: UInt32, intoPayload payload: UnsafeMutableRawPointer) {
     self.valueWitnessTable.destructiveInjectEnumData(payload, tag, ptr)
   }
+
+  @_spi(Reflection) public static func project<Enum>(_ root: Enum) -> Any? {
+    guard let metadata = Self(Enum.self)
+    else { return nil }
+
+    let tag = metadata.tag(of: root)
+    guard
+      let isIndirect = metadata
+        .typeDescriptor
+        .fieldDescriptor?
+        .field(atIndex: tag)
+        .flags
+        .contains(.isIndirectCase)
+    else { return nil }
+
+    var root = root
+    return withUnsafeMutableBytes(of: &root) { rawBuffer in
+      guard var pointer = rawBuffer.baseAddress
+      else { return nil }
+
+      if isIndirect {
+        pointer = pointer
+          .load(as: UnsafeMutableRawPointer.self)  // Load the heap object pointer.
+          .advanced(by: 2 * pointerSize)  // Skip the heap object header.
+      }
+
+      metadata.destructivelyProjectPayload(of: pointer)
+      defer { metadata.destructivelyInjectTag(tag, intoPayload: pointer) }
+      func open<T>(_ type: T.Type) -> T {
+        pointer.load(as: type)
+      }
+      return _openExistential(metadata.associatedValueType(forTag: tag), do: open)
+    }
+  }
 }
 
 @_spi(Reflection) public struct EnumTypeDescriptor: Equatable {
