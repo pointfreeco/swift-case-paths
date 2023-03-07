@@ -604,6 +604,20 @@ final class CasePathsTests: XCTestCase {
     XCTAssertEqual(CasePath(Authentication.authenticated).extract(from: root), "deadbeef")
   }
 
+  func testPathExtractFromOptionalRoot_AnyHashable() {
+    enum Authentication {
+      case authenticated(token: AnyHashable)
+      case unauthenticated
+    }
+
+    let root: Authentication? = .authenticated(token: "deadbeef")
+    let path: CasePath<Authentication?, String> = /Authentication.authenticated
+    for _ in 1...2 {
+      let actual = path.extract(from: root)
+      XCTAssertEqual(actual, "deadbeef")
+    }
+  }
+
   func testEmbed() {
     enum Foo: Equatable { case bar(Int) }
 

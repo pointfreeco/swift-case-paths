@@ -188,21 +188,32 @@ func extractHelp<Root, Value>(_ embed: @escaping (Value) -> Root) -> (Root) -> V
   }
 
   var cachedTag: UInt32?
+  var cachedStrategy: (isIndirect: Bool, associatedValueType: Any.Type)?
 
   return { root in
     let rootTag = metadata.tag(of: root)
 
-    if let cachedTag = cachedTag {
+    if let cachedTag = cachedTag, let (isIndirect, associatedValueType) = cachedStrategy {
       guard rootTag == cachedTag else { return nil }
-      return EnumMetadata.project(root) as? Value
+      return
+        EnumMetadata
+        ._project(root, isIndirect: isIndirect, associatedValueType: associatedValueType)?
+        .value as? Value
     }
 
-    guard let value = EnumMetadata.project(root) as? Value
+    guard
+      let (value, isIndirect, type) = EnumMetadata._project(root),
+      let value = value as? Value
     else { return nil }
 
     let embedTag = metadata.tag(of: embed(value))
     cachedTag = embedTag
-    return embedTag == rootTag ? value : nil
+    if embedTag == rootTag {
+      cachedStrategy = (isIndirect, type)
+      return value
+    } else {
+      return nil
+    }
   }
 }
 
@@ -362,12 +373,21 @@ extension EnumMetadata {
   }
 
   @_spi(Reflection) public static func project<Enum>(_ root: Enum) -> Any? {
+    Self._project(root)?.value
+  }
+
+  fileprivate static func _project<Enum>(
+    _ root: Enum,
+    isIndirect: Bool? = nil,
+    associatedValueType: Any.Type? = nil
+  ) -> (value: Any, isIndirect: Bool, associatedValueType: Any.Type)? {
     guard let metadata = Self(Enum.self)
     else { return nil }
 
     let tag = metadata.tag(of: root)
     guard
-      let isIndirect = metadata
+      let isIndirect = isIndirect
+        ?? metadata
         .typeDescriptor
         .fieldDescriptor?
         .field(atIndex: tag)
@@ -383,17 +403,24 @@ extension EnumMetadata {
       defer { metadata.destructivelyInjectTag(tag, intoPayload: pointer) }
       func open<T>(_ type: T.Type) -> T {
         isIndirect
-        ? pointer
-          .load(as: UnsafeRawPointer.self)  // Load the heap object pointer.
-          .advanced(by: 2 * pointerSize)  // Skip the heap object header.
-          .load(as: type)
-        : pointer.load(as: type)
+          ? pointer
+            .load(as: UnsafeRawPointer.self)  // Load the heap object pointer.
+            .advanced(by: 2 * pointerSize)  // Skip the heap object header.
+            .load(as: type)
+          : pointer.load(as: type)
       }
-      var type = metadata.associatedValueType(forTag: tag)
-      if let tupleMetadata = TupleMetadata(type), tupleMetadata.elementCount == 1 {
-        type = tupleMetadata.element(at: 0).type
+      let type: Any.Type
+      if let associatedValueType = associatedValueType {
+        type = associatedValueType
+      } else {
+        var associatedValueType = metadata.associatedValueType(forTag: tag)
+        if let tupleMetadata = TupleMetadata(associatedValueType), tupleMetadata.elementCount == 1 {
+          associatedValueType = tupleMetadata.element(at: 0).type
+        }
+        type = associatedValueType
       }
-      return _openExistential(type, do: open)
+      let value: Any = _openExistential(type, do: open)
+      return (value: value, isIndirect: isIndirect, associatedValueType: type)
     }
   }
 }
