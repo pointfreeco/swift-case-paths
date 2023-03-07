@@ -188,29 +188,21 @@ func extractHelp<Root, Value>(_ embed: @escaping (Value) -> Root) -> (Root) -> V
   }
 
   var cachedTag: UInt32?
-  var cachedStrategy: Strategy<Root, Value>?
 
   return { root in
     let rootTag = metadata.tag(of: root)
 
-    if let cachedTag = cachedTag, let cachedStrategy = cachedStrategy {
+    if let cachedTag = cachedTag {
       guard rootTag == cachedTag else { return nil }
-      return cachedStrategy.extract(from: root, tag: rootTag)
+      return EnumMetadata.project(root) as? Value
     }
 
-    let rootStrategy = Strategy<Root, Value>(tag: rootTag)
-    guard let value = rootStrategy.extract(from: root, tag: rootTag)
+    guard let value = EnumMetadata.project(root) as? Value
     else { return nil }
 
     let embedTag = metadata.tag(of: embed(value))
     cachedTag = embedTag
-    if embedTag == rootTag {
-      cachedStrategy = rootStrategy
-      return value
-    } else {
-      cachedStrategy = Strategy<Root, Value>(tag: embedTag)
-      return nil
-    }
+    return embedTag == rootTag ? value : nil
   }
 }
 
@@ -227,32 +219,23 @@ func optionalPromotedExtractHelp<Root, Value>(
   }
 
   var cachedTag: UInt32?
-  var cachedStrategy: Strategy<Root, Value>?
 
   return { optionalRoot in
     guard let root = optionalRoot else { return nil }
 
     let rootTag = metadata.tag(of: root)
 
-    if let cachedTag = cachedTag, let cachedStrategy = cachedStrategy {
+    if let cachedTag = cachedTag {
       guard rootTag == cachedTag else { return nil }
-      return cachedStrategy.extract(from: root, tag: rootTag)
     }
 
-    let rootStrategy = Strategy<Root, Value>(tag: rootTag)
-    guard let value = rootStrategy.extract(from: root, tag: rootTag)
+    guard let value = EnumMetadata.project(root) as? Value
     else { return nil }
 
     guard let embedded = embed(value) else { return nil }
     let embedTag = metadata.tag(of: embedded)
     cachedTag = embedTag
-    if embedTag == rootTag {
-      cachedStrategy = rootStrategy
-      return value
-    } else {
-      cachedStrategy = Strategy<Root, Value>(tag: embedTag)
-      return nil
-    }
+    return embedTag == rootTag ? value : nil
   }
 }
 
@@ -284,136 +267,6 @@ func optionalPromotedExtractVoidHelp<Root>(_ root: Root?) -> (Root?) -> Void? {
 }
 
 // MARK: - Runtime reflection
-
-private enum Strategy<Enum, Value> {
-  case direct
-  case existential(extract: (Enum) -> Any?)
-  case indirect
-  case optional(extract: (Enum) -> Value?)
-  case unimplemented
-  case void
-}
-
-extension Strategy {
-  init(tag: UInt32, assumedAssociatedValueType: Any.Type? = nil) {
-    let metadata = EnumMetadata(assumingEnum: Enum.self)
-    let avType = assumedAssociatedValueType ?? metadata.associatedValueType(forTag: tag)
-
-    var shouldWorkAroundSR12044: Bool {
-      #if compiler(<5.2)
-        return true
-      #else
-        return false
-      #endif
-    }
-
-    var isUninhabitedEnum: Bool {
-      metadata.typeDescriptor.emptyCaseCount == 0 && metadata.typeDescriptor.payloadCaseCount == 0
-    }
-
-    if avType == Value.self {
-      self = .init(nonExistentialTag: tag)
-
-    } else if shouldWorkAroundSR12044, MemoryLayout<Value>.size == 0, !isUninhabitedEnum {
-      // Workaround for https://bugs.swift.org/browse/SR-12044
-      self = .void
-
-    } else if let avMetadata = TupleMetadata(avType), avMetadata.elementCount == 1 {
-      // Drop payload label from metadata, e.g., treat `(foo: Foo)` as `Foo`.
-      self.init(tag: tag, assumedAssociatedValueType: avMetadata.element(at: 0).type)
-
-    } else if let avMetadata = TupleMetadata(avType),
-      let valueMetadata = TupleMetadata(Value.self),
-      valueMetadata.labels == nil
-    {
-      // Drop payload labels from metadata, e.g., treat `(foo: Foo, bar: Bar)` as `(Foo, Bar)`.
-      guard avMetadata.hasSameLayout(as: valueMetadata) else {
-        self = .unimplemented
-        return
-      }
-      self.init(tag: tag, assumedAssociatedValueType: Value.self)
-
-    } else if let avMetadata = ExistentialMetadata(avType) {
-      if avType == Error.self || avMetadata.isClassConstrained {
-        // For Objective-C interop, the Error existential is a pointer to an NSError-compatible
-        // (and thus AnyObject-compatible) object.
-        let strategy = Strategy<Enum, AnyObject>(nonExistentialTag: tag)
-        self = .existential { strategy.extract(from: $0, tag: tag) }
-        return
-      }
-
-      // Convert protocol existentials to `Any` so that they can be cast (`as? Value`).
-      let anyStrategy = Strategy<Enum, Any>(nonExistentialTag: tag)
-      self = .existential { anyStrategy.extract(from: $0, tag: tag) }
-
-    } else if avType == Value?.self {
-      // Handle contravariant optional demotion, e.g. embed function
-      // `(String?) -> Result<String?, Error>)` interpreted as `(String) -> Result<String?, Error>`
-      let wrappedStrategy = Strategy<Enum, Value?>(tag: tag, assumedAssociatedValueType: avType)
-      if case .unimplemented = wrappedStrategy {
-        self = .unimplemented
-      } else {
-        self = .optional { wrappedStrategy.extract(from: $0, tag: tag).flatMap { $0 } }
-      }
-    } else {
-      self = .unimplemented
-    }
-  }
-
-  init(nonExistentialTag tag: UInt32) {
-    self =
-      EnumMetadata(assumingEnum: Enum.self)
-        .typeDescriptor
-        .fieldDescriptor!
-        .field(atIndex: tag)
-        .flags
-        .contains(.isIndirectCase)
-      ? .indirect
-      : .direct
-  }
-
-  func extract(from root: Enum, tag: UInt32) -> Value? {
-    switch self {
-    case .direct:
-      return self.withProjectedPayload(of: root, tag: tag) { $0.load(as: Value.self) }
-
-    case let .existential(extract):
-      return extract(root) as? Value
-
-    case .indirect:
-      return self.withProjectedPayload(of: root, tag: tag) {
-        $0
-          .load(as: UnsafeRawPointer.self)  // Load the heap object pointer.
-          .advanced(by: 2 * pointerSize)  // Skip the heap object header.
-          .load(as: Value.self)
-      }
-
-    case let .optional(extract):
-      return extract(root)
-
-    case .unimplemented:
-      return nil
-
-    case .void:
-      return .some(unsafeBitCast((), to: Value.self))
-    }
-  }
-
-  private func withProjectedPayload<Answer>(
-    of root: Enum,
-    tag: UInt32,
-    do body: (UnsafeRawPointer) -> Answer
-  ) -> Answer {
-    var root = root
-    return withUnsafeMutableBytes(of: &root) { rawBuffer in
-      let pointer = rawBuffer.baseAddress!
-      let metadata = EnumMetadata(assumingEnum: Enum.self)
-      metadata.destructivelyProjectPayload(of: pointer)
-      defer { metadata.destructivelyInjectTag(tag, intoPayload: pointer) }
-      return body(pointer)
-    }
-  }
-}
 
 private protocol Metadata {
   var ptr: UnsafeRawPointer { get }
