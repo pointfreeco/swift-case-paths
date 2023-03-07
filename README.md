@@ -125,7 +125,7 @@ a particular problem, there are a number of places you can discuss with fellow
 
 ## Documentation
 
-The latest documentation for CasePaths' APIs is available [here](https://pointfreeco.github.io/swift-case-paths/).
+The latest documentation for CasePaths' APIs is available [here](https://pointfreeco.github.io/swift-case-paths/main/documentation/casepaths/).
 
 ## Other libraries
 
