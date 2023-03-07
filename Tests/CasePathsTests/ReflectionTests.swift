@@ -48,4 +48,24 @@ final class ReflectionTests: XCTestCase {
     let value = EnumMetadata.project(Enum.noPayload)
     try XCTUnwrap(EnumMetadata.project(value) as? Void)
   }
+
+  func testCompound() throws {
+    let object = Object()
+    enum Enum: Equatable {
+      indirect case indirect(Int, Object?, Int, Object?)
+      case direct(Int, Object?, Int, Object?)
+    }
+
+    let indirect = try XCTUnwrap(
+      EnumMetadata.project(Enum.indirect(42, nil, 43, object))
+        as? (Int, Object?, Int, Object?)
+    )
+    XCTAssert(indirect == (42, nil, 43, object))
+  }
+}
+
+fileprivate class Object: Equatable {
+  static func == (lhs: Object, rhs: Object) -> Bool {
+    return lhs === rhs
+  }
 }

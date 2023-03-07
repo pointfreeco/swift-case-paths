@@ -524,19 +524,18 @@ extension EnumMetadata {
 
     var root = root
     return withUnsafeMutableBytes(of: &root) { rawBuffer in
-      guard var pointer = rawBuffer.baseAddress
+      guard let pointer = rawBuffer.baseAddress
       else { return nil }
-
-      if isIndirect {
-        pointer = pointer
-          .load(as: UnsafeMutableRawPointer.self)  // Load the heap object pointer.
-          .advanced(by: 2 * pointerSize)  // Skip the heap object header.
-      }
 
       metadata.destructivelyProjectPayload(of: pointer)
       defer { metadata.destructivelyInjectTag(tag, intoPayload: pointer) }
       func open<T>(_ type: T.Type) -> T {
-        pointer.load(as: type)
+        isIndirect
+        ? pointer
+          .load(as: UnsafeRawPointer.self)  // Load the heap object pointer.
+          .advanced(by: 2 * pointerSize)  // Skip the heap object header.
+          .load(as: type)
+        : pointer.load(as: type)
       }
       return _openExistential(metadata.associatedValueType(forTag: tag), do: open)
     }
