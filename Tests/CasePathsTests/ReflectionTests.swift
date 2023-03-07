@@ -49,6 +49,19 @@ final class ReflectionTests: XCTestCase {
     try XCTUnwrap(EnumMetadata.project(value) as? Void)
   }
 
+  func testLabel() throws {
+    enum Enum: Equatable {
+      case label(id: Int)
+      case multiLabel(id: Int, name: String)
+    }
+
+    XCTAssertEqual(EnumMetadata.project(Enum.label(id: 42)) as? Int, 42)
+    let pair = try XCTUnwrap(
+      EnumMetadata.project(Enum.multiLabel(id: 42, name: "Blob")) as? (Int, String)
+    )
+    XCTAssert(pair == (42, "Blob"))
+  }
+
   func testCompound() throws {
     let object = Object()
     enum Enum: Equatable {

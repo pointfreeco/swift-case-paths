@@ -526,7 +526,6 @@ extension EnumMetadata {
     return withUnsafeMutableBytes(of: &root) { rawBuffer in
       guard let pointer = rawBuffer.baseAddress
       else { return nil }
-
       metadata.destructivelyProjectPayload(of: pointer)
       defer { metadata.destructivelyInjectTag(tag, intoPayload: pointer) }
       func open<T>(_ type: T.Type) -> T {
@@ -537,7 +536,11 @@ extension EnumMetadata {
           .load(as: type)
         : pointer.load(as: type)
       }
-      return _openExistential(metadata.associatedValueType(forTag: tag), do: open)
+      var type = metadata.associatedValueType(forTag: tag)
+      if let tupleMetadata = TupleMetadata(type), tupleMetadata.elementCount == 1 {
+        type = tupleMetadata.element(at: 0).type
+      }
+      return _openExistential(type, do: open)
     }
   }
 }
