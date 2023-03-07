@@ -577,17 +577,15 @@ final class CasePathsTests: XCTestCase {
     XCTAssertEqual(itPath.extract(from: .citCase), .some(Conformer()))
   }
 
-  func testUnreasonableContravariantEmbed() {
+  func testCompoundContravariantEmbed() {
     enum Enum {
       case c(TestProtocol, Int)
     }
 
-    // The library doesn't handle this crazy esoteric case, but it detects it and returns nil
-    // instead of garbage.
     let path: CasePath<Enum, (Int, Int)> = /Enum.c
 
     for _ in 1...2 {
-      XCTAssertNil(path.extract(from: .c(34, 12)))
+      XCTAssert(try XCTUnwrap(path.extract(from: .c(34, 12))) == (34, 12))
     }
   }
 
@@ -604,6 +602,20 @@ final class CasePathsTests: XCTestCase {
       XCTAssertEqual(actual, "deadbeef")
     }
     XCTAssertEqual(CasePath(Authentication.authenticated).extract(from: root), "deadbeef")
+  }
+
+  func testPathExtractFromOptionalRoot_AnyHashable() {
+    enum Authentication {
+      case authenticated(token: AnyHashable)
+      case unauthenticated
+    }
+
+    let root: Authentication? = .authenticated(token: "deadbeef")
+    let path: CasePath<Authentication?, String> = /Authentication.authenticated
+    for _ in 1...2 {
+      let actual = path.extract(from: root)
+      XCTAssertEqual(actual, "deadbeef")
+    }
   }
 
   func testEmbed() {
