@@ -8,7 +8,7 @@ final class ReflectionTests: XCTestCase {
         let id = 42
       }
       let success = Result<MyIdentifiable, Error>.success(MyIdentifiable())
-      let anyIdentifiable = try XCTUnwrap(EnumMetadata.project(success) as? any Identifiable)
+      let anyIdentifiable = try XCTUnwrap(EnumMetadata.project(success) as? anyIdentifiable)
       func id(of identifiable: some Identifiable) -> AnyHashable {
         identifiable.id
       }
@@ -20,7 +20,7 @@ final class ReflectionTests: XCTestCase {
         let id = 42
       }
       let success = Result<Any, Error>.success(MyIdentifiable())
-      let anyIdentifiable = try XCTUnwrap(EnumMetadata.project(success) as? any Identifiable)
+      let anyIdentifiable = try XCTUnwrap(EnumMetadata.project(success) as? anyIdentifiable)
       func id(of identifiable: some Identifiable) -> AnyHashable {
         identifiable.id
       }
@@ -35,7 +35,7 @@ final class ReflectionTests: XCTestCase {
         indirect case indirectCase(MyIdentifiable)
       }
       let indirect = Enum.indirectCase(MyIdentifiable())
-      let anyIdentifiable = try XCTUnwrap(EnumMetadata.project(indirect) as? any Identifiable)
+      let anyIdentifiable = try XCTUnwrap(EnumMetadata.project(indirect) as? anyIdentifiable)
       func id(of identifiable: some Identifiable) -> AnyHashable {
         identifiable.id
       }
@@ -79,7 +79,7 @@ final class ReflectionTests: XCTestCase {
   #endif
 }
 
-fileprivate class Object: Equatable {
+private class Object: Equatable {
   static func == (lhs: Object, rhs: Object) -> Bool {
     return lhs === rhs
   }
