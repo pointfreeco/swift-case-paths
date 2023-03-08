@@ -23,14 +23,14 @@
 
       XCTExpectFailure {
         $0.compactDescription == """
-          XCTModify failed: expected to extract value of type "Int" from \
-          "Optional<Result<Int, Error>>"
+          XCTModify failed: expected to extract value of type "Sheet.State" from \
+          "Destination.State?"
           """
       }
 
-      var result = Optional(Result<Int, Error>.failure(SomeError()))
-      XCTModify(&result, case: /Result.success) {
-        $0 += 1
+      var result = Optional(Destination.State.alert)
+      XCTModify(&result, case: /Destination.State.sheet) {
+        $0.count += 1
       }
     }
 
@@ -132,4 +132,16 @@
   }
 
   private struct SomeError: Error, Equatable {}
+
+  struct Sheet {
+    struct State {
+      var count = 0
+    }
+  }
+  struct Destination {
+    enum State {
+      case alert
+      case sheet(Sheet.State)
+    }
+  }
 #endif

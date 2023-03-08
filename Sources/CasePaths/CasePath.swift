@@ -84,7 +84,7 @@ public struct CasePath<Root, Value> {
 
 extension CasePath: CustomStringConvertible {
   public var description: String {
-    "CasePath<\(Root.self), \(Value.self)>"
+    "CasePath<\(typeName(Root.self)), \(typeName(Value.self))>"
   }
 }
 
