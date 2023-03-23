@@ -11,7 +11,8 @@ func typeName(
       options: .regularExpression
     )
   for _ in 1...10 {  // NB: Only handle so much nesting
-    let abbreviated = name
+    let abbreviated =
+      name
       .replacingOccurrences(
         of: #"\bSwift.Optional<([^><]+)>"#,
         with: "$1?",
