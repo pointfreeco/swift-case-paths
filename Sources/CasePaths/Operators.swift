@@ -2,9 +2,11 @@ prefix operator /
 
 /// Returns whether or not a root value matches a particular case path.
 ///
-///     [Result<Int, Error>.success(1), .success(2), .failure(NSError()), .success(4)]
-///       .prefix(while: { /Result.success ~= $0 })
-///     // [.success(1), .success(2)]
+/// ```swift
+/// [Result<Int, Error>.success(1), .success(2), .failure(NSError()), .success(4)]
+///   .prefix(while: { /Result.success ~= $0 })
+/// // [.success(1), .success(2)]
+/// ```
 ///
 /// - Parameters:
 ///   - pattern: A case path.
@@ -73,14 +75,14 @@ public prefix func / <Root>(
 }
 
 /// Identifies and returns a given case path. Enables shorthand syntax on static case paths, _e.g._
-/// `/.self`  instead of `.self`.
+/// `/.self`  instead of `.self`, and `/.some` instead of `.some`.
 ///
-/// - Parameter type: A type for which to return the identity case path.
-/// - Returns: An identity case path.
-public prefix func / <Root>(
-  type: CasePath<Root, Root>
-) -> CasePath<Root, Root> {
-  .self
+/// - Parameter path: A case path to return.
+/// - Returns: The case path.
+public prefix func / <Root, Value>(
+  path: CasePath<Root, Value>
+) -> CasePath<Root, Value> {
+  path
 }
 
 /// Returns a function that can attempt to extract associated values from the given enum case
@@ -156,7 +158,7 @@ public prefix func / <Root>(
 }
 
 precedencegroup CasePathCompositionPrecedence {
-  associativity: right
+  associativity: left
 }
 
 infix operator ..: CasePathCompositionPrecedence

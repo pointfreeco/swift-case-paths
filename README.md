@@ -1,6 +1,7 @@
 # 🧰 CasePaths
 
 [![CI](https://github.com/pointfreeco/swift-case-paths/workflows/CI/badge.svg)](https://actions-badge.atrox.dev/pointfreeco/swift-case-paths/goto)
+[![Slack](https://img.shields.io/badge/slack-chat-informational.svg?label=Slack&logo=slack)](http://pointfree.co/slack-invite)
 [![](https://img.shields.io/endpoint?url=https%3A%2F%2Fswiftpackageindex.com%2Fapi%2Fpackages%2Fpointfreeco%2Fswift-case-paths%2Fbadge%3Ftype%3Dswift-versions)](https://swiftpackageindex.com/pointfreeco/swift-case-paths)
 [![](https://img.shields.io/endpoint?url=https%3A%2F%2Fswiftpackageindex.com%2Fapi%2Fpackages%2Fpointfreeco%2Fswift-case-paths%2Fbadge%3Ftype%3Dplatforms)](https://swiftpackageindex.com/pointfreeco/swift-case-paths)
 
@@ -113,23 +114,18 @@ CasePaths uses Swift reflection to automatically embed and extract associated va
 // Optional("cafebeef")
 ```
 
-## Installation
+## Community
 
-You can add CasePaths to an Xcode project by adding it as a package dependency.
+If you want to discuss this library or have a question about how to use it to solve 
+a particular problem, there are a number of places you can discuss with fellow 
+[Point-Free](http://www.pointfree.co) enthusiasts:
 
-> https://github.com/pointfreeco/swift-case-paths
-
-If you want to use CasePaths in a [SwiftPM](https://swift.org/package-manager/) project, it's as simple as adding a `dependencies` clause to your `Package.swift`:
-
-``` swift
-dependencies: [
-  .package(url: "https://github.com/pointfreeco/swift-case-paths.git", from: "0.4.0")
-]
-```
+* For long-form discussions, we recommend the [discussions](http://github.com/pointfreeco/swift-case-paths/discussions) tab of this repo.
+* For casual chat, we recommend the [Point-Free Community Slack](http://pointfree.co/slack-invite).
 
 ## Documentation
 
-The latest documentation for CasePaths' APIs is available [here](https://pointfreeco.github.io/swift-case-paths/).
+The latest documentation for CasePaths' APIs is available [here](https://pointfreeco.github.io/swift-case-paths/main/documentation/casepaths/).
 
 ## Other libraries
 
