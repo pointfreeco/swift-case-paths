@@ -3,12 +3,15 @@
   import XCTest
 
   final class XCTModifyTests: XCTestCase {
-    func testXCTModiftyFailure() throws {
+    func testXCTModifyFailure() throws {
       try XCTSkipIf(ProcessInfo.processInfo.environment["CI"] != nil)
 
       XCTExpectFailure {
         $0.compactDescription == """
-          XCTModify failed: expected to extract value of type "Int" from "Result<Int, Error>"
+          XCTModify failed: expected to extract value of type "Int" from "Result<Int, Error>" …
+
+            Found:
+              failure(CasePathsTests.SomeError())
           """
       }
 
@@ -18,13 +21,16 @@
       }
     }
 
-    func testXCTModiftyFailure_OptionalPromotion() throws {
+    func testXCTModifyFailure_OptionalPromotion() throws {
       try XCTSkipIf(ProcessInfo.processInfo.environment["CI"] != nil)
 
       XCTExpectFailure {
         $0.compactDescription == """
           XCTModify failed: expected to extract value of type "Sheet.State" from \
-          "Destination.State?"
+          "Destination.State?" …
+
+            Found:
+              Optional(CasePathsTests.Destination.State.alert)
           """
       }
 
@@ -34,13 +40,16 @@
       }
     }
 
-    func testXCTModiftyFailure_Nil_OptionalPromotion() throws {
+    func testXCTModifyFailure_Nil_OptionalPromotion() throws {
       try XCTSkipIf(ProcessInfo.processInfo.environment["CI"] != nil)
 
       XCTExpectFailure {
         $0.compactDescription == """
           XCTModify failed: expected to extract value of type "Int" from \
-          "Optional<Result<Int, Error>>"
+          "Optional<Result<Int, Error>>" …
+
+            Found:
+              nil
           """
       }
 
@@ -56,7 +65,10 @@
       XCTExpectFailure {
         $0.compactDescription == """
           XCTModify failed: expected to extract value of type "Int" from "Result<Int, Error>" - \
-          Should be success
+          Should be success …
+
+            Found:
+              failure(CasePathsTests.SomeError())
           """
       }
 
@@ -131,7 +143,7 @@
     }
   }
 
-  private struct SomeError: Error, Equatable {}
+  struct SomeError: Error, Equatable {}
 
   struct Sheet {
     struct State {
