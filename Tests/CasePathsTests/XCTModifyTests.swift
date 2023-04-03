@@ -10,7 +10,7 @@
         $0.compactDescription == """
           XCTModify failed: expected to extract value of type "Int" from "Result<Int, Error>" …
 
-            Found:
+            Actual:
               failure(CasePathsTests.SomeError())
           """
       }
@@ -29,7 +29,7 @@
           XCTModify failed: expected to extract value of type "Sheet.State" from \
           "Destination.State?" …
 
-            Found:
+            Actual:
               Optional(CasePathsTests.Destination.State.alert)
           """
       }
@@ -48,7 +48,7 @@
           XCTModify failed: expected to extract value of type "Int" from \
           "Optional<Result<Int, Error>>" …
 
-            Found:
+            Actual:
               nil
           """
       }
@@ -67,7 +67,7 @@
           XCTModify failed: expected to extract value of type "Int" from "Result<Int, Error>" - \
           Should be success …
 
-            Found:
+            Actual:
               failure(CasePathsTests.SomeError())
           """
       }

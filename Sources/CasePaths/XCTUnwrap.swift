@@ -67,7 +67,7 @@ public func XCTModify<Enum, Case>(
       "\(typeName(Enum.self))"\
       \(message.isEmpty ? "" : " - " + message) …
 
-        Found:
+        Actual:
           \(`enum`)
       """,
       file: file,
