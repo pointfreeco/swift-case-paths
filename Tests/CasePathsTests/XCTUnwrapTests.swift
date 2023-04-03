@@ -8,7 +8,10 @@
 
       XCTExpectFailure {
         $0.compactDescription == """
-          XCTUnwrap failed: expected non-nil value of type "Error"
+          XCTUnwrap failed: expected to extract value of type "Error" from "Result<Int, Error>" …
+
+            Actual:
+              success(2)
           """
       }
       _ = try XCTUnwrap(Result<Int, Error>.success(2), case: /Result.failure)
@@ -19,10 +22,14 @@
 
       XCTExpectFailure {
         $0.compactDescription == """
-          XCTUnwrap failed: expected non-nil value of type "Error" - Should be success
+          XCTUnwrap failed: expected to extract value of type "Error" from "Result<Int, Error>" - \
+          Should be 'failure' …
+
+            Actual:
+              success(2)
           """
       }
-      _ = try XCTUnwrap(Result<Int, Error>.success(2), case: /Result.failure, "Should be success")
+      _ = try XCTUnwrap(Result<Int, Error>.success(2), case: /Result.failure, "Should be 'failure'")
     }
 
     func testXCTUnwrapPass() throws {

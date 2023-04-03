@@ -352,6 +352,10 @@ extension EnumMetadata {
 
     return type
   }
+
+  @_spi(Reflection) public func caseName(forTag tag: UInt32) -> String? {
+    self.typeDescriptor.fieldDescriptor?.field(atIndex: tag).name
+  }
 }
 
 @_silgen_name("swift_getTypeByMangledNameInContext")
@@ -540,6 +544,14 @@ private struct FieldRecord {
       .advanced(by: 4)
       .loadRelativePointer()
       .map { MangledTypeName(ptr: $0.assumingMemoryBound(to: UInt8.self)) }
+  }
+
+  var name: String? {
+    self.ptr
+      .advanced(by: 4)
+      .advanced(by: 4)
+      .loadRelativePointer()
+      .map { String(cString: $0.assumingMemoryBound(to: CChar.self)) }
   }
 }
 
