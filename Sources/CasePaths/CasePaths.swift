@@ -71,3 +71,36 @@ public protocol _OptionalProtocol {
 extension Optional: _OptionalProtocol {
   public var optional: Wrapped? { self }
 }
+
+/// A protocol that represents types from which values can be extracted using a `CasePath`.
+public protocol Extractable {}
+
+/// A protocol that represents types into which values can be embedded using a `CasePath`.
+public protocol Embeddable {}
+
+public extension Extractable {
+  /// Returns the value extracted using the given `CasePath`, or `nil` if the extraction fails.
+  ///
+  /// - Parameter casePath: The `CasePath` to use for extraction.
+  /// - Returns: The value extracted using the given `CasePath`, or `nil` if the extraction fails.
+  subscript<Value>(casePath path: CasePath<Self, Value>) -> Value? {
+    path.extract(from: self)
+  }
+}
+
+public extension Embeddable {
+  /// Returns the value extracted using the given `CasePath`, or `nil` if the extraction fails.
+  ///
+  /// If the given value is not `nil`, the `CasePath` is used to embed the value.
+  ///
+  /// - Parameter casePath: The `CasePath` to use for extraction and embedding.
+  /// - Returns: The value extracted using the given `CasePath`, or `nil` if the extraction fails.
+  subscript<Value>(casePath path: CasePath<Self, Value>) -> Value? {
+    get { path.extract(from: self) }
+    set {
+      if let newValue = newValue {
+        self = path.embed(newValue)
+      }
+    }
+  }
+}
