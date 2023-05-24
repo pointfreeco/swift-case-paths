@@ -1178,9 +1178,22 @@ final class CasePathsTests: XCTestCase {
   func testModify() throws {
     enum Foo: Equatable { case bar(Int) }
     var foo = Foo.bar(42)
-    try (/Foo.bar).modify(&foo) { $0 *= 2 }
+    (/Foo.bar).modify(&foo) { $0 *= 2 }
     XCTAssertEqual(foo, .bar(84))
   }
+
+  #if DEBUG && (os(iOS) || os(macOS) || os(tvOS) || os(watchOS))
+    func testModify_Failure() throws {
+      enum Foo: Equatable { case bar(Int), baz(Int) }
+      var foo = Foo.bar(42)
+      XCTExpectFailure {
+        $0.compactDescription == """
+          Can't modify unrelated case "bar"
+          """
+      }
+      (/Foo.baz).modify(&foo) { $0 *= 2 }
+    }
+  #endif
 
   func testRegression_gh72() throws {
     enum E1 {

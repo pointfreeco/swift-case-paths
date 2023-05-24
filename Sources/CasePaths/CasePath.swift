@@ -1,4 +1,5 @@
 import Foundation
+import XCTestDynamicOverlay
 
 /// A path that supports embedding a value in a root and attempting to extract a root's embedded
 /// value.
@@ -52,14 +53,31 @@ public struct CasePath<Root, Value> {
   ///   - body: A closure that can mutate the case's associated value. If the closure throws, the root
   ///     will be left unmodified.
   /// - Returns: The return value, if any, of the body closure.
-  public func modify<Result>(
+  public func modify(
     _ root: inout Root,
-    _ body: (inout Value) throws -> Result
-  ) throws -> Result {
-    guard var value = self.extract(from: root) else { throw ExtractionFailed() }
-    let result = try body(&value)
+    _ body: (inout Value) throws -> Void,
+    file: StaticString = #file,
+    line: UInt = #line
+  ) rethrows {
+    guard var value = self.extract(from: root) else {
+      var description: String?
+      if
+        let metadata = EnumMetadata(Root.self),
+        let caseName = metadata.caseName(forTag: metadata.tag(of: root))
+      {
+        description = caseName
+      }
+      XCTFail(
+        """
+        Can't modify unrelated case\(description.map { " \($0.debugDescription)" } ?? "")
+        """,
+        file: file,
+        line: line
+      )
+      return
+    }
+    try body(&value)
     root = self.embed(value)
-    return result
   }
 
   /// Returns a new case path created by appending the given case path to this one.
