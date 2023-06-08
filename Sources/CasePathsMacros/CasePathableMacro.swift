@@ -54,11 +54,7 @@ extension CasePathableMacro: MemberMacro {
         """
     }
 
-    let cases = caseDecls
-      .map { "Case(embed: \($0.identifier), extract: \\.\($0.identifier))," }
-      .joined(separator: "\n")
-
-    return properties + ["static let cases = Cases([\(raw: cases)])"]
+    return properties
   }
 }
 
