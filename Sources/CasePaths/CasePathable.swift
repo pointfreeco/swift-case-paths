@@ -4,6 +4,7 @@ extension CasePath where Root: CasePathable {
   }
 }
 
+// TODO: Should we even both shipping/requiring this marker protocol?
 public protocol CasePathable {}
 
 @_spi(SwiftStdlib) extension Optional: CasePathable {
