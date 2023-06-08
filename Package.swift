@@ -1,5 +1,6 @@
-// swift-tools-version:5.5
+// swift-tools-version:5.9
 
+import CompilerPluginSupport
 import PackageDescription
 
 let package = Package(
@@ -17,13 +18,22 @@ let package = Package(
     )
   ],
   dependencies: [
+    .package(url: "https://github.com/apple/swift-syntax.git", from: "509.0.0-swift-5.9-DEVELOPMENT-SNAPSHOT-2023-04-25-b"),
     .package(name: "Benchmark", url: "https://github.com/google/swift-benchmark", from: "0.1.0"),
     .package(url: "https://github.com/pointfreeco/xctest-dynamic-overlay", from: "0.8.0"),
   ],
   targets: [
+    .macro(
+      name: "CasePathsMacros",
+      dependencies: [
+        .product(name: "SwiftSyntaxMacros", package: "swift-syntax"),
+        .product(name: "SwiftCompilerPlugin", package: "swift-syntax")
+      ]
+    ),
     .target(
       name: "CasePaths",
       dependencies: [
+        "CasePathsMacros",
         .product(name: "XCTestDynamicOverlay", package: "xctest-dynamic-overlay")
       ]
     ),
