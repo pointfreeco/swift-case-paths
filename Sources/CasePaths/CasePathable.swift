@@ -6,12 +6,12 @@ extension CasePath where Root: CasePathable {
 
 public protocol CasePathable {}
 
-extension Optional: CasePathable {
+@_spi(SwiftStdlib) extension Optional: CasePathable {
   public var some: Wrapped? { if case let .some(value) = self { value } else { nil } }
   public var none: Void? { if case .none = self { () } else { nil } }
 }
 
-extension Result: CasePathable {
+@_spi(SwiftStdlib) extension Result: CasePathable {
   public var success: Success? { if case let .success(value) = self { value } else { nil } }
   public var failure: Failure? { if case let .failure(value) = self { value } else { nil } }
 }
