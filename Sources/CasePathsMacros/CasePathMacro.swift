@@ -25,6 +25,8 @@ public struct CasePathMacro: ExpressionMacro {
       throw CustomError.message("#casePath requires a @CasePathable enum key path")
     }
 
+    // TODO: Can/should we support #casePath(\.foo?.bar) if this compile?
+    //     CasePath(embed: { .foo(.bar($0)) }, extract: \.foo?.bar)
     return "CasePath(embed: { .\(identifier)($0) }, extract: \(argument))"
   }
 }
