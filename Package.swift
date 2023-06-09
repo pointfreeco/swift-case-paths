@@ -39,7 +39,10 @@ let package = Package(
     ),
     .testTarget(
       name: "CasePathsTests",
-      dependencies: ["CasePaths"]
+      dependencies: [
+        "CasePaths",
+        .product(name: "SwiftSyntaxMacrosTestSupport", package: "swift-syntax"),
+      ]
     ),
     .executableTarget(
       name: "swift-case-paths-benchmark",

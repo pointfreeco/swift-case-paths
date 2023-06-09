@@ -1,6 +1,7 @@
 import Benchmark
 import CasePaths
 
+@CasePathable
 enum Enum {
   case associatedValue(Int)
   case anotherAssociatedValue(String)
@@ -30,6 +31,18 @@ let success = BenchmarkSuite(name: "Success") {
   $0.benchmark("Reflection (uncached)") {
     precondition((/Enum.associatedValue).extract(from: enumCase) == 42)
   }
+
+  $0.benchmark("Macro: keyPath") {
+    precondition(#casePath(\.associatedValue).extract(from: enumCase) == 42)
+  }
+
+  $0.benchmark("Macro: embed") {
+    precondition(#casePath(Enum.associatedValue).extract(from: enumCase) == 42)
+  }
+
+  $0.benchmark("Property") {
+    precondition(enumCase.associatedValue == 42)
+  }
 }
 
 let failure = BenchmarkSuite(name: "Failure") {
@@ -43,6 +56,18 @@ let failure = BenchmarkSuite(name: "Failure") {
 
   $0.benchmark("Reflection (uncached)") {
     precondition((/Enum.associatedValue).extract(from: anotherCase) == nil)
+  }
+
+  $0.benchmark("Macro") {
+    precondition(#casePath(\.associatedValue).extract(from: anotherCase) == nil)
+  }
+
+  $0.benchmark("Macro: embed") {
+    precondition(#casePath(Enum.associatedValue).extract(from: anotherCase) == nil)
+  }
+
+  $0.benchmark("Property") {
+    precondition(anotherCase.associatedValue == nil)
   }
 }
 
