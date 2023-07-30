@@ -33,8 +33,8 @@
         "repositoryURL": "https://github.com/pointfreeco/xctest-dynamic-overlay.git",
         "state": {
           "branch": null,
-          "revision": "a9daebf0bf65981fd159c885d504481a65a75f02",
-          "version": "0.8.0"
+          "revision": "302891700c7fa3b92ebde9fe7b42933f8349f3c7",
+          "version": "1.0.0"
         }
       }
     ]
