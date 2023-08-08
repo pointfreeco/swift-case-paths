@@ -5,5 +5,6 @@ import SwiftSyntaxMacros
 struct CasePathsPlugin: CompilerPlugin {
   let providingMacros: [Macro.Type] = [
     CasePathableMacro.self,
+    CasePathMacro.self,
   ]
 }
