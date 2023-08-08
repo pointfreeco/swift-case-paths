@@ -13,6 +13,13 @@ public macro casePath<Root: CasePathable, Value>(
 ) -> CasePath<Root, Value> = #externalMacro(module: "CasePathsMacros", type: "CasePathMacro")
 
 @CasePathable enum Foo {
-  case bar
-  case baz(String)
+  case baz
+  case bar(Bar)
+}
+@CasePathable enum Bar {
+  case buzz
+  case fizz(String)
+}
+func foo() {
+  let tmp = #casePath(\Foo.bar?.fizz)
 }
