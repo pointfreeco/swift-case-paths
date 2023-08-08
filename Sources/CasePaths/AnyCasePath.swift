@@ -16,15 +16,12 @@ extension CasePath: CustomDebugStringConvertible {
   public var debugDescription: String {
     if let keyPaths = self.keyPaths {
       if keyPaths.isEmpty {
-        "\\\(Root.self).self"
+        return "\\\(Root.self).self"
       } else if #available(macOS 13.3, iOS 16.4, watchOS 9.4, tvOS 16.4, *) {
-        "\\\(Root.self).\(keyPaths.map(\.componentName).joined(separator: "?."))"
-      } else {
-        "CasePath<\(Root.self), \(Value.self)>"
+        return "\\\(Root.self).\(keyPaths.map(\.componentName).joined(separator: "?."))"
       }
-    } else {
-      "CasePath<\(Root.self), \(Value.self)>"
     }
+    return "CasePath<\(Root.self), \(Value.self)>"
   }
 }
 
