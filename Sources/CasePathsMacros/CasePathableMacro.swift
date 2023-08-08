@@ -49,6 +49,20 @@ extension CasePathableMacro: MemberMacro {
       .members
       .compactMap { $0.decl.as(EnumCaseDeclSyntax.self)?.elements.first }
 
+    let uniqueCaseNames = Set(enumCaseDecls.map { $0.name.text })
+    let hasOverloadedCaseName = uniqueCaseNames.count != enumCaseDecls.count
+    guard !hasOverloadedCaseName
+    else {
+      for enumCaseDecl in enumCaseDecls where uniqueCaseNames.contains(enumCaseDecl.name.text) {
+        throw DiagnosticsError(
+          diagnostics: [
+            CasePathableMacroDiagnostic.overloadedCaseName.diagnose(at: Syntax(enumCaseDecl))
+          ]
+        )
+      }
+      fatalError()
+    }
+
     let casePaths: [DeclSyntax] = enumCaseDecls.map { enumCaseDecl in
       let caseName = enumCaseDecl.name.trimmed
       let associatedValueName = enumCaseDecl.trimmedTypeDescription
@@ -140,6 +154,7 @@ extension CasePathableMacro: MemberMacro {
 
 enum CasePathableMacroDiagnostic {
   case notAnEnum(DeclGroupSyntax)
+  case overloadedCaseName
 }
 
 extension CasePathableMacroDiagnostic: DiagnosticMessage {
@@ -150,6 +165,10 @@ extension CasePathableMacroDiagnostic: DiagnosticMessage {
         @CasePathable macro requires \(decl.nameDescription.map { "'\($0)' to be " } ?? "")\
         an enum
         """
+    case .overloadedCaseName:
+      return """
+        @CasePathable macro does not allow overloaded case names.
+        """
     }
   }
 
@@ -157,12 +176,16 @@ extension CasePathableMacroDiagnostic: DiagnosticMessage {
     switch self {
     case .notAnEnum:
       return MessageID(domain: "MetaEnumDiagnostic", id: "notAnEnum")
+    case .overloadedCaseName:
+      return MessageID(domain: "MetaEnumDiagnostic", id: "overloadedCaseName")
     }
   }
 
   var severity: DiagnosticSeverity {
     switch self {
     case .notAnEnum:
+      return .error
+    case .overloadedCaseName:
       return .error
     }
   }

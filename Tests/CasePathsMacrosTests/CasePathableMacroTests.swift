@@ -91,7 +91,26 @@ final class CasePathableMacroTests: XCTestCase {
     }
   }
 
-  func testCasePathable_RequiresEnum() throws {
+  func testOverloadedCaseName() throws {
+    assertMacroSnapshot(testMacros) {
+      """
+      @CasePathable enum Foo {
+        case bar(Int)
+        case bar(int: Int)
+      }
+      """
+    } expandsTo: {
+      """
+      enum Foo {
+        case bar(Int)
+        case bar(int: Int)
+           ╰─ 🛑 @CasePathable macro does not allow overloaded case names.
+      }
+      """
+    }
+  }
+
+  func testRequiresEnum() throws {
     assertMacroSnapshot(testMacros) {
       """
       @CasePathable struct Foo {
