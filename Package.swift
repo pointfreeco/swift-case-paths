@@ -23,8 +23,8 @@ let package = Package(
       from: "509.0.0-swift-DEVELOPMENT-SNAPSHOT-2023-08-07-a"
     ),
     .package(url: "https://github.com/google/swift-benchmark", from: "0.1.0"),
-//    .package(url: "https://github.com/pointfreeco/swift-snapshot-testing", branch: "swift-syntax"),
-    .package(path: "../swift-snapshot-testing"),
+    .package(url: "https://github.com/pointfreeco/swift-snapshot-testing", branch: "swift-syntax"),
+//    .package(path: "../swift-snapshot-testing"),
     .package(url: "https://github.com/pointfreeco/xctest-dynamic-overlay", from: "1.0.0"),
   ],
   targets: [
