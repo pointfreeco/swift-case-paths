@@ -18,8 +18,18 @@ public macro casePath<Root: CasePathable, Value>(
 }
 @CasePathable enum Bar {
   case buzz
-  case fizz(String)
+  case qux(Qux)
+}
+enum Qux {
+  case blob
+  case slob(Int)
+  var slob: Int? {
+    guard case let .slob(int) = self else {
+      return nil
+    }
+    return int
+  }
 }
 func foo() {
-  let tmp = #casePath(\Foo.bar?.fizz)
+  let _ = #casePath(\Foo.bar?.qux)
 }
