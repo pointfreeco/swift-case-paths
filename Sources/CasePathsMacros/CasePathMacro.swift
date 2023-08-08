@@ -7,8 +7,6 @@ public struct CasePathMacro: ExpressionMacro {
     of node: some FreestandingMacroExpansionSyntax,
     in context: some MacroExpansionContext
   ) throws -> ExprSyntax {
-    dump(node.argumentList)
-
     guard let argument = node.argumentList.first?.expression.as(KeyPathExprSyntax.self)
     else {
       throw CustomError.message("#casePath requires a @CasePathable enum key path")
@@ -38,16 +36,6 @@ public struct CasePathMacro: ExpressionMacro {
 
     return "\(raw: path)"
   }
-}
-
-struct SimpleDiagnosticMessage: DiagnosticMessage, Error {
-  let message: String
-  let diagnosticID: MessageID
-  let severity: DiagnosticSeverity
-}
-
-extension SimpleDiagnosticMessage: FixItMessage {
-  var fixItID: MessageID { self.diagnosticID }
 }
 
 enum CustomError: Error, CustomStringConvertible {

@@ -208,7 +208,7 @@ extension EnumCaseElementListSyntax.Element {
       if associatedValue.parameters.count == 1,
         let type = associatedValue.parameters.first?.type.trimmed
       {
-        return type.is(ConstrainedSugarTypeSyntax.self)
+        return type.is(SomeOrAnyTypeSyntax.self)
           ? "(\(type))"
           : "\(type)"
       } else {
