@@ -7,15 +7,12 @@ import Foundation
 public struct CasePath<Root, Value> {
   private let _embed: (Value) -> Root
   private let _extract: (Root) -> Value?
+  let keyPaths: [AnyKeyPath]
 
-  /// Creates a case path with a pair of functions.
-  ///
-  /// - Parameters:
-  ///   - embed: A function that always succeeds in embedding a value in a root.
-  ///   - extract: A function that can optionally fail in extracting a value from a root.
-  public init(
+  init(
     embed: @escaping (Value) -> Root,
-    extract: @escaping (Root) -> Value?
+    extract: @escaping (Root) -> Value?,
+    keyPaths: [AnyKeyPath]
   ) {
     self._embed = {
       lock.lock()
@@ -27,6 +24,35 @@ public struct CasePath<Root, Value> {
       defer { lock.unlock() }
       return extract($0)
     }
+    self.keyPaths = keyPaths
+  }
+
+  /// Creates a case path with a pair of functions.
+  ///
+  /// - Parameters:
+  ///   - embed: A function that always succeeds in embedding a value in a root.
+  ///   - extract: A function that can optionally fail in extracting a value from a root.
+  public init(
+    embed: @escaping (Value) -> Root,
+    extract: @escaping (Root) -> Value?
+  ) {
+    self.init(
+      embed: embed,
+      extract: extract,
+      keyPaths: []
+    )
+  }
+
+  public static func _init(
+    embed: @escaping (Value) -> Root,
+    extract: @escaping (Root) -> Value?,
+    keyPath: KeyPath<Root, Value?>
+  ) -> Self where Root: CasePathable {
+    Self(
+      embed: embed,
+      extract: extract,
+      keyPaths: [keyPath]
+    )
   }
 
   /// Returns a root by embedding a value.
