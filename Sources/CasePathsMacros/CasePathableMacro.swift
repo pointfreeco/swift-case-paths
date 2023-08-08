@@ -77,20 +77,20 @@ extension CasePathableMacro: MemberMacro {
       }
 
       return """
-          \(access)var \(caseName): CasePaths.CasePath<\(enumName), \(raw: associatedValueName)> {
-            CasePaths.CasePath<\(enumName), \(raw: associatedValueName)>._init(
-              embed: {
-                .\(caseName)\(raw: embedNames)
-              },
-              extract: {
-                guard case\(raw: hasPayload ? " let" : "").\(caseName)\(raw: bindingNames) = $0 else {
-                  return nil
-                }
-                return \(raw: returnName)
-              },
-              keyPath: \\.\(caseName)
-            )
-          }
+        \(access)var \(caseName): CasePaths.CasePath<\(enumName), \(raw: associatedValueName)> {\
+        CasePaths.CasePath<\(enumName), \(raw: associatedValueName)>._init(
+        embed: {\
+        .\(caseName)\(raw: embedNames)\
+        },
+        extract: {\
+        guard case\(raw: hasPayload ? " let" : "").\(caseName)\(raw: bindingNames) = $0 else {\
+        return nil\
+        }\
+        return \(raw: returnName)\
+        },
+        keyPath: \\.\(caseName)
+        )\
+        }
         """
     }
 
@@ -102,19 +102,19 @@ extension CasePathableMacro: MemberMacro {
       let caseName = enumCaseDecl.name.trimmed
       let associatedValueName = enumCaseDecl.trimmedTypeDescription
       return """
-        \(access)var \(caseName): \(raw: associatedValueName)? {
-          Self.allCasePaths.\(caseName).extract(from: self)
+        \(access)var \(caseName): \(raw: associatedValueName)? { \
+        Self.allCasePaths.\(caseName).extract(from: self) \
         }
         """
     }
 
     return [
       """
-      \(access)struct AllCasePaths {
-      \(raw: casePaths.map(\.description).joined(separator: "\n"))
+      \(access)struct AllCasePaths { \
+      \(raw: casePaths.map(\.description).joined(separator: "\n")) \
       }
-      \(access)static var allCasePaths: AllCasePaths {
-        AllCasePaths()
+      \(access)static var allCasePaths: AllCasePaths { \
+      AllCasePaths() \
       }
       \(raw: properties.map(\.description).joined(separator: "\n"))
       """

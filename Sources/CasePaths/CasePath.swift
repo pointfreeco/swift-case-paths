@@ -7,12 +7,12 @@ import Foundation
 public struct CasePath<Root, Value> {
   private let _embed: (Value) -> Root
   private let _extract: (Root) -> Value?
-  let keyPaths: [AnyKeyPath]
+  let keyPaths: [AnyKeyPath]?
 
   init(
     embed: @escaping (Value) -> Root,
     extract: @escaping (Root) -> Value?,
-    keyPaths: [AnyKeyPath]
+    keyPaths: [AnyKeyPath]?
   ) {
     self._embed = {
       lock.lock()
@@ -32,6 +32,10 @@ public struct CasePath<Root, Value> {
   /// - Parameters:
   ///   - embed: A function that always succeeds in embedding a value in a root.
   ///   - extract: A function that can optionally fail in extracting a value from a root.
+  @available(iOS, deprecated: 9999, message: "TODO")
+  @available(macOS, deprecated: 9999, message: "TODO")
+  @available(tvOS, deprecated: 9999, message: "TODO")
+  @available(watchOS, deprecated: 9999, message: "TODO")
   public init(
     embed: @escaping (Value) -> Root,
     extract: @escaping (Root) -> Value?
@@ -39,7 +43,7 @@ public struct CasePath<Root, Value> {
     self.init(
       embed: embed,
       extract: extract,
-      keyPaths: []
+      keyPaths: nil
     )
   }
 
