@@ -1245,6 +1245,13 @@ final class CasePathsTests: XCTestCase {
       XCTAssertEqual(count, iterationCount * 4)
     }
   #endif
+
+  func testCaseKeyPath() {
+    XCTAssertEqual(
+      [_Foo.bar, .baz(1), .bar, .baz(2)].compactMap(\.baz),
+      [1, 2]
+    )
+  }
 }
 
 private class TestObject: Equatable {
@@ -1257,3 +1264,8 @@ private func unwrap<Wrapped>(_ optional: Wrapped?) throws -> Wrapped {
   return wrapped
 }
 private struct UnexpectedNil: Error {}
+
+@CasePathable private enum _Foo {
+  case bar
+  case baz(Int)
+}
