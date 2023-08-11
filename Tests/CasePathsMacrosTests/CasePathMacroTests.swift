@@ -5,16 +5,18 @@ import SwiftSyntaxMacros
 import XCTest
 
 final class CasePathMacroTests: XCTestCase {
-  override func setUp() {
-    super.setUp()
+  override func invokeTest() {
+    MacroSnapshot.withConfiguration(isRecording: false, macros: testMacros) {
+      super.invokeTest()
+    }
   }
 
   func testCasePath() throws {
-    assertMacroSnapshot(testMacros) {
+    assertMacroSnapshot {
       #"""
       #casePath(\Foo.bar)
       """#
-    } expandsTo: {
+    } matches: {
       #"""
       CasePaths.CasePath._$case(\Foo.AllCasePaths.bar)
       """#
@@ -22,11 +24,11 @@ final class CasePathMacroTests: XCTestCase {
   }
 
   func testCasePath_Appending() throws {
-    assertMacroSnapshot(testMacros) {
+    assertMacroSnapshot {
       #"""
       #casePath(\Foo.bar?.baz)
       """#
-    } expandsTo: {
+    } matches: {
       #"""
       CasePaths.CasePath._$case(\Foo.AllCasePaths.bar).appending(path: ._$case(\.baz))
       """#

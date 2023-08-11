@@ -5,8 +5,14 @@ import SwiftSyntaxMacros
 import XCTest
 
 final class CasePathableMacroTests: XCTestCase {
+  override func invokeTest() {
+    MacroSnapshot.withConfiguration(isRecording: false, macros: testMacros) {
+      super.invokeTest()
+    }
+  }
+
   func testCasePathable() throws {
-    assertMacroSnapshot(testMacros) {
+    assertMacroSnapshot {
       """
       @CasePathable enum Foo {
         case bar
@@ -15,7 +21,7 @@ final class CasePathableMacroTests: XCTestCase {
         case fizzier(Int, buzzier: String)
       }
       """
-    } expandsTo: {
+    } matches: {
       #"""
       enum Foo {
         case bar
@@ -95,14 +101,14 @@ final class CasePathableMacroTests: XCTestCase {
   }
 
   func testOverloadedCaseName() throws {
-    assertMacroSnapshot(testMacros) {
+    assertMacroSnapshot {
       """
       @CasePathable enum Foo {
         case bar(Int)
         case bar(int: Int)
       }
       """
-    } expandsTo: {
+    } matches: {
       """
       @CasePathable enum Foo {
         case bar(Int)
@@ -114,12 +120,12 @@ final class CasePathableMacroTests: XCTestCase {
   }
 
   func testRequiresEnum() throws {
-    assertMacroSnapshot(testMacros) {
+    assertMacroSnapshot {
       """
       @CasePathable struct Foo {
       }
       """
-    } expandsTo: {
+    } matches: {
       """
       @CasePathable struct Foo {
                     ╰─ 🛑 @CasePathable macro requires 'Foo' to be an enum
