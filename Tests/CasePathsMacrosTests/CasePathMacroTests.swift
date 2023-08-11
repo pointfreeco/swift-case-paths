@@ -11,7 +11,7 @@ final class CasePathMacroTests: XCTestCase {
     }
   }
 
-  func testCasePath() throws {
+  func testCasePath() {
     assertMacroSnapshot {
       #"""
       #casePath(\Foo.bar)
@@ -23,7 +23,7 @@ final class CasePathMacroTests: XCTestCase {
     }
   }
 
-  func testCasePath_Appending() throws {
+  func testCasePath_Appending() {
     assertMacroSnapshot {
       #"""
       #casePath(\Foo.bar?.baz)

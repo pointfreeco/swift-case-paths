@@ -11,7 +11,7 @@ final class CasePathableMacroTests: XCTestCase {
     }
   }
 
-  func testCasePathable() throws {
+  func testCasePathable() {
     assertMacroSnapshot {
       """
       @CasePathable enum Foo {
@@ -100,7 +100,7 @@ final class CasePathableMacroTests: XCTestCase {
     }
   }
 
-  func testOverloadedCaseName() throws {
+  func testOverloadedCaseName() {
     assertMacroSnapshot {
       """
       @CasePathable enum Foo {
@@ -112,14 +112,14 @@ final class CasePathableMacroTests: XCTestCase {
       """
       @CasePathable enum Foo {
         case bar(Int)
-             ╰─ 🛑 @CasePathable macro does not allow overloaded case names
         case bar(int: Int)
+             ╰─ 🛑 @CasePathable macro does not allow duplicate case name 'bar'
       }
       """
     }
   }
 
-  func testRequiresEnum() throws {
+  func testRequiresEnum() {
     assertMacroSnapshot {
       """
       @CasePathable struct Foo {

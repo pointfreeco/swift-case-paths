@@ -51,18 +51,17 @@ extension CasePathableMacro: MemberMacro {
       .members
       .compactMap { $0.decl.as(EnumCaseDeclSyntax.self)?.elements.first }
 
-    let uniqueCaseNames = Set(enumCaseDecls.map { $0.name.text })
-    let hasOverloadedCaseName = uniqueCaseNames.count != enumCaseDecls.count
-    guard !hasOverloadedCaseName
-    else {
-      for enumCaseDecl in enumCaseDecls where uniqueCaseNames.contains(enumCaseDecl.name.text) {
+    var seenCaseNames: Set<String> = []
+    for enumCaseDecl in enumCaseDecls {
+      let name = enumCaseDecl.name.text
+      if seenCaseNames.contains(name) {
         throw DiagnosticsError(
           diagnostics: [
-            CasePathableMacroDiagnostic.overloadedCaseName.diagnose(at: Syntax(enumCaseDecl))
+            CasePathableMacroDiagnostic.overloadedCaseName(name).diagnose(at: Syntax(enumCaseDecl))
           ]
         )
       }
-      fatalError()
+      seenCaseNames.insert(name)
     }
 
     let casePaths: [DeclSyntax] = enumCaseDecls.map { enumCaseDecl in
@@ -156,7 +155,7 @@ extension CasePathableMacro: MemberMacro {
 
 enum CasePathableMacroDiagnostic {
   case notAnEnum(DeclGroupSyntax)
-  case overloadedCaseName
+  case overloadedCaseName(String)
 }
 
 extension CasePathableMacroDiagnostic: DiagnosticMessage {
@@ -166,9 +165,9 @@ extension CasePathableMacroDiagnostic: DiagnosticMessage {
       return """
         @CasePathable macro requires \(decl.nameDescription.map { "'\($0)' to be " } ?? "")an enum
         """
-    case .overloadedCaseName:
+    case let .overloadedCaseName(name):
       return """
-        @CasePathable macro does not allow overloaded case names
+        @CasePathable macro does not allow duplicate case name '\(name)'
         """
     }
   }
