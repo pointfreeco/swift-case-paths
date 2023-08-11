@@ -87,6 +87,9 @@ final class CasePathableMacroTests: XCTestCase {
         var fizz: String? { Self.allCasePaths.fizz.extract(from: self) }
         var fizzier: (Int, buzzier: String)? { Self.allCasePaths.fizzier.extract(from: self) }
       }
+
+      extension Foo: CasePaths.CasePathable {
+      }
       """#
     }
   }
@@ -101,10 +104,10 @@ final class CasePathableMacroTests: XCTestCase {
       """
     } expandsTo: {
       """
-      enum Foo {
+      @CasePathable enum Foo {
         case bar(Int)
+             ╰─ 🛑 @CasePathable macro does not allow overloaded case names
         case bar(int: Int)
-           ╰─ 🛑 @CasePathable macro does not allow overloaded case names.
       }
       """
     }
@@ -118,8 +121,8 @@ final class CasePathableMacroTests: XCTestCase {
       """
     } expandsTo: {
       """
-      struct Foo {
-      ╰─ 🛑 @CasePathable macro requires 'Foo' to be an enum
+      @CasePathable struct Foo {
+                    ╰─ 🛑 @CasePathable macro requires 'Foo' to be an enum
       }
       """
     }

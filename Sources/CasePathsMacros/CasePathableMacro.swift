@@ -14,9 +14,9 @@ extension CasePathableMacro: ExtensionMacro {
     conformingTo protocols: [SwiftSyntax.TypeSyntax],
     in context: some SwiftSyntaxMacros.MacroExpansionContext
   ) throws -> [SwiftSyntax.ExtensionDeclSyntax] {
-    if protocols.isEmpty {
-      return []
-    }
+    //if protocols.isEmpty {
+    //  return []
+    //}
     let ext: DeclSyntax =
       """
       extension \(type.trimmed): CasePaths.CasePathable {}
@@ -37,7 +37,9 @@ extension CasePathableMacro: MemberMacro {
     else {
       throw DiagnosticsError(
         diagnostics: [
-          CasePathableMacroDiagnostic.notAnEnum(declaration).diagnose(at: Syntax(node))
+          CasePathableMacroDiagnostic
+            .notAnEnum(declaration)
+            .diagnose(at: declaration.keyword)
         ]
       )
     }
@@ -162,12 +164,11 @@ extension CasePathableMacroDiagnostic: DiagnosticMessage {
     switch self {
     case let .notAnEnum(decl):
       return """
-        @CasePathable macro requires \(decl.nameDescription.map { "'\($0)' to be " } ?? "")\
-        an enum
+        @CasePathable macro requires \(decl.nameDescription.map { "'\($0)' to be " } ?? "")an enum
         """
     case .overloadedCaseName:
       return """
-        @CasePathable macro does not allow overloaded case names.
+        @CasePathable macro does not allow overloaded case names
         """
     }
   }
@@ -196,6 +197,25 @@ extension CasePathableMacroDiagnostic: DiagnosticMessage {
 }
 
 extension DeclGroupSyntax {
+  var keyword: Syntax {
+    switch self {
+    case let syntax as ActorDeclSyntax:
+      return Syntax(syntax.actorKeyword)
+    case let syntax as ClassDeclSyntax:
+      return Syntax(syntax.classKeyword)
+    case let syntax as ExtensionDeclSyntax:
+      return Syntax(syntax.extensionKeyword)
+    case let syntax as ProtocolDeclSyntax:
+      return Syntax(syntax.protocolKeyword)
+    case let syntax as StructDeclSyntax:
+      return Syntax(syntax.structKeyword)
+    case let syntax as EnumDeclSyntax:
+      return Syntax(syntax.enumKeyword)
+    default:
+      return Syntax(self)
+    }
+  }
+
   var nameDescription: String? {
     switch self {
     case let syntax as ActorDeclSyntax:
