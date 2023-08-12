@@ -28,12 +28,21 @@
       }
     },
     {
+      "identity" : "swift-macro-testing",
+      "kind" : "remoteSourceControl",
+      "location" : "https://github.com/pointfreeco/swift-macro-testing",
+      "state" : {
+        "branch" : "main",
+        "revision" : "f246da50d8b3a50f24253ef70ce3736cd64bf985"
+      }
+    },
+    {
       "identity" : "swift-snapshot-testing",
       "kind" : "remoteSourceControl",
       "location" : "https://github.com/pointfreeco/swift-snapshot-testing",
       "state" : {
         "branch" : "swift-syntax",
-        "revision" : "9323ff86db68fa1be0d4817f7acb88d5ee71ad58"
+        "revision" : "6368922f00b66662eb241a705dd4b75e36675dcc"
       }
     },
     {

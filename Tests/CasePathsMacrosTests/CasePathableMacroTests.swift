@@ -1,18 +1,20 @@
 import CasePathsMacros
-import MacroSnapshotTesting
-import SnapshotTesting
+import MacroTesting
 import SwiftSyntaxMacros
 import XCTest
 
 final class CasePathableMacroTests: XCTestCase {
   override func invokeTest() {
-    MacroSnapshot.withConfiguration(isRecording: false, macros: testMacros) {
+    MacroTesting.withConfiguration(
+      isRecording: false,
+      macros: [CasePathableMacro.self]
+    ) {
       super.invokeTest()
     }
   }
 
   func testCasePathable() {
-    assertMacroSnapshot {
+    assertMacro {
       """
       @CasePathable enum Foo {
         case bar
@@ -101,7 +103,7 @@ final class CasePathableMacroTests: XCTestCase {
   }
 
   func testOverloadedCaseName() {
-    assertMacroSnapshot {
+    assertMacro {
       """
       @CasePathable enum Foo {
         case bar(Int)
@@ -120,7 +122,7 @@ final class CasePathableMacroTests: XCTestCase {
   }
 
   func testRequiresEnum() {
-    assertMacroSnapshot {
+    assertMacro {
       """
       @CasePathable struct Foo {
       }

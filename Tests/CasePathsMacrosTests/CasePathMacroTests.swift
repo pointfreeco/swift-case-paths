@@ -1,18 +1,20 @@
 import CasePathsMacros
-import MacroSnapshotTesting
-import SnapshotTesting
+import MacroTesting
 import SwiftSyntaxMacros
 import XCTest
 
 final class CasePathMacroTests: XCTestCase {
   override func invokeTest() {
-    MacroSnapshot.withConfiguration(isRecording: false, macros: testMacros) {
+    MacroTesting.withConfiguration(
+      isRecording: false,
+      macros: [CasePathMacro.self]
+    ) {
       super.invokeTest()
     }
   }
 
   func testCasePath() {
-    assertMacroSnapshot {
+    assertMacro {
       #"""
       #casePath(\Foo.bar)
       """#
@@ -24,7 +26,7 @@ final class CasePathMacroTests: XCTestCase {
   }
 
   func testCasePath_Appending() {
-    assertMacroSnapshot {
+    assertMacro {
       #"""
       #casePath(\Foo.bar?.baz)
       """#
