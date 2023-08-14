@@ -108,6 +108,30 @@ public struct CasePath<Root, Value> {
   }
 }
 
+import XCTestDynamicOverlay
+
+extension CasePath: Equatable {
+  public static func == (lhs: Self, rhs: Self) -> Bool {
+    guard let lhs = lhs.keyPaths, let rhs = rhs.keyPaths
+    else {
+      XCTFail("TODO")
+      return false
+    }
+    return lhs == rhs
+  }
+}
+
+extension CasePath: Hashable {
+  public func hash(into hasher: inout Hasher) {
+    guard let keyPaths = self.keyPaths
+    else {
+      XCTFail("TODO")
+      return
+    }
+    hasher.combine(keyPaths)
+  }
+}
+
 #if canImport(_Concurrency) && compiler(>=5.5.2)
   extension CasePath: @unchecked Sendable {}
 #endif
