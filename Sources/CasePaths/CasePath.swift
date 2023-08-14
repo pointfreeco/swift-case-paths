@@ -103,7 +103,8 @@ public struct CasePath<Root, Value> {
   > {
     CasePath<Root, AppendedValue>(
       embed: { self.embed(path.embed($0)) },
-      extract: { self.extract(from: $0).flatMap(path.extract) }
+      extract: { self.extract(from: $0).flatMap(path.extract) },
+      keyPaths: self.keyPaths.flatMap { keyPaths in path.keyPaths.map { keyPaths + $0 } }
     )
   }
 }

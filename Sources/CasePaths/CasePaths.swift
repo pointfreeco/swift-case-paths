@@ -3,7 +3,8 @@ extension CasePath where Root == Value {
   public static var `self`: CasePath {
     .init(
       embed: { $0 },
-      extract: Optional.some
+      extract: Optional.some,
+      keyPaths: []
     )
   }
 }
