@@ -20,7 +20,7 @@ let package = Package(
   dependencies: [
     .package(
       url: "https://github.com/apple/swift-syntax.git",
-      from: "509.0.0-swift-DEVELOPMENT-SNAPSHOT-2023-08-07-a"
+      from: "509.0.0-swift-DEVELOPMENT-SNAPSHOT-2023-08-28-a"
     ),
     .package(url: "https://github.com/google/swift-benchmark", from: "0.1.0"),
     .package(url: "https://github.com/pointfreeco/swift-macro-testing", branch: "main"),

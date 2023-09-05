@@ -45,7 +45,7 @@ extension CasePathableMacro: MemberMacro {
     }
     let enumName = enumDecl.name.trimmed
 
-    let access = enumDecl.modifiers?.first(where: \.isNeededAccessLevelModifier)
+    let access = enumDecl.modifiers.first(where: \.isNeededAccessLevelModifier)
 
     let enumCaseDecls = enumDecl.memberBlock
       .members
