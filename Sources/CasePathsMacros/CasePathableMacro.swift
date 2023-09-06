@@ -5,16 +5,28 @@ import SwiftSyntaxMacros
 
 public struct CasePathableMacro {}
 
-extension CasePathableMacro: ConformanceMacro {
-  public static func expansion<
-    Declaration: DeclGroupSyntax,
-    Context: MacroExpansionContext
-  >(
+extension CasePathableMacro: ExtensionMacro {
+  public static func expansion(
     of node: AttributeSyntax,
-    providingConformancesOf declaration: Declaration,
-    in context: Context
-  ) throws -> [(TypeSyntax, GenericWhereClauseSyntax?)] {
-    [("CasePathable", nil)]
+    attachedTo declaration: some DeclGroupSyntax,
+    providingExtensionsOf type: some TypeSyntaxProtocol,
+    conformingTo protocols: [TypeSyntax],
+    in context: some MacroExpansionContext
+  ) throws -> [ExtensionDeclSyntax] {
+    if protocols.isEmpty {
+      return []
+    }
+
+    let casePathableExtension: DeclSyntax =
+      """
+      extension \(type.trimmed): CasePathable {}
+      """
+
+    guard let extensionDecl = casePathableExtension.as(ExtensionDeclSyntax.self) else {
+      return []
+    }
+
+    return [extensionDecl]
   }
 }
 
@@ -33,23 +45,23 @@ extension CasePathableMacro: MemberMacro {
       ])
     }
 
-    let access = enumDecl.modifiers?.first(where: \.isNeededAccessLevelModifier)
+    let access = enumDecl.modifiers.first(where: \.isNeededAccessLevelModifier)
 
     let caseDecls = enumDecl.memberBlock
       .members
       .compactMap { $0.decl.as(EnumCaseDeclSyntax.self)?.elements.first }
 
     let properties: [DeclSyntax] = caseDecls.map { enumCase in
-      enumCase.associatedValue.map { associatedValue in
+      enumCase.parameterClause.map { associatedValue in
         """
-        \(access)var \(raw: enumCase.identifier): \(associatedValue)? {
-          if case let .\(raw: enumCase.identifier)(value) = self { value } else { nil }
+        \(access)var \(raw: enumCase.name): \(associatedValue)? {
+          if case let .\(raw: enumCase.name)(value) = self { value } else { nil }
         }
         """
       }
         ?? """
-        \(access)var \(raw: enumCase.identifier): Void? {
-          if case .\(raw: enumCase.identifier) = self { () } else { nil }
+        \(access)var \(raw: enumCase.name): Void? {
+          if case .\(raw: enumCase.name) = self { () } else { nil }
         }
         """
     }
@@ -96,17 +108,17 @@ extension DeclGroupSyntax {
   var identifierDescription: String? {
     switch self {
     case let syntax as ActorDeclSyntax:
-      return syntax.identifier.trimmedDescription
+      return syntax.name.trimmedDescription
     case let syntax as ClassDeclSyntax:
-      return syntax.identifier.trimmedDescription
+      return syntax.name.trimmedDescription
     case let syntax as ExtensionDeclSyntax:
       return syntax.extendedType.trimmedDescription
     case let syntax as ProtocolDeclSyntax:
-      return syntax.identifier.trimmedDescription
+      return syntax.name.trimmedDescription
     case let syntax as StructDeclSyntax:
-      return syntax.identifier.trimmedDescription
+      return syntax.name.trimmedDescription
     case let syntax as EnumDeclSyntax:
-      return syntax.identifier.trimmedDescription
+      return syntax.name.trimmedDescription
     default:
       return nil
     }

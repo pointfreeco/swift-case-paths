@@ -19,7 +19,7 @@ public struct CasePathMacro: ExpressionMacro {
 
     guard
       let identifier = argument.components
-        .compactMap({ $0.component.as(KeyPathPropertyComponentSyntax.self)?.identifier })
+        .compactMap({ $0.component.as(KeyPathPropertyComponentSyntax.self)?.declName.baseName })
         .first
     else {
       throw CustomError.message("#casePath requires a @CasePathable enum key path")
