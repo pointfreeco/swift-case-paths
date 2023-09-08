@@ -1202,12 +1202,21 @@ final class CasePathsTests: XCTestCase {
   }
 
   #if canImport(_Concurrency) && compiler(>=5.5.2)
+    #if os(Windows)
+    // There seems to be some strangeness with the current
+    // concurrency implmentation on Windows that breaks if
+    // you have more than 100 tasks here.
+    let maxIterations = 100
+    #else
+    let maxIterations = 100_000
+    #endif
+
     func testConcurrency_SharedCasePath() async throws {
       enum Enum { case payload(Int) }
       let casePath = /Enum.payload
 
       await withTaskGroup(of: Void.self) { group in
-        for index in 1...100_000 {
+        for index in 1...maxIterations {
           group.addTask {
             XCTAssertEqual(casePath.extract(from: Enum.payload(index)), index)
           }
@@ -1217,11 +1226,10 @@ final class CasePathsTests: XCTestCase {
 
     func testConcurrency_NonSendableEmbed() async throws {
       enum Enum: Equatable { case payload(Int) }
-      let iterationCount = 100_000
       var count = 0
 
       await withTaskGroup(of: Void.self) { group in
-        for index in 1...iterationCount {
+        for index in 1...maxIterations {
           let casePath1 = CasePath<Enum, Int> {
             count += 1
             return .payload($0)
@@ -1242,7 +1250,7 @@ final class CasePathsTests: XCTestCase {
         }
       }
 
-      XCTAssertEqual(count, iterationCount * 4)
+      XCTAssertEqual(count, maxIterations * 4)
     }
   #endif
 }
