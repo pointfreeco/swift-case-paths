@@ -51,7 +51,5 @@ jobs:
           tag: 5.8.1-RELEASE
 
       - uses: actions/checkout@v3
-      - name: Build
-        run: swift build -c ${{ matrix.config }}
-      - name: Test
-        run: swift test --skip-build
+      - name: Build & Test
+        run: swift test -c ${{ matrix.config }}
