@@ -54,4 +54,4 @@ jobs:
       - name: Build All Configurations
         run: swift build -c ${{ matrix.config }}
       - name: Run tests
-        run: swift test
+        run: swift test -v
