@@ -43,6 +43,7 @@ jobs:
       matrix:
         os: [windows-latest]
         config: ['debug', 'release']
+        fail-fast: false
     runs-on: ${{ matrix.os }}
     steps:
       - uses: compnerd/gha-setup-swift@main
