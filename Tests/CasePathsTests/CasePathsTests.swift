@@ -1203,12 +1203,12 @@ final class CasePathsTests: XCTestCase {
 
   #if canImport(_Concurrency) && compiler(>=5.5.2)
     #if os(Windows)
-    // There seems to be some strangeness with the current
-    // concurrency implmentation on Windows that breaks if
-    // you have more than 100 tasks here.
-    let maxIterations = 100
+      // There seems to be some strangeness with the current
+      // concurrency implmentation on Windows that breaks if
+      // you have more than 100 tasks here.
+      let maxIterations = 100
     #else
-    let maxIterations = 100_000
+      let maxIterations = 100_000
     #endif
 
     func testConcurrency_SharedCasePath() async throws {
