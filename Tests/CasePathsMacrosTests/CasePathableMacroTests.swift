@@ -5,8 +5,8 @@ import XCTest
 
 final class CasePathableMacroTests: XCTestCase {
   override func invokeTest() {
-    MacroTesting.withConfiguration(
-      isRecording: false,
+    MacroTesting.withMacroTesting(
+      //isRecording: true,
       macros: [CasePathableMacro.self]
     ) {
       super.invokeTest()
@@ -115,6 +115,7 @@ final class CasePathableMacroTests: XCTestCase {
       @CasePathable enum Foo {
         case bar(Int)
         case bar(int: Int)
+             ┬──
              ╰─ 🛑 @CasePathable macro does not allow duplicate case name 'bar'
       }
       """
@@ -130,6 +131,7 @@ final class CasePathableMacroTests: XCTestCase {
     } matches: {
       """
       @CasePathable struct Foo {
+                    ┬─────
                     ╰─ 🛑 @CasePathable macro requires 'Foo' to be an enum
       }
       """

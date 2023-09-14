@@ -5,7 +5,7 @@ import XCTest
 
 final class CasePathMacroTests: XCTestCase {
   override func invokeTest() {
-    MacroTesting.withConfiguration(
+    MacroTesting.withMacroTesting(
       isRecording: false,
       macros: [CasePathMacro.self]
     ) {

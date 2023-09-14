@@ -57,7 +57,7 @@ extension CasePathableMacro: MemberMacro {
       if seenCaseNames.contains(name) {
         throw DiagnosticsError(
           diagnostics: [
-            CasePathableMacroDiagnostic.overloadedCaseName(name).diagnose(at: Syntax(enumCaseDecl))
+            CasePathableMacroDiagnostic.overloadedCaseName(name).diagnose(at: Syntax(enumCaseDecl.name))
           ]
         )
       }
