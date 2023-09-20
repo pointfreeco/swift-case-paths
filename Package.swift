@@ -13,7 +13,6 @@ let package = Package(
   ],
   products: [
     .library(name: "CasePaths", targets: ["CasePaths"]),
-    .library(name: "CasePathsMacros", targets: ["CasePathsMacros"]),
   ],
   dependencies: [
     .package(url: "https://github.com/apple/swift-syntax.git", from: "509.0.0"),
