@@ -33,7 +33,7 @@ final class CasePathableMacroTests: XCTestCase {
 
         struct AllCasePaths {
           var bar: CasePaths.CasePath<Foo, Void> {
-            CasePaths.CasePath<Foo, Void> ._init(
+            CasePaths.CasePath<Foo, Void> ._$init(
               embed: {
                 .bar
               },
@@ -47,7 +47,7 @@ final class CasePathableMacroTests: XCTestCase {
             )
           }
           var baz: CasePaths.CasePath<Foo, Int> {
-            CasePaths.CasePath<Foo, Int> ._init(
+            CasePaths.CasePath<Foo, Int> ._$init(
               embed: {
                 .baz($0)
               },
@@ -61,7 +61,7 @@ final class CasePathableMacroTests: XCTestCase {
             )
           }
           var fizz: CasePaths.CasePath<Foo, String> {
-            CasePaths.CasePath<Foo, String> ._init(
+            CasePaths.CasePath<Foo, String> ._$init(
               embed: {
                 .fizz(buzz: $0)
               },
@@ -75,7 +75,7 @@ final class CasePathableMacroTests: XCTestCase {
             )
           }
           var fizzier: CasePaths.CasePath<Foo, (Int, buzzier: String)> {
-            CasePaths.CasePath<Foo, (Int, buzzier: String)> ._init(
+            CasePaths.CasePath<Foo, (Int, buzzier: String)> ._$init(
               embed: {
                 .fizzier($0, buzzier: $1)
               },
@@ -94,6 +94,79 @@ final class CasePathableMacroTests: XCTestCase {
         var baz: Int? { Self.allCasePaths.baz.extract(from: self) }
         var fizz: String? { Self.allCasePaths.fizz.extract(from: self) }
         var fizzier: (Int, buzzier: String)? { Self.allCasePaths.fizzier.extract(from: self) }
+      }
+
+      extension Foo: CasePaths.CasePathable {
+      }
+      """#
+    }
+  }
+
+  func testCasePathable_AccessControl() {
+    assertMacro {
+      """
+      @CasePathable public enum Foo {
+        case bar(Int)
+      }
+      """
+    } matches: {
+      #"""
+      public enum Foo {
+        case bar(Int)
+
+        public struct AllCasePaths {
+          public var bar: CasePaths.CasePath<Foo, Int> {
+            CasePaths.CasePath<Foo, Int> ._$init(
+              embed: {
+                .bar($0)
+              },
+              extract: {
+                guard case let .bar(v0) = $0 else {
+                  return nil
+                }
+                return v0
+              },
+              keyPath: \.bar
+            )
+          }
+        }
+        public static var allCasePaths: AllCasePaths { AllCasePaths() }
+        public var bar: Int? { Self.allCasePaths.bar.extract(from: self) }
+      }
+
+      extension Foo: CasePaths.CasePathable {
+      }
+      """#
+    }
+    assertMacro {
+      """
+      @CasePathable private enum Foo {
+        case bar(Int)
+      }
+      """
+    } matches: {
+      #"""
+      private enum Foo {
+        case bar(Int)
+
+        struct AllCasePaths {
+          var bar: CasePaths.CasePath<Foo, Int> {
+            CasePaths.CasePath<Foo, Int> ._$init(
+              embed: {
+                .bar($0)
+              },
+              extract: {
+                guard case let .bar(v0) = $0 else {
+                  return nil
+                }
+                return v0
+              },
+              keyPath: \.bar
+            )
+          }
+        }
+        static var allCasePaths: AllCasePaths { AllCasePaths() }
+        var bar: Int? { Self.allCasePaths.bar.extract(from: self) }
       }
 
       extension Foo: CasePaths.CasePathable {

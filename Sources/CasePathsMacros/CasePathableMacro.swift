@@ -93,7 +93,7 @@ extension CasePathableMacro: MemberMacro {
 
       return """
         \(access)var \(caseName): CasePaths.CasePath<\(enumName), \(raw: associatedValueName)> {\
-        CasePaths.CasePath<\(enumName), \(raw: associatedValueName)>._init(
+        CasePaths.CasePath<\(enumName), \(raw: associatedValueName)>._$init(
         embed: {\
         .\(caseName)\(raw: embedNames)\
         },
@@ -158,16 +158,23 @@ enum CasePathableMacroDiagnostic {
   case overloadedCaseName(String)
 }
 
+import Observation
+
+@Observable struct Ok {}
+
 extension CasePathableMacroDiagnostic: DiagnosticMessage {
   var message: String {
     switch self {
     case let .notAnEnum(decl):
+
+      // TODO: '@CasePathable' cannot be applied to <struct> type '<Foo>'
       return """
-        @CasePathable macro requires \(decl.nameDescription.map { "'\($0)' to be " } ?? "")an enum
+        '@CasePathable' macro requires \(decl.nameDescription.map { "'\($0)' to be " } ?? "")an enum
         """
     case let .overloadedCaseName(name):
+      // TODO: '@CasePathable' cannot be applied to overloaded case name '<bar>'
       return """
-        @CasePathable macro does not allow duplicate case name '\(name)'
+        '@CasePathable' cannot be applied to overloaded case name '\(name)'
         """
     }
   }

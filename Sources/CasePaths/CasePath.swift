@@ -1,4 +1,5 @@
 import Foundation
+import XCTestDynamicOverlay
 
 /// A path that supports embedding a value in a root and attempting to extract a root's embedded
 /// value.
@@ -32,10 +33,16 @@ public struct CasePath<Root, Value> {
   /// - Parameters:
   ///   - embed: A function that always succeeds in embedding a value in a root.
   ///   - extract: A function that can optionally fail in extracting a value from a root.
-  @available(iOS, deprecated: 9999, message: "TODO")
-  @available(macOS, deprecated: 9999, message: "TODO")
-  @available(tvOS, deprecated: 9999, message: "TODO")
-  @available(watchOS, deprecated: 9999, message: "TODO")
+  @available(iOS, deprecated: 9999, message: "Use '#casePath' with a '@CasePathable' enum instead")
+  @available(
+    macOS, deprecated: 9999, message: "Use '#casePath' with a '@CasePathable' enum instead"
+  )
+  @available(
+    tvOS, deprecated: 9999, message: "Use '#casePath' with a '@CasePathable' enum instead"
+  )
+  @available(
+    watchOS, deprecated: 9999, message: "Use '#casePath' with a '@CasePathable' enum instead"
+  )
   public init(
     embed: @escaping (Value) -> Root,
     extract: @escaping (Root) -> Value?
@@ -47,7 +54,7 @@ public struct CasePath<Root, Value> {
     )
   }
 
-  public static func _init(
+  public static func _$init(
     embed: @escaping (Value) -> Root,
     extract: @escaping (Root) -> Value?,
     keyPath: KeyPath<Root, Value?>
@@ -109,7 +116,7 @@ public struct CasePath<Root, Value> {
   }
 }
 
-import XCTestDynamicOverlay
+struct ExtractionFailed: Error {}
 
 extension CasePath: Equatable {
   public static func == (lhs: Self, rhs: Self) -> Bool {
@@ -137,12 +144,24 @@ extension CasePath: Hashable {
   extension CasePath: @unchecked Sendable {}
 #endif
 
-extension CasePath: CustomStringConvertible {
-  public var description: String {
-    "CasePath<\(typeName(Root.self)), \(typeName(Value.self))>"
+extension CasePath: CustomDebugStringConvertible {
+  public var debugDescription: String {
+    if let keyPaths = self.keyPaths {
+      if keyPaths.isEmpty {
+        return "\\\(Root.self).self"
+      } else if #available(macOS 13.3, iOS 16.4, watchOS 9.4, tvOS 16.4, *) {
+        return "\\\(Root.self).\(keyPaths.map(\.componentName).joined(separator: "?."))"
+      }
+    }
+    return "CasePath<\(Root.self), \(Value.self)>"
   }
 }
 
-struct ExtractionFailed: Error {}
+@available(macOS 13.3, iOS 16.4, watchOS 9.4, tvOS 16.4, *)
+fileprivate extension AnyKeyPath {
+  var componentName: String {
+    String(self.debugDescription.dropFirst("\\\(Self.rootType).".count))
+  }
+}
 
 private let lock = NSRecursiveLock()

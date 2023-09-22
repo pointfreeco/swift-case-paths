@@ -1,3 +1,11 @@
+// 1. Autocomplete from `\.`
+// 2. Type inference from `\.`
+// 3. More succinct (`/Feature.Destination.State.thing` -> `#casePath(\.thing)`)
+// 4. Correctness/speed (no reflection)
+// 5. Auto-getters
+// 6. Equatability/Hashability
+// 7. Composition, motivated by destinations in TCA
+
 @attached(extension, conformances: CasePathable)
 @attached(member, names: arbitrary)
 public macro CasePathable() = #externalMacro(module: "CasePathsMacros", type: "CasePathableMacro")
