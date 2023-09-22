@@ -1040,6 +1040,7 @@ final class CasePathsTests: XCTestCase {
     }
   }
 
+  @available(*, deprecated)
   func testCustomStringConvertible() {
     XCTAssertEqual(
       "\(/Result<String, Error>.success)",
@@ -1246,12 +1247,14 @@ final class CasePathsTests: XCTestCase {
     }
   #endif
 
-  func testCaseKeyPath() {
-    XCTAssertEqual(
-      [_Foo.bar, .baz(1), .bar, .baz(2)].compactMap(\.baz),
-      [1, 2]
-    )
-  }
+  #if swift(>=5.9)
+    func testCaseKeyPath() {
+      XCTAssertEqual(
+        [_Foo.bar, .baz(1), .bar, .baz(2)].compactMap(\.baz),
+        [1, 2]
+      )
+    }
+  #endif
 }
 
 private class TestObject: Equatable {
@@ -1265,7 +1268,9 @@ private func unwrap<Wrapped>(_ optional: Wrapped?) throws -> Wrapped {
 }
 private struct UnexpectedNil: Error {}
 
-@CasePathable private enum _Foo {
-  case bar
-  case baz(Int)
-}
+#if swift(>=5.9)
+  @CasePathable private enum _Foo {
+    case bar
+    case baz(Int)
+  }
+#endif

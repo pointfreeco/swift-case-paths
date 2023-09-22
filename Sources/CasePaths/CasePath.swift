@@ -15,16 +15,8 @@ public struct CasePath<Root, Value> {
     extract: @escaping (Root) -> Value?,
     keyPaths: [AnyKeyPath]?
   ) {
-    self._embed = {
-      lock.lock()
-      defer { lock.unlock() }
-      return embed($0)
-    }
-    self._extract = {
-      lock.lock()
-      defer { lock.unlock() }
-      return extract($0)
-    }
+    self._embed = embed
+    self._extract = extract
     self.keyPaths = keyPaths
   }
 
@@ -33,7 +25,9 @@ public struct CasePath<Root, Value> {
   /// - Parameters:
   ///   - embed: A function that always succeeds in embedding a value in a root.
   ///   - extract: A function that can optionally fail in extracting a value from a root.
-  @available(iOS, deprecated: 9999, message: "Use '#casePath' with a '@CasePathable' enum instead")
+  @available(
+    iOS, deprecated: 9999, message: "Use '#casePath' with a '@CasePathable' enum instead"
+  )
   @available(
     macOS, deprecated: 9999, message: "Use '#casePath' with a '@CasePathable' enum instead"
   )
@@ -48,8 +42,16 @@ public struct CasePath<Root, Value> {
     extract: @escaping (Root) -> Value?
   ) {
     self.init(
-      embed: embed,
-      extract: extract,
+      embed: {
+        lock.lock()
+        defer { lock.unlock() }
+        return embed($0)
+      },
+      extract: {
+        lock.lock()
+        defer { lock.unlock() }
+        return extract($0)
+      },
       keyPaths: nil
     )
   }
@@ -105,9 +107,9 @@ public struct CasePath<Root, Value> {
   ///
   /// - Parameter path: The case path to append.
   /// - Returns: A case path from the root of this case path to the value type of `path`.
-  public func appending<AppendedValue>(path: CasePath<Value, AppendedValue>) -> CasePath<
-    Root, AppendedValue
-  > {
+  public func appending<AppendedValue>(
+    path: CasePath<Value, AppendedValue>
+  ) -> CasePath<Root, AppendedValue> {
     CasePath<Root, AppendedValue>(
       embed: { self.embed(path.embed($0)) },
       extract: { self.extract(from: $0).flatMap(path.extract) },
@@ -117,28 +119,6 @@ public struct CasePath<Root, Value> {
 }
 
 struct ExtractionFailed: Error {}
-
-extension CasePath: Equatable {
-  public static func == (lhs: Self, rhs: Self) -> Bool {
-    guard let lhs = lhs.keyPaths, let rhs = rhs.keyPaths
-    else {
-      XCTFail("TODO")
-      return false
-    }
-    return lhs == rhs
-  }
-}
-
-extension CasePath: Hashable {
-  public func hash(into hasher: inout Hasher) {
-    guard let keyPaths = self.keyPaths
-    else {
-      XCTFail("TODO")
-      return
-    }
-    hasher.combine(keyPaths)
-  }
-}
 
 #if canImport(_Concurrency) && compiler(>=5.5.2)
   extension CasePath: @unchecked Sendable {}
@@ -158,8 +138,8 @@ extension CasePath: CustomDebugStringConvertible {
 }
 
 @available(macOS 13.3, iOS 16.4, watchOS 9.4, tvOS 16.4, *)
-fileprivate extension AnyKeyPath {
-  var componentName: String {
+extension AnyKeyPath {
+  fileprivate var componentName: String {
     String(self.debugDescription.dropFirst("\\\(Self.rootType).".count))
   }
 }

@@ -4,22 +4,40 @@ import SwiftSyntaxBuilder
 import SwiftSyntaxMacros
 
 public struct CasePathableMacro {
+  static let moduleName = "CasePaths"
+  static let conformanceName = "CasePathable"
+  static var qualifiedConformanceName: String { "\(Self.moduleName).\(Self.conformanceName)" }
+  static var conformanceNames: [String] { [Self.conformanceName, Self.qualifiedConformanceName] }
+  static let casePathTypeName = "CasePath"
+  static var qualifiedCasePathTypeName: String { "\(Self.moduleName).\(Self.casePathTypeName)" }
 }
 
 extension CasePathableMacro: ExtensionMacro {
-  public static func expansion(
-    of node: SwiftSyntax.AttributeSyntax,
-    attachedTo declaration: some SwiftSyntax.DeclGroupSyntax,
-    providingExtensionsOf type: some SwiftSyntax.TypeSyntaxProtocol,
-    conformingTo protocols: [SwiftSyntax.TypeSyntax],
-    in context: some SwiftSyntaxMacros.MacroExpansionContext
-  ) throws -> [SwiftSyntax.ExtensionDeclSyntax] {
-    //if protocols.isEmpty {
-    //  return []
-    //}
+  public static func expansion<D: DeclGroupSyntax, T: TypeSyntaxProtocol, C: MacroExpansionContext>(
+    of node: AttributeSyntax,
+    attachedTo declaration: D,
+    providingExtensionsOf type: T,
+    conformingTo protocols: [TypeSyntax],
+    in context: C
+  ) throws -> [ExtensionDeclSyntax] {
+    // if protocols.isEmpty {
+    //   return []
+    // }
+    guard let enumDecl = declaration.as(EnumDeclSyntax.self)
+    else {
+      // TODO: Diagnostic?
+      return []
+    }
+    if let inheritanceClause = enumDecl.inheritanceClause,
+      inheritanceClause.inheritedTypes.contains(
+        where: { Self.conformanceNames.contains($0.trimmedDescription) }
+      )
+    {
+      return []
+    }
     let ext: DeclSyntax =
       """
-      extension \(type.trimmed): CasePaths.CasePathable {}
+      extension \(type.trimmed): \(raw: Self.qualifiedConformanceName) {}
       """
     return [ext.cast(ExtensionDeclSyntax.self)]
   }
@@ -49,7 +67,7 @@ extension CasePathableMacro: MemberMacro {
 
     let enumCaseDecls = enumDecl.memberBlock
       .members
-      .compactMap { $0.decl.as(EnumCaseDeclSyntax.self)?.elements.first }
+      .flatMap { $0.decl.as(EnumCaseDeclSyntax.self)?.elements ?? [] }
 
     var seenCaseNames: Set<String> = []
     for enumCaseDecl in enumCaseDecls {
@@ -57,7 +75,8 @@ extension CasePathableMacro: MemberMacro {
       if seenCaseNames.contains(name) {
         throw DiagnosticsError(
           diagnostics: [
-            CasePathableMacroDiagnostic.overloadedCaseName(name).diagnose(at: Syntax(enumCaseDecl.name))
+            CasePathableMacroDiagnostic.overloadedCaseName(name).diagnose(
+              at: Syntax(enumCaseDecl.name))
           ]
         )
       }
@@ -74,7 +93,7 @@ extension CasePathableMacro: MemberMacro {
       if hasPayload, let associatedValue = enumCaseDecl.parameterClause {
         embedNames =
           "("
-        + associatedValue.parameters.enumerated()
+          + associatedValue.parameters.enumerated()
           .map { offset, parameter in
             "\(parameter.firstName.map { "\($0): " } ?? "")$\(offset)"
           }
@@ -92,26 +111,21 @@ extension CasePathableMacro: MemberMacro {
       }
 
       return """
-        \(access)var \(caseName): CasePaths.CasePath<\(enumName), \(raw: associatedValueName)> {\
-        CasePaths.CasePath<\(enumName), \(raw: associatedValueName)>._$init(
-        embed: {\
-        .\(caseName)\(raw: embedNames)\
-        },
-        extract: {\
-        guard case\(raw: hasPayload ? " let" : "").\(caseName)\(raw: bindingNames) = $0 else {\
-        return nil\
-        }\
-        return \(raw: returnName)\
+        \(access)var \(caseName): \
+        \(raw: Self.qualifiedCasePathTypeName)<\(enumName), \(raw: associatedValueName)> {
+        \(raw: Self.qualifiedCasePathTypeName)<\(enumName), \(raw: associatedValueName)>._$init(
+        embed: { .\(caseName)\(raw: embedNames) },
+        extract: {
+        guard case\(raw: hasPayload ? " let" : "").\(caseName)\(raw: bindingNames) = $0 else { \
+        return nil \
+        }
+        return \(raw: returnName)
         },
         keyPath: \\.\(caseName)
-        )\
+        )
         }
         """
     }
-
-    //let elements = enumCaseDecls
-    //  .map { enumCaseDecl in "      self.\(enumCaseDecl.name.trimmed)" }
-    //  .joined(separator: ",\n")
 
     let properties: [DeclSyntax] = enumCaseDecls.map { enumCaseDecl in
       let caseName = enumCaseDecl.name.trimmed
@@ -125,31 +139,13 @@ extension CasePathableMacro: MemberMacro {
 
     return [
       """
-      \(access)struct AllCasePaths { \
-      \(raw: casePaths.map(\.description).joined(separator: "\n")) \
+      \(access)struct AllCasePaths {
+      \(raw: casePaths.map(\.description).joined(separator: "\n"))
       }
-      \(access)static var allCasePaths: AllCasePaths { \
-      AllCasePaths() \
-      }
+      \(access)static var allCasePaths: AllCasePaths { AllCasePaths() }
       \(raw: properties.map(\.description).joined(separator: "\n"))
       """
     ]
-    //return [
-    //  """
-    //  \(access)struct AllCasePaths: CasePaths.CasePathIterable {
-    //  \(raw: casePaths.map(\.description).joined(separator: "\n"))
-    //    \(access)var _$elements: [any PartialCasePath<\(enumName)>] {
-    //      [
-    //  \(raw: elements)
-    //      ]
-    //    }
-    //  }
-    //  \(access)static var allCasePaths: AllCasePaths {
-    //    AllCasePaths()
-    //  }
-    //  \(raw: properties.map(\.description).joined(separator: "\n"))
-    //  """
-    //]
   }
 }
 
@@ -158,21 +154,16 @@ enum CasePathableMacroDiagnostic {
   case overloadedCaseName(String)
 }
 
-import Observation
-
-@Observable struct Ok {}
-
 extension CasePathableMacroDiagnostic: DiagnosticMessage {
   var message: String {
     switch self {
     case let .notAnEnum(decl):
-
-      // TODO: '@CasePathable' cannot be applied to <struct> type '<Foo>'
       return """
-        '@CasePathable' macro requires \(decl.nameDescription.map { "'\($0)' to be " } ?? "")an enum
+        '@CasePathable' cannot be applied to\
+        \(decl.keywordDescription.map { " \($0)" } ?? "") type\
+        \(decl.nameDescription.map { " '\($0)'" } ?? "")
         """
     case let .overloadedCaseName(name):
-      // TODO: '@CasePathable' cannot be applied to overloaded case name '<bar>'
       return """
         '@CasePathable' cannot be applied to overloaded case name '\(name)'
         """
@@ -219,6 +210,25 @@ extension DeclGroupSyntax {
       return Syntax(syntax.enumKeyword)
     default:
       return Syntax(self)
+    }
+  }
+
+  var keywordDescription: String? {
+    switch self {
+    case let syntax as ActorDeclSyntax:
+      return syntax.actorKeyword.trimmedDescription
+    case let syntax as ClassDeclSyntax:
+      return syntax.classKeyword.trimmedDescription
+    case let syntax as ExtensionDeclSyntax:
+      return syntax.extensionKeyword.trimmedDescription
+    case let syntax as ProtocolDeclSyntax:
+      return syntax.protocolKeyword.trimmedDescription
+    case let syntax as StructDeclSyntax:
+      return syntax.structKeyword.trimmedDescription
+    case let syntax as EnumDeclSyntax:
+      return syntax.enumKeyword.trimmedDescription
+    default:
+      return nil
     }
   }
 

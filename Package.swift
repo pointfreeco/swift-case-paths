@@ -12,7 +12,7 @@ let package = Package(
     .watchOS(.v6),
   ],
   products: [
-    .library(name: "CasePaths", targets: ["CasePaths"]),
+    .library(name: "CasePaths", targets: ["CasePaths"])
   ],
   dependencies: [
     .package(url: "https://github.com/apple/swift-syntax.git", from: "509.0.0"),
@@ -26,7 +26,7 @@ let package = Package(
       name: "CasePaths",
       dependencies: [
         "CasePathsMacros",
-        .product(name: "XCTestDynamicOverlay", package: "xctest-dynamic-overlay")
+        .product(name: "XCTestDynamicOverlay", package: "xctest-dynamic-overlay"),
       ]
     ),
     .testTarget(
@@ -37,7 +37,7 @@ let package = Package(
       name: "CasePathsMacros",
       dependencies: [
         .product(name: "SwiftSyntaxMacros", package: "swift-syntax"),
-        .product(name: "SwiftCompilerPlugin", package: "swift-syntax")
+        .product(name: "SwiftCompilerPlugin", package: "swift-syntax"),
       ]
     ),
     .testTarget(

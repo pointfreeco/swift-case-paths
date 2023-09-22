@@ -14,8 +14,7 @@ public struct CasePathMacro: ExpressionMacro {
 
     var path = ""
     for (offset, component) in argument.components.enumerated() {
-      if
-        offset.isMultiple(of: 2),
+      if offset.isMultiple(of: 2),
         component.period != nil,
         let identifier = component.component.as(KeyPathPropertyComponentSyntax.self)?.declName
       {

@@ -22,6 +22,18 @@ public func ~= <Root, Value>(pattern: CasePath<Root, Value>, value: Root) -> Boo
 ///   values. Its behavior is otherwise undefined.
 /// - Parameter embed: An embed function.
 /// - Returns: A case path.
+@available(
+  iOS, deprecated: 9999, message: "Use '#casePath' with a '@CasePathable' enum instead"
+)
+@available(
+  macOS, deprecated: 9999, message: "Use '#casePath' with a '@CasePathable' enum instead"
+)
+@available(
+  tvOS, deprecated: 9999, message: "Use '#casePath' with a '@CasePathable' enum instead"
+)
+@available(
+  watchOS, deprecated: 9999, message: "Use '#casePath' with a '@CasePathable' enum instead"
+)
 public prefix func / <Root, Value>(
   embed: @escaping (Value) -> Root
 ) -> CasePath<Root, Value> {
@@ -34,6 +46,18 @@ public prefix func / <Root, Value>(
 ///   values. Its behavior is otherwise undefined.
 /// - Parameter embed: An embed function.
 /// - Returns: A case path.
+@available(
+  iOS, deprecated: 9999, message: "Use '#casePath' with a '@CasePathable' enum instead"
+)
+@available(
+  macOS, deprecated: 9999, message: "Use '#casePath' with a '@CasePathable' enum instead"
+)
+@available(
+  tvOS, deprecated: 9999, message: "Use '#casePath' with a '@CasePathable' enum instead"
+)
+@available(
+  watchOS, deprecated: 9999, message: "Use '#casePath' with a '@CasePathable' enum instead"
+)
 public prefix func / <Root, Value>(
   embed: @escaping (Value) -> Root?
 ) -> CasePath<Root?, Value> {
@@ -46,6 +70,18 @@ public prefix func / <Root, Value>(
 ///   values. Its behavior is otherwise undefined.
 /// - Parameter root: A case with no an associated value.
 /// - Returns: A void case path.
+@available(
+  iOS, deprecated: 9999, message: "Use '#casePath' with a '@CasePathable' enum instead"
+)
+@available(
+  macOS, deprecated: 9999, message: "Use '#casePath' with a '@CasePathable' enum instead"
+)
+@available(
+  tvOS, deprecated: 9999, message: "Use '#casePath' with a '@CasePathable' enum instead"
+)
+@available(
+  watchOS, deprecated: 9999, message: "Use '#casePath' with a '@CasePathable' enum instead"
+)
 public prefix func / <Root>(
   root: Root
 ) -> CasePath<Root, Void> {
@@ -58,6 +94,18 @@ public prefix func / <Root>(
 ///   values. Its behavior is otherwise undefined.
 /// - Parameter root: A case with no an associated value.
 /// - Returns: A void case path.
+@available(
+  iOS, deprecated: 9999, message: "Use '#casePath' with a '@CasePathable' enum instead"
+)
+@available(
+  macOS, deprecated: 9999, message: "Use '#casePath' with a '@CasePathable' enum instead"
+)
+@available(
+  tvOS, deprecated: 9999, message: "Use '#casePath' with a '@CasePathable' enum instead"
+)
+@available(
+  watchOS, deprecated: 9999, message: "Use '#casePath' with a '@CasePathable' enum instead"
+)
 public prefix func / <Root>(
   root: Root?
 ) -> CasePath<Root?, Void> {
@@ -68,6 +116,18 @@ public prefix func / <Root>(
 ///
 /// - Parameter type: A type for which to return the identity case path.
 /// - Returns: An identity case path.
+@available(
+  iOS, deprecated: 9999, message: "Use '#casePath' with a '@CasePathable' enum instead"
+)
+@available(
+  macOS, deprecated: 9999, message: "Use '#casePath' with a '@CasePathable' enum instead"
+)
+@available(
+  tvOS, deprecated: 9999, message: "Use '#casePath' with a '@CasePathable' enum instead"
+)
+@available(
+  watchOS, deprecated: 9999, message: "Use '#casePath' with a '@CasePathable' enum instead"
+)
 public prefix func / <Root>(
   type: Root.Type
 ) -> CasePath<Root, Root> {
@@ -79,6 +139,18 @@ public prefix func / <Root>(
 ///
 /// - Parameter path: A case path to return.
 /// - Returns: The case path.
+@available(
+  iOS, deprecated: 9999, message: "Use '#casePath' with a '@CasePathable' enum instead"
+)
+@available(
+  macOS, deprecated: 9999, message: "Use '#casePath' with a '@CasePathable' enum instead"
+)
+@available(
+  tvOS, deprecated: 9999, message: "Use '#casePath' with a '@CasePathable' enum instead"
+)
+@available(
+  watchOS, deprecated: 9999, message: "Use '#casePath' with a '@CasePathable' enum instead"
+)
 public prefix func / <Root, Value>(
   path: CasePath<Root, Value>
 ) -> CasePath<Root, Value> {
@@ -101,6 +173,18 @@ public prefix func / <Root, Value>(
 ///   otherwise undefined.
 /// - Parameter embed: An enum case initializer.
 /// - Returns: A function that can attempt to extract associated values from an enum.
+@available(
+  iOS, deprecated: 9999, message: "Use '#casePath' with a '@CasePathable' enum instead"
+)
+@available(
+  macOS, deprecated: 9999, message: "Use '#casePath' with a '@CasePathable' enum instead"
+)
+@available(
+  tvOS, deprecated: 9999, message: "Use '#casePath' with a '@CasePathable' enum instead"
+)
+@available(
+  watchOS, deprecated: 9999, message: "Use '#casePath' with a '@CasePathable' enum instead"
+)
 @_disfavoredOverload
 public prefix func / <Root, Value>(
   embed: @escaping (Value) -> Root
@@ -124,6 +208,18 @@ public prefix func / <Root, Value>(
 ///   otherwise undefined.
 /// - Parameter embed: An enum case initializer.
 /// - Returns: A function that can attempt to extract associated values from an enum.
+@available(
+  iOS, deprecated: 9999, message: "Use '#casePath' with a '@CasePathable' enum instead"
+)
+@available(
+  macOS, deprecated: 9999, message: "Use '#casePath' with a '@CasePathable' enum instead"
+)
+@available(
+  tvOS, deprecated: 9999, message: "Use '#casePath' with a '@CasePathable' enum instead"
+)
+@available(
+  watchOS, deprecated: 9999, message: "Use '#casePath' with a '@CasePathable' enum instead"
+)
 @_disfavoredOverload
 public prefix func / <Root, Value>(
   embed: @escaping (Value) -> Root?
@@ -137,6 +233,18 @@ public prefix func / <Root, Value>(
 ///   values. Its behavior is otherwise undefined.
 /// - Parameter root: A case with no an associated value.
 /// - Returns: A void case path.
+@available(
+  iOS, deprecated: 9999, message: "Use '#casePath' with a '@CasePathable' enum instead"
+)
+@available(
+  macOS, deprecated: 9999, message: "Use '#casePath' with a '@CasePathable' enum instead"
+)
+@available(
+  tvOS, deprecated: 9999, message: "Use '#casePath' with a '@CasePathable' enum instead"
+)
+@available(
+  watchOS, deprecated: 9999, message: "Use '#casePath' with a '@CasePathable' enum instead"
+)
 @_disfavoredOverload
 public prefix func / <Root>(
   root: Root
@@ -150,6 +258,18 @@ public prefix func / <Root>(
 ///   values. Its behavior is otherwise undefined.
 /// - Parameter root: A case with no an associated value.
 /// - Returns: A void case path.
+@available(
+  iOS, deprecated: 9999, message: "Use '#casePath' with a '@CasePathable' enum instead"
+)
+@available(
+  macOS, deprecated: 9999, message: "Use '#casePath' with a '@CasePathable' enum instead"
+)
+@available(
+  tvOS, deprecated: 9999, message: "Use '#casePath' with a '@CasePathable' enum instead"
+)
+@available(
+  watchOS, deprecated: 9999, message: "Use '#casePath' with a '@CasePathable' enum instead"
+)
 @_disfavoredOverload
 public prefix func / <Root>(
   root: Root
@@ -161,7 +281,7 @@ precedencegroup CasePathCompositionPrecedence {
   associativity: left
 }
 
-infix operator ..: CasePathCompositionPrecedence
+infix operator .. : CasePathCompositionPrecedence
 
 extension CasePath {
   /// Returns a new case path created by appending the given case path to this one.
@@ -173,6 +293,38 @@ extension CasePath {
   ///   - lhs: A case path from a root to a value.
   ///   - rhs: A case path from the first case path's value to some other appended value.
   /// - Returns: A new case path from the first case path's root to the second case path's value.
+  @available(
+    iOS,
+    deprecated: 9999,
+    message:
+      """
+      Use '#casePath' with optional-chained '@CasePathable' enums instead, or 'appending(path:)'
+      """
+  )
+  @available(
+    macOS,
+    deprecated: 9999,
+    message:
+      """
+      Use '#casePath' with optional-chained '@CasePathable' enums instead, or 'appending(path:)'
+      """
+  )
+  @available(
+    tvOS,
+    deprecated: 9999,
+    message:
+      """
+      Use '#casePath' with optional-chained '@CasePathable' enums instead, or 'appending(path:)'
+      """
+  )
+  @available(
+    watchOS,
+    deprecated: 9999,
+    message:
+      """
+      Use '#casePath' with optional-chained '@CasePathable' enums instead, or 'appending(path:)'
+      """
+  )
   public static func .. <AppendedValue>(
     lhs: CasePath,
     rhs: CasePath<Value, AppendedValue>
@@ -187,6 +339,38 @@ extension CasePath {
   ///   - rhs: An embed function from an appended value.
   /// - Returns: A new case path from the first case path's root to the second embed function's
   ///   value.
+  @available(
+    iOS,
+    deprecated: 9999,
+    message:
+      """
+      Use '#casePath' with optional-chained '@CasePathable' enums instead, or 'appending(path:)'
+      """
+  )
+  @available(
+    macOS,
+    deprecated: 9999,
+    message:
+      """
+      Use '#casePath' with optional-chained '@CasePathable' enums instead, or 'appending(path:)'
+      """
+  )
+  @available(
+    tvOS,
+    deprecated: 9999,
+    message:
+      """
+      Use '#casePath' with optional-chained '@CasePathable' enums instead, or 'appending(path:)'
+      """
+  )
+  @available(
+    watchOS,
+    deprecated: 9999,
+    message:
+      """
+      Use '#casePath' with optional-chained '@CasePathable' enums instead, or 'appending(path:)'
+      """
+  )
   public static func .. <AppendedValue>(
     lhs: CasePath,
     rhs: @escaping (AppendedValue) -> Value
@@ -210,6 +394,18 @@ extension CasePath {
 ///   - rhs: An embed function from some other appended value to the extract function's value.
 /// - Returns: A new extract function from the first extract function's root to the second embed
 ///   function's appended value.
+@available(
+  iOS, deprecated: 9999, message: "Use '@CasePathable' enum properties instead"
+)
+@available(
+  macOS, deprecated: 9999, message: "Use '@CasePathable' enum properties instead"
+)
+@available(
+  tvOS, deprecated: 9999, message: "Use '@CasePathable' enum properties instead"
+)
+@available(
+  watchOS, deprecated: 9999, message: "Use '@CasePathable' enum properties instead"
+)
 public func .. <Root, Value, AppendedValue>(
   lhs: @escaping (Root) -> Value?,
   rhs: @escaping (AppendedValue) -> Value

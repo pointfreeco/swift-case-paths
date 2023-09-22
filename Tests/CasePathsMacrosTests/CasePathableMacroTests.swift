@@ -5,8 +5,8 @@ import XCTest
 
 final class CasePathableMacroTests: XCTestCase {
   override func invokeTest() {
-    MacroTesting.withMacroTesting(
-      //isRecording: true,
+    withMacroTesting(
+      // isRecording: true,
       macros: [CasePathableMacro.self]
     ) {
       super.invokeTest()
@@ -102,6 +102,59 @@ final class CasePathableMacroTests: XCTestCase {
     }
   }
 
+  func testCasePathable_ElementList() {
+    assertMacro {
+      """
+      @CasePathable public enum Foo {
+        case bar(Int), baz(String)
+      }
+      """
+    } matches: {
+      #"""
+      public enum Foo {
+        case bar(Int), baz(String)
+
+        public struct AllCasePaths {
+          public var bar: CasePaths.CasePath<Foo, Int> {
+            CasePaths.CasePath<Foo, Int> ._$init(
+              embed: {
+                .bar($0)
+              },
+              extract: {
+                guard case let .bar(v0) = $0 else {
+                  return nil
+                }
+                return v0
+              },
+              keyPath: \.bar
+            )
+          }
+          public var baz: CasePaths.CasePath<Foo, String> {
+            CasePaths.CasePath<Foo, String> ._$init(
+              embed: {
+                .baz($0)
+              },
+              extract: {
+                guard case let .baz(v0) = $0 else {
+                  return nil
+                }
+                return v0
+              },
+              keyPath: \.baz
+            )
+          }
+        }
+        public static var allCasePaths: AllCasePaths { AllCasePaths() }
+        public var bar: Int? { Self.allCasePaths.bar.extract(from: self) }
+        public var baz: String? { Self.allCasePaths.baz.extract(from: self) }
+      }
+
+      extension Foo: CasePaths.CasePathable {
+      }
+      """#
+    }
+  }
+
   func testCasePathable_AccessControl() {
     assertMacro {
       """
@@ -189,7 +242,7 @@ final class CasePathableMacroTests: XCTestCase {
         case bar(Int)
         case bar(int: Int)
              ┬──
-             ╰─ 🛑 @CasePathable macro does not allow duplicate case name 'bar'
+             ╰─ 🛑 '@CasePathable' cannot be applied to overloaded case name 'bar'
       }
       """
     }
@@ -205,7 +258,42 @@ final class CasePathableMacroTests: XCTestCase {
       """
       @CasePathable struct Foo {
                     ┬─────
-                    ╰─ 🛑 @CasePathable macro requires 'Foo' to be an enum
+                    ╰─ 🛑 '@CasePathable' cannot be applied to struct type 'Foo'
+      }
+      """
+    }
+  }
+
+  func testRedundantConformances() {
+    assertMacro {
+      """
+      @CasePathable enum Foo: CasePathable {
+      }
+      """
+    } matches: {
+      """
+      enum Foo: CasePathable {
+
+          struct AllCasePaths {
+
+          }
+          static var allCasePaths: AllCasePaths { AllCasePaths() }
+      }
+      """
+    }
+    assertMacro {
+      """
+      @CasePathable enum Foo: CasePaths.CasePathable {
+      }
+      """
+    } matches: {
+      """
+      enum Foo: CasePaths.CasePathable {
+
+          struct AllCasePaths {
+
+          }
+          static var allCasePaths: AllCasePaths { AllCasePaths() }
       }
       """
     }
