@@ -4,7 +4,7 @@ Case paths bring the power and ergonomics of key paths to enums.
 
 ## Overview
 
-TODO
+<!-- TODO: Copy over README -->
 
 ## Topics
 
@@ -21,3 +21,7 @@ TODO
 
 - ``XCTUnwrap(_:case:_:file:line:)``
 - ``XCTModify(_:case:_:_:file:line:)``
+
+### Deprecated interfaces
+
+- <doc:Deprecations>

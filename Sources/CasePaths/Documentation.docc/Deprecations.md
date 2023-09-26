@@ -25,7 +25,7 @@ Avoid using deprecated APIs in your app. See the replacement that you should use
 
 ### Operators
 
-<!-- TODO: Can't reference `/` or `..` yet -->
+<!-- TODO: Can't reference `/` yet -->
 <!-- https://github.com/apple/swift-docc/issues/714 -->
 
 - ``CasePath/..(_:_:)-8selm``

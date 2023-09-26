@@ -15,7 +15,3 @@
 ### Matching cases
 
 - ``~=(_:_:)``
-
-### Deprecated interfaces
-
-- <doc:Deprecated>
