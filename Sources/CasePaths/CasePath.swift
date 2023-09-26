@@ -20,42 +20,6 @@ public struct CasePath<Root, Value> {
     self.keyPaths = keyPaths
   }
 
-  /// Creates a case path with a pair of functions.
-  ///
-  /// - Parameters:
-  ///   - embed: A function that always succeeds in embedding a value in a root.
-  ///   - extract: A function that can optionally fail in extracting a value from a root.
-  @available(
-    iOS, deprecated: 9999, message: "Use '#casePath' with a '@CasePathable' enum instead"
-  )
-  @available(
-    macOS, deprecated: 9999, message: "Use '#casePath' with a '@CasePathable' enum instead"
-  )
-  @available(
-    tvOS, deprecated: 9999, message: "Use '#casePath' with a '@CasePathable' enum instead"
-  )
-  @available(
-    watchOS, deprecated: 9999, message: "Use '#casePath' with a '@CasePathable' enum instead"
-  )
-  public init(
-    embed: @escaping (Value) -> Root,
-    extract: @escaping (Root) -> Value?
-  ) {
-    self.init(
-      embed: {
-        lock.lock()
-        defer { lock.unlock() }
-        return embed($0)
-      },
-      extract: {
-        lock.lock()
-        defer { lock.unlock() }
-        return extract($0)
-      },
-      keyPaths: nil
-    )
-  }
-
   public static func _$init(
     embed: @escaping (Value) -> Root,
     extract: @escaping (Root) -> Value?,
@@ -100,22 +64,6 @@ public struct CasePath<Root, Value> {
     root = self.embed(value)
     return result
   }
-
-  /// Returns a new case path created by appending the given case path to this one.
-  ///
-  /// Use this method to extend this case path to the value type of another case path.
-  ///
-  /// - Parameter path: The case path to append.
-  /// - Returns: A case path from the root of this case path to the value type of `path`.
-  public func appending<AppendedValue>(
-    path: CasePath<Value, AppendedValue>
-  ) -> CasePath<Root, AppendedValue> {
-    CasePath<Root, AppendedValue>(
-      embed: { self.embed(path.embed($0)) },
-      extract: { self.extract(from: $0).flatMap(path.extract) },
-      keyPaths: self.keyPaths.flatMap { keyPaths in path.keyPaths.map { keyPaths + $0 } }
-    )
-  }
 }
 
 struct ExtractionFailed: Error {}
@@ -143,5 +91,3 @@ extension AnyKeyPath {
     String(self.debugDescription.dropFirst("\\\(Self.rootType).".count))
   }
 }
-
-private let lock = NSRecursiveLock()

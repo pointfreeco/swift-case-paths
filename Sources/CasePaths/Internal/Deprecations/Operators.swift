@@ -286,8 +286,8 @@ infix operator .. : CasePathCompositionPrecedence
 extension CasePath {
   /// Returns a new case path created by appending the given case path to this one.
   ///
-  /// The operator version of ``appending(path:)``. Use this method to extend this case path to the
-  /// value type of another case path.
+  /// The operator version of ``appending(path:)-55474``. Use this method to extend this case path
+  /// to the value type of another case path.
   ///
   /// - Parameters:
   ///   - lhs: A case path from a root to a value.

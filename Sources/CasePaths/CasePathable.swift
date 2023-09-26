@@ -44,6 +44,33 @@ public protocol CasePathable {
   static var allCasePaths: AllCasePaths { get }
 }
 
+extension CasePathable {
+  /// Extracts a value from `self` using a case path.
+  ///
+  /// ```swift
+  /// guard let value = enum[casePath: casePath]
+  /// else { /* ... */ }
+  /// ```
+  public subscript<Value>(casePath casePath: CasePath<Self, Value>) -> Value? {
+    casePath.extract(from: self)
+  }
+
+  /// Embeds a value into `self` using a case path.
+  ///
+  /// ```swift
+  /// enum[casePath: casePath] = newValue
+  /// ```
+  @_disfavoredOverload
+  public subscript<Value>(casePath casePath: CasePath<Self, Value>) -> Value {
+    @available(*, unavailable)
+    get { fatalError() }
+    set {
+      guard casePath ~= self else { return }
+      self = casePath.embed(newValue)
+    }
+  }
+}
+
 extension CasePath where Root: CasePathable {
   // NB: Invoked by `#casePath`
   public static func _$case(_ keyPath: KeyPath<Root.AllCasePaths, Self>) -> Self {
@@ -63,6 +90,12 @@ extension CasePath where Root: CasePathable, Root == Value {
 }
 
 extension CasePath where Root: CasePathable, Value: CasePathable {
+  /// Returns a new case path created by appending the given case path to this one.
+  ///
+  /// Use this method to extend this case path to the value type of another case path.
+  ///
+  /// - Parameter path: The case path to append.
+  /// - Returns: A case path from the root of this case path to the value type of `path`.
   public func appending<AppendedValue>(
     path: CasePath<Value, AppendedValue>
   ) -> CasePath<Root, AppendedValue> {

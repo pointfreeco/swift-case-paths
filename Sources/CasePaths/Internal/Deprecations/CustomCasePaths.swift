@@ -31,8 +31,9 @@ extension CasePath where Root == Value {
 
 extension CasePath where Root: _OptionalProtocol, Value == Root.Wrapped {
   /// The optional case path: a case path that unwraps an optional value.
+  @available(*, deprecated)
   public static var some: CasePath {
-    .init(embed: Root.init, extract: { $0.optional })
+    .init(embed: Root.init, extract: { $0._wrapped })
   }
 }
 
@@ -41,6 +42,7 @@ extension CasePath where Root == Void {
   ///
   /// - Parameter value: A constant value.
   /// - Returns: A case path from `()` to `value`.
+  @available(*, deprecated)
   public static func constant(_ value: Value) -> CasePath {
     .init(
       embed: { _ in () },
@@ -52,6 +54,7 @@ extension CasePath where Root == Void {
 extension CasePath where Value == Never {
   /// The never case path for `Root`: a case path that always fails to extract the a value of the
   /// uninhabited `Never` type.
+  @available(*, deprecated)
   public static var never: CasePath {
     func absurd<A>(_ never: Never) -> A {}
     return .init(
@@ -64,6 +67,7 @@ extension CasePath where Value == Never {
 extension CasePath where Value: RawRepresentable, Root == Value.RawValue {
   /// Returns a case path for `RawRepresentable` types: a case path that attempts to extract a value
   /// that can be represented by a raw value from a raw value.
+  @available(*, deprecated)
   public static var rawValue: CasePath {
     .init(
       embed: { $0.rawValue },
@@ -75,6 +79,7 @@ extension CasePath where Value: RawRepresentable, Root == Value.RawValue {
 extension CasePath where Value: LosslessStringConvertible, Root == String {
   /// Returns a case path for `LosslessStringConvertible` types: a case path that attempts to
   /// extract a value that can be represented by a lossless string from a string.
+  @available(*, deprecated)
   public static var description: CasePath {
     .init(
       embed: { $0.description },
@@ -85,10 +90,10 @@ extension CasePath where Value: LosslessStringConvertible, Root == String {
 
 public protocol _OptionalProtocol {
   associatedtype Wrapped
-  var optional: Wrapped? { get }
+  var _wrapped: Wrapped? { get }
   init(_ some: Wrapped)
 }
 
 extension Optional: _OptionalProtocol {
-  public var optional: Wrapped? { self }
+  public var _wrapped: Wrapped? { self }
 }
