@@ -18,8 +18,8 @@ public func ~= <Root, Value>(pattern: CasePath<Root, Value>, value: Root) -> Boo
 
 /// Returns a case path for the given embed function.
 ///
-/// - Note: This operator is only intended to be used with enum cases that have no associated
-///   values. Its behavior is otherwise undefined.
+/// - Note: This operator is only intended to be used with enum case initializers. Its behavior is
+///   otherwise undefined.
 /// - Parameter embed: An embed function.
 /// - Returns: A case path.
 public prefix func / <Root, Value>(
@@ -30,8 +30,8 @@ public prefix func / <Root, Value>(
 
 /// Returns a case path for the given embed function.
 ///
-/// - Note: This operator is only intended to be used with enum cases that have no associated
-///   values. Its behavior is otherwise undefined.
+/// - Note: This operator is only intended to be used with enum case initializers. Its behavior is
+///   otherwise undefined.
 /// - Parameter embed: An embed function.
 /// - Returns: A case path.
 public prefix func / <Root, Value>(
