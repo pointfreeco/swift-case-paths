@@ -1,25 +1,6 @@
 extension CasePath where Root == Value {
   /// The identity case path for `Root`: a case path that always successfully extracts a root value.
-  @available(
-    iOS,
-    deprecated: 9999,
-    message: "Use '#casePath(\\.self)' with a '@CasePathable' enum instead"
-  )
-  @available(
-    macOS,
-    deprecated: 9999,
-    message: "Use '#casePath(\\.self)' with a '@CasePathable' enum instead"
-  )
-  @available(
-    tvOS,
-    deprecated: 9999,
-    message: "Use '#casePath(\\.self)' with a '@CasePathable' enum instead"
-  )
-  @available(
-    watchOS,
-    deprecated: 9999,
-    message: "Use '#casePath(\\.self)' with a '@CasePathable' enum instead"
-  )
+  @available(*, deprecated, message: "Use '#casePath(\\.self)' with a '@CasePathable' enum instead")
   public static var `self`: CasePath {
     .init(
       embed: { $0 },

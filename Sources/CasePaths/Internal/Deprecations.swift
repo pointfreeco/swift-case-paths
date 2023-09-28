@@ -8,18 +8,7 @@ extension CasePath {
   /// - Parameters:
   ///   - embed: A function that always succeeds in embedding a value in a root.
   ///   - extract: A function that can optionally fail in extracting a value from a root.
-  @available(
-    iOS, deprecated: 9999, message: "Use '#casePath' with a '@CasePathable' enum instead"
-  )
-  @available(
-    macOS, deprecated: 9999, message: "Use '#casePath' with a '@CasePathable' enum instead"
-  )
-  @available(
-    tvOS, deprecated: 9999, message: "Use '#casePath' with a '@CasePathable' enum instead"
-  )
-  @available(
-    watchOS, deprecated: 9999, message: "Use '#casePath' with a '@CasePathable' enum instead"
-  )
+  @available(*, deprecated, message: "Use '#casePath' with a '@CasePathable' enum instead")
   public init(
     embed: @escaping (Value) -> Root,
     extract: @escaping (Root) -> Value?
@@ -45,38 +34,7 @@ extension CasePath {
   ///
   /// - Parameter path: The case path to append.
   /// - Returns: A case path from the root of this case path to the value type of `path`.
-  @available(
-    iOS,
-    deprecated: 9999,
-    message:
-      """
-      Use '#casePath' with optional-chained '@CasePathable' enums instead, or 'appending(path:)'
-      """
-  )
-  @available(
-    macOS,
-    deprecated: 9999,
-    message:
-      """
-      Use '#casePath' with optional-chained '@CasePathable' enums instead, or 'appending(path:)'
-      """
-  )
-  @available(
-    tvOS,
-    deprecated: 9999,
-    message:
-      """
-      Use '#casePath' with optional-chained '@CasePathable' enums instead, or 'appending(path:)'
-      """
-  )
-  @available(
-    watchOS,
-    deprecated: 9999,
-    message:
-      """
-      Use '#casePath' with optional-chained '@CasePathable' enums instead, or 'appending(path:)'
-      """
-  )
+  @available(*, deprecated, message: "Use '#casePath' with a '@CasePathable' enum instead")
   public func appending<AppendedValue>(
     path: CasePath<Value, AppendedValue>
   ) -> CasePath<Root, AppendedValue> {
@@ -89,8 +47,8 @@ extension CasePath {
 
   /// Returns a case path for the given embed function.
   ///
-  /// - Note: This operator is only intended to be used with enum cases that have no associated
-  ///   values. Its behavior is otherwise undefined.
+  /// - Note: This operator is only intended to be used with enum case initializers. Its behavior is
+  ///   otherwise undefined.
   /// - Parameter embed: An embed function.
   /// - Returns: A case path.
   @available(*, deprecated, message: "Use '#casePath' with a '@CasePathable' enum instead")
