@@ -1,8 +1,8 @@
 extension CasePath {
   /// Returns a case path for the given embed function.
   ///
-  /// - Note: This operator is only intended to be used with enum cases that have no associated
-  ///   values. Its behavior is otherwise undefined.
+  /// - Note: This operator is only intended to be used with enum case initializers. Its behavior is
+  ///   otherwise undefined.
   /// - Parameter embed: An embed function.
   /// - Returns: A case path.
   public init(_ embed: @escaping (Value) -> Root) {
