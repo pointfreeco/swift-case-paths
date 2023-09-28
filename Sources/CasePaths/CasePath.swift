@@ -66,6 +66,12 @@ public struct CasePath<Root, Value> {
   }
 }
 
+extension CasePath where Value == Void {
+  public func embed() -> Root {
+    self.embed(())
+  }
+}
+
 struct ExtractionFailed: Error {}
 
 #if canImport(_Concurrency) && compiler(>=5.5.2)
