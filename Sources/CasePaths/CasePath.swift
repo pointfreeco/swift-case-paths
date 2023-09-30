@@ -22,3 +22,26 @@ public struct Case<Root, Value> {
     )
   }
 }
+
+
+public typealias _CasePath<Root: CasePathable, Value> = KeyPath<Cases<Root>, Cases<Value>>
+
+@dynamicMemberLookup
+public struct Cases<Root> {}
+
+extension Cases where Root: CasePathable {
+  public subscript<Value>(dynamicMember keyPath: CasePath<Root, Value>) -> Cases<Value> {
+    Cases<Value>()
+  }
+}
+
+@CasePathable enum Food { case chicken(Int) }
+
+func f<R, V>(_ cp: _CasePath<R, V>) -> _CasePath<R, V> {
+  cp
+}
+
+func g() {
+  let _: _CasePath<Food, Int> = f(\.chicken)
+  let _: _CasePath<Food, Food> = f(\.self)
+}

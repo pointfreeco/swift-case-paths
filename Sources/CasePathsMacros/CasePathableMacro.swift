@@ -138,7 +138,8 @@ extension CasePathableMacro: MemberMacro {
 
     return [
       """
-      \(access)struct Cases {
+      \(access)struct Cases: _Self {
+      typealias Root = \(enumName)
       \(raw: casePaths.map(\.description).joined(separator: "\n"))
       }
       \(access)static var cases: Cases { Cases() }

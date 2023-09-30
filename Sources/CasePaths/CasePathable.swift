@@ -1,5 +1,16 @@
+public protocol _Self<Root> {
+  associatedtype Root
+  var some: Case<Root, Root> { get }
+}
+
+extension _Self {
+  public var some: Case<Root, Root> {
+    Case(embed: { $0 }, extract: { $0 })
+  }
+}
+
 public protocol CasePathable {
-  associatedtype Cases
+  associatedtype Cases: _Self<Self>
   static var cases: Cases { get }
 }
 
