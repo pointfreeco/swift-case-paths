@@ -2,6 +2,8 @@ import SwiftUI
 
 // TODO: Better name? `CasePathLookup`?
 // TODO: Should this alias be named `CasePath` and the `embed`/`extract` pair be something else?
+//       Much bigger change, but if we rename `AllCasePaths`, we could potentially get rid of
+//       `#casePath(\Enum.ok)` and `#casePath(\.ok)` and simply have `\Enum.Cases.ok` and `\.ok`...
 public typealias DynamicCasePath<Root: CasePathable, Value> = KeyPath<
   Root.AllCasePaths, CasePath<Root, Value>
 >
