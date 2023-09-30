@@ -14,9 +14,6 @@ extension Binding where Value: CasePathable {
       get: { self.wrappedValue[keyPath: keyPath] },
       set: { newValue, transaction in
         guard let newValue else { return }
-
-        let x = keyPath(newValue)
-
         self.transaction(transaction).wrappedValue[keyPath: keyPath] = newValue
       }
     )
