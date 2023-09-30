@@ -47,15 +47,15 @@ public func XCTUnwrap<Enum, Case>(
 ///   - casePath: A case path that can extract and embed the associated value of a particular case.
 ///   - message: An optional description of a failure.
 ///   - body: A closure that can modify the associated value of the given case.
-public func XCTModify<Enum, Case>(
+public func XCTModify<Enum, AssociatedValue>(
   _ enum: inout Enum,
-  case casePath: CasePath<Enum, Case>,
+  case casePath: Case<Enum, AssociatedValue>,
   _ message: @autoclosure () -> String = "",
-  _ body: (inout Case) throws -> Void,
+  _ body: (inout AssociatedValue) throws -> Void,
   file: StaticString = #file,
   line: UInt = #line
 ) {
-  guard var value = casePath.extract(from: `enum`)
+  guard var value = casePath.extract(`enum`)
   else {
     #if canImport(ObjectiveC)
       _ = XCTCurrentTestCase?.perform(Selector(("setContinueAfterFailure:")), with: false)
@@ -63,7 +63,7 @@ public func XCTModify<Enum, Case>(
     let message = message()
     XCTFail(
       """
-      XCTModify failed: expected to extract value of type "\(typeName(Case.self))" from \
+      XCTModify failed: expected to extract value of type "\(typeName(AssociatedValue.self))" from \
       "\(typeName(Enum.self))"\
       \(message.isEmpty ? "" : " - " + message) …
 
@@ -89,8 +89,10 @@ public func XCTModify<Enum, Case>(
   {
     XCTFail(
       """
-      XCTModify failed: expected "\(typeName(Case.self))" value to be modified but it was unchanged.
-      """)
+      XCTModify failed: expected "\(typeName(AssociatedValue.self))" value to be modified but it \
+      was unchanged.
+      """
+    )
   }
 
   `enum` = casePath.embed(value)

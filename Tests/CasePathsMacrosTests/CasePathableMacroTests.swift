@@ -31,9 +31,9 @@ final class CasePathableMacroTests: XCTestCase {
         case fizz(buzz: String)
         case fizzier(Int, buzzier: String)
 
-        struct AllCasePaths {
-          var bar: CasePaths.CasePath<Foo, Void> {
-            CasePaths.CasePath<Foo, Void> ._$init(
+        struct Cases {
+          var bar: CasePaths.Case<Foo, Void> {
+            CasePaths.Case<Foo, Void> ._$init(
               embed: {
                 .bar
               },
@@ -46,8 +46,8 @@ final class CasePathableMacroTests: XCTestCase {
               keyPath: \.bar
             )
           }
-          var baz: CasePaths.CasePath<Foo, Int> {
-            CasePaths.CasePath<Foo, Int> ._$init(
+          var baz: CasePaths.Case<Foo, Int> {
+            CasePaths.Case<Foo, Int> ._$init(
               embed: {
                 .baz($0)
               },
@@ -60,8 +60,8 @@ final class CasePathableMacroTests: XCTestCase {
               keyPath: \.baz
             )
           }
-          var fizz: CasePaths.CasePath<Foo, String> {
-            CasePaths.CasePath<Foo, String> ._$init(
+          var fizz: CasePaths.Case<Foo, String> {
+            CasePaths.Case<Foo, String> ._$init(
               embed: {
                 .fizz(buzz: $0)
               },
@@ -74,8 +74,8 @@ final class CasePathableMacroTests: XCTestCase {
               keyPath: \.fizz
             )
           }
-          var fizzier: CasePaths.CasePath<Foo, (Int, buzzier: String)> {
-            CasePaths.CasePath<Foo, (Int, buzzier: String)> ._$init(
+          var fizzier: CasePaths.Case<Foo, (Int, buzzier: String)> {
+            CasePaths.Case<Foo, (Int, buzzier: String)> ._$init(
               embed: {
                 .fizzier($0, buzzier: $1)
               },
@@ -89,11 +89,11 @@ final class CasePathableMacroTests: XCTestCase {
             )
           }
         }
-        static var allCasePaths: AllCasePaths { AllCasePaths() }
-        var bar: Void? { Self.allCasePaths.bar.extract(from: self) }
-        var baz: Int? { Self.allCasePaths.baz.extract(from: self) }
-        var fizz: String? { Self.allCasePaths.fizz.extract(from: self) }
-        var fizzier: (Int, buzzier: String)? { Self.allCasePaths.fizzier.extract(from: self) }
+        static var cases: Cases { Cases() }
+        var bar: Void? { Self.cases.bar.extract(from: self) }
+        var baz: Int? { Self.cases.baz.extract(from: self) }
+        var fizz: String? { Self.cases.fizz.extract(from: self) }
+        var fizzier: (Int, buzzier: String)? { Self.cases.fizzier.extract(from: self) }
       }
 
       extension Foo: CasePaths.CasePathable {
@@ -114,9 +114,9 @@ final class CasePathableMacroTests: XCTestCase {
       public enum Foo {
         case bar(Int), baz(String)
 
-        public struct AllCasePaths {
-          public var bar: CasePaths.CasePath<Foo, Int> {
-            CasePaths.CasePath<Foo, Int> ._$init(
+        public struct Cases {
+          public var bar: CasePaths.Case<Foo, Int> {
+            CasePaths.Case<Foo, Int> ._$init(
               embed: {
                 .bar($0)
               },
@@ -129,8 +129,8 @@ final class CasePathableMacroTests: XCTestCase {
               keyPath: \.bar
             )
           }
-          public var baz: CasePaths.CasePath<Foo, String> {
-            CasePaths.CasePath<Foo, String> ._$init(
+          public var baz: CasePaths.Case<Foo, String> {
+            CasePaths.Case<Foo, String> ._$init(
               embed: {
                 .baz($0)
               },
@@ -144,9 +144,9 @@ final class CasePathableMacroTests: XCTestCase {
             )
           }
         }
-        public static var allCasePaths: AllCasePaths { AllCasePaths() }
-        public var bar: Int? { Self.allCasePaths.bar.extract(from: self) }
-        public var baz: String? { Self.allCasePaths.baz.extract(from: self) }
+        public static var cases: Cases { Cases() }
+        public var bar: Int? { Self.cases.bar.extract(from: self) }
+        public var baz: String? { Self.cases.baz.extract(from: self) }
       }
 
       extension Foo: CasePaths.CasePathable {
@@ -167,9 +167,9 @@ final class CasePathableMacroTests: XCTestCase {
       public enum Foo {
         case bar(Int)
 
-        public struct AllCasePaths {
-          public var bar: CasePaths.CasePath<Foo, Int> {
-            CasePaths.CasePath<Foo, Int> ._$init(
+        public struct Cases {
+          public var bar: CasePaths.Case<Foo, Int> {
+            CasePaths.Case<Foo, Int> ._$init(
               embed: {
                 .bar($0)
               },
@@ -183,8 +183,8 @@ final class CasePathableMacroTests: XCTestCase {
             )
           }
         }
-        public static var allCasePaths: AllCasePaths { AllCasePaths() }
-        public var bar: Int? { Self.allCasePaths.bar.extract(from: self) }
+        public static var cases: Cases { Cases() }
+        public var bar: Int? { Self.cases.bar.extract(from: self) }
       }
 
       extension Foo: CasePaths.CasePathable {
@@ -202,9 +202,9 @@ final class CasePathableMacroTests: XCTestCase {
       private enum Foo {
         case bar(Int)
 
-        struct AllCasePaths {
-          var bar: CasePaths.CasePath<Foo, Int> {
-            CasePaths.CasePath<Foo, Int> ._$init(
+        struct Cases {
+          var bar: CasePaths.Case<Foo, Int> {
+            CasePaths.Case<Foo, Int> ._$init(
               embed: {
                 .bar($0)
               },
@@ -218,8 +218,8 @@ final class CasePathableMacroTests: XCTestCase {
             )
           }
         }
-        static var allCasePaths: AllCasePaths { AllCasePaths() }
-        var bar: Int? { Self.allCasePaths.bar.extract(from: self) }
+        static var cases: Cases { Cases() }
+        var bar: Int? { Self.cases.bar.extract(from: self) }
       }
 
       extension Foo: CasePaths.CasePathable {
@@ -274,10 +274,10 @@ final class CasePathableMacroTests: XCTestCase {
       """
       enum Foo: CasePathable {
 
-          struct AllCasePaths {
+          struct Cases {
 
           }
-          static var allCasePaths: AllCasePaths { AllCasePaths() }
+          static var cases: Cases { Cases() }
       }
       """
     }
@@ -290,10 +290,10 @@ final class CasePathableMacroTests: XCTestCase {
       """
       enum Foo: CasePaths.CasePathable {
 
-          struct AllCasePaths {
+          struct Cases {
 
           }
-          static var allCasePaths: AllCasePaths { AllCasePaths() }
+          static var cases: Cases { Cases() }
       }
       """
     }

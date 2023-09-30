@@ -66,8 +66,8 @@ enum UserAction {
 And case paths can be produced from a "case-pathable" enum using the `#casePath` macro:
 
 ```swift
-#casePath(\UserAction.home)      // CasePath<UserAction, HomeAction>
-#casePath(\UserAction.settings)  // CasePath<UserAction, SettingsAction>
+#casePath(\UserAction.home)      // Case<UserAction, HomeAction>
+#casePath(\UserAction.settings)  // Case<UserAction, SettingsAction>
 ```
 
 ### Case paths vs. key paths
@@ -97,7 +97,7 @@ case paths use optional-chaining:
 // WritableKeyPath<HighScore, String>
 
 #casePath(\UserAction.home?.timeline)
-// CasePath<UserAction, TimelineAction>
+// Case<UserAction, TimelineAction>
 ```
 
 Case paths, also like key paths, provide an
@@ -107,7 +107,7 @@ work with entire structure.
 
 ``` swift
 \User.self                   // WritableKeyPath<User, User>
-#casePath(\UserAction.self)  // CasePath<UserAction, UserAction>
+#casePath(\UserAction.self)  // Case<UserAction, UserAction>
 ```
 
 ## Community

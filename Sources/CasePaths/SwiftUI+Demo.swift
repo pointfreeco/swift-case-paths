@@ -51,8 +51,6 @@ struct ItemView: View {
 
       switch self.item.status {
       case .inStock:
-        // if let $quantity = self.$item.status.inStock {  // Requires `"\($quantity.wrappedValue)"`
-        // self.$item.status.inStock.map { $quantity in
         Binding(self.$item.status.inStock).map { $quantity in
           Section(header: Text("In stock")) {
             Stepper("Quantity: \(quantity)", value: $quantity)

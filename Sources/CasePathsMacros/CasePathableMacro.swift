@@ -8,7 +8,7 @@ public struct CasePathableMacro {
   static let conformanceName = "CasePathable"
   static var qualifiedConformanceName: String { "\(Self.moduleName).\(Self.conformanceName)" }
   static var conformanceNames: [String] { [Self.conformanceName, Self.qualifiedConformanceName] }
-  static let casePathTypeName = "CasePath"
+  static let casePathTypeName = "Case"
   static var qualifiedCasePathTypeName: String { "\(Self.moduleName).\(Self.casePathTypeName)" }
 }
 
@@ -113,15 +113,14 @@ extension CasePathableMacro: MemberMacro {
       return """
         \(access)var \(caseName): \
         \(raw: Self.qualifiedCasePathTypeName)<\(enumName), \(raw: associatedValueName)> {
-        \(raw: Self.qualifiedCasePathTypeName)<\(enumName), \(raw: associatedValueName)>._$init(
+        \(raw: Self.qualifiedCasePathTypeName)<\(enumName), \(raw: associatedValueName)>(
         embed: { .\(caseName)\(raw: embedNames) },
         extract: {
         guard case\(raw: hasPayload ? " let" : "").\(caseName)\(raw: bindingNames) = $0 else { \
         return nil \
         }
         return \(raw: returnName)
-        },
-        keyPath: \\.\(caseName)
+        }
         )
         }
         """
@@ -132,17 +131,17 @@ extension CasePathableMacro: MemberMacro {
       let associatedValueName = enumCaseDecl.trimmedTypeDescription
       return """
         \(access)var \(caseName): \(raw: associatedValueName)? { \
-        Self.allCasePaths.\(caseName).extract(from: self) \
+        self[keyPath: \\Self.Cases.\(caseName)] \
         }
         """
     }
 
     return [
       """
-      \(access)struct AllCasePaths {
+      \(access)struct Cases {
       \(raw: casePaths.map(\.description).joined(separator: "\n"))
       }
-      \(access)static var allCasePaths: AllCasePaths { AllCasePaths() }
+      \(access)static var cases: Cases { Cases() }
       \(raw: properties.map(\.description).joined(separator: "\n"))
       """
     ]
