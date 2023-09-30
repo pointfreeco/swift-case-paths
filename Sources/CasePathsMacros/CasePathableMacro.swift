@@ -131,15 +131,14 @@ extension CasePathableMacro: MemberMacro {
       let associatedValueName = enumCaseDecl.trimmedTypeDescription
       return """
         \(access)var \(caseName): \(raw: associatedValueName)? { \
-        self[keyPath: \\Self.Cases.\(caseName)] \
+        self[keyPath: \\\(raw: Self.qualifiedCasePathTypeName).\(caseName)] \
         }
         """
     }
 
     return [
       """
-      \(access)struct Cases: _Self {
-      typealias Root = \(enumName)
+      \(access)struct Cases {
       \(raw: casePaths.map(\.description).joined(separator: "\n"))
       }
       \(access)static var cases: Cases { Cases() }
