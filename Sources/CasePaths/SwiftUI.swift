@@ -2,6 +2,10 @@ import SwiftUI
 
 
 extension Binding where Value: CasePathable {
+  // TODO: Should/could this be simplified with a macro expansion?
+  //
+  // @dynamicCaseLookup
+  // subscript<Case>(dynamicMember casePath: CasePath<Value, Case>) -> Binding<Case?> {
   public subscript<Member>(
     dynamicMember keyPath: KeyPath<Value.AllCasePaths, CasePath<Value, Member>>
   ) -> Binding<Member?> {
