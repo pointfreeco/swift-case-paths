@@ -65,9 +65,53 @@ extension CasePathable {
     @available(*, unavailable)
     get { fatalError() }
     set {
-      guard casePath ~= self else { return }
+      guard case casePath = self else { return }
       self = casePath.embed(newValue)
     }
+  }
+
+  // NB: These overloads simplify dynamic member lookup (see SwiftUI.swift)
+
+  public subscript<Value>(keyPath keyPath: KeyPath<AllCasePaths, CasePath<Self, Value>>) -> Value? {
+    self[casePath: Self.allCasePaths[keyPath: keyPath]]
+  }
+
+  @_disfavoredOverload
+  public subscript<Value>(keyPath keyPath: KeyPath<AllCasePaths, CasePath<Self, Value>>) -> Value {
+    @available(*, unavailable)
+    get { fatalError() }
+    set { self[casePath: Self.allCasePaths[keyPath: keyPath]] = newValue }
+  }
+}
+
+// TODO: If `[casePath: _]` becomes the de facto way to get/set, should `embed` change?
+//
+// * `casePath(value)`  // `callAsFunction`?
+// * `casePath[value]`  // `subscript`?
+
+extension CasePath {
+  public func callAsFunction(_ value: Value) -> Root {
+    self.embed(value)
+  }
+}
+
+extension CasePath where Value == Void {
+  public func callAsFunction() -> Root {
+    self.embed()
+  }
+}
+
+extension KeyPath {
+  public func callAsFunction<Enum: CasePathable, Case>(
+    _ value: Case
+  ) -> Enum
+  where Root == Enum.AllCasePaths, Value == CasePath<Enum, Case> {
+    Enum.allCasePaths[keyPath: self].embed(value)
+  }
+
+  public func callAsFunction<Enum: CasePathable>() -> Enum
+  where Root == Enum.AllCasePaths, Value == CasePath<Enum, Void> {
+    Enum.allCasePaths[keyPath: self].embed()
   }
 }
 
