@@ -5,6 +5,7 @@ import XCTestDynamicOverlay
 /// value.
 ///
 /// This type defines key path-like semantics for enum cases.
+@dynamicMemberLookup
 public struct CasePath<Root, Value> {
   private let _embed: (Value) -> Root
   private let _extract: (Root) -> Value?
@@ -64,6 +65,19 @@ public struct CasePath<Root, Value> {
     root = self.embed(value)
     return result
   }
+
+  public subscript<AppendedValue>(
+    dynamicMember keyPath: DynamicCasePath<Value, AppendedValue>
+  ) -> CasePath<Root, AppendedValue>
+  where Root: CasePathable, Value: CasePathable {
+    self.appending(path: Value.allCasePaths[keyPath: keyPath])
+  }
+}
+
+@CasePathable enum _Foo { case bar(_Bar) }
+@CasePathable enum _Bar { case baz(Int) }
+func f() {
+  _ = \_Foo.AllCasePaths.bar.baz
 }
 
 extension CasePath where Value == Void {
