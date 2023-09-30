@@ -9,7 +9,7 @@ extension Binding where Value: CasePathable {
     return Binding<Member>(
       get: { self.wrappedValue[casePath: casePath] ?? member },
       set: { newValue, transaction in
-        guard casePath ~= self.wrappedValue else { return }
+        guard case casePath = self.wrappedValue else { return }
         member = newValue
         self.transaction(transaction).wrappedValue[casePath: casePath] = newValue
       }
@@ -28,7 +28,7 @@ extension Binding where Value: CasePathable {
 //    return Binding<Member?>(
 //      get: { self.wrappedValue[casePath: casePath] },
 //      set: { newValue, transaction in
-//        guard casePath ~= self.wrappedValue, let newValue else { return }
+//        guard case casePath = self.wrappedValue, let newValue else { return }
 //        self.transaction(transaction).wrappedValue[casePath: casePath] = newValue
 //      }
 //    )
