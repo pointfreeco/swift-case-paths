@@ -1,7 +1,7 @@
 public typealias CasePath<Root: CasePathable, Value> = KeyPath<Root.Cases, Case<Root, Value>>
 
 @dynamicMemberLookup
-public struct Case<Root: CasePathable, Value> {
+public struct Case<Root, Value> {
   let embed: (Value) -> Root
   let extract: (Root) -> Value?
 
