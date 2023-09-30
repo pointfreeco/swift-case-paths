@@ -51,13 +51,15 @@ struct ItemView: View {
 
       switch self.item.status {
       case .inStock:
-        // if let $quantity = self.$item.status.inStock {
+        // if let $quantity = self.$item.status.inStock {  // Requires `"\($quantity.wrappedValue)"`
         // Binding(self.$item.status.inStock).map { $quantity in
         self.$item.status.inStock.map { $quantity in
           Section(header: Text("In stock")) {
             Stepper("Quantity: \(quantity)", value: $quantity)
             Button("Mark as sold out") {
-              self.item.status = .outOfStock(isOnBackOrder: false)
+              withAnimation {
+                self.item.status = .outOfStock(isOnBackOrder: false)
+              }
             }
           }
         }
@@ -67,7 +69,9 @@ struct ItemView: View {
           Section(header: Text("Out of stock")) {
             Toggle("Is on back order?", isOn: $isOnBackOrder)
             Button("Is back in stock!") {
-              self.item.status = .inStock(quantity: 1)
+              withAnimation {
+                self.item.status = .inStock(quantity: 1)
+              }
             }
           }
         }
