@@ -21,9 +21,15 @@ final class CasePathsTests: XCTestCase {
 
     foo[keyPath: \.bar] = .baz(42)
 
-    foo[keyPath: \.self] = .bar(.baz(1))
+    XCTAssertEqual((\Foo.Cases.self)(.bar(.baz(1))), .bar(.baz(1)))
+    XCTAssertEqual((\Foo.Cases.bar)(.baz(1)), .bar(.baz(1)))
+    XCTAssertEqual((\Foo.Cases.bar.baz)(1), .bar(.baz(1)))
   }
 }
 
-@CasePathable enum Foo: Equatable { case bar(Bar) }
-@CasePathable enum Bar: Equatable { case baz(Int) }
+@CasePathable enum Foo: Equatable {
+  case bar(Bar)
+}
+@CasePathable enum Bar: Equatable {
+  case baz(Int)
+}

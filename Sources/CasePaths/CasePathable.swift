@@ -1,11 +1,13 @@
 public protocol CasePathable {
-  associatedtype Cases
-  static var cases: Cases { get }
+  associatedtype AllCasePaths
+  static var allCasePaths: AllCasePaths { get }
 }
 
 extension CasePathable {
+  public typealias Cases = Case<Self, Self>
+
   public subscript<Value>(keyPath keyPath: CasePath<Self, Value>) -> Value? {
-    Case<Self, Self>()[keyPath: keyPath].extract(self)
+    Case()[keyPath: keyPath].extract(self)
   }
 
   @_disfavoredOverload
@@ -13,7 +15,7 @@ extension CasePathable {
     @available(*, unavailable)
     get { fatalError() }
     set {
-      let `case` = Case<Self, Self>()[keyPath: keyPath]
+      let `case` = Case()[keyPath: keyPath]
       guard `case`.extract(self) != nil else { return }
       self = `case`.embed(newValue)
     }

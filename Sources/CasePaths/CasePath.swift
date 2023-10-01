@@ -14,11 +14,11 @@ public struct Case<Root: CasePathable, Value> {
   }
 
   public subscript<AppendedValue>(
-    dynamicMember keyPath: KeyPath<Value.Cases, Case<Value, AppendedValue>>
+    dynamicMember keyPath: KeyPath<Value.AllCasePaths, Case<Value, AppendedValue>>
   ) -> Case<Root, AppendedValue> {
     Case<Root, AppendedValue>(
-      embed: { self.embed(Value.cases[keyPath: keyPath].embed($0)) },
-      extract: { self.extract($0).flatMap(Value.cases[keyPath: keyPath].extract) }
+      embed: { self.embed(Value.allCasePaths[keyPath: keyPath].embed($0)) },
+      extract: { self.extract($0).flatMap(Value.allCasePaths[keyPath: keyPath].extract) }
     )
   }
 }

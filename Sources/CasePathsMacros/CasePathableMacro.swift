@@ -138,10 +138,10 @@ extension CasePathableMacro: MemberMacro {
 
     return [
       """
-      \(access)struct Cases {
+      \(access)struct AllCasePaths {
       \(raw: casePaths.map(\.description).joined(separator: "\n"))
       }
-      \(access)static var cases: Cases { Cases() }
+      \(access)static var allCasePaths: AllCasePaths { AllCasePaths() }
       \(raw: properties.map(\.description).joined(separator: "\n"))
       """
     ]
