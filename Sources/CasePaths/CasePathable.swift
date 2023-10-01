@@ -23,9 +23,7 @@ extension CasePathable {
 }
 
 extension KeyPath {
-  public func callAsFunction<Enum: CasePathable, AssociatedValue>(
-    _ value: AssociatedValue
-  ) -> Enum
+  public func callAsFunction<Enum: CasePathable, AssociatedValue>(_ value: AssociatedValue) -> Enum
   where Root == Case<Enum, Enum>, Value == Case<Enum, AssociatedValue> {
     Case()[keyPath: self].embed(value)
   }
