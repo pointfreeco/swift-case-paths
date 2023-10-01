@@ -49,13 +49,13 @@ public func XCTUnwrap<Enum, Case>(
 ///   - body: A closure that can modify the associated value of the given case.
 public func XCTModify<Enum, AssociatedValue>(
   _ enum: inout Enum,
-  case casePath: Case<Enum, AssociatedValue>,
+  case casePath: AnyCasePath<Enum, AssociatedValue>,
   _ message: @autoclosure () -> String = "",
   _ body: (inout AssociatedValue) throws -> Void,
   file: StaticString = #file,
   line: UInt = #line
 ) {
-  guard var value = casePath.extract(`enum`)
+  guard var value = casePath.extract(from: `enum`)
   else {
     #if canImport(ObjectiveC)
       _ = XCTCurrentTestCase?.perform(Selector(("setContinueAfterFailure:")), with: false)

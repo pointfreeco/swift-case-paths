@@ -8,7 +8,7 @@ public struct CasePathableMacro {
   static let conformanceName = "CasePathable"
   static var qualifiedConformanceName: String { "\(Self.moduleName).\(Self.conformanceName)" }
   static var conformanceNames: [String] { [Self.conformanceName, Self.qualifiedConformanceName] }
-  static let casePathTypeName = "Case"
+  static let casePathTypeName = "AnyCasePath"
   static var qualifiedCasePathTypeName: String { "\(Self.moduleName).\(Self.casePathTypeName)" }
 }
 
