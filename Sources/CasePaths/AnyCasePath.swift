@@ -1,10 +1,13 @@
 import Foundation
 
+@available(*, deprecated, renamed: "AnyCasePath")
+public typealias CasePath = AnyCasePath
+
 /// A path that supports embedding a value in a root and attempting to extract a root's embedded
 /// value.
 ///
 /// This type defines key path-like semantics for enum cases.
-public struct CasePath<Root, Value> {
+public struct AnyCasePath<Root, Value> {
   private let _embed: (Value) -> Root
   private let _extract: (Root) -> Value?
 
@@ -68,10 +71,10 @@ public struct CasePath<Root, Value> {
   ///
   /// - Parameter path: The case path to append.
   /// - Returns: A case path from the root of this case path to the value type of `path`.
-  public func appending<AppendedValue>(path: CasePath<Value, AppendedValue>) -> CasePath<
+  public func appending<AppendedValue>(path: AnyCasePath<Value, AppendedValue>) -> AnyCasePath<
     Root, AppendedValue
   > {
-    CasePath<Root, AppendedValue>(
+    AnyCasePath<Root, AppendedValue>(
       embed: { self.embed(path.embed($0)) },
       extract: { self.extract(from: $0).flatMap(path.extract) }
     )
@@ -79,12 +82,13 @@ public struct CasePath<Root, Value> {
 }
 
 #if canImport(_Concurrency) && compiler(>=5.5.2)
-  extension CasePath: @unchecked Sendable {}
+  extension AnyCasePath: @unchecked Sendable {}
 #endif
 
-extension CasePath: CustomStringConvertible {
+// TODO: Deprecate
+extension AnyCasePath: CustomStringConvertible {
   public var description: String {
-    "CasePath<\(typeName(Root.self)), \(typeName(Value.self))>"
+    "AnyCasePath<\(typeName(Root.self)), \(typeName(Value.self))>"
   }
 }
 

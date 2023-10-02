@@ -1,19 +1,21 @@
 prefix operator /
 
-/// Returns whether or not a root value matches a particular case path.
-///
-/// ```swift
-/// [Result<Int, Error>.success(1), .success(2), .failure(NSError()), .success(4)]
-///   .prefix(while: { /Result.success ~= $0 })
-/// // [.success(1), .success(2)]
-/// ```
-///
-/// - Parameters:
-///   - pattern: A case path.
-///   - value: A root value.
-/// - Returns: Whether or not a root value matches a particular case path
-public func ~= <Root, Value>(pattern: CasePath<Root, Value>, value: Root) -> Bool {
-  pattern.extract(from: value) != nil
+extension AnyCasePath {
+  /// Returns whether or not a root value matches a particular case path.
+  ///
+  /// ```swift
+  /// [Result<Int, Error>.success(1), .success(2), .failure(NSError()), .success(4)]
+  ///   .prefix(while: { /Result.success ~= $0 })
+  /// // [.success(1), .success(2)]
+  /// ```
+  ///
+  /// - Parameters:
+  ///   - pattern: A case path.
+  ///   - value: A root value.
+  /// - Returns: Whether or not a root value matches a particular case path
+  public static func ~= (pattern: AnyCasePath, value: Root) -> Bool {
+    pattern.extract(from: value) != nil
+  }
 }
 
 /// Returns a case path for the given embed function.
@@ -24,7 +26,7 @@ public func ~= <Root, Value>(pattern: CasePath<Root, Value>, value: Root) -> Boo
 /// - Returns: A case path.
 public prefix func / <Root, Value>(
   embed: @escaping (Value) -> Root
-) -> CasePath<Root, Value> {
+) -> AnyCasePath<Root, Value> {
   .init(embed: embed, extract: extractHelp(embed))
 }
 
@@ -36,7 +38,7 @@ public prefix func / <Root, Value>(
 /// - Returns: A case path.
 public prefix func / <Root, Value>(
   embed: @escaping (Value) -> Root?
-) -> CasePath<Root?, Value> {
+) -> AnyCasePath<Root?, Value> {
   .init(embed: embed, extract: optionalPromotedExtractHelp(embed))
 }
 
@@ -48,7 +50,7 @@ public prefix func / <Root, Value>(
 /// - Returns: A void case path.
 public prefix func / <Root>(
   root: Root
-) -> CasePath<Root, Void> {
+) -> AnyCasePath<Root, Void> {
   .init(embed: { root }, extract: extractVoidHelp(root))
 }
 
@@ -60,7 +62,7 @@ public prefix func / <Root>(
 /// - Returns: A void case path.
 public prefix func / <Root>(
   root: Root?
-) -> CasePath<Root?, Void> {
+) -> AnyCasePath<Root?, Void> {
   .init(embed: { root }, extract: optionalPromotedExtractVoidHelp(root))
 }
 
@@ -70,7 +72,7 @@ public prefix func / <Root>(
 /// - Returns: An identity case path.
 public prefix func / <Root>(
   type: Root.Type
-) -> CasePath<Root, Root> {
+) -> AnyCasePath<Root, Root> {
   .self
 }
 
@@ -80,8 +82,8 @@ public prefix func / <Root>(
 /// - Parameter path: A case path to return.
 /// - Returns: The case path.
 public prefix func / <Root, Value>(
-  path: CasePath<Root, Value>
-) -> CasePath<Root, Value> {
+  path: AnyCasePath<Root, Value>
+) -> AnyCasePath<Root, Value> {
   path
 }
 
@@ -163,7 +165,7 @@ precedencegroup CasePathCompositionPrecedence {
 
 infix operator ..: CasePathCompositionPrecedence
 
-extension CasePath {
+extension AnyCasePath {
   /// Returns a new case path created by appending the given case path to this one.
   ///
   /// The operator version of ``appending(path:)``. Use this method to extend this case path to the
@@ -174,9 +176,9 @@ extension CasePath {
   ///   - rhs: A case path from the first case path's value to some other appended value.
   /// - Returns: A new case path from the first case path's root to the second case path's value.
   public static func .. <AppendedValue>(
-    lhs: CasePath,
-    rhs: CasePath<Value, AppendedValue>
-  ) -> CasePath<Root, AppendedValue> {
+    lhs: AnyCasePath,
+    rhs: AnyCasePath<Value, AppendedValue>
+  ) -> AnyCasePath<Root, AppendedValue> {
     lhs.appending(path: rhs)
   }
 
@@ -188,9 +190,9 @@ extension CasePath {
   /// - Returns: A new case path from the first case path's root to the second embed function's
   ///   value.
   public static func .. <AppendedValue>(
-    lhs: CasePath,
+    lhs: AnyCasePath,
     rhs: @escaping (AppendedValue) -> Value
-  ) -> CasePath<Root, AppendedValue> {
+  ) -> AnyCasePath<Root, AppendedValue> {
     lhs.appending(path: /rhs)
   }
 }

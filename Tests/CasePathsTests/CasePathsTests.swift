@@ -13,7 +13,7 @@ final class CasePathsTests: XCTestCase {
       XCTAssertEqual(path.extract(from: .payload(42)), 42)
       XCTAssertEqual(path.extract(from: .payload(42)), 42)
     }
-    XCTAssertEqual(CasePath(Enum.payload).extract(from: .payload(42)), 42)
+    XCTAssertEqual(AnyCasePath(Enum.payload).extract(from: .payload(42)), 42)
   }
 
   func testSimpleLabeledPayload() {
@@ -22,7 +22,7 @@ final class CasePathsTests: XCTestCase {
     for _ in 1...2 {
       XCTAssertEqual(path.extract(from: .payload(label: 42)), 42)
     }
-    XCTAssertEqual(CasePath(Enum.payload(label:)).extract(from: .payload(label: 42)), 42)
+    XCTAssertEqual(AnyCasePath(Enum.payload(label:)).extract(from: .payload(label: 42)), 42)
   }
 
   // This test crashes Xcode 11.7's compiler.
@@ -40,27 +40,27 @@ final class CasePathsTests: XCTestCase {
         XCTAssertEqual(pathB.extract(from: .payload(a: 42)), nil)
         XCTAssertEqual(pathB.extract(from: .payload(b: 42)), 42)
       }
-      XCTAssertEqual(CasePath(Enum.payload(a:)).extract(from: .payload(a: 42)), 42)
-      XCTAssertEqual(CasePath(Enum.payload(a:)).extract(from: .payload(b: 42)), nil)
-      XCTAssertEqual(CasePath(Enum.payload(b:)).extract(from: .payload(a: 42)), nil)
-      XCTAssertEqual(CasePath(Enum.payload(b:)).extract(from: .payload(b: 42)), 42)
+      XCTAssertEqual(AnyCasePath(Enum.payload(a:)).extract(from: .payload(a: 42)), 42)
+      XCTAssertEqual(AnyCasePath(Enum.payload(a:)).extract(from: .payload(b: 42)), nil)
+      XCTAssertEqual(AnyCasePath(Enum.payload(b:)).extract(from: .payload(a: 42)), nil)
+      XCTAssertEqual(AnyCasePath(Enum.payload(b:)).extract(from: .payload(b: 42)), 42)
     }
   #endif
 
   func testMultiPayload() {
     enum Enum { case payload(Int, String) }
-    let path: CasePath<Enum, (Int, String)> = /Enum.payload
+    let path: AnyCasePath<Enum, (Int, String)> = /Enum.payload
     for _ in 1...2 {
       XCTAssert(try unwrap(path.extract(from: .payload(42, "Blob"))) == (42, "Blob"))
     }
     XCTAssert(
-      try unwrap(CasePath(Enum.payload).extract(from: .payload(42, "Blob"))) == (42, "Blob")
+      try unwrap(AnyCasePath(Enum.payload).extract(from: .payload(42, "Blob"))) == (42, "Blob")
     )
   }
 
   func testMultiLabeledPayload() {
     enum Enum { case payload(a: Int, b: String) }
-    let path: CasePath<Enum, (Int, String)> = /Enum.payload
+    let path: AnyCasePath<Enum, (Int, String)> = /Enum.payload
     for _ in 1...2 {
       XCTAssert(
         try unwrap(path.extract(from: .payload(a: 42, b: "Blob"))) == (42, "Blob")
@@ -70,10 +70,10 @@ final class CasePathsTests: XCTestCase {
       )
     }
     XCTAssert(
-      try unwrap(CasePath(Enum.payload).extract(from: .payload(a: 42, b: "Blob"))) == (42, "Blob")
+      try unwrap(AnyCasePath(Enum.payload).extract(from: .payload(a: 42, b: "Blob"))) == (42, "Blob")
     )
     XCTAssert(
-      try unwrap(CasePath(Enum.payload).extract(from: .payload(a: 42, b: "Blob")))
+      try unwrap(AnyCasePath(Enum.payload).extract(from: .payload(a: 42, b: "Blob")))
         == (a: 42, b: "Blob")
     )
   }
@@ -88,10 +88,10 @@ final class CasePathsTests: XCTestCase {
       XCTAssertNil(pathA.extract(from: .b))
       XCTAssertNil(pathB.extract(from: .a))
     }
-    XCTAssertNotNil(CasePath(Enum.a).extract(from: .a))
-    XCTAssertNotNil(CasePath(Enum.b).extract(from: .b))
-    XCTAssertNil(CasePath(Enum.a).extract(from: .b))
-    XCTAssertNil(CasePath(Enum.b).extract(from: .a))
+    XCTAssertNotNil(AnyCasePath(Enum.a).extract(from: .a))
+    XCTAssertNotNil(AnyCasePath(Enum.b).extract(from: .b))
+    XCTAssertNil(AnyCasePath(Enum.a).extract(from: .b))
+    XCTAssertNil(AnyCasePath(Enum.b).extract(from: .a))
   }
 
   func testZeroMemoryLayoutPayload() {
@@ -116,15 +116,15 @@ final class CasePathsTests: XCTestCase {
       XCTAssertNil(path3.extract(from: .void(())))
       XCTAssertNil(path3.extract(from: .unit1(.init())))
     }
-    XCTAssertNotNil(CasePath(Enum.void).extract(from: .void(())))
-    XCTAssertNotNil(CasePath(Enum.unit1).extract(from: .unit1(.init())))
-    XCTAssertNotNil(CasePath(Enum.unit2).extract(from: .unit2(.unit)))
-    XCTAssertNil(CasePath(Enum.void).extract(from: .unit1(.init())))
-    XCTAssertNil(CasePath(Enum.void).extract(from: .unit2(.unit)))
-    XCTAssertNil(CasePath(Enum.unit1).extract(from: .void(())))
-    XCTAssertNil(CasePath(Enum.unit1).extract(from: .unit2(.unit)))
-    XCTAssertNil(CasePath(Enum.unit2).extract(from: .void(())))
-    XCTAssertNil(CasePath(Enum.unit2).extract(from: .unit1(.init())))
+    XCTAssertNotNil(AnyCasePath(Enum.void).extract(from: .void(())))
+    XCTAssertNotNil(AnyCasePath(Enum.unit1).extract(from: .unit1(.init())))
+    XCTAssertNotNil(AnyCasePath(Enum.unit2).extract(from: .unit2(.unit)))
+    XCTAssertNil(AnyCasePath(Enum.void).extract(from: .unit1(.init())))
+    XCTAssertNil(AnyCasePath(Enum.void).extract(from: .unit2(.unit)))
+    XCTAssertNil(AnyCasePath(Enum.unit1).extract(from: .void(())))
+    XCTAssertNil(AnyCasePath(Enum.unit1).extract(from: .unit2(.unit)))
+    XCTAssertNil(AnyCasePath(Enum.unit2).extract(from: .void(())))
+    XCTAssertNil(AnyCasePath(Enum.unit2).extract(from: .unit1(.init())))
   }
 
   func testUninhabitedPayload() {
@@ -140,8 +140,8 @@ final class CasePathsTests: XCTestCase {
       XCTAssertNil(path1.extract(from: .value))
       XCTAssertNil(path2.extract(from: .value))
     }
-    XCTAssertNil(CasePath(Enum.never).extract(from: .value))
-    XCTAssertNil(CasePath(Enum.uninhabited).extract(from: .value))
+    XCTAssertNil(AnyCasePath(Enum.never).extract(from: .value))
+    XCTAssertNil(AnyCasePath(Enum.uninhabited).extract(from: .value))
   }
 
   func testClosurePayload() throws {
@@ -154,7 +154,7 @@ final class CasePathsTests: XCTestCase {
       XCTAssertTrue(invoked)
     }
     var invoked = false
-    let closure = try unwrap(CasePath(Enum.closure).extract(from: .closure { invoked = true }))
+    let closure = try unwrap(AnyCasePath(Enum.closure).extract(from: .closure { invoked = true }))
     closure()
     XCTAssertTrue(invoked)
   }
@@ -172,9 +172,9 @@ final class CasePathsTests: XCTestCase {
         deepPath.extract(from: .indirect(.indirect(.direct))), .indirect(.direct)
       )
     }
-    XCTAssertEqual(CasePath(Enum.indirect).extract(from: .indirect(.direct)), .direct)
+    XCTAssertEqual(AnyCasePath(Enum.indirect).extract(from: .indirect(.direct)), .direct)
     XCTAssertEqual(
-      CasePath(Enum.indirect).extract(from: .indirect(.indirect(.direct))), .indirect(.direct)
+      AnyCasePath(Enum.indirect).extract(from: .indirect(.indirect(.direct))), .indirect(.direct)
     )
   }
 
@@ -193,10 +193,10 @@ final class CasePathsTests: XCTestCase {
       XCTAssertEqual(directPath.extract(from: .indirect(42)), nil)
       XCTAssertEqual(directPath.extract(from: .direct(42)), 42)
     }
-    XCTAssertEqual(CasePath(Enum.indirect).extract(from: .indirect(42)), 42)
-    XCTAssertEqual(CasePath(Enum.indirect).extract(from: .direct(42)), nil)
-    XCTAssertEqual(CasePath(Enum.direct).extract(from: .indirect(42)), nil)
-    XCTAssertEqual(CasePath(Enum.direct).extract(from: .direct(42)), 42)
+    XCTAssertEqual(AnyCasePath(Enum.indirect).extract(from: .indirect(42)), 42)
+    XCTAssertEqual(AnyCasePath(Enum.indirect).extract(from: .direct(42)), nil)
+    XCTAssertEqual(AnyCasePath(Enum.direct).extract(from: .indirect(42)), nil)
+    XCTAssertEqual(AnyCasePath(Enum.direct).extract(from: .direct(42)), 42)
   }
 
   fileprivate class Object: Equatable {
@@ -213,8 +213,8 @@ final class CasePathsTests: XCTestCase {
       case direct(Int, Object?, Int, Object?)
     }
 
-    let indirectPath: CasePath<Enum, (Int, Object?, Int, Object?)> = /Enum.indirect
-    let directPath: CasePath<Enum, (Int, Object?, Int, Object?)> = /Enum.direct
+    let indirectPath: AnyCasePath<Enum, (Int, Object?, Int, Object?)> = /Enum.indirect
+    let directPath: AnyCasePath<Enum, (Int, Object?, Int, Object?)> = /Enum.direct
 
     for _ in 1...2 {
       XCTAssert(
@@ -228,13 +228,13 @@ final class CasePathsTests: XCTestCase {
       )
     }
     XCTAssert(
-      try unwrap(CasePath(Enum.indirect).extract(from: .indirect(42, nil, 43, object)))
+      try unwrap(AnyCasePath(Enum.indirect).extract(from: .indirect(42, nil, 43, object)))
         == (42, nil, 43, object)
     )
-    XCTAssertNil(CasePath(Enum.indirect).extract(from: .direct(42, nil, 43, object)))
-    XCTAssertNil(CasePath(Enum.direct).extract(from: .indirect(42, nil, 43, object)))
+    XCTAssertNil(AnyCasePath(Enum.indirect).extract(from: .direct(42, nil, 43, object)))
+    XCTAssertNil(AnyCasePath(Enum.direct).extract(from: .indirect(42, nil, 43, object)))
     XCTAssert(
-      try unwrap(CasePath(Enum.direct).extract(from: .direct(42, nil, 43, object))) == (
+      try unwrap(AnyCasePath(Enum.direct).extract(from: .direct(42, nil, 43, object))) == (
         42, nil, 43, object
       )
     )
@@ -259,8 +259,8 @@ final class CasePathsTests: XCTestCase {
       XCTAssertEqual(path.extract(from: .int(.some(42))), .some(.some(42)))
       XCTAssertEqual(path.extract(from: .int(.none)), .some(.none))
     }
-    XCTAssertEqual(CasePath(Enum.int).extract(from: .int(.some(42))), .some(.some(42)))
-    XCTAssertEqual(CasePath(Enum.int).extract(from: .int(.none)), .some(.none))
+    XCTAssertEqual(AnyCasePath(Enum.int).extract(from: .int(.some(42))), .some(.some(42)))
+    XCTAssertEqual(AnyCasePath(Enum.int).extract(from: .int(.none)), .some(.none))
   }
 
   func testAnyPayload() {
@@ -269,7 +269,7 @@ final class CasePathsTests: XCTestCase {
     for _ in 1...2 {
       XCTAssertEqual(path.extract(from: .any(42)) as? Int, 42)
     }
-    XCTAssertEqual(CasePath(Enum.any).extract(from: .any(42)) as? Int, 42)
+    XCTAssertEqual(AnyCasePath(Enum.any).extract(from: .any(42)) as? Int, 42)
   }
 
   func testAnyObjectPayload() {
@@ -282,8 +282,8 @@ final class CasePathsTests: XCTestCase {
       XCTAssert(try unwrap(path.extract(from: .anyObject(object))) === object)
       XCTAssert(try unwrap(path.extract(from: .anyObject(nsObject))) === nsObject)
     }
-    XCTAssert(try unwrap(CasePath(Enum.anyObject).extract(from: .anyObject(object))) === object)
-    XCTAssert(try unwrap(CasePath(Enum.anyObject).extract(from: .anyObject(nsObject))) === nsObject)
+    XCTAssert(try unwrap(AnyCasePath(Enum.anyObject).extract(from: .anyObject(object))) === object)
+    XCTAssert(try unwrap(AnyCasePath(Enum.anyObject).extract(from: .anyObject(nsObject))) === nsObject)
   }
 
   func testProtocolPayload() {
@@ -293,7 +293,7 @@ final class CasePathsTests: XCTestCase {
     for _ in 1...2 {
       XCTAssertEqual(path.extract(from: .error(Error())) as? Error, Error())
     }
-    XCTAssertEqual(CasePath(Enum.error).extract(from: .error(Error())) as? Error, Error())
+    XCTAssertEqual(AnyCasePath(Enum.error).extract(from: .error(Error())) as? Error, Error())
   }
 
   func testSubclassPayload() {
@@ -319,26 +319,26 @@ final class CasePathsTests: XCTestCase {
       )
     }
     XCTAssert(
-      try unwrap(CasePath(Enum.superclass).extract(from: .superclass(superclass))) === superclass
+      try unwrap(AnyCasePath(Enum.superclass).extract(from: .superclass(superclass))) === superclass
     )
     XCTAssert(
-      try unwrap(CasePath(Enum.superclass).extract(from: .superclass(subclass))) === subclass
+      try unwrap(AnyCasePath(Enum.superclass).extract(from: .superclass(subclass))) === subclass
     )
     XCTAssert(
-      try unwrap(CasePath(Enum.subclass).extract(from: .subclass(subclass))) === subclass
+      try unwrap(AnyCasePath(Enum.subclass).extract(from: .subclass(subclass))) === subclass
     )
   }
 
   func testDefaults() {
     enum Enum { case n(Int, m: Int? = nil, file: String = #file, line: UInt = #line) }
-    let path: CasePath<Enum, (Int, Int?, String, UInt)> = /Enum.n
+    let path: AnyCasePath<Enum, (Int, Int?, String, UInt)> = /Enum.n
     for _ in 1...2 {
       XCTAssert(
         try unwrap(path.extract(from: .n(42))) == (42, nil, #file, #line)
       )
     }
     XCTAssert(
-      try unwrap(CasePath(Enum.n).extract(from: .n(42))) == (42, nil, #file, #line)
+      try unwrap(AnyCasePath(Enum.n).extract(from: .n(42))) == (42, nil, #file, #line)
     )
   }
 
@@ -384,32 +384,32 @@ final class CasePathsTests: XCTestCase {
       XCTAssertNotNil(voidPath.extract(from: .void(())))
       XCTAssertNotNil(anyPath.extract(from: .any("Blob")))
     }
-    XCTAssertNil(CasePath(Enum.bool).extract(from: .int(42)))
-    XCTAssertNil(CasePath(Enum.bool).extract(from: .void(())))
-    XCTAssertNil(CasePath(Enum.bool).extract(from: .structure(.init())))
-    XCTAssertNil(CasePath(Enum.bool).extract(from: .any("Blob")))
-    XCTAssertNil(CasePath(Enum.int).extract(from: .bool(true)))
-    XCTAssertNil(CasePath(Enum.int).extract(from: .void(())))
-    XCTAssertNil(CasePath(Enum.int).extract(from: .structure(.init())))
-    XCTAssertNil(CasePath(Enum.int).extract(from: .any("Blob")))
-    XCTAssertNil(CasePath(Enum.void).extract(from: .bool(true)))
-    XCTAssertNil(CasePath(Enum.void).extract(from: .int(42)))
-    XCTAssertNil(CasePath(Enum.void).extract(from: .structure(.init())))
-    XCTAssertNil(CasePath(Enum.void).extract(from: .any("Blob")))
-    XCTAssertNil(CasePath(Enum.structure).extract(from: .bool(true)))
-    XCTAssertNil(CasePath(Enum.structure).extract(from: .int(42)))
-    XCTAssertNil(CasePath(Enum.structure).extract(from: .void(())))
-    XCTAssertNil(CasePath(Enum.structure).extract(from: .any("Blob")))
-    XCTAssertNil(CasePath(Enum.any).extract(from: .bool(true)))
-    XCTAssertNil(CasePath(Enum.any).extract(from: .int(42)))
-    XCTAssertNil(CasePath(Enum.any).extract(from: .void(())))
-    XCTAssertNil(CasePath(Enum.any).extract(from: .structure(.init())))
+    XCTAssertNil(AnyCasePath(Enum.bool).extract(from: .int(42)))
+    XCTAssertNil(AnyCasePath(Enum.bool).extract(from: .void(())))
+    XCTAssertNil(AnyCasePath(Enum.bool).extract(from: .structure(.init())))
+    XCTAssertNil(AnyCasePath(Enum.bool).extract(from: .any("Blob")))
+    XCTAssertNil(AnyCasePath(Enum.int).extract(from: .bool(true)))
+    XCTAssertNil(AnyCasePath(Enum.int).extract(from: .void(())))
+    XCTAssertNil(AnyCasePath(Enum.int).extract(from: .structure(.init())))
+    XCTAssertNil(AnyCasePath(Enum.int).extract(from: .any("Blob")))
+    XCTAssertNil(AnyCasePath(Enum.void).extract(from: .bool(true)))
+    XCTAssertNil(AnyCasePath(Enum.void).extract(from: .int(42)))
+    XCTAssertNil(AnyCasePath(Enum.void).extract(from: .structure(.init())))
+    XCTAssertNil(AnyCasePath(Enum.void).extract(from: .any("Blob")))
+    XCTAssertNil(AnyCasePath(Enum.structure).extract(from: .bool(true)))
+    XCTAssertNil(AnyCasePath(Enum.structure).extract(from: .int(42)))
+    XCTAssertNil(AnyCasePath(Enum.structure).extract(from: .void(())))
+    XCTAssertNil(AnyCasePath(Enum.structure).extract(from: .any("Blob")))
+    XCTAssertNil(AnyCasePath(Enum.any).extract(from: .bool(true)))
+    XCTAssertNil(AnyCasePath(Enum.any).extract(from: .int(42)))
+    XCTAssertNil(AnyCasePath(Enum.any).extract(from: .void(())))
+    XCTAssertNil(AnyCasePath(Enum.any).extract(from: .structure(.init())))
 
-    XCTAssertNotNil(CasePath(Enum.bool).extract(from: .bool(true)))
-    XCTAssertNotNil(CasePath(Enum.int).extract(from: .int(42)))
-    XCTAssertNotNil(CasePath(Enum.void).extract(from: .void(())))
-    XCTAssertNotNil(CasePath(Enum.structure).extract(from: .structure(.init())))
-    XCTAssertNotNil(CasePath(Enum.any).extract(from: .any("Blob")))
+    XCTAssertNotNil(AnyCasePath(Enum.bool).extract(from: .bool(true)))
+    XCTAssertNotNil(AnyCasePath(Enum.int).extract(from: .int(42)))
+    XCTAssertNotNil(AnyCasePath(Enum.void).extract(from: .void(())))
+    XCTAssertNotNil(AnyCasePath(Enum.structure).extract(from: .structure(.init())))
+    XCTAssertNotNil(AnyCasePath(Enum.any).extract(from: .any("Blob")))
   }
 
   func testAssociatedValueIsExistential() {
@@ -428,11 +428,11 @@ final class CasePathsTests: XCTestCase {
       XCTAssertNil(intPath.extract(from: .proto(100)))
       XCTAssertEqual(intPath.extract(from: .int(100)), 100)
     }
-    XCTAssertNil(CasePath(Enum.proto).extract(from: .int(100)))
-    XCTAssertEqual(CasePath(Enum.proto).extract(from: .proto(100)) as? Int, 100)
+    XCTAssertNil(AnyCasePath(Enum.proto).extract(from: .int(100)))
+    XCTAssertEqual(AnyCasePath(Enum.proto).extract(from: .proto(100)) as? Int, 100)
 
-    XCTAssertNil(CasePath(Enum.int).extract(from: .proto(100)))
-    XCTAssertEqual(CasePath(Enum.int).extract(from: .int(100)), 100)
+    XCTAssertNil(AnyCasePath(Enum.int).extract(from: .proto(100)))
+    XCTAssertEqual(AnyCasePath(Enum.int).extract(from: .int(100)), 100)
   }
 
   func testClassConstrainedExistential() {
@@ -453,11 +453,11 @@ final class CasePathsTests: XCTestCase {
       XCTAssertNil(intPath.extract(from: .proto(object)))
       XCTAssertEqual(intPath.extract(from: .int(100)), 100)
     }
-    XCTAssertNil(CasePath(Enum.proto).extract(from: .int(100)))
-    XCTAssertTrue(CasePath(Enum.proto).extract(from: .proto(object)) === object)
+    XCTAssertNil(AnyCasePath(Enum.proto).extract(from: .int(100)))
+    XCTAssertTrue(AnyCasePath(Enum.proto).extract(from: .proto(object)) === object)
 
-    XCTAssertNil(CasePath(Enum.int).extract(from: .proto(object)))
-    XCTAssertEqual(CasePath(Enum.int).extract(from: .int(100)), 100)
+    XCTAssertNil(AnyCasePath(Enum.int).extract(from: .proto(object)))
+    XCTAssertEqual(AnyCasePath(Enum.int).extract(from: .int(100)), 100)
   }
 
   func testContravariantEmbed() {
@@ -492,10 +492,10 @@ final class CasePathsTests: XCTestCase {
       }
     }
 
-    var dePath: CasePath<Enum, Conformer> = /Enum.directExistential
-    var dtPath: CasePath<Enum, Conformer> = /Enum.directTuple
-    var iePath: CasePath<Enum, Conformer> = /Enum.indirectExistential
-    var itPath: CasePath<Enum, Conformer> = /Enum.indirectTuple
+    var dePath: AnyCasePath<Enum, Conformer> = /Enum.directExistential
+    var dtPath: AnyCasePath<Enum, Conformer> = /Enum.directTuple
+    var iePath: AnyCasePath<Enum, Conformer> = /Enum.indirectExistential
+    var itPath: AnyCasePath<Enum, Conformer> = /Enum.indirectTuple
 
     for _ in 1...2 {
       XCTAssertNil(dePath.extract(from: .cdtCase))
@@ -535,10 +535,10 @@ final class CasePathsTests: XCTestCase {
       XCTAssertEqual(itPath.extract(from: .citCase), .some(Conformer()))
     }
 
-    dePath = CasePath(Enum.directExistential)
-    dtPath = CasePath(Enum.directTuple)
-    iePath = CasePath(Enum.indirectExistential)
-    itPath = CasePath(Enum.indirectTuple)
+    dePath = AnyCasePath(Enum.directExistential)
+    dtPath = AnyCasePath(Enum.directTuple)
+    iePath = AnyCasePath(Enum.indirectExistential)
+    itPath = AnyCasePath(Enum.indirectTuple)
 
     XCTAssertNil(dePath.extract(from: .cdtCase))
     XCTAssertNil(dePath.extract(from: .cieCase))
@@ -582,7 +582,7 @@ final class CasePathsTests: XCTestCase {
       case c(TestProtocol, Int)
     }
 
-    let path: CasePath<Enum, (Int, Int)> = /Enum.c
+    let path: AnyCasePath<Enum, (Int, Int)> = /Enum.c
 
     for _ in 1...2 {
       XCTAssert(try XCTUnwrap(path.extract(from: .c(34, 12))) == (34, 12))
@@ -596,12 +596,12 @@ final class CasePathsTests: XCTestCase {
     }
 
     let root: Authentication? = .authenticated(token: "deadbeef")
-    let path: CasePath<Authentication?, String> = /Authentication.authenticated
+    let path: AnyCasePath<Authentication?, String> = /Authentication.authenticated
     for _ in 1...2 {
       let actual = path.extract(from: root)
       XCTAssertEqual(actual, "deadbeef")
     }
-    XCTAssertEqual(CasePath(Authentication.authenticated).extract(from: root), "deadbeef")
+    XCTAssertEqual(AnyCasePath(Authentication.authenticated).extract(from: root), "deadbeef")
   }
 
   func testPathExtractFromOptionalRoot_AnyHashable() {
@@ -611,7 +611,7 @@ final class CasePathsTests: XCTestCase {
     }
 
     let root: Authentication? = .authenticated(token: "deadbeef")
-    let path: CasePath<Authentication?, String> = /Authentication.authenticated
+    let path: AnyCasePath<Authentication?, String> = /Authentication.authenticated
     for _ in 1...2 {
       let actual = path.extract(from: root)
       XCTAssertEqual(actual, "deadbeef")
@@ -624,8 +624,8 @@ final class CasePathsTests: XCTestCase {
     let fooBar = /Foo.bar
     XCTAssertEqual(.bar(42), fooBar.embed(42))
     XCTAssertEqual(.bar(42), (/Foo.self).embed(Foo.bar(42)))
-    XCTAssertEqual(.bar(42), CasePath(Foo.bar).embed(42))
-    XCTAssertEqual(.bar(42), CasePath(Foo.self).embed(Foo.bar(42)))
+    XCTAssertEqual(.bar(42), AnyCasePath(Foo.bar).embed(42))
+    XCTAssertEqual(.bar(42), AnyCasePath(Foo.self).embed(Foo.bar(42)))
   }
 
   func testNestedEmbed() {
@@ -634,15 +634,15 @@ final class CasePathsTests: XCTestCase {
 
     let fooBaz = /Foo.bar .. Bar.baz
     XCTAssertEqual(.bar(.baz(42)), fooBaz.embed(42))
-    XCTAssertEqual(.bar(.baz(42)), CasePath(Foo.bar).appending(path: .init(Bar.baz)).embed(42))
+    XCTAssertEqual(.bar(.baz(42)), AnyCasePath(Foo.bar).appending(path: .init(Bar.baz)).embed(42))
   }
 
-  func testVoidCasePath() {
+  func testVoidAnyCasePath() {
     enum Foo: Equatable { case bar }
 
     let fooBar = /Foo.bar
     XCTAssertEqual(.bar, fooBar.embed(()))
-    XCTAssertEqual(.bar, CasePath(Foo.bar).embed(()))
+    XCTAssertEqual(.bar, AnyCasePath(Foo.bar).embed(()))
   }
 
   func testCasePaths() {
@@ -656,10 +656,10 @@ final class CasePathsTests: XCTestCase {
     )
     XCTAssertEqual(
       .some("Hello"),
-      CasePath(String?.some).extract(from: "Hello")
+      AnyCasePath(String?.some).extract(from: "Hello")
     )
     XCTAssertNil(
-      CasePath(String?.some).extract(from: .none)
+      AnyCasePath(String?.some).extract(from: .none)
     )
 
     struct MyError: Equatable, Error {}
@@ -692,10 +692,10 @@ final class CasePathsTests: XCTestCase {
       )
     }
 
-    success = CasePath(Result<String, Error>.success)
-    failure = CasePath(Result<String, Error>.failure)
-    mySuccess = CasePath(Result<String, MyError>.success)
-    myFailure = CasePath(Result<String, MyError>.failure)
+    success = AnyCasePath(Result<String, Error>.success)
+    failure = AnyCasePath(Result<String, Error>.failure)
+    mySuccess = AnyCasePath(Result<String, MyError>.success)
+    myFailure = AnyCasePath(Result<String, MyError>.failure)
 
     XCTAssertEqual(
       .some("Hello"),
@@ -734,11 +734,11 @@ final class CasePathsTests: XCTestCase {
 
     XCTAssertEqual(
       .some(42),
-      CasePath(Int.self).extract(from: 42)
+      AnyCasePath(Int.self).extract(from: 42)
     )
     XCTAssertEqual(
       .some(42),
-      CasePath(Int.self)
+      AnyCasePath(Int.self)
         .extract(from: 42)
     )
   }
@@ -767,10 +767,10 @@ final class CasePathsTests: XCTestCase {
 
     XCTAssertEqual(
       .some(42),
-      CasePath(Foo.bar(some:)).extract(from: .bar(some: 42))
+      AnyCasePath(Foo.bar(some:)).extract(from: .bar(some: 42))
     )
     XCTAssertNil(
-      CasePath(Foo.bar(some:)).extract(from: .bar(none: 42))
+      AnyCasePath(Foo.bar(some:)).extract(from: .bar(none: 42))
     )
   }
 
@@ -793,7 +793,7 @@ final class CasePathsTests: XCTestCase {
       case bar(fizz: Int, buzz: String)
     }
 
-    let fooBar: CasePath<Foo, (fizz: Int, buzz: String)> = /Foo.bar(fizz:buzz:)
+    let fooBar: AnyCasePath<Foo, (fizz: Int, buzz: String)> = /Foo.bar(fizz:buzz:)
     guard let fizzBuzz = fooBar.extract(from: .bar(fizz: 42, buzz: "Blob"))
     else {
       XCTFail()
@@ -842,7 +842,7 @@ final class CasePathsTests: XCTestCase {
       case something(Void)
     }
 
-    let path: CasePath<Enum, (Never, Never)> = /Enum.nevers(_:_:)
+    let path: AnyCasePath<Enum, (Never, Never)> = /Enum.nevers(_:_:)
 
     for _ in 1...2 {
       XCTAssertNil(path.extract(from: Enum.something(())))
@@ -988,25 +988,25 @@ final class CasePathsTests: XCTestCase {
     XCTAssertEqual(42, (/Int??.some .. Int?.some).extract(from: Optional(Optional(42))))
   }
 
-  func testConstantCasePath() {
-    XCTAssertEqual(.some(42), CasePath.constant(42).extract(from: ()))
-    XCTAssertNotNil(CasePath.constant(42).embed(42))
+  func testConstantAnyCasePath() {
+    XCTAssertEqual(.some(42), AnyCasePath.constant(42).extract(from: ()))
+    XCTAssertNotNil(AnyCasePath.constant(42).embed(42))
   }
 
-  func testNeverCasePath() {
-    XCTAssertNil(CasePath.never.extract(from: 42))
+  func testNeverAnyCasePath() {
+    XCTAssertNil(AnyCasePath.never.extract(from: 42))
   }
 
   func testRawValuePath() {
     enum Foo: String { case bar, baz }
 
-    XCTAssertEqual(.some(.bar), CasePath<String, Foo>.rawValue.extract(from: "bar"))
-    XCTAssertEqual("baz", CasePath.rawValue.embed(Foo.baz))
+    XCTAssertEqual(.some(.bar), AnyCasePath<String, Foo>.rawValue.extract(from: "bar"))
+    XCTAssertEqual("baz", AnyCasePath.rawValue.embed(Foo.baz))
   }
 
   func testDescriptionPath() {
-    XCTAssertEqual(.some(42), CasePath.description.extract(from: "42"))
-    XCTAssertEqual("42", CasePath.description.embed(42))
+    XCTAssertEqual(.some(42), AnyCasePath.description.extract(from: "42"))
+    XCTAssertEqual("42", AnyCasePath.description.embed(42))
   }
 
   func testA() {
@@ -1043,13 +1043,13 @@ final class CasePathsTests: XCTestCase {
   func testCustomStringConvertible() {
     XCTAssertEqual(
       "\(/Result<String, Error>.success)",
-      "CasePath<Result<String, Error>, String>"
+      "AnyCasePath<Result<String, Error>, String>"
     )
   }
 
   func testOptionalInsideResult() {
     let result: Result<String?, Error> = .success("hello, world")
-    let path: CasePath<Result<String?, Error>, String> = /Result.success
+    let path: AnyCasePath<Result<String?, Error>, String> = /Result.success
     let actual = path.extract(from: result)
     XCTAssertEqual(
       actual,
@@ -1110,10 +1110,10 @@ final class CasePathsTests: XCTestCase {
     }
 
     let o = TestObject()
-    let c1Path: CasePath<E?, TestObject> = /E.c1
-    let c2Path: CasePath<E?, TestObject> = /E.c2
+    let c1Path: AnyCasePath<E?, TestObject> = /E.c1
+    let c2Path: AnyCasePath<E?, TestObject> = /E.c2
 
-    func check(_ path: CasePath<E?, TestObject>, _ input: E?, _ expected: TestObject?) {
+    func check(_ path: AnyCasePath<E?, TestObject>, _ input: E?, _ expected: TestObject?) {
       let actual = path.extract(from: input)
       XCTAssertEqual(actual, expected)
     }
@@ -1230,7 +1230,7 @@ final class CasePathsTests: XCTestCase {
 
       await withTaskGroup(of: Void.self) { group in
         for index in 1...maxIterations {
-          let casePath1 = CasePath<Enum, Int> {
+          let casePath1 = AnyCasePath<Enum, Int> {
             count += 1
             return .payload($0)
           }
@@ -1239,7 +1239,7 @@ final class CasePathsTests: XCTestCase {
             XCTAssertEqual(casePath1.embed(index), .payload(index))
           }
 
-          let casePath2 = CasePath<Enum, Int> {
+          let casePath2 = AnyCasePath<Enum, Int> {
             count += 1
             return .payload($0)
           }

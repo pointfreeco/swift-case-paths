@@ -9,14 +9,14 @@ enum Enum {
 let enumCase = Enum.associatedValue(42)
 let anotherCase = Enum.anotherAssociatedValue("Blob")
 
-let manual = CasePath(
+let manual = AnyCasePath(
   embed: Enum.associatedValue,
   extract: {
     guard case let .associatedValue(value) = $0 else { return nil }
     return value
   }
 )
-let reflection: CasePath<Enum, Int> = /Enum.associatedValue
+let reflection: AnyCasePath<Enum, Int> = /Enum.associatedValue
 
 let success = BenchmarkSuite(name: "Success") {
   $0.benchmark("Manual") {

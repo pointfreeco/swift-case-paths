@@ -49,7 +49,7 @@ public func XCTUnwrap<Enum, Case>(
 ///   - body: A closure that can modify the associated value of the given case.
 public func XCTModify<Enum, Case>(
   _ enum: inout Enum,
-  case casePath: CasePath<Enum, Case>,
+  case casePath: AnyCasePath<Enum, Case>,
   _ message: @autoclosure () -> String = "",
   _ body: (inout Case) throws -> Void,
   file: StaticString = #file,

@@ -1,4 +1,4 @@
-extension CasePath {
+extension AnyCasePath {
   /// Returns a case path for the given embed function.
   ///
   /// - Note: This operator is only intended to be used with enum case initializers. Its behavior is
@@ -21,7 +21,7 @@ extension CasePath {
   }
 }
 
-extension CasePath where Value == Void {
+extension AnyCasePath where Value == Void {
   /// Returns a void case path for a case with no associated value.
   ///
   /// - Note: This operator is only intended to be used with enum cases that have no associated
@@ -40,7 +40,7 @@ extension CasePath where Value == Void {
   }
 }
 
-extension CasePath where Root == Value {
+extension AnyCasePath where Root == Value {
   /// Returns the identity case path for the given type. Enables `CasePath(MyType.self)` syntax.
   ///
   /// - Parameter type: A type for which to return the identity case path.
@@ -50,7 +50,7 @@ extension CasePath where Root == Value {
   }
 }
 
-extension CasePath {
+extension AnyCasePath {
   /// Returns a case path that extracts values associated with a given enum case initializer.
   ///
   /// - Note: This function is only intended to be used with enum case initializers. Its behavior is
@@ -58,7 +58,7 @@ extension CasePath {
   /// - Parameter embed: An enum case initializer.
   /// - Returns: A case path that extracts associated values from enum cases.
   @available(*, deprecated, message: "Use case path literal syntax (e.g., '/Root.caseName')")
-  public static func `case`(_ embed: @escaping (Value) -> Root) -> CasePath {
+  public static func `case`(_ embed: @escaping (Value) -> Root) -> Self {
     self.init(
       embed: embed,
       extract: CasePaths.extract(embed)
@@ -66,7 +66,7 @@ extension CasePath {
   }
 }
 
-extension CasePath where Value == Void {
+extension AnyCasePath where Value == Void {
   /// Returns a case path that successfully extracts `()` from a given enum case with no associated
   /// values.
   ///
@@ -75,8 +75,8 @@ extension CasePath where Value == Void {
   /// - Parameter value: An enum case with no associated values.
   /// - Returns: A case path that extracts `()` if the case matches, otherwise `nil`.
   @available(*, deprecated, message: "Use case path literal syntax (e.g., '/Root.caseName')")
-  public static func `case`(_ value: Root) -> CasePath {
-    CasePath(
+  public static func `case`(_ value: Root) -> Self {
+    Self(
       embed: { value },
       extract: extractVoidHelp(value)
     )
