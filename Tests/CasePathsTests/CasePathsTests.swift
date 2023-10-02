@@ -1040,6 +1040,7 @@ final class CasePathsTests: XCTestCase {
     }
   }
 
+  @available(*, deprecated)
   func testCustomStringConvertible() {
     XCTAssertEqual(
       "\(/Result<String, Error>.success)",

@@ -82,13 +82,6 @@ public struct AnyCasePath<Root, Value> {
   extension AnyCasePath: @unchecked Sendable {}
 #endif
 
-// TODO: Deprecate
-extension AnyCasePath: CustomStringConvertible {
-  public var description: String {
-    "AnyCasePath<\(typeName(Root.self)), \(typeName(Value.self))>"
-  }
-}
-
 struct ExtractionFailed: Error {}
 
 private let lock = NSRecursiveLock()

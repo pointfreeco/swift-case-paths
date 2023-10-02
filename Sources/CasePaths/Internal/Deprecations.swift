@@ -3,6 +3,13 @@
 @available(*, deprecated, renamed: "AnyCasePath")
 public typealias CasePath = AnyCasePath
 
+@available(*, deprecated)
+extension AnyCasePath: CustomStringConvertible {
+  public var description: String {
+    "AnyCasePath<\(typeName(Root.self)), \(typeName(Value.self))>"
+  }
+}
+
 // Deprecated after 0.5.0:
 
 extension AnyCasePath {
