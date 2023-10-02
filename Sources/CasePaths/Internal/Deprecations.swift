@@ -1,0 +1,132 @@
+// Deprecated after 1.0.0:
+
+@available(*, deprecated, renamed: "AnyCasePath")
+public typealias CasePath = AnyCasePath
+
+// Deprecated after 0.5.0:
+
+extension AnyCasePath {
+  /// Returns a case path that extracts values associated with a given enum case initializer.
+  ///
+  /// - Note: This function is only intended to be used with enum case initializers. Its behavior is
+  ///   otherwise undefined.
+  /// - Parameter embed: An enum case initializer.
+  /// - Returns: A case path that extracts associated values from enum cases.
+  @available(*, deprecated, message: "Use case path literal syntax (e.g., '/Root.caseName')")
+  public static func `case`(_ embed: @escaping (Value) -> Root) -> Self {
+    self.init(
+      embed: embed,
+      extract: CasePaths.extract(embed)
+    )
+  }
+}
+
+extension AnyCasePath where Value == Void {
+  /// Returns a case path that successfully extracts `()` from a given enum case with no associated
+  /// values.
+  ///
+  /// - Note: This function is only intended to be used with enum cases that have no associated
+  ///   values. Its behavior is otherwise undefined.
+  /// - Parameter value: An enum case with no associated values.
+  /// - Returns: A case path that extracts `()` if the case matches, otherwise `nil`.
+  @available(*, deprecated, message: "Use case path literal syntax (e.g., '/Root.caseName')")
+  public static func `case`(_ value: Root) -> Self {
+    Self(
+      embed: { value },
+      extract: extractVoidHelp(value)
+    )
+  }
+}
+
+/// Attempts to extract values associated with a given enum case initializer from a given root enum.
+///
+/// ```swift
+/// extract(case: Result<Int, Error>.success, from: .success(42))
+/// // 42
+/// extract(case: Result<Int, Error>.success, from: .failure(MyError())
+/// // nil
+/// ```
+///
+/// - Note: This function is only intended to be used with enum case initializers. Its behavior is
+///   otherwise undefined.
+/// - Parameters:
+///   - embed: An enum case initializer.
+///   - root: A root enum value.
+/// - Returns: Values if they can be extracted from the given enum case initializer and root enum,
+///   otherwise `nil`.
+@available(
+  *, deprecated,
+  message:
+    "Use case path literal syntax (e.g., '/Root.caseName'), or '(/Root.caseName).extract(from:)'"
+)
+public func extract<Root, Value>(case embed: @escaping (Value) -> Root, from root: Root) -> Value? {
+  CasePaths.extract(embed)(root)
+}
+
+/// Attempts to extract values associated with a given enum case initializer from a given root enum.
+///
+/// ```swift
+/// extract(case: Result<Int, Error>.success, from: .success(42))
+/// // 42
+/// extract(case: Result<Int, Error>.success, from: .failure(MyError())
+/// // nil
+/// ```
+///
+/// - Note: This function is only intended to be used with enum case initializers. Its behavior is
+///   otherwise undefined.
+/// - Parameters:
+///   - embed: An enum case initializer.
+///   - root: A root enum value.
+/// - Returns: Values if they can be extracted from the given enum case initializer and root enum,
+///   otherwise `nil`.
+@available(
+  *, deprecated,
+  message:
+    "Use case path literal syntax (e.g., '/Root.caseName'), or '(/Root.caseName).extract(from:)'"
+)
+public func extract<Root, Value>(case embed: @escaping (Value) -> Root?, from root: Root?) -> Value?
+{
+  CasePaths.extract(embed)(root)
+}
+
+/// Returns a function that can attempt to extract associated values from the given enum case
+/// initializer.
+///
+/// Use this function to create new transform functions to pass to higher-order methods like
+/// `compactMap`:
+///
+/// ```swift
+/// [Result<Int, Error>.success(42), .failure(MyError()]
+///   .compactMap(extract(Result.success))
+/// // [42]
+/// ```
+///
+/// - Note: This function is only intended to be used with enum case initializers. Its behavior is
+///   otherwise undefined.
+/// - Parameter embed: An enum case initializer.
+/// - Returns: A function that can attempt to extract associated values from an enum.
+@available(*, deprecated, message: "Use case path literal syntax (e.g., '/Root.caseName')")
+public func extract<Root, Value>(_ embed: @escaping (Value) -> Root) -> (Root) -> Value? {
+  extractHelp(embed)
+}
+
+/// Returns a function that can attempt to extract associated values from the given enum case
+/// initializer.
+///
+/// Use this function to create new transform functions to pass to higher-order methods like
+/// `compactMap`:
+///
+/// ```swift
+/// [Result<Int, Error>.success(42), .failure(MyError()]
+///   .compactMap(extract(Result.success))
+/// // [42]
+/// ```
+///
+/// - Note: This function is only intended to be used with enum case initializers. Its behavior is
+///   otherwise undefined.
+/// - Parameter embed: An enum case initializer.
+/// - Returns: A function that can attempt to extract associated values from an enum.
+@available(*, deprecated, message: "Use case path literal syntax (e.g., '/Root.caseName')")
+public func extract<Root, Value>(_ embed: @escaping (Value) -> Root?) -> (Root?) -> Value? {
+  optionalPromotedExtractHelp(embed)
+}

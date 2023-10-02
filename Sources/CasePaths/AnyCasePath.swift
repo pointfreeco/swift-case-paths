@@ -1,8 +1,5 @@
 import Foundation
 
-@available(*, deprecated, renamed: "AnyCasePath")
-public typealias CasePath = AnyCasePath
-
 /// A path that supports embedding a value in a root and attempting to extract a root's embedded
 /// value.
 ///
