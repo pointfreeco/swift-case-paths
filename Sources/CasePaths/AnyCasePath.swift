@@ -27,12 +27,12 @@ extension AnyCasePath where Root == Value {
 }
 
 extension AnyCasePath where Root: CasePathable {
-  init(_ keyPath: CasePath<Root, Value>) {
+  public init(_ keyPath: CasePath<Root, Value>) {
     self = AnyCasePath<Root, Root>()[keyPath: keyPath]
   }
 }
 
-extension AnyCasePath where Root: CasePathable, Value: CasePathable {
+extension AnyCasePath where Value: CasePathable {
   public subscript<AppendedValue>(
     dynamicMember keyPath: KeyPath<Value.AllCasePaths, AnyCasePath<Value, AppendedValue>>
   ) -> AnyCasePath<Root, AppendedValue> {

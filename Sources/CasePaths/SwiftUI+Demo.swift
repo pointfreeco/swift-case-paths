@@ -1,3 +1,6 @@
+// CasePath -> AnyCasePath
+// CaseKeyPath -> typealias
+
 import SwiftUI
 
 struct Item: Hashable, Identifiable {
