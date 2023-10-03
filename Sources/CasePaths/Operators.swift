@@ -129,7 +129,9 @@ extension AnyCasePath {
 #endif
 
 #if swift(>=5.9)
-  @available(*, deprecated, message: "Use the '\\.self' case key path, instead")
+  @available(
+    *, deprecated, message: "Use the a case key path (like '\\.self' or '\\.some'), instead"
+  )
   public prefix func / <Root, Value>(
     path: AnyCasePath<Root, Value>
   ) -> AnyCasePath<Root, Value> {

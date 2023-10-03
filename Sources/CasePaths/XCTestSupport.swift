@@ -76,6 +76,16 @@ import Foundation
   }
 #endif
 
+public func XCTModify<Wrapped>(
+  _ enum: inout Wrapped?,
+  _ message: @autoclosure () -> String = "",
+  _ body: (inout Wrapped) throws -> Void,
+  file: StaticString = #file,
+  line: UInt = #line
+) {
+  XCTModify(&`enum`, case: \.some, message(), body, file: file, line: line)
+}
+
 /// Asserts that an enum value matches a particular case and modifies the associated value in place.
 ///
 /// - Parameters:
