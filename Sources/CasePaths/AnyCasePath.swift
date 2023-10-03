@@ -4,6 +4,7 @@ import Foundation
 /// value.
 ///
 /// This type defines key path-like semantics for enum cases.
+@dynamicMemberLookup
 public struct AnyCasePath<Root, Value> {
   private let _embed: (Value) -> Root
   private let _extract: (Root) -> Value?
@@ -75,6 +76,18 @@ public struct AnyCasePath<Root, Value> {
       embed: { self.embed(path.embed($0)) },
       extract: { self.extract(from: $0).flatMap(path.extract) }
     )
+  }
+}
+
+extension AnyCasePath where Root == Value {
+  public init() where Root == Value {
+    self.init(embed: { $0 }, extract: { $0 })
+  }
+}
+
+extension AnyCasePath: CustomDebugStringConvertible {
+  public var debugDescription: String {
+    "AnyCasePath<\(typeName(Root.self)), \(typeName(Value.self))>"
   }
 }
 

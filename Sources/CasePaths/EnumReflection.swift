@@ -1,53 +1,95 @@
 extension AnyCasePath {
-  /// Returns a case path for the given embed function.
-  ///
-  /// - Note: This operator is only intended to be used with enum case initializers. Its behavior is
-  ///   otherwise undefined.
-  /// - Parameter embed: An embed function.
-  /// - Returns: A case path.
-  public init(_ embed: @escaping (Value) -> Root) {
-    func open<Wrapped>(_: Wrapped.Type) -> (Root) -> Value? {
-      optionalPromotedExtractHelp(unsafeBitCast(embed, to: ((Value) -> Wrapped?).self))
-        as! (Root) -> Value?
+  #if swift(>=5.9)
+    @available(*, deprecated, message: "Use a 'CasePathable' case key path, instead")
+    public init(_ embed: @escaping (Value) -> Root) {
+      func open<Wrapped>(_: Wrapped.Type) -> (Root) -> Value? {
+        optionalPromotedExtractHelp(unsafeBitCast(embed, to: ((Value) -> Wrapped?).self))
+          as! (Root) -> Value?
+      }
+      let extract =
+        ((_Witness<Root>.self as? _AnyOptional.Type)?.wrappedType)
+        .map { _openExistential($0, do: open) }
+        ?? extractHelp(embed)
+      self.init(
+        embed: embed,
+        extract: extract
+      )
     }
-    let extract =
-      ((_Witness<Root>.self as? _AnyOptional.Type)?.wrappedType)
-      .map { _openExistential($0, do: open) }
-      ?? extractHelp(embed)
-    self.init(
-      embed: embed,
-      extract: extract
-    )
-  }
+  #else
+    /// Returns a case path for the given embed function.
+    ///
+    /// - Note: This operator is only intended to be used with enum case initializers. Its behavior is
+    ///   otherwise undefined.
+    /// - Parameter embed: An embed function.
+    /// - Returns: A case path.
+    public init(_ embed: @escaping (Value) -> Root) {
+      func open<Wrapped>(_: Wrapped.Type) -> (Root) -> Value? {
+        optionalPromotedExtractHelp(unsafeBitCast(embed, to: ((Value) -> Wrapped?).self))
+          as! (Root) -> Value?
+      }
+      let extract =
+        ((_Witness<Root>.self as? _AnyOptional.Type)?.wrappedType)
+        .map { _openExistential($0, do: open) }
+        ?? extractHelp(embed)
+      self.init(
+        embed: embed,
+        extract: extract
+      )
+    }
+  #endif
 }
 
 extension AnyCasePath where Value == Void {
-  /// Returns a void case path for a case with no associated value.
-  ///
-  /// - Note: This operator is only intended to be used with enum cases that have no associated
-  ///   values. Its behavior is otherwise undefined.
-  /// - Parameter root: A case with no an associated value.
-  /// - Returns: A void case path.
-  public init(_ root: Root) {
-    func open<Wrapped>(_: Wrapped.Type) -> (Root) -> Void? {
-      optionalPromotedExtractVoidHelp(unsafeBitCast(root, to: Wrapped?.self)) as! (Root) -> Void?
+  #if swift(>=5.9)
+    @available(*, deprecated, message: "Use a 'CasePathable' case key path, instead")
+    @_disfavoredOverload
+    public init(_ root: Root) {
+      func open<Wrapped>(_: Wrapped.Type) -> (Root) -> Void? {
+        optionalPromotedExtractVoidHelp(unsafeBitCast(root, to: Wrapped?.self)) as! (Root) -> Void?
+      }
+      let extract =
+        ((_Witness<Root>.self as? _AnyOptional.Type)?.wrappedType)
+        .map { _openExistential($0, do: open) }
+        ?? extractVoidHelp(root)
+      self.init(embed: { root }, extract: extract)
     }
-    let extract =
-      ((_Witness<Root>.self as? _AnyOptional.Type)?.wrappedType)
-      .map { _openExistential($0, do: open) }
-      ?? extractVoidHelp(root)
-    self.init(embed: { root }, extract: extract)
-  }
+  #else
+    /// Returns a void case path for a case with no associated value.
+    ///
+    /// - Note: This operator is only intended to be used with enum cases that have no associated
+    ///   values. Its behavior is otherwise undefined.
+    /// - Parameter root: A case with no an associated value.
+    /// - Returns: A void case path.
+    @_disfavoredOverload
+    public init(_ root: Root) {
+      func open<Wrapped>(_: Wrapped.Type) -> (Root) -> Void? {
+        optionalPromotedExtractVoidHelp(unsafeBitCast(root, to: Wrapped?.self)) as! (Root) -> Void?
+      }
+      let extract =
+        ((_Witness<Root>.self as? _AnyOptional.Type)?.wrappedType)
+        .map { _openExistential($0, do: open) }
+        ?? extractVoidHelp(root)
+      self.init(embed: { root }, extract: extract)
+    }
+
+  #endif
 }
 
 extension AnyCasePath where Root == Value {
-  /// Returns the identity case path for the given type. Enables `CasePath(MyType.self)` syntax.
-  ///
-  /// - Parameter type: A type for which to return the identity case path.
-  /// - Returns: An identity case path.
-  public init(_ type: Root.Type) {
-    self = .self
-  }
+  #if swift(>=5.9)
+    @available(*, deprecated, message: "Use the '\\.self' case key path, instead")
+    public init(_ type: Root.Type) {
+      self = .self
+    }
+  #else
+    /// Returns the identity case path for the given type. Enables `CasePath(MyType.self)` syntax.
+    ///
+    /// - Parameter type: A type for which to return the identity case path.
+    /// - Returns: An identity case path.
+    public init(_ type: Root.Type) {
+      self = .self
+    }
+  #endif
 }
 
 // MARK: - Extraction helpers
