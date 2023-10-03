@@ -3,7 +3,7 @@ public protocol CasePathable {
   static var allCasePaths: AllCasePaths { get }
 }
 
-public typealias CaseKeyPath<Root: CasePathable, Value> = KeyPath<
+public typealias CaseKeyPath<Root, Value> = KeyPath<
   AnyCasePath<Root, Root>, AnyCasePath<Root, Value>
 >
 
@@ -38,7 +38,7 @@ extension CasePathable {
   }
 }
 
-extension AnyCasePath where Root: CasePathable {
+extension AnyCasePath {
   public init(_ keyPath: CaseKeyPath<Root, Value>) {
     self = AnyCasePath<Root, Root>()[keyPath: keyPath]
   }
