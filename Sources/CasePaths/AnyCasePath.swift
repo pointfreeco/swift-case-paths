@@ -18,16 +18,8 @@ public struct AnyCasePath<Root, Value> {
     embed: @escaping (Value) -> Root,
     extract: @escaping (Root) -> Value?
   ) {
-    self._embed = {
-      lock.lock()
-      defer { lock.unlock() }
-      return embed($0)
-    }
-    self._extract = {
-      lock.lock()
-      defer { lock.unlock() }
-      return extract($0)
-    }
+    self._embed = embed
+    self._extract = extract
   }
 
   /// Returns a root by embedding a value.
@@ -63,23 +55,41 @@ public struct AnyCasePath<Root, Value> {
     return result
   }
 
-  /// Returns a new case path created by appending the given case path to this one.
-  ///
-  /// Use this method to extend this case path to the value type of another case path.
-  ///
-  /// - Parameter path: The case path to append.
-  /// - Returns: A case path from the root of this case path to the value type of `path`.
-  public func appending<AppendedValue>(path: AnyCasePath<Value, AppendedValue>) -> AnyCasePath<
-    Root, AppendedValue
-  > {
-    AnyCasePath<Root, AppendedValue>(
-      embed: { self.embed(path.embed($0)) },
-      extract: { self.extract(from: $0).flatMap(path.extract) }
-    )
-  }
+  #if swift(>=5.9)
+    @available(*, deprecated, message: "Chain case key paths together, instead.")
+    public func appending<AppendedValue>(
+      path: AnyCasePath<Value, AppendedValue>
+    ) -> AnyCasePath<Root, AppendedValue> {
+      AnyCasePath<Root, AppendedValue>(
+        embed: { self.embed(path.embed($0)) },
+        extract: { self.extract(from: $0).flatMap(path.extract) }
+      )
+    }
+  #else
+    /// Returns a new case path created by appending the given case path to this one.
+    ///
+    /// Use this method to extend this case path to the value type of another case path.
+    ///
+    /// - Parameter path: The case path to append.
+    /// - Returns: A case path from the root of this case path to the value type of `path`.
+    public func appending<AppendedValue>(
+      path: AnyCasePath<Value, AppendedValue>
+    ) -> AnyCasePath<Root, AppendedValue> {
+      AnyCasePath<Root, AppendedValue>(
+        embed: { self.embed(path.embed($0)) },
+        extract: { self.extract(from: $0).flatMap(path.extract) }
+      )
+    }
+  #endif
 }
 
 extension AnyCasePath where Root == Value {
+  /// The identity case path.
+  ///
+  /// A case path that:
+  ///
+  ///   * Given a value to embed, returns the given value.
+  ///   * Given a value to extract, returns the given value.
   public init() where Root == Value {
     self.init(embed: { $0 }, extract: { $0 })
   }
@@ -96,5 +106,3 @@ extension AnyCasePath: CustomDebugStringConvertible {
 #endif
 
 struct ExtractionFailed: Error {}
-
-private let lock = NSRecursiveLock()

@@ -1,3 +1,5 @@
+import Foundation
+
 extension AnyCasePath {
   #if swift(>=5.9)
     @available(*, deprecated, message: "Use a 'CasePathable' case key path, instead")
@@ -94,7 +96,11 @@ extension AnyCasePath where Root == Value {
 
 // MARK: - Extraction helpers
 
+private let lock = NSRecursiveLock()
+
 func extractHelp<Root, Value>(_ embed: @escaping (Value) -> Root) -> (Root) -> Value? {
+  lock.lock()
+  defer { lock.unlock() }
   guard
     let metadata = EnumMetadata(Root.self),
     metadata.typeDescriptor.fieldDescriptor != nil
