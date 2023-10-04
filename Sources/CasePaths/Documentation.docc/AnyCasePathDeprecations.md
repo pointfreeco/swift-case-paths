@@ -24,7 +24,7 @@ Avoid using deprecated APIs in your app. See the replacement that you should use
 
 ### Modifying values
 
-- ``modify(_:_:)``
+- ``AnyCasePath/modify(_:_:)``
 
 ### Appending paths
 

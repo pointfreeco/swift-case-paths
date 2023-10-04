@@ -155,7 +155,7 @@ extension CaseKeyPath {
   ///
   /// - Parameter value: A value to embed.
   /// - Returns: An enum for the case of this key path that holds the given value.
-  public func callAsFunction<Enum: CasePathable, AssociatedValue>(_ value: AssociatedValue) -> Enum
+  public func callAsFunction<Enum, AssociatedValue>(_ value: AssociatedValue) -> Enum
   where Root == AnyCasePath<Enum, Enum>, Value == AnyCasePath<Enum, AssociatedValue> {
     AnyCasePath(self).embed(value)
   }
@@ -178,7 +178,7 @@ extension CaseKeyPath {
   /// ```
   ///
   /// - Returns: An enum for the case of this key path.
-  public func callAsFunction<Enum: CasePathable>() -> Enum
+  public func callAsFunction<Enum>() -> Enum
   where Root == AnyCasePath<Enum, Enum>, Value == AnyCasePath<Enum, Void> {
     AnyCasePath(self).embed(())
   }

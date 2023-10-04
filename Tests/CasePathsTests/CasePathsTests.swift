@@ -67,6 +67,16 @@ final class CasePathsTests: XCTestCase {
     XCTAssertNotNil(Result<Int, Error>.failure(SomeError())[keyPath: \.failure])
     XCTAssertEqual((\Result<Int, SomeError>.Cases.failure)(SomeError()), .failure(SomeError()))
   }
+
+  func testSelfCaseKeyPathCallAsFunction() {
+    enum Loadable: Equatable { case isLoading(progress: Float), isLoaded }
+
+    var loadable = Loadable.isLoading(progress: 0)
+    loadable = (\.self as CaseKeyPath<Loadable, Loadable>)(.isLoading(progress: 0.5))
+    XCTAssertEqual(loadable, .isLoading(progress: 0.5))
+    loadable = (\.self as CaseKeyPath<Loadable, Loadable>)(.isLoaded)
+    XCTAssertEqual(loadable, .isLoaded)
+  }
 }
 
 @CasePathable enum Foo: Equatable {
