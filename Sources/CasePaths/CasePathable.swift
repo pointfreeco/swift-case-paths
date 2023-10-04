@@ -102,11 +102,14 @@ public protocol CasePathable {
 ///   case outer(SomeEnum)
 /// }
 ///
-/// let nested = OuterEnum.outer(.someCase(24))
+/// var nested = OuterEnum.outer(.someCase(24))
 /// let nestedCaseKeyPath = \OuterEnum.Cases.outer.someCase
 ///
 /// let nestedValue = nested[keyPath: nestedCaseKeyPath]
 /// // nestedValue is Optional(24)
+///
+/// nested[keyPath: \.outer.someCase] = 42
+/// // nested is now OuterEnum.outer(.someCase(42))
 /// ```
 ///
 /// Key paths have the identity key path `\SomeStructure.self`, and so case key paths have the
