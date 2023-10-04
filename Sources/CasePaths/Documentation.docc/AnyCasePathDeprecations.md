@@ -27,7 +27,7 @@ Avoid using deprecated APIs in your app. See the replacement that you should use
 
 ### Appending paths
 
-- ``appending(path:)``
+- ``AnyCasePath/appending(path:)``
 - ``AnyCasePath/..(_:_:)-8bw4h``
 - ``AnyCasePath/..(_:_:)-8n2ce``
 - ``CasePaths/..(_:_:)``
