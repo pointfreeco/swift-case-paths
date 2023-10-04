@@ -27,6 +27,7 @@ extension AnyCasePath {
 
 #if swift(>=5.9)
   @available(*, deprecated, message: "Use a 'CasePathable' case key path, instead")
+  @_documentation(visibility: internal)
   public prefix func / <Root, Value>(
     embed: @escaping (Value) -> Root
   ) -> AnyCasePath<Root, Value> {
@@ -48,6 +49,7 @@ extension AnyCasePath {
 
 #if swift(>=5.9)
   @available(*, deprecated, message: "Use a 'CasePathable' case key path, instead")
+  @_documentation(visibility: internal)
   public prefix func / <Root, Value>(
     embed: @escaping (Value) -> Root?
   ) -> AnyCasePath<Root?, Value> {
@@ -69,6 +71,7 @@ extension AnyCasePath {
 
 #if swift(>=5.9)
   @available(*, deprecated, message: "Use a 'CasePathable' case key path, instead")
+  @_documentation(visibility: internal)
   public prefix func / <Root>(
     root: Root
   ) -> AnyCasePath<Root, Void> {
@@ -90,6 +93,7 @@ extension AnyCasePath {
 
 #if swift(>=5.9)
   @available(*, deprecated, message: "Use a 'CasePathable' case key path, instead")
+  @_documentation(visibility: internal)
   public prefix func / <Root>(
     root: Root?
   ) -> AnyCasePath<Root?, Void> {
@@ -111,6 +115,7 @@ extension AnyCasePath {
 
 #if swift(>=5.9)
   @available(*, deprecated, message: "Use the '\\.self' case key path, instead")
+  @_documentation(visibility: internal)
   public prefix func / <Root>(
     type: Root.Type
   ) -> AnyCasePath<Root, Root> {
@@ -132,6 +137,7 @@ extension AnyCasePath {
   @available(
     *, deprecated, message: "Use the a case key path (like '\\.self' or '\\.some'), instead"
   )
+  @_documentation(visibility: internal)
   public prefix func / <Root, Value>(
     path: AnyCasePath<Root, Value>
   ) -> AnyCasePath<Root, Value> {
@@ -153,6 +159,7 @@ extension AnyCasePath {
 #if swift(>=5.9)
   @available(*, deprecated, message: "Use a 'CasePathable' case property, instead")
   @_disfavoredOverload
+  @_documentation(visibility: internal)
   public prefix func / <Root, Value>(
     embed: @escaping (Value) -> Root
   ) -> (Root) -> Value? {
@@ -186,6 +193,7 @@ extension AnyCasePath {
 #if swift(>=5.9)
   @available(*, deprecated, message: "Use a 'CasePathable' case property, instead")
   @_disfavoredOverload
+  @_documentation(visibility: internal)
   public prefix func / <Root, Value>(
     embed: @escaping (Value) -> Root?
   ) -> (Root?) -> Value? {
@@ -219,6 +227,7 @@ extension AnyCasePath {
 #if swift(>=5.9)
   @available(*, deprecated, message: "Use a 'CasePathable' case property, instead")
   @_disfavoredOverload
+  @_documentation(visibility: internal)
   public prefix func / <Root>(
     root: Root
   ) -> (Root) -> Void? {
@@ -242,6 +251,7 @@ extension AnyCasePath {
 #if swift(>=5.9)
   @available(*, deprecated, message: "Use a 'CasePathable' case property, instead")
   @_disfavoredOverload
+  @_documentation(visibility: internal)
   public prefix func / <Root>(
     root: Root
   ) -> (Root?) -> Void? {
