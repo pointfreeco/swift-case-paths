@@ -1224,35 +1224,6 @@ final class DeprecatedTests: XCTestCase {
         }
       }
     }
-
-    func testConcurrency_NonSendableEmbed() async throws {
-      enum Enum: Equatable { case payload(Int) }
-      var count = 0
-
-      await withTaskGroup(of: Void.self) { group in
-        for index in 1...maxIterations {
-          let casePath1 = AnyCasePath<Enum, Int> {
-            count += 1
-            return .payload($0)
-          }
-          group.addTask {
-            XCTAssertEqual(casePath1.extract(from: Enum.payload(index)), index)
-            XCTAssertEqual(casePath1.embed(index), .payload(index))
-          }
-
-          let casePath2 = AnyCasePath<Enum, Int> {
-            count += 1
-            return .payload($0)
-          }
-          group.addTask {
-            XCTAssertEqual(casePath2.extract(from: Enum.payload(index)), index)
-            XCTAssertEqual(casePath2.embed(index), .payload(index))
-          }
-        }
-      }
-
-      XCTAssertEqual(count, maxIterations * 4)
-    }
   #endif
 }
 

@@ -8,11 +8,10 @@
 - ``init(_:)-2gro0``
 - ``init()``
 
-### Extracting, embedding, and modifying values
+### Extracting and embedding values
 
 - ``extract(from:)``
 - ``embed(_:)``
-- ``modify(_:_:)``
 
 ### Appending paths
 

@@ -76,14 +76,20 @@ import Foundation
   }
 #endif
 
+/// Asserts that an enum value matches a particular case and modifies the associated value in place.
+///
+/// - Parameters:
+///   - optional: An optional value.
+///   - message: An optional description of a failure.
+///   - body: A closure that can modify the wrapped value of the given optional.
 public func XCTModify<Wrapped>(
-  _ enum: inout Wrapped?,
+  _ optional: inout Wrapped?,
   _ message: @autoclosure () -> String = "",
   _ body: (inout Wrapped) throws -> Void,
   file: StaticString = #file,
   line: UInt = #line
 ) {
-  XCTModify(&`enum`, case: \.some, message(), body, file: file, line: line)
+  XCTModify(&optional, case: \.some, message(), body, file: file, line: line)
 }
 
 /// Asserts that an enum value matches a particular case and modifies the associated value in place.
@@ -136,7 +142,7 @@ public func XCTModify<Enum, Case>(
   }
 #endif
 
-func _XCTModify<Enum, Case>(
+private func _XCTModify<Enum, Case>(
   _ enum: inout Enum,
   case casePath: AnyCasePath<Enum, Case>,
   _ message: @autoclosure () -> String = "",

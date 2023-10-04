@@ -22,8 +22,9 @@ Avoid using deprecated APIs in your app. See the replacement that you should use
 - ``AnyCasePath/description-type.property``
 - ``AnyCasePath/rawValue``
 
-<!-- TODO: Can't reference `/` yet -->
-<!-- https://github.com/apple/swift-docc/issues/714 -->
+### Modifying values
+
+- ``modify(_:_:)``
 
 ### Appending paths
 

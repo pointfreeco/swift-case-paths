@@ -29,6 +29,10 @@ Case paths bring the power and ergonomics of key paths to enums.
 
 - ``XCTModify(_:case:_:_:file:line:)-7cezk``
 
+### Guides
+
+- <doc:Swift59>
+
 ### Deprecated interfaces
 
 - <doc:Deprecations>
