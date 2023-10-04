@@ -114,7 +114,7 @@ public protocol CasePathable {
 ///
 /// Key paths have the identity key path `\SomeStructure.self`, and so case key paths have the
 /// identity case key path `\SomeEnum.Cases.self`. It refers to the whole enum and can be passed to
-/// a function that takes case key paths when one wants to extract, change, or replace all of the
+/// a function that takes case key paths when you want to extract, change, or replace all of the
 /// data stored in an enum in a single step.
 ///
 /// Because the ``CasePathable()`` macro produces a property to the data for each enum case, you can
