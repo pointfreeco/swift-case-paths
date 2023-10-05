@@ -326,3 +326,25 @@ extension AnyCasePath where Value: CasePathable {
     )
   }
 }
+
+// TODO: Consider any of these?
+
+// .filter { \.playedWord ~= $0.type }
+extension KeyPath {
+  public static func ~=<Enum: CasePathable, AssociatedValue>(lhs: KeyPath, rhs: Enum) -> Bool
+  where Root == AnyCasePath<Enum, Enum>, Value == AnyCasePath<Enum, AssociatedValue> {
+    rhs[keyPath: lhs] != nil
+  }
+}
+
+extension CasePathable {
+  // .filter { $0.type.is(\.playedWord) }
+  public func `is`<Value>(_ keyPath: CaseKeyPath<Self, Value>) -> Bool {
+    self[keyPath: keyPath] != nil
+  }
+
+  // .filter(\.type[is: \.playedWord])
+  public subscript<Value>(is keyPath: CaseKeyPath<Self, Value>) -> Bool {
+    self[keyPath: keyPath] != nil
+  }
+}
