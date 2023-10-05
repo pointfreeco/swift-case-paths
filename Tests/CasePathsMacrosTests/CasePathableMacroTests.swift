@@ -98,6 +98,42 @@ final class CasePathableMacroTests: XCTestCase {
     }
   }
 
+  func testCasePathable_withoutProperties() {
+    assertMacro {
+      """
+      @CasePathable(withProperties: false) enum Foo {
+        case bar
+      }
+      """
+    } expansion: {
+      #"""
+      enum Foo {
+        case bar
+
+        struct AllCasePaths {
+          var bar: CasePaths.AnyCasePath<Foo, Void> {
+            CasePaths.AnyCasePath<Foo, Void>(
+              embed: {
+                .bar
+              },
+              extract: {
+                guard case .bar = $0 else {
+                  return nil
+                }
+                return ()
+              }
+            )
+          }
+        }
+        static var allCasePaths: AllCasePaths { AllCasePaths() }
+      }
+
+      extension Foo: CasePaths.CasePathable {
+      }
+      """#
+    }
+  }
+
   func testCasePathable_ElementList() {
     assertMacro {
       """
