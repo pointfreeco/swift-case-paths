@@ -35,7 +35,7 @@ final class CasePathableMacroTests: XCTestCase {
           var bar: CasePaths.AnyCasePath<Foo, Void> {
             CasePaths.AnyCasePath<Foo, Void>(
               embed: {
-                .bar
+                Foo.bar
               },
               extract: {
                 guard case .bar = $0 else {
@@ -47,9 +47,7 @@ final class CasePathableMacroTests: XCTestCase {
           }
           var baz: CasePaths.AnyCasePath<Foo, Int> {
             CasePaths.AnyCasePath<Foo, Int>(
-              embed: {
-                .baz($0)
-              },
+              embed: Foo.baz,
               extract: {
                 guard case let .baz(v0) = $0 else {
                   return nil
@@ -60,9 +58,7 @@ final class CasePathableMacroTests: XCTestCase {
           }
           var fizz: CasePaths.AnyCasePath<Foo, String> {
             CasePaths.AnyCasePath<Foo, String>(
-              embed: {
-                .fizz(buzz: $0)
-              },
+              embed: Foo.fizz,
               extract: {
                 guard case let .fizz(v0) = $0 else {
                   return nil
@@ -73,9 +69,7 @@ final class CasePathableMacroTests: XCTestCase {
           }
           var fizzier: CasePaths.AnyCasePath<Foo, (Int, buzzier: String)> {
             CasePaths.AnyCasePath<Foo, (Int, buzzier: String)>(
-              embed: {
-                .fizzier($0, buzzier: $1)
-              },
+              embed: Foo.fizzier,
               extract: {
                 guard case let .fizzier(v0, v1) = $0 else {
                   return nil
@@ -101,12 +95,12 @@ final class CasePathableMacroTests: XCTestCase {
   func testCasePathable_withoutProperties() {
     assertMacro {
       """
-      @CasePathable(withProperties: false) enum Foo {
+      @CasePathable(withGetters: false) enum Foo {
         case bar
       }
       """
     } expansion: {
-      #"""
+      """
       enum Foo {
         case bar
 
@@ -114,7 +108,7 @@ final class CasePathableMacroTests: XCTestCase {
           var bar: CasePaths.AnyCasePath<Foo, Void> {
             CasePaths.AnyCasePath<Foo, Void>(
               embed: {
-                .bar
+                Foo.bar
               },
               extract: {
                 guard case .bar = $0 else {
@@ -130,7 +124,7 @@ final class CasePathableMacroTests: XCTestCase {
 
       extension Foo: CasePaths.CasePathable {
       }
-      """#
+      """
     }
   }
 
@@ -149,9 +143,7 @@ final class CasePathableMacroTests: XCTestCase {
         public struct AllCasePaths {
           public var bar: CasePaths.AnyCasePath<Foo, Int> {
             CasePaths.AnyCasePath<Foo, Int>(
-              embed: {
-                .bar($0)
-              },
+              embed: Foo.bar,
               extract: {
                 guard case let .bar(v0) = $0 else {
                   return nil
@@ -162,9 +154,7 @@ final class CasePathableMacroTests: XCTestCase {
           }
           public var baz: CasePaths.AnyCasePath<Foo, String> {
             CasePaths.AnyCasePath<Foo, String>(
-              embed: {
-                .baz($0)
-              },
+              embed: Foo.baz,
               extract: {
                 guard case let .baz(v0) = $0 else {
                   return nil
@@ -200,9 +190,7 @@ final class CasePathableMacroTests: XCTestCase {
         public struct AllCasePaths {
           public var bar: CasePaths.AnyCasePath<Foo, Int> {
             CasePaths.AnyCasePath<Foo, Int>(
-              embed: {
-                .bar($0)
-              },
+              embed: Foo.bar,
               extract: {
                 guard case let .bar(v0) = $0 else {
                   return nil
@@ -234,9 +222,7 @@ final class CasePathableMacroTests: XCTestCase {
         struct AllCasePaths {
           var bar: CasePaths.AnyCasePath<Foo, Int> {
             CasePaths.AnyCasePath<Foo, Int>(
-              embed: {
-                .bar($0)
-              },
+              embed: Foo.bar,
               extract: {
                 guard case let .bar(v0) = $0 else {
                   return nil

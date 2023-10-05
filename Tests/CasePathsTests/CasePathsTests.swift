@@ -83,10 +83,13 @@ final class CasePathsTests: XCTestCase {
   case bar(Bar)
   case baz(Baz)
   case fizzBuzz
+  case blob(Blob)
 }
 @CasePathable enum Bar: Equatable {
   case int(Int)
 }
 @CasePathable enum Baz: Equatable {
   case string(String)
+}
+@CasePathable enum Blob: Equatable {
 }

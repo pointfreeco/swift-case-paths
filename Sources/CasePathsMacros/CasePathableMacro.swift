@@ -51,20 +51,19 @@ extension CasePathableMacro: MemberMacro {
     providingMembersOf declaration: Declaration,
     in context: Context
   ) throws -> [DeclSyntax] {
-    let withProperties: Bool
 
+    let withGetters: Bool
     switch node.arguments {
     case let .argumentList(list):
-      withProperties =
+      withGetters =
         list
-        .first(where: { $0.label?.text == "withProperties" })?
+        .first(where: { $0.label?.text == "withGetters" })?
         .expression
         .as(BooleanLiteralExprSyntax.self)?
         .literal
         .text != "false"
-
     default:
-      withProperties = true
+      withGetters = true
     }
 
     guard let enumDecl = declaration.as(EnumDeclSyntax.self)
@@ -103,25 +102,15 @@ extension CasePathableMacro: MemberMacro {
       let caseName = enumCaseDecl.name.trimmed
       let associatedValueName = enumCaseDecl.trimmedTypeDescription
       let hasPayload = enumCaseDecl.parameterClause.map { !$0.parameters.isEmpty } ?? false
-      let embedNames: String
       let bindingNames: String
       let returnName: String
       if hasPayload, let associatedValue = enumCaseDecl.parameterClause {
-        embedNames =
-          "("
-          + associatedValue.parameters.enumerated()
-          .map { offset, parameter in
-            "\(parameter.firstName.map { "\($0): " } ?? "")$\(offset)"
-          }
-          .joined(separator: ", ")
-          + ")"
         let parameterNames = (0..<associatedValue.parameters.count)
           .map { "v\($0)" }
           .joined(separator: ", ")
         bindingNames = "(\(parameterNames))"
         returnName = associatedValue.parameters.count == 1 ? parameterNames : bindingNames
       } else {
-        embedNames = ""
         bindingNames = ""
         returnName = "()"
       }
@@ -130,7 +119,7 @@ extension CasePathableMacro: MemberMacro {
         \(access)var \(caseName): \
         \(raw: Self.qualifiedCasePathTypeName)<\(enumName), \(raw: associatedValueName)> {
         \(raw: Self.qualifiedCasePathTypeName)<\(enumName), \(raw: associatedValueName)>(
-        embed: { .\(caseName)\(raw: embedNames) },
+        embed: \(raw: hasPayload ? "\(enumName).\(caseName)" : "{ \(enumName).\(caseName) }"),
         extract: {
         guard case\(raw: hasPayload ? " let" : "").\(caseName)\(raw: bindingNames) = $0 else { \
         return nil \
@@ -143,7 +132,7 @@ extension CasePathableMacro: MemberMacro {
     }
 
     let properties: [DeclSyntax] =
-      withProperties
+      withGetters
       ? enumCaseDecls.map { enumCaseDecl in
         let caseName = enumCaseDecl.name.trimmed
         let associatedValueName = enumCaseDecl.trimmedTypeDescription
