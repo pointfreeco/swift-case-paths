@@ -338,10 +338,10 @@ extension KeyPath {
 }
 
 extension CasePathable {
-  // .filter { $0.type.is(\.playedWord) }
-  public func `is`<Value>(_ keyPath: CaseKeyPath<Self, Value>) -> Bool {
-    self[keyPath: keyPath] != nil
-  }
+  // // .filter { $0.type.is(\.playedWord) }
+  // public func `is`<Value>(_ keyPath: CaseKeyPath<Self, Value>) -> Bool {
+  //   self[keyPath: keyPath] != nil
+  // }
 
   // .filter(\.type[is: \.playedWord])
   public subscript<Value>(is keyPath: CaseKeyPath<Self, Value>) -> Bool {
