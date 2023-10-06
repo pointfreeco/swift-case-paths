@@ -35,18 +35,3 @@
     module: "CasePathsMacros", type: "CasePathableMacro"
   )
 #endif
-
-@CasePathable enum Foo: Equatable {
-  case bar(Bar)
-  case baz(Baz)
-  case fizzBuzz
-  case blob(Blob)
-}
-@CasePathable enum Bar: Equatable {
-  case int(Int)
-}
-@CasePathable enum Baz: Equatable {
-  case string(String)
-}
-@CasePathable enum Blob: Equatable {
-}

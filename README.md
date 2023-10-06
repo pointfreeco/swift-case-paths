@@ -5,113 +5,167 @@
 [![](https://img.shields.io/endpoint?url=https%3A%2F%2Fswiftpackageindex.com%2Fapi%2Fpackages%2Fpointfreeco%2Fswift-case-paths%2Fbadge%3Ftype%3Dswift-versions)](https://swiftpackageindex.com/pointfreeco/swift-case-paths)
 [![](https://img.shields.io/endpoint?url=https%3A%2F%2Fswiftpackageindex.com%2Fapi%2Fpackages%2Fpointfreeco%2Fswift-case-paths%2Fbadge%3Ftype%3Dplatforms)](https://swiftpackageindex.com/pointfreeco/swift-case-paths)
 
-Case paths bring the power and ergonomics of key paths to enums!
+Case paths extends the key path hierarchy to enum cases.
 
 ## Motivation
 
-Swift endows every struct and class property with a [key path](https://developer.apple.com/documentation/swift/swift_standard_library/key-path_expressions).
+Swift endows every struct and class property with a [key path][key-path-docs].
+
+[key-path-docs]: https://developer.apple.com/documentation/swift/swift_standard_library/key-path_expressions
 
 ``` swift
 struct User {
-  var id: Int
+  let id: Int
   var name: String
 }
 
-\User.id   // WritableKeyPath<User, Int>
-\User.name // WritableKeyPath<User, String>
+\User.id    // KeyPath<User, Int>
+\User.name  // WritableKeyPath<User, String>
 ```
 
-This is compiler-generated code that can be used to abstractly zoom in on part of a structure, inspect and even change it, while propagating these changes to the structure's whole. They unlock the ability to do many things, like [key-value observing](https://developer.apple.com/documentation/swift/cocoa_design_patterns/using_key-value_observing_in_swift) and [reactive bindings](https://developer.apple.com/documentation/combine/receiving_and_handling_events_with_combine), [dynamic member lookup](https://github.com/apple/swift-evolution/blob/master/proposals/0252-keypath-dynamic-member-lookup.md), and scoping changes to the SwiftUI [environment](https://developer.apple.com/documentation/swiftui/environment).
+This is compiler-generated code that can be used to abstractly zoom in on part of a structure,
+inspect and even change it, all while propagating those changes to the structure's whole. They are
+the silent partner of many modern Swift APIs powered by
+[dynamic member lookup][dynamic-member-lookup-proposal], like SwiftUI
+[bindings][binding-dynamic-member-lookup-docs], but also make more direct appearances, like in the
+SwiftUI [environment][environment-property-wrapper-docs].
 
-Unfortunately, no such structure exists for enum cases!
+Unfortunately, no such structure exists for enum cases.
 
 ``` swift
-enum Authentication {
-  case authenticated(accessToken: String)
-  case unauthenticated
+enum UserAction {
+  case home(HomeAction)
+  case settings(SettingsAction)
 }
 
-\Authentication.authenticated // 🛑
+\UserAction.home  // 🛑
 ```
 
-And so it's impossible to write similar generic algorithms that can zoom in on a particular enum case.
+> 🛑 key path cannot refer to static member 'home'
+
+And so it's impossible to write generic code that can zoom in on and propagate changes to a
+particular case.
+
+[key-path-docs]: https://developer.apple.com/documentation/swift/swift_standard_library/key-path_expressions
+[dynamic-member-lookup-proposal]: https://github.com/apple/swift-evolution/blob/master/proposals/0252-keypath-dynamic-member-lookup.md
+[binding-dynamic-member-lookup-docs]: https://developer.apple.com/documentation/swiftui/bindable/subscript(dynamicmember:)
+[environment-property-wrapper-docs]: https://developer.apple.com/documentation/swiftui/scene/environment(_:_:)
+[combine-publisher-assign-docs]: https://developer.apple.com/documentation/combine/publisher/assign(to:on:)
 
 ## Introducing: case paths
 
-This library intends to bridge this gap by introducing what we call "case paths." Case paths can be constructed simply by prepending the enum type and case name with a _forward_ slash:
+This library bridges this gap by introducing what we call "case paths": key paths for enum cases.
 
-``` swift
-import CasePaths
+Case paths can be enabled for an enum using the `@CasePathable` macro:
 
-/Authentication.authenticated // CasePath<Authentication, String>
+```swift
+@CasePathable
+enum UserAction {
+  case home(HomeAction)
+  case settings(SettingsAction)
+}
+```
+
+And they can be produced from a "case-pathable" enum through its `Cases` namespace:
+
+```swift
+\UserAction.Cases.home      // CaseKeyPath<UserAction, HomeAction>
+\UserAction.Cases.settings  // CaseKeyPath<UserAction, SettingsAction>
+```
+
+And like any key path, they can be abbreviated when the enum type can be inferred:
+
+```swift
+\.home as CaseKeyPath<UserAction, HomeAction>
+\.settings as CaseKeyPath<UserAction, SettingsAction>
 ```
 
 ### Case paths vs. key paths
 
-While key paths package up the functionality of getting and setting a value on a root structure, case paths package up the functionality of extracting and embedding a value on a root enumeration.
+As key paths package up the functionality of getting and setting a value on a root structure, case
+paths package up the functionality of optionally extracting and modifying an associated value of a
+root enumeration.
 
 ``` swift
-user[keyPath: \User.id] = 42
-user[keyPath: \User.id] // 42
+user[keyPath: \User.name] = "Blob"
+user[keyPath: \User.name]  // "Blob"
 
-let authentication = (/Authentication.authenticated).embed("cafebeef")
-(/Authentication.authenticated).extract(from: authentication) // Optional("cafebeef")
+userAction[keyPath: \UserAction.Cases.home] = .onAppear
+userAction[keyPath: \UserAction.Cases.home]  // Optional(HomeAction.onAppear)
 ```
 
-Case path extraction can fail and return `nil` because the cases may not match up.
+If the case doesn't match, the extraction can fail and return `nil`:
 
-``` swift
-(/Authentication.authenticated).extract(from: .unauthenticated) // nil
-````
+```swift
+userAction[keyPath: \UserAction.Cases.settings]  // nil
+```
 
-Case paths, like key paths, compose. Where key paths use dot-syntax to dive deeper into a structure, case paths use a double-dot syntax:
+And case paths have an additional ability, which is to embed an associated value into a brand new
+root:
+
+```swift
+let homeCase = \UserAction.Cases.home
+homeCase(.onAppear)  // UserAction.home(.onAppear)
+```
+
+Case paths, like key paths, compose. You can dive deeper into the enumeration of an enumeration's
+case using familiar dot-chaining:
 
 ``` swift
 \HighScore.user.name
 // WritableKeyPath<HighScore, String>
 
-/Result<Authentication, Error>..Authentication.authenticated
-// CasePath<Result<Authentication, Error>, String>
+\AppAction.Cases.user.home
+// CasePath<AppAction, HomeAction>
 ```
 
-Case paths, also like key paths, provide an "[identity](https://github.com/apple/swift-evolution/blob/master/proposals/0227-identity-keypath.md)" path, which is useful for interacting with APIs that use key paths and case paths but you want to work with entire structure.
+Case paths, also like key paths, provide an
+[identity](https://github.com/apple/swift-evolution/blob/master/proposals/0227-identity-keypath.md)
+path, which is useful for interacting with APIs that use key paths and case paths but you want to
+work with entire structure.
 
 ``` swift
-\User.self           // WritableKeyPath<User, User>
-/Authentication.self // CasePath<Authentication, Authentication>
+\User.self              // WritableKeyPath<User, User>
+\UserAction.Cases.self  // CasePath<UserAction, UserAction>
 ```
 
-Key paths are created for every property, even computed ones, so what is the equivalent for case paths? Well, "computed" case paths can be created by providing custom `embed` and `extract` functions:
+Key paths are created for every property, even computed ones, so what is the equivalent for case
+paths? Well, "computed" case paths can be created by extending the case-pathable enum's
+`AllCasePaths` type with properties that implement the `embed` and `extract` functionality of a
+custom case:
 
-``` swift
-CasePath<Authentication, String>(
-  embed: { decryptedToken in
-    Authentication.authenticated(token: encrypt(decryptedToken))
-  },
-  extract: { authentication in
-    guard
-      case let .authenticated(encryptedToken) = authentication,
-      let decryptedToken = decrypt(token)
-      else { return nil }
-    return decryptedToken
+```swift
+@CasePathable
+enum Authentication {
+  case authenticated(accessToken: String)
+  case unauthenticated
+}
+
+extension Authentication.AllCasePaths {
+  var encrypted: AnyCasePath<Authentication, String> {
+    AnyCasePath(
+      embed: { decryptedToken in
+        .authenticated(token: encrypt(decryptedToken))
+      },
+      extract: { authentication in
+        guard
+          case let .authenticated(encryptedToken) = authentication,
+          let decryptedToken = decrypt(token)
+          else { return nil }
+        return decryptedToken
+      }
+    )
   }
-)
+}
 ```
 
-Since Swift 5.2, key path expressions can be passed directly to methods like `map`. The same is true of case path expressions, which can be passed to methods like `compactMap`:
+Since Swift 5.2, key path expressions can be passed directly to methods like `map`. By default,
+the `@CasePathable` macro defines getter properties that can be invoked using key path expressions
+passed to methods like `compactMap`:
 
-``` swift
-users.map(\User.name)
-authentications.compactMap(/Authentication.authenticated)
-```
-
-## Ergonomic associated value access
-
-CasePaths uses Swift reflection to automatically embed and extract associated values from _any_ enum in a single, short expression. This helpful utility is made available as a public module function that can be used in your own libraries and apps:
-
-``` swift
-(/Authentication.authenticated).extract(from: .authenticated("cafebeef"))
-// Optional("cafebeef")
+```swift
+users.map(\.name)
+userActions.compactMap(\.home)
 ```
 
 ## Community
@@ -129,16 +183,23 @@ The latest documentation for CasePaths' APIs is available [here](https://pointfr
 
 ## Other libraries
 
-  - [`EnumKit`](https://github.com/gringoireDM/EnumKit) is a protocol-oriented, reflection-based solution to ergonomic enum access and inspired the creation of this library.
+  - [`EnumKit`](https://github.com/gringoireDM/EnumKit) is a protocol-oriented, reflection-based
+    solution to ergonomic enum access and inspired the creation of this library.
 
 ## Interested in learning more?
 
-These concepts (and more) are explored thoroughly in [Point-Free](https://www.pointfree.co), a video series exploring functional programming and Swift hosted by [Brandon Williams](https://github.com/mbrandonw) and [Stephen Celis](https://github.com/stephencelis).
+These concepts (and more) are explored thoroughly in [Point-Free](https://www.pointfree.co), a video
+series exploring functional programming and Swift hosted by
+[Brandon Williams](https://github.com/mbrandonw) and
+[Stephen Celis](https://github.com/stephencelis).
 
-The design of this library was explored in the following [Point-Free](https://www.pointfree.co) episodes:
+The design of this library was explored in the following [Point-Free](https://www.pointfree.co)
+episodes:
 
-  - [Episode 87](https://www.pointfree.co/episodes/ep87-the-case-for-case-paths-introduction): The Case for Case Paths: Introduction
-  - [Episode 88](https://www.pointfree.co/episodes/ep88-the-case-for-case-paths-properties): The Case for Case Paths: Properties
+  - [Episode 87](https://www.pointfree.co/episodes/ep87-the-case-for-case-paths-introduction): The
+    Case for Case Paths: Introduction
+  - [Episode 88](https://www.pointfree.co/episodes/ep88-the-case-for-case-paths-properties): The
+    Case for Case Paths: Properties
   - [Episode 89](https://www.pointfree.co/episodes/ep89-case-paths-for-free): Case Paths for Free
 
 <a href="https://www.pointfree.co/episodes/ep87-the-case-for-case-paths-introduction">
