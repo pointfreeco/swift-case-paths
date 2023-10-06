@@ -100,8 +100,7 @@ If the case doesn't match, the extraction can fail and return `nil`:
 userAction[keyPath: \UserAction.Cases.settings]  // nil
 ```
 
-And case paths have an additional ability, which is to embed an associated value into a brand new
-root:
+Case paths have an additional ability, which is to embed an associated value into a brand new root:
 
 ```swift
 let homeCase = \UserAction.Cases.home
@@ -159,8 +158,8 @@ extension Authentication.AllCasePaths {
 }
 ```
 
-Since Swift 5.2, key path expressions can be passed directly to methods like `map`. By default,
-the `@CasePathable` macro defines getter properties that can be invoked using key path expressions
+Since Swift 5.2, key path expressions can be passed directly to methods like `map`. By default, the
+`@CasePathable` macro defines getter properties that can be invoked using key path expressions
 passed to methods like `compactMap`:
 
 ```swift
