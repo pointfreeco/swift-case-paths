@@ -158,9 +158,9 @@ extension Authentication.AllCasePaths {
 }
 ```
 
-Since Swift 5.2, key path expressions can be passed directly to methods like `map`. By default, the
-`@CasePathable` macro defines getter properties that can be invoked using key path expressions
-passed to methods like `compactMap`:
+Since Swift 5.2, key path expressions can be passed directly to methods like `map`. Case pathable
+enums that are annotated with dynamic member lookup enable property access and key path expressions
+for each case.
 
 ```swift
 users.map(\.name)
@@ -173,8 +173,10 @@ If you want to discuss this library or have a question about how to use it to so
 a particular problem, there are a number of places you can discuss with fellow 
 [Point-Free](http://www.pointfree.co) enthusiasts:
 
-* For long-form discussions, we recommend the [discussions](http://github.com/pointfreeco/swift-case-paths/discussions) tab of this repo.
-* For casual chat, we recommend the [Point-Free Community Slack](http://pointfree.co/slack-invite).
+  * For long-form discussions, we recommend the
+    [discussions](http://github.com/pointfreeco/swift-case-paths/discussions) tab of this repo.
+  * For casual chat, we recommend the
+    [Point-Free Community Slack](http://pointfree.co/slack-invite).
 
 ## Documentation
 
@@ -182,7 +184,7 @@ The latest documentation for CasePaths' APIs is available [here](https://pointfr
 
 ## Other libraries
 
-  - [`EnumKit`](https://github.com/gringoireDM/EnumKit) is a protocol-oriented, reflection-based
+  * [`EnumKit`](https://github.com/gringoireDM/EnumKit) is a protocol-oriented, reflection-based
     solution to ergonomic enum access and inspired the creation of this library.
 
 ## Interested in learning more?
@@ -195,11 +197,11 @@ series exploring functional programming and Swift hosted by
 The design of this library was explored in the following [Point-Free](https://www.pointfree.co)
 episodes:
 
-  - [Episode 87](https://www.pointfree.co/episodes/ep87-the-case-for-case-paths-introduction): The
+  * [Episode 87](https://www.pointfree.co/episodes/ep87-the-case-for-case-paths-introduction): The
     Case for Case Paths: Introduction
-  - [Episode 88](https://www.pointfree.co/episodes/ep88-the-case-for-case-paths-properties): The
+  * [Episode 88](https://www.pointfree.co/episodes/ep88-the-case-for-case-paths-properties): The
     Case for Case Paths: Properties
-  - [Episode 89](https://www.pointfree.co/episodes/ep89-case-paths-for-free): Case Paths for Free
+  * [Episode 89](https://www.pointfree.co/episodes/ep89-case-paths-for-free): Case Paths for Free
 
 <a href="https://www.pointfree.co/episodes/ep87-the-case-for-case-paths-introduction">
   <img alt="video poster image" src="https://d3rccdn33rt8ze.cloudfront.net/episodes/0087.jpeg" width="480">
