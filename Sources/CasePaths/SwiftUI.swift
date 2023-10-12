@@ -2,6 +2,10 @@
   import SwiftUI
 
   extension Binding where Value: CasePathable {
+    /// Returns a binding to the associated value of a given case key path.
+    ///
+    /// - Parameter keyPath: A case key path to a specific associated value.
+    /// - Returns: A new binding.
     public subscript<Member>(
       dynamicMember keyPath: CaseKeyPath<Value, Member>
     ) -> Binding<Member?> {
