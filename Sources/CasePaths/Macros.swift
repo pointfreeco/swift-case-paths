@@ -26,12 +26,9 @@
   /// \UserAction.Cases.home      // CasePath<UserAction, HomeAction>
   /// \UserAction.Cases.settings  // CasePath<UserAction, SettingsAction>
   /// ```
-  ///
-  /// - Parameter withGetters: Whether or not the macro should define a getter property for every
-  ///   case.
   @attached(extension, conformances: CasePathable)
-  @attached(member, names: arbitrary)
-  public macro CasePathable(withGetters: Bool = true) = #externalMacro(
+  @attached(member, names: named(AllCasePaths), named(allCasePaths))
+  public macro CasePathable() = #externalMacro(
     module: "CasePathsMacros", type: "CasePathableMacro"
   )
 #endif

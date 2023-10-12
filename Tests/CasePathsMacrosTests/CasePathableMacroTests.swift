@@ -24,7 +24,7 @@ final class CasePathableMacroTests: XCTestCase {
       }
       """
     } expansion: {
-      #"""
+      """
       enum Foo {
         case bar
         case baz(Int)
@@ -80,46 +80,6 @@ final class CasePathableMacroTests: XCTestCase {
           }
         }
         static var allCasePaths: AllCasePaths { AllCasePaths() }
-        var bar: Void? { self[keyPath: \CasePaths.AnyCasePath.bar] }
-        var baz: Int? { self[keyPath: \CasePaths.AnyCasePath.baz] }
-        var fizz: String? { self[keyPath: \CasePaths.AnyCasePath.fizz] }
-        var fizzier: (Int, buzzier: String)? { self[keyPath: \CasePaths.AnyCasePath.fizzier] }
-      }
-
-      extension Foo: CasePaths.CasePathable {
-      }
-      """#
-    }
-  }
-
-  func testCasePathable_withoutProperties() {
-    assertMacro {
-      """
-      @CasePathable(withGetters: false) enum Foo {
-        case bar
-      }
-      """
-    } expansion: {
-      """
-      enum Foo {
-        case bar
-
-        struct AllCasePaths {
-          var bar: CasePaths.AnyCasePath<Foo, Void> {
-            CasePaths.AnyCasePath<Foo, Void>(
-              embed: {
-                Foo.bar
-              },
-              extract: {
-                guard case .bar = $0 else {
-                  return nil
-                }
-                return ()
-              }
-            )
-          }
-        }
-        static var allCasePaths: AllCasePaths { AllCasePaths() }
       }
 
       extension Foo: CasePaths.CasePathable {
@@ -136,7 +96,7 @@ final class CasePathableMacroTests: XCTestCase {
       }
       """
     } expansion: {
-      #"""
+      """
       public enum Foo {
         case bar(Int), baz(String)
 
@@ -165,13 +125,11 @@ final class CasePathableMacroTests: XCTestCase {
           }
         }
         public static var allCasePaths: AllCasePaths { AllCasePaths() }
-        public var bar: Int? { self[keyPath: \CasePaths.AnyCasePath.bar] }
-        public var baz: String? { self[keyPath: \CasePaths.AnyCasePath.baz] }
       }
 
       extension Foo: CasePaths.CasePathable {
       }
-      """#
+      """
     }
   }
 
@@ -183,7 +141,7 @@ final class CasePathableMacroTests: XCTestCase {
       }
       """
     } expansion: {
-      #"""
+      """
       public enum Foo {
         case bar(Int)
 
@@ -201,12 +159,11 @@ final class CasePathableMacroTests: XCTestCase {
           }
         }
         public static var allCasePaths: AllCasePaths { AllCasePaths() }
-        public var bar: Int? { self[keyPath: \CasePaths.AnyCasePath.bar] }
       }
 
       extension Foo: CasePaths.CasePathable {
       }
-      """#
+      """
     }
     assertMacro {
       """
@@ -215,7 +172,7 @@ final class CasePathableMacroTests: XCTestCase {
       }
       """
     } expansion: {
-      #"""
+      """
       private enum Foo {
         case bar(Int)
 
@@ -233,12 +190,11 @@ final class CasePathableMacroTests: XCTestCase {
           }
         }
         static var allCasePaths: AllCasePaths { AllCasePaths() }
-        var bar: Int? { self[keyPath: \CasePaths.AnyCasePath.bar] }
       }
 
       extension Foo: CasePaths.CasePathable {
       }
-      """#
+      """
     }
   }
 

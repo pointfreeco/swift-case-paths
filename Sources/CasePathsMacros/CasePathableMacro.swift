@@ -52,21 +52,6 @@ extension CasePathableMacro: MemberMacro {
     providingMembersOf declaration: Declaration,
     in context: Context
   ) throws -> [DeclSyntax] {
-
-    let withGetters: Bool
-    switch node.arguments {
-    case let .argumentList(list):
-      withGetters =
-        list
-        .first(where: { $0.label?.text == "withGetters" })?
-        .expression
-        .as(BooleanLiteralExprSyntax.self)?
-        .literal
-        .text != "false"
-    default:
-      withGetters = true
-    }
-
     guard let enumDecl = declaration.as(EnumDeclSyntax.self)
     else {
       throw DiagnosticsError(
@@ -132,26 +117,12 @@ extension CasePathableMacro: MemberMacro {
         """
     }
 
-    let properties: [DeclSyntax] =
-      withGetters
-      ? enumCaseDecls.map { enumCaseDecl in
-        let caseName = enumCaseDecl.name.trimmed
-        let associatedValueName = enumCaseDecl.trimmedTypeDescription
-        return """
-          \(access)var \(caseName): \(raw: associatedValueName)? { \
-          self[keyPath: \\\(raw: Self.qualifiedCaseTypeName).\(caseName)] \
-          }
-          """
-      }
-      : []
-
     return [
       """
       \(access)struct AllCasePaths {
       \(raw: casePaths.map(\.description).joined(separator: "\n"))
       }
       \(access)static var allCasePaths: AllCasePaths { AllCasePaths() }
-      \(raw: properties.map(\.description).joined(separator: "\n"))
       """
     ]
   }

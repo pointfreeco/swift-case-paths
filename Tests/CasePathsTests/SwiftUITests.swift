@@ -3,6 +3,7 @@
   import SwiftUI
   import XCTest
 
+  @dynamicMemberLookup
   @CasePathable
   enum Status: Equatable {
     case inStock(quantity: Int)

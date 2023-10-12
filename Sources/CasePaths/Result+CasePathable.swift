@@ -25,3 +25,8 @@ extension Result: CasePathable {
     AllCasePaths()
   }
 }
+
+@dynamicMemberLookup
+@CasePathable enum Foo {
+  case bar(Int)
+}

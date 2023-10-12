@@ -42,6 +42,32 @@ public protocol CasePathable {
   static var allCasePaths: AllCasePaths { get }
 }
 
+extension CasePathable {
+  /// Extracts the associated value of a case via dynamic member lookup.
+  ///
+  /// Simply annotate the base type with `@dynamicMemberLookup` to enable this functionality:
+  ///
+  /// ```swift
+  /// @CasePathable
+  /// @dynamicMemberLookup
+  /// enum UserAction {
+  ///   case home(HomeAction)
+  ///   case settings(SettingsAction)
+  /// }
+  ///
+  /// let userAction: UserAction = .home(.onAppear)
+  /// userAction.home      // Optional(HomeAction.onAppear)
+  /// userAction.settings  // nil
+  ///
+  /// let userActions: [UserAction] = [.home(.onAppear), .settings(.subscribeButtonTapped)]
+  /// userActions.compactMap(\.home)      // [HomeAction.onAppear]
+  /// userActions.compactMap(\.settings)  // [SettingsAction.subscribeButtonTapped]
+  /// ```
+  public subscript<Value>(dynamicMember keyPath: CaseKeyPath<Self, Value>) -> Value? {
+    self[keyPath: keyPath]
+  }
+}
+
 /// A type that is used to distinguish case key paths from key paths by wrapping the enum and
 /// associated value types.
 @dynamicMemberLookup

@@ -89,16 +89,16 @@ final class CasePathsTests: XCTestCase {
   }
 }
 
-@CasePathable enum Foo: Equatable {
+@CasePathable @dynamicMemberLookup enum Foo: Equatable {
   case bar(Bar)
   case baz(Baz)
   case fizzBuzz
   case blob(Blob)
 }
-@CasePathable enum Bar: Equatable {
+@CasePathable @dynamicMemberLookup enum Bar: Equatable {
   case int(Int)
 }
-@CasePathable enum Baz: Equatable {
+@CasePathable @dynamicMemberLookup enum Baz: Equatable {
   case string(String)
 }
 @CasePathable enum Blob: Equatable {
