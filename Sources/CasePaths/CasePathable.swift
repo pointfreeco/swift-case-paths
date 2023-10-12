@@ -42,32 +42,6 @@ public protocol CasePathable {
   static var allCasePaths: AllCasePaths { get }
 }
 
-extension CasePathable {
-  /// Extracts the associated value of a case via dynamic member lookup.
-  ///
-  /// Simply annotate the base type with `@dynamicMemberLookup` to enable this functionality:
-  ///
-  /// ```swift
-  /// @CasePathable
-  /// @dynamicMemberLookup
-  /// enum UserAction {
-  ///   case home(HomeAction)
-  ///   case settings(SettingsAction)
-  /// }
-  ///
-  /// let userAction: UserAction = .home(.onAppear)
-  /// userAction.home      // Optional(HomeAction.onAppear)
-  /// userAction.settings  // nil
-  ///
-  /// let userActions: [UserAction] = [.home(.onAppear), .settings(.subscribeButtonTapped)]
-  /// userActions.compactMap(\.home)      // [HomeAction.onAppear]
-  /// userActions.compactMap(\.settings)  // [SettingsAction.subscribeButtonTapped]
-  /// ```
-  public subscript<Value>(dynamicMember keyPath: CaseKeyPath<Self, Value>) -> Value? {
-    self[keyPath: keyPath]
-  }
-}
-
 /// A type that is used to distinguish case key paths from key paths by wrapping the enum and
 /// associated value types.
 #if swift(>=5.9)
@@ -112,7 +86,7 @@ extension Case {
 /// `\.someCase` where the type can be inferred.
 ///
 /// To extract an associated value from an enum using a case key path, pass the key path to the
-/// ``CasePathable/subscript(keyPath:)-1icdd`` subscript. For example:
+/// ``CasePathable/subscript(keyPath:)-1icdd``. For example:
 ///
 /// ```swift
 /// @CasePathable
@@ -131,8 +105,8 @@ extension Case {
 /// // anotherValue is nil
 /// ```
 ///
-/// To replace an associated value, assign it through the ``CasePathable/subscript(keyPath:)-1icdd``.
-/// subscript. If the given path does not match the given enum case, the replacement will fail. For
+/// To replace an associated value, assign it through ``CasePathable/subscript(keyPath:)-1icdd``. If
+/// the given path does not match the given enum case, the replacement will fail. For
 /// example:
 ///
 /// ```swift
@@ -145,8 +119,8 @@ extension Case {
 /// // Assignment fails: e is still SomeEnum.someCase(24)
 /// ```
 ///
-/// To produce a whole instance from a case key path, call ``Swift/KeyPath/callAsFunction(_:)`` with
-/// the associated value you'd like to embed:
+/// To produce a whole instance from a case key path, call the key path directly with the associated
+/// value you'd like to embed (via ``Swift/KeyPath/callAsFunction(_:)``):
 ///
 /// ```swift
 /// let pathToCase = \SomeEnum.Cases.someCase
@@ -179,24 +153,6 @@ extension Case {
 /// identity case key path `\SomeEnum.Cases.self`. It refers to the whole enum and can be passed to
 /// a function that takes case key paths when you want to extract, change, or replace all of the
 /// data stored in an enum in a single step.
-///
-/// Because the ``CasePathable()`` macro produces a property to the data for each enum case, you can
-/// use a key path expression in the same contexts you can use them for any property. Specifically,
-/// you can use a key path expression whose root type is `SomeEnum` and whose path extracts a value
-/// of type `Value?`, instead of a function or closure of type `(SomeEnum) -> Value?`.
-///
-/// ```swift
-/// let values: SomeEnum = [
-///   .someCase(12),
-///   .anotherCase("Goodbye!"),
-///   .someCase(30),
-/// ]
-///
-/// // The approaches below are all equivalent.
-/// values.compactMap(\.someCase).reduce(+)
-/// values.compactMap { $0.someCase }.reduce(+)
-/// values.compactMap { if case let .someCase(int) { int } else { nil } }.reduce(+)
-/// ```
 public typealias CaseKeyPath<Root, Value> = KeyPath<Case<Root>, Case<Value>>
 
 extension CaseKeyPath {
@@ -216,6 +172,8 @@ extension CaseKeyPath {
   /// let e = path(12)
   /// // e is SomeEnum.someCase(12)
   /// ```
+  ///
+  /// See ``Swift/KeyPath/callAsFunction()`` for cases with no associated values.
   ///
   /// - Parameter value: A value to embed.
   /// - Returns: An enum for the case of this key path that holds the given value.
@@ -241,10 +199,42 @@ extension CaseKeyPath {
   /// // e is SomeEnum.someCase
   /// ```
   ///
+  /// See ``Swift/KeyPath/callAsFunction(_:)`` for cases with associated values.
+  ///
   /// - Returns: An enum for the case of this key path.
   public func callAsFunction<Enum>() -> Enum
   where Root == Case<Enum>, Value == Case<Void> {
     Case(self).embed(()) as! Enum
+  }
+
+  /// Whether an argument matches the case key path's case.
+  ///
+  /// ```swift
+  /// @CasePathable enum UserAction {
+  ///   case settings(SettingsAction)
+  /// }
+  /// @CasePathable enum SettingsAction {
+  ///   case store(StoreAction)
+  /// }
+  /// @CasePathable enum StoreAction {
+  ///   case subscribeButtonTapped
+  /// }
+  ///
+  /// switch userAction {
+  /// case \.settings.store.subscribeButtonTapped:
+  ///   // ...
+  /// }
+  ///
+  /// // Equivalent to:
+  ///
+  /// switch userAction {
+  /// case .settings(.store(.subscribeButtonTapped)):
+  ///   // ...
+  /// }
+  /// ```
+  public static func ~=<Enum: CasePathable, AssociatedValue>(lhs: KeyPath, rhs: Enum) -> Bool
+  where Root == Case<Enum>, Value == Case<AssociatedValue> {
+    rhs[keyPath: lhs] != nil
   }
 }
 
@@ -321,7 +311,52 @@ extension CasePathable {
       self = `case`.embed(newValue) as! Self
     }
   }
-  
+
+  /// Extracts the associated value of a case via dynamic member lookup.
+  ///
+  /// Simply annotate the base type with `@dynamicMemberLookup` to enable this functionality:
+  ///
+  /// ```swift
+  /// @CasePathable
+  /// @dynamicMemberLookup
+  /// enum UserAction {
+  ///   case home(HomeAction)
+  ///   case settings(SettingsAction)
+  /// }
+  ///
+  /// let userAction: UserAction = .home(.onAppear)
+  /// userAction.home      // Optional(HomeAction.onAppear)
+  /// userAction.settings  // nil
+  ///
+  /// let userActions: [UserAction] = [.home(.onAppear), .settings(.subscribeButtonTapped)]
+  /// userActions.compactMap(\.home)      // [HomeAction.onAppear]
+  /// userActions.compactMap(\.settings)  // [SettingsAction.subscribeButtonTapped]
+  /// ```
+  public subscript<Value>(dynamicMember keyPath: CaseKeyPath<Self, Value>) -> Value? {
+    self[keyPath: keyPath]
+  }
+
+  /// Tests the associated value of a case.
+  ///
+  /// ```swift
+  /// @CasePathable
+  /// enum UserAction {
+  ///   case home(HomeAction)
+  ///   case settings(SettingsAction)
+  /// }
+  ///
+  /// let userAction: UserAction = .home(.onAppear)
+  /// userAction[is: \.home]      // true
+  /// userAction[is: \.settings]  // false
+  ///
+  /// let userActions: [UserAction] = [.home(.onAppear), .settings(.subscribeButtonTapped)]
+  /// userActions.filter(\.[is: \.home])      // [UserAction.home(.onAppear)]
+  /// userActions.filter(\.[is: \.settings])  // [UserAction.settings(.subscribeButtonTapped)]
+  /// ```
+  public subscript<Value>(is keyPath: CaseKeyPath<Self, Value>) -> Bool {
+    self[keyPath: keyPath] != nil
+  }
+
   /// Unwraps and yields a mutable associated value to a closure.
   ///
   /// > Warning: If the enum's case does not match the given case key path, the mutation will not be
@@ -389,27 +424,5 @@ extension AnyCasePath where Value: CasePathable {
         self.extract(from: $0).flatMap(Value.allCasePaths[keyPath: keyPath].extract(from:))
       }
     )
-  }
-}
-
-// TODO: Consider any of these?
-
-// .filter { \.playedWord ~= $0.type }
-extension KeyPath {
-  public static func ~=<Enum: CasePathable, AssociatedValue>(lhs: KeyPath, rhs: Enum) -> Bool
-  where Root == Case<Enum>, Value == Case<AssociatedValue> {
-    rhs[keyPath: lhs] != nil
-  }
-}
-
-extension CasePathable {
-  // // .filter { $0.type.is(\.playedWord) }
-  // public func `is`<Value>(_ keyPath: CaseKeyPath<Self, Value>) -> Bool {
-  //   self[keyPath: keyPath] != nil
-  // }
-
-  // .filter(\.type[is: \.playedWord])
-  public subscript<Value>(is keyPath: CaseKeyPath<Self, Value>) -> Bool {
-    self[keyPath: keyPath] != nil
   }
 }
