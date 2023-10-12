@@ -222,14 +222,14 @@ extension CaseKeyPath {
   ///
   /// switch userAction {
   /// case \.settings.store.subscribeButtonTapped:
-  ///   // ...
+  /// // ...
   /// }
   ///
   /// // Equivalent to:
   ///
   /// switch userAction {
   /// case .settings(.store(.subscribeButtonTapped)):
-  ///   // ...
+  /// // ...
   /// }
   /// ```
   ///
