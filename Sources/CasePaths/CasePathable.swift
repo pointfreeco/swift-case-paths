@@ -232,6 +232,10 @@ extension CaseKeyPath {
   ///   // ...
   /// }
   /// ```
+  ///
+  /// - Parameters:
+  ///   - lhs: A case key path.
+  ///   - rhs: An enum.
   public static func ~=<Enum: CasePathable, AssociatedValue>(lhs: KeyPath, rhs: Enum) -> Bool
   where Root == Case<Enum>, Value == Case<AssociatedValue> {
     rhs[keyPath: lhs] != nil
