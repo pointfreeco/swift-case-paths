@@ -27,7 +27,7 @@ Case paths bring the power and ergonomics of key paths to enums.
 
 ### XCTest support
 
-- ``XCTModify(_:case:_:_:file:line:)-7cezk``
+- ``XCTModify(_:case:_:_:file:line:)-94qma``
 
 ### Guides
 

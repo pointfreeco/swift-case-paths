@@ -70,16 +70,22 @@ extension CasePathable {
 
 /// A type that is used to distinguish case key paths from key paths by wrapping the enum and
 /// associated value types.
-@dynamicMemberLookup
-public struct Case<Value> {
-  fileprivate let embed: (Value) -> Any
-  fileprivate let extract: (Any) -> Value?
-
-  fileprivate init(embed: @escaping (Value) -> Any, extract: @escaping (Any) -> Value?) {
-    self.embed = embed
-    self.extract = extract
+#if swift(>=5.9)
+  @_documentation(visibility: internal)
+  @dynamicMemberLookup
+  public struct Case<Value> {
+    fileprivate let embed: (Value) -> Any
+    fileprivate let extract: (Any) -> Value?
   }
+#else
+  @dynamicMemberLookup
+  public struct Case<Value> {
+    fileprivate let embed: (Value) -> Any
+    fileprivate let extract: (Any) -> Value?
+  }
+#endif
 
+extension Case {
   fileprivate init() {
     self.init(embed: { $0 }, extract: { $0 as? Value })
   }
@@ -106,7 +112,7 @@ public struct Case<Value> {
 /// `\.someCase` where the type can be inferred.
 ///
 /// To extract an associated value from an enum using a case key path, pass the key path to the
-/// ``CasePathable/subscript(keyPath:)-9s97`` subscript. For example:
+/// ``CasePathable/subscript(keyPath:)-1icdd`` subscript. For example:
 ///
 /// ```swift
 /// @CasePathable
@@ -125,7 +131,7 @@ public struct Case<Value> {
 /// // anotherValue is nil
 /// ```
 ///
-/// To replace an associated value, assign it through the ``CasePathable/subscript(keyPath:)-9s97``.
+/// To replace an associated value, assign it through the ``CasePathable/subscript(keyPath:)-1icdd``.
 /// subscript. If the given path does not match the given enum case, the replacement will fail. For
 /// example:
 ///
@@ -275,7 +281,7 @@ extension CasePathable {
   /// e[keyPath: \.anotherCase]  // nil
   /// ```
   ///
-  /// See ``CasePathable/subscript(keyPath:)-9s97`` for replacing an associated value in a root
+  /// See ``CasePathable/subscript(keyPath:)-1icdd`` for replacing an associated value in a root
   /// enum, and see ``Swift/KeyPath/callAsFunction(_:)`` for embedding an associated value in a
   /// brand new root enum.
   public subscript<Value>(keyPath keyPath: CaseKeyPath<Self, Value>) -> Value? {
@@ -302,7 +308,7 @@ extension CasePathable {
   /// // Assignment fails: e is still SomeEnum.someCase(24)
   /// ```
   ///
-  /// See ``CasePathable/subscript(keyPath:)-7o5xj`` for extracting an associated value from a root
+  /// See ``CasePathable/subscript(keyPath:)-1zh2e`` for extracting an associated value from a root
   /// enum, and see ``Swift/KeyPath/callAsFunction(_:)`` for embedding an associated value in a
   /// brand new root enum.
   @_disfavoredOverload

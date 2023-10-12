@@ -10,6 +10,7 @@ Avoid using deprecated APIs in your app. See the replacement that you should use
 
 ### Creating paths
 
+- ``AnyCasePath/init(unsafe:)``
 - ``AnyCasePath/init(_:)-5t7e8``
 - ``AnyCasePath/init(_:)-5hb2e``
 - ``AnyCasePath/init(_:)-2cuas``

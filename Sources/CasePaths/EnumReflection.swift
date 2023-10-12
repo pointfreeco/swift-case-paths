@@ -1,6 +1,36 @@
 import Foundation
 
 extension AnyCasePath {
+  /// Returns a case path for the given embed function.
+  ///
+  /// This initializer generates a case path with an extract function that dynamically resolves
+  /// given an enum embed function.
+  ///
+  /// > Important: This operation is provided for backwards compatibility. Avoid introducing it to
+  /// > your code and instead favor using types that conform to ``CasePathable`` and
+  /// > ``CaseKeyPath``.
+  ///
+  /// - Parameter embed: An embed function.
+  /// - Returns: A case path.
+  @available(iOS, deprecated: 9999, message: "Use a 'CasePathable' case key path, instead")
+  @available(macOS, deprecated: 9999, message: "Use a 'CasePathable' case key path, instead")
+  @available(tvOS, deprecated: 9999, message: "Use a 'CasePathable' case key path, instead")
+  @available(watchOS, deprecated: 9999, message: "Use a 'CasePathable' case key path, instead")
+  public init(unsafe embed: @escaping (Value) -> Root) {
+    func open<Wrapped>(_: Wrapped.Type) -> (Root) -> Value? {
+      optionalPromotedExtractHelp(unsafeBitCast(embed, to: ((Value) -> Wrapped?).self))
+        as! (Root) -> Value?
+    }
+    let extract =
+      ((_Witness<Root>.self as? _AnyOptional.Type)?.wrappedType)
+      .map { _openExistential($0, do: open) }
+      ?? extractHelp(embed)
+    self.init(
+      embed: embed,
+      extract: extract
+    )
+  }
+
   #if swift(>=5.9)
     @available(*, deprecated, message: "Use a 'CasePathable' case key path, instead")
     public init(_ embed: @escaping (Value) -> Root) {
@@ -20,8 +50,8 @@ extension AnyCasePath {
   #else
     /// Returns a case path for the given embed function.
     ///
-    /// - Note: This operator is only intended to be used with enum case initializers. Its behavior is
-    ///   otherwise undefined.
+    /// - Note: This operator is only intended to be used with enum case initializers. Its behavior
+    ///   is otherwise undefined.
     /// - Parameter embed: An embed function.
     /// - Returns: A case path.
     public init(_ embed: @escaping (Value) -> Root) {

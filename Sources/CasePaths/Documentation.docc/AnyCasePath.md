@@ -5,7 +5,7 @@
 ### Creating paths
 
 - ``init(embed:extract:)``
-- ``init(_:)-2gro0``
+- ``init(_:)-65qkv``
 - ``init()``
 
 ### Extracting and embedding values
