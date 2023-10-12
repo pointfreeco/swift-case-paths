@@ -77,6 +77,16 @@ final class CasePathsTests: XCTestCase {
     loadable = (\.self as CaseKeyPath<Loadable, Loadable>)(.isLoaded)
     XCTAssertEqual(loadable, .isLoaded)
   }
+
+  func testAppend() {
+    let fooToBar = \Foo.Cases.bar
+    let barToInt = \Bar.Cases.int
+    let fooToInt = fooToBar.appending(path: barToInt)
+
+    XCTAssertEqual(Foo.bar(.int(42))[keyPath: fooToInt], 42)
+    XCTAssertEqual(Foo.baz(.string("Hello"))[keyPath: fooToInt], nil)
+    XCTAssertEqual(Foo.bar(.int(123)), fooToInt(123))
+  }
 }
 
 @CasePathable enum Foo: Equatable {

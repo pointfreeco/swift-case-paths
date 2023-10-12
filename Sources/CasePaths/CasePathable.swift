@@ -42,6 +42,37 @@ public protocol CasePathable {
   static var allCasePaths: AllCasePaths { get }
 }
 
+/// A type that is used to distinguish case key paths from key paths by wrapping the enum and
+/// associated value types.
+@dynamicMemberLookup
+public struct Case<Value> {
+  fileprivate let embed: (Value) -> Any
+  fileprivate let extract: (Any) -> Value?
+
+  fileprivate init(embed: @escaping (Value) -> Any, extract: @escaping (Any) -> Value?) {
+    self.embed = embed
+    self.extract = extract
+  }
+
+  fileprivate init() {
+    self.init(embed: { $0 }, extract: { $0 as? Value })
+  }
+
+  fileprivate init<Root>(_ keyPath: CaseKeyPath<Root, Value>) {
+    self = Case<Root>()[keyPath: keyPath]
+  }
+
+  public subscript<AppendedValue>(
+    dynamicMember keyPath: KeyPath<Value.AllCasePaths, AnyCasePath<Value, AppendedValue>>
+  ) -> Case<AppendedValue>
+  where Value: CasePathable {
+    Case<AppendedValue>(
+      embed: { self.embed(Value.allCasePaths[keyPath: keyPath].embed($0)) },
+      extract: { self.extract($0).flatMap(Value.allCasePaths[keyPath: keyPath].extract) }
+    )
+  }
+}
+
 /// A key path to the associated value of an enum case.
 ///
 /// The most common way to make an instance of this type is by applying the ``CasePathable()`` macro
@@ -134,9 +165,7 @@ public protocol CasePathable {
 /// values.compactMap { $0.someCase }.reduce(+)
 /// values.compactMap { if case let .someCase(int) { int } else { nil } }.reduce(+)
 /// ```
-public typealias CaseKeyPath<Root, Value> = KeyPath<
-  AnyCasePath<Root, Root>, AnyCasePath<Root, Value>
->
+public typealias CaseKeyPath<Root, Value> = KeyPath<Case<Root>, Case<Value>>
 
 extension CaseKeyPath {
   /// Embeds a value in an enum at this case key path's case.
@@ -159,8 +188,8 @@ extension CaseKeyPath {
   /// - Parameter value: A value to embed.
   /// - Returns: An enum for the case of this key path that holds the given value.
   public func callAsFunction<Enum, AssociatedValue>(_ value: AssociatedValue) -> Enum
-  where Root == AnyCasePath<Enum, Enum>, Value == AnyCasePath<Enum, AssociatedValue> {
-    AnyCasePath(self).embed(value)
+  where Root == Case<Enum>, Value == Case<AssociatedValue> {
+    Case(self).embed(value) as! Enum
   }
   
   /// Returns an enum for this case key path's case.
@@ -182,8 +211,8 @@ extension CaseKeyPath {
   ///
   /// - Returns: An enum for the case of this key path.
   public func callAsFunction<Enum>() -> Enum
-  where Root == AnyCasePath<Enum, Enum>, Value == AnyCasePath<Enum, Void> {
-    AnyCasePath(self).embed(())
+  where Root == Case<Enum>, Value == Case<Void> {
+    Case(self).embed(()) as! Enum
   }
 }
 
@@ -201,7 +230,7 @@ extension CasePathable {
   ///
   /// \SomeEnum.Cases.someCase  // CaseKeyPath<SomeEnum, Int>
   /// ```
-  public typealias Cases = AnyCasePath<Self, Self>
+  public typealias Cases = Case<Self>
 
   /// Attempts to extract the associated value from a root enum using a case key path.
   ///
@@ -224,7 +253,7 @@ extension CasePathable {
   /// enum, and see ``Swift/KeyPath/callAsFunction(_:)`` for embedding an associated value in a
   /// brand new root enum.
   public subscript<Value>(keyPath keyPath: CaseKeyPath<Self, Value>) -> Value? {
-    AnyCasePath(keyPath).extract(from: self)
+    Case(keyPath).extract(self)
   }
 
   /// Attempts to replace the associated value of a root enum using a case key path.
@@ -255,9 +284,9 @@ extension CasePathable {
     @available(*, unavailable)
     get { fatalError() }
     set {
-      let `case` = AnyCasePath(keyPath)
-      guard `case`.extract(from: self) != nil else { return }
-      self = `case`.embed(newValue)
+      let `case` = Case(keyPath)
+      guard `case`.extract(self) != nil else { return }
+      self = `case`.embed(newValue) as! Self
     }
   }
   
@@ -289,13 +318,13 @@ extension CasePathable {
     file: StaticString = #filePath,
     line: UInt = #line
   ) {
-    let `case` = AnyCasePath(keyPath)
-    guard var value = `case`.extract(from: self) else {
+    let `case` = Case(keyPath)
+    guard var value = `case`.extract(self) else {
       XCTFail("Can't modify \(self) with case key path \(keyPath)", file: file, line: line)
       return
     }
     yield(&value)
-    self = `case`.embed(value)
+    self = `case`.embed(value) as! Self
   }
 }
 
@@ -304,7 +333,11 @@ extension AnyCasePath {
   ///
   /// - Parameter keyPath: A case key path.
   public init(_ keyPath: CaseKeyPath<Root, Value>) {
-    self = AnyCasePath<Root, Root>()[keyPath: keyPath]
+    let `case` = Case(keyPath)
+    self.init(
+      embed: { `case`.embed($0) as! Root },
+      extract: { `case`.extract($0) }
+    )
   }
 }
 
@@ -332,7 +365,7 @@ extension AnyCasePath where Value: CasePathable {
 // .filter { \.playedWord ~= $0.type }
 extension KeyPath {
   public static func ~=<Enum: CasePathable, AssociatedValue>(lhs: KeyPath, rhs: Enum) -> Bool
-  where Root == AnyCasePath<Enum, Enum>, Value == AnyCasePath<Enum, AssociatedValue> {
+  where Root == Case<Enum>, Value == Case<AssociatedValue> {
     rhs[keyPath: lhs] != nil
   }
 }

@@ -10,6 +10,7 @@ public struct CasePathableMacro {
   static var conformanceNames: [String] { [Self.conformanceName, Self.qualifiedConformanceName] }
   static let casePathTypeName = "AnyCasePath"
   static var qualifiedCasePathTypeName: String { "\(Self.moduleName).\(Self.casePathTypeName)" }
+  static var qualifiedCaseTypeName: String { "\(Self.moduleName).Case" }
 }
 
 extension CasePathableMacro: ExtensionMacro {
@@ -138,7 +139,7 @@ extension CasePathableMacro: MemberMacro {
         let associatedValueName = enumCaseDecl.trimmedTypeDescription
         return """
           \(access)var \(caseName): \(raw: associatedValueName)? { \
-          self[keyPath: \\\(raw: Self.qualifiedCasePathTypeName).\(caseName)] \
+          self[keyPath: \\\(raw: Self.qualifiedCaseTypeName).\(caseName)] \
           }
           """
       }
