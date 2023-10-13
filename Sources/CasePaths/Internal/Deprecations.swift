@@ -1,5 +1,10 @@
 // Deprecated after 1.0.0:
 
+/// A type-erased case path that supports embedding a value in a root and attempting to extract a
+/// root's embedded value.
+///
+/// This type has been renamed to ``AnyCasePath`` and is primarily employed by the
+/// ``CasePathable()`` macro to derive ``CaseKeyPath``s from an enum's cases.
 @available(*, deprecated, renamed: "AnyCasePath")
 public typealias CasePath = AnyCasePath
 
