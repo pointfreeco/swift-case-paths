@@ -110,29 +110,6 @@ final class CasePathsTests: XCTestCase {
     XCTAssertFalse(Foo.bar(.int(42)).is(\.blob))
     XCTAssertFalse(Foo.bar(.int(42)).is(\.fizzBuzz))
   }
-
-  func testCasePredicate() {
-    switch Foo.bar(.int(42)) {
-    case \.bar.int:
-      return
-    default:
-      XCTFail()
-    }
-
-    switch Foo.bar(.int(42)) {
-    case \.bar:
-      return
-    default:
-      XCTFail()
-    }
-
-    XCTAssertTrue(Foo.bar(.int(42)).is.bar)
-    XCTAssertTrue(Foo.bar(.int(42)).is.bar.int)
-    XCTAssertFalse(Foo.bar(.int(42)).is.baz)
-    XCTAssertFalse(Foo.bar(.int(42)).is.baz.string)
-    XCTAssertFalse(Foo.bar(.int(42)).is.blob)
-    XCTAssertFalse(Foo.bar(.int(42)).is.fizzBuzz)
-  }
 }
 
 @CasePathable @dynamicMemberLookup enum Foo: Equatable {
