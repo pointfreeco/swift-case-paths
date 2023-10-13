@@ -21,10 +21,6 @@ Case paths bring the power and ergonomics of key paths to enums.
 - ``Swift/Optional``
 - ``Swift/Result``
 
-### SwiftUI support
-
-- ``SwiftUI/Binding``
-
 ### XCTest support
 
 - ``XCTModify(_:case:_:_:file:line:)-94qma``
