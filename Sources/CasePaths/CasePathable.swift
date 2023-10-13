@@ -350,14 +350,14 @@ extension CasePathable {
   /// }
   ///
   /// let userAction: UserAction = .home(.onAppear)
-  /// userAction[is: \.home]      // true
-  /// userAction[is: \.settings]  // false
+  /// userAction.is(\.home)      // true
+  /// userAction.is(\.settings)  // false
   ///
   /// let userActions: [UserAction] = [.home(.onAppear), .settings(.subscribeButtonTapped)]
-  /// userActions.filter(\.[is: \.home])      // [UserAction.home(.onAppear)]
-  /// userActions.filter(\.[is: \.settings])  // [UserAction.settings(.subscribeButtonTapped)]
+  /// userActions.filter { $0.is(\.home) }      // [UserAction.home(.onAppear)]
+  /// userActions.filter { $0.is(\.settings) }  // [UserAction.settings(.subscribeButtonTapped)]
   /// ```
-  public subscript<Value>(is keyPath: CaseKeyPath<Self, Value>) -> Bool {
+  public func `is`<Value>(_ keyPath: CaseKeyPath<Self, Value>) -> Bool {
     self[keyPath: keyPath] != nil
   }
 
