@@ -42,9 +42,9 @@ public protocol CasePathable {
   static var allCasePaths: AllCasePaths { get }
 }
 
-/// A type that is used to distinguish case key paths from key paths by wrapping the enum and
-/// associated value types.
 #if swift(>=5.9)
+  /// A type that is used to distinguish case key paths from key paths by wrapping the enum and
+  /// associated value types.
   @_documentation(visibility: internal)
   @dynamicMemberLookup
   public struct Case<Value> {
@@ -59,13 +59,21 @@ public protocol CasePathable {
   }
 #endif
 
-extension Case {
+private protocol _AnyCase {
+  func _extract(from root: Any) -> Any?
+}
+
+extension Case: _AnyCase {
   fileprivate init() {
     self.init(embed: { $0 }, extract: { $0 as? Value })
   }
 
   fileprivate init<Root>(_ keyPath: CaseKeyPath<Root, Value>) {
     self = Case<Root>()[keyPath: keyPath]
+  }
+
+  fileprivate func _extract(from root: Any) -> Any? {
+    self.extract(root)
   }
 
   public subscript<AppendedValue>(
@@ -242,6 +250,23 @@ extension CaseKeyPath {
   }
 }
 
+/// A partially type-erased key path, from a concrete root enum to any resulting value type.
+public typealias PartialCaseKeyPath<Root> = PartialKeyPath<Case<Root>>
+
+extension PartialCaseKeyPath {
+  /// Attempts to embeds any value in an enum at this case key path's case.
+  ///
+  /// - Parameter value: A value to embed. If the value type does not match the case path's value
+  ///   type, the operation will fail.
+  /// - Returns: An enum for the case of this key path that holds the given value, or `nil`.
+  public func callAsFunction<Enum: CasePathable, AnyAssociatedValue>(
+    _ value: AnyAssociatedValue
+  ) -> Enum?
+  where Root == Case<Enum> {
+    (Case<Enum>()[keyPath: self] as? Case<AnyAssociatedValue>)?.embed(value) as? Enum
+  }
+}
+
 extension CasePathable {
   /// A namespace that can be used to derive case key paths from case-pathable enums.
   ///
@@ -280,6 +305,11 @@ extension CasePathable {
   /// brand new root enum.
   public subscript<Value>(keyPath keyPath: CaseKeyPath<Self, Value>) -> Value? {
     Case(keyPath).extract(self)
+  }
+
+  /// Attempts to extract the associated value from a root enum using a partial case key path.
+  public subscript(keyPath keyPath: PartialCaseKeyPath<Self>) -> Any? {
+    (Case<Self>()[keyPath: keyPath] as? any _AnyCase)?._extract(from: self)
   }
 
   /// Attempts to replace the associated value of a root enum using a case key path.

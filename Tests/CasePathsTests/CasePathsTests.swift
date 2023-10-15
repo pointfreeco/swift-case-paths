@@ -110,6 +110,15 @@ final class CasePathsTests: XCTestCase {
     XCTAssertFalse(Foo.bar(.int(42)).is(\.blob))
     XCTAssertFalse(Foo.bar(.int(42)).is(\.fizzBuzz))
   }
+
+  func testPartialCaseKeyPath() {
+    let partialPath = \Foo.Cases.bar as PartialCaseKeyPath
+    XCTAssertEqual(.bar(.int(42)), partialPath(Bar.int(42)))
+    XCTAssertNil(partialPath(42))
+
+    XCTAssertEqual(.int(42), Foo.bar(.int(42))[keyPath: partialPath] as? Bar)
+    XCTAssertNil(Foo.baz(.string("Hello"))[keyPath: partialPath])
+  }
 }
 
 @CasePathable @dynamicMemberLookup enum Foo: Equatable {
