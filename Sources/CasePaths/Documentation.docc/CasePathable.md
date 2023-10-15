@@ -10,11 +10,14 @@
 
 - ``subscript(keyPath:)-1icdd``
 - ``subscript(keyPath:)-1zh2e``
-- ``subscript(dynamicMember:)``
 - ``modify(_:yield:file:line:)``
-- ``is(_:)``
 
-### Manual conformance
+### Case properties
+
+- ``is(_:)``
+- ``subscript(dynamicMember:)``
+
+### Manual conformances
 
 - ``AllCasePaths``
 - ``allCasePaths``
