@@ -421,7 +421,14 @@ extension CasePathable {
   ) {
     let `case` = Case(keyPath)
     guard var value = `case`.extract(self) else {
-      XCTFail("Can't modify '\(self)' at path \(keyPath)", file: file, line: line)
+      XCTFail(
+        """
+        Can't modify '\(String(describing: self))' via 'CaseKeyPath<\(Self.self), \(Value.self)>' \
+        (aka '\(String(reflecting: keyPath))')
+        """,
+        file: file,
+        line: line
+      )
       return
     }
     yield(&value)

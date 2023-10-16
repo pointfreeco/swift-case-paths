@@ -14,7 +14,8 @@ final class CasePathableTests: XCTestCase {
       response.modify(\.success) { $0 += 1 }
     } issueMatcher: {
       $0.compactDescription == #"""
-        Can't modify 'failure' at path \Case<Response>.subscript(dynamicMember: <unknown>)
+        Can't modify 'failure' via 'CaseKeyPath<Response, Int>' \#
+        (aka '\Case<Response>.subscript(dynamicMember: <unknown>)')
         """#
     }
     XCTAssertEqual(response, .failure)
