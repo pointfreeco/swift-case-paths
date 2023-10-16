@@ -277,6 +277,9 @@ extension Authentication.AllCasePaths {
   * [**Parsing**](https://github.com/pointfreeco/swift-parsing) uses case paths to turn unstructured
     data into enums and back again.
 
+Do you have a project that uses case paths that you'd like to share? Please
+[open a PR](https://github.com/pointfreeco/swift-case-paths/edit/main/README.md) with a link to it!
+
 ## Community
 
 If you want to discuss this library or have a question about how to use it to solve 
