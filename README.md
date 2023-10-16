@@ -43,7 +43,7 @@ enum UserAction {
 
 > 🛑 key path cannot refer to static member 'home'
 
-And so it's impossible to write generic code that can zoom in on and propagate changes to a
+And so it's not possible to write generic code that can zoom in on and propagate changes to a
 particular case.
 
 [key-path-docs]: https://developer.apple.com/documentation/swift/swift_standard_library/key-path_expressions
@@ -82,30 +82,34 @@ And like any key path, they can be abbreviated when the enum type can be inferre
 
 ### Case paths vs. key paths
 
+#### Extracting, embedding, and modifying values
+
 As key paths package up the functionality of getting and setting a value on a root structure, case
 paths package up the functionality of optionally extracting and modifying an associated value of a
 root enumeration.
 
 ``` swift
 user[keyPath: \User.name] = "Blob"
-user[keyPath: \User.name]  // "Blob"
+user[keyPath: \.name]  // "Blob"
 
 userAction[keyPath: \UserAction.Cases.home] = .onAppear
-userAction[keyPath: \UserAction.Cases.home]  // Optional(HomeAction.onAppear)
+userAction[keyPath: \.home]  // Optional(HomeAction.onAppear)
 ```
 
 If the case doesn't match, the extraction can fail and return `nil`:
 
 ```swift
-userAction[keyPath: \UserAction.Cases.settings]  // nil
+userAction[keyPath: \.settings]  // nil
 ```
 
 Case paths have an additional ability, which is to embed an associated value into a brand new root:
 
 ```swift
-let homeCase = \UserAction.Cases.home
-homeCase(.onAppear)  // UserAction.home(.onAppear)
+let userActionToHome = \UserAction.Cases.home
+userActionToHome(.onAppear)  // UserAction.home(.onAppear)
 ```
+
+#### Composing paths
 
 Case paths, like key paths, compose. You can dive deeper into the enumeration of an enumeration's
 case using familiar dot-chaining:
@@ -118,6 +122,22 @@ case using familiar dot-chaining:
 // CasePath<AppAction, HomeAction>
 ```
 
+Or you can append them together:
+
+```swift
+let highScoreToUser = \HighScore.user
+let userToName = \User.name
+let highScoreToUserName = highScoreToUser.append(path: userToName)
+// WritableKeyPath<HighScore, String>
+
+let appActionToUser = \AppAction.Cases.user
+let userActionToHome = \UserAction.Cases.home
+let appActionToHome = appActionToUser.append(path: userActionToHome)
+// CasePath<AppAction, HomeAction>
+```
+
+#### Identity paths
+
 Case paths, also like key paths, provide an
 [identity](https://github.com/apple/swift-evolution/blob/master/proposals/0227-identity-keypath.md)
 path, which is useful for interacting with APIs that use key paths and case paths but you want to
@@ -127,6 +147,90 @@ work with entire structure.
 \User.self              // WritableKeyPath<User, User>
 \UserAction.Cases.self  // CasePath<UserAction, UserAction>
 ```
+
+#### Property access
+
+Since Swift 5.2, key path expressions can be passed directly to methods like `map`. Case-pathable
+enums that are annotated with dynamic member lookup enable property access and key path expressions
+for each case.
+
+```swift
+@CasePathable
+@dynamicMemberLookup
+enum UserAction {
+  case home(HomeAction)
+  case settings(SettingsAction)
+}
+
+let userAction: UserAction = .home(.onAppear)
+userAction.home  // Optional(HomeAction.onAppear)
+
+let userActions: [UserAction] = [.home(.onAppear), .settings(.purchaseButtonTapped)]
+userActions.compactMap(\.home)  // [HomeAction.onAppear]
+```
+
+#### Dynamic case lookup
+
+Because case key paths are bona fide key paths, they can be used in the same applications, like
+dynamic member lookup. For example, we can extend SwiftUI's binding type to enum cases by extending
+it with a subscript:
+
+```swift
+extension Binding {
+  subscript<Member>(
+    dynamicMember keyPath: CaseKeyPath<Value, Member>
+  ) -> Binding<Member>? {
+    guard let member = self.wrappedValue[keyPath: keyPath]
+    else { return nil }
+    return Binding<Member>(
+      get: { self.wrappedValue ?? member },
+      set: { self.wrappedValue[keyPath: keyPath] = $0 }
+    )
+  }
+}
+
+@CasePathable enum ItemStatus {
+  case inStock(quantity: Int)
+  case outOfStock(isOnBackOrder: Bool)
+}
+
+struct ItemStatusView: View {
+  @State var status: ItemStatus
+
+  var body: some View {
+    switch self.status {
+    case .inStock:
+      self.$status.inStock.map { $quantity in
+        Section {
+          Stepper("Quantity: \(quantity)", value: $quantity)
+          Button("Mark as sold out") {
+            self.item.status = .outOfStock(isOnBackOrder: false)
+          }
+        } header: {
+          Text("In stock")
+        }
+      }
+    case .outOfStock:
+      self.$status.outOfStock.map { $isOnBackOrder in
+        Section {
+          Toggle("Is on back order?", isOn: $isOnBackOrder)
+          Button("Is back in stock!") {
+            self.item.status = .inStock(quantity: 1)
+          }
+        } header: {
+          Text("Out of stock")
+        }
+      }
+    }
+  }
+}
+```
+
+> **Note**
+> The above is a simplified version of the subscript that ships in our
+> [SwiftUINavigation](https://github.com/pointfreeco/swiftui-navigation) library.
+
+#### Computed paths
 
 Key paths are created for every property, even computed ones, so what is the equivalent for case
 paths? Well, "computed" case paths can be created by extending the case-pathable enum's
@@ -156,16 +260,22 @@ extension Authentication.AllCasePaths {
     )
   }
 }
+
+\Authentication.Cases.encrypted
+// CaseKeyPath<Authentication, String>
 ```
 
-Since Swift 5.2, key path expressions can be passed directly to methods like `map`. Case pathable
-enums that are annotated with dynamic member lookup enable property access and key path expressions
-for each case.
+## Case studies
 
-```swift
-users.map(\.name)
-userActions.compactMap(\.home)
-```
+  * [**SwiftUINavigation**](https://github.com/pointfreeco/swiftui-navigation) uses case paths to
+    power SwiftUI bindings, including navigation, with enums.
+
+  * [**The Composable Architecture**](https://github.com/pointfreeco/swift-composable-architecture)
+    allows you to break large features down into smaller ones that can be glued together user key
+    paths and case paths.
+
+  * [**Parsing**](https://github.com/pointfreeco/swift-parsing) uses case paths to turn unstructured
+    data into enums and back again.
 
 ## Community
 
