@@ -296,10 +296,11 @@ a particular problem, there are a number of places you can discuss with fellow
 
 The latest documentation for CasePaths' APIs is available [here](https://pointfreeco.github.io/swift-case-paths/main/documentation/casepaths/).
 
-## Other libraries
+## Credit and thanks
 
-  * [`EnumKit`](https://github.com/gringoireDM/EnumKit) is a protocol-oriented, reflection-based
-    solution to ergonomic enum access and inspired the creation of this library.
+Special thanks to [Giuseppe Lanza](https://github.com/gringoireDM), whose
+[EnumKit](https://github.com/gringoireDM/EnumKit) inspired the original, reflection-based solution
+this library used to power case paths.
 
 ## Interested in learning more?
 
