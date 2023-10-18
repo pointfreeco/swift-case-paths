@@ -82,7 +82,7 @@ And like any key path, they can be abbreviated when the enum type can be inferre
 
 ### Case paths vs. key paths
 
-#### Extracting, embedding, and modifying values
+#### Extracting, embedding, modifying, and testing values
 
 As key paths package up the functionality of getting and setting a value on a root structure, case
 paths package up the functionality of optionally extracting and modifying an associated value of a
@@ -107,6 +107,23 @@ Case paths have an additional ability, which is to embed an associated value int
 ```swift
 let userActionToHome = \UserAction.Cases.home
 userActionToHome(.onAppear)  // UserAction.home(.onAppear)
+```
+
+Cases can be tested using the `is` method on case-pathable enums:
+
+```swift
+userAction.is(\.home)      // true
+userAction.is(\.settings)  // false
+```
+
+And their associated values can be mutated in place using the `modify` method:
+
+```swift
+var result = Result.success("Blob")
+result.modify(\.success) {
+  $0.append(", Jr.")
+}
+result  // Result.success("Blob, Jr.")
 ```
 
 #### Composing paths
