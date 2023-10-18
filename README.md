@@ -145,7 +145,7 @@ work with entire structure.
 
 ``` swift
 \User.self              // WritableKeyPath<User, User>
-\UserAction.Cases.self  // CasePath<UserAction, UserAction>
+\UserAction.Cases.self  // CaseKeyPath<UserAction, UserAction>
 ```
 
 #### Property access
