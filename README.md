@@ -163,7 +163,8 @@ enum UserAction {
 }
 
 let userAction: UserAction = .home(.onAppear)
-userAction.home  // Optional(HomeAction.onAppear)
+userAction.home      // Optional(HomeAction.onAppear)
+userAction.settings  // nil
 
 let userActions: [UserAction] = [.home(.onAppear), .settings(.purchaseButtonTapped)]
 userActions.compactMap(\.home)  // [HomeAction.onAppear]
