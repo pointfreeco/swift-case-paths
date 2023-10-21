@@ -272,7 +272,7 @@ extension Authentication.AllCasePaths {
         guard
           case let .authenticated(encryptedToken) = authentication,
           let decryptedToken = decrypt(token)
-          else { return nil }
+        else { return nil }
         return decryptedToken
       }
     )
