@@ -38,7 +38,8 @@ extension CasePathableMacro: ExtensionMacro {
     }
     let ext: DeclSyntax =
       """
-      extension \(type.trimmed): \(raw: Self.qualifiedConformanceName) {}
+      extension \(type.trimmed): \(raw: Self.qualifiedConformanceName), CasePaths.CasePathIterable {
+      }
       """
     return [ext.cast(ExtensionDeclSyntax.self)]
   }
@@ -84,6 +85,7 @@ extension CasePathableMacro: MemberMacro {
       seenCaseNames.insert(name)
     }
 
+    var taggedCaseKeyPaths: (withPayload: [String], withoutPayload: [String]) = ([], [])
     let casePaths: [DeclSyntax] = enumCaseDecls.map { enumCaseDecl in
       let caseName = enumCaseDecl.name.trimmed
       let associatedValueName = enumCaseDecl.trimmedTypeDescription
@@ -96,9 +98,11 @@ extension CasePathableMacro: MemberMacro {
           .joined(separator: ", ")
         bindingNames = "(\(parameterNames))"
         returnName = associatedValue.parameters.count == 1 ? parameterNames : bindingNames
+        taggedCaseKeyPaths.withPayload.append("\\\(enumName).Cases.\(caseName)")
       } else {
         bindingNames = ""
         returnName = "()"
+        taggedCaseKeyPaths.withoutPayload.append("\\\(enumName).Cases.\(caseName)")
       }
 
       return """
@@ -117,10 +121,23 @@ extension CasePathableMacro: MemberMacro {
         """
     }
 
+    let iterableCasePaths = (taggedCaseKeyPaths.withPayload + taggedCaseKeyPaths.withoutPayload)
+      .enumerated()
+
     return [
       """
-      \(access)struct AllCasePaths {
+      \(access)struct AllCasePaths: RandomAccessCollection {
       \(raw: casePaths.map(\.description).joined(separator: "\n"))
+      \(access)var startIndex: Int { 0 }
+      \(access)var endIndex: Int { \(raw: enumCaseDecls.count) }
+      \(access)func index(after i: Int) -> Int { i + 1 }
+      \(access)func index(before i: Int) -> Int { i - 1 }
+      \(access)subscript(position: Int) -> PartialCaseKeyPath<\(enumName)> {
+      switch position {
+      \(raw: iterableCasePaths.map { "case \($0): return \($1)" }.joined(separator: "\n"))
+      default: fatalError("Index out of range")
+      }
+      }
       }
       \(access)static var allCasePaths: AllCasePaths { AllCasePaths() }
       """

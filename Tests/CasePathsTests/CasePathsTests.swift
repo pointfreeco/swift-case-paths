@@ -119,6 +119,30 @@ final class CasePathsTests: XCTestCase {
     XCTAssertEqual(.int(42), Foo.bar(.int(42))[keyPath: partialPath] as? Bar)
     XCTAssertNil(Foo.baz(.string("Hello"))[keyPath: partialPath])
   }
+
+  func testCasePathIterable() {
+    for path in Foo.allCasePaths {
+      switch path {
+      case \.bar:
+        XCTAssertEqual(path(Bar.int(42)), Foo.bar(.int(42)))
+        XCTAssertNil(path(Baz.string("Blob")))
+        XCTAssertNil(path(()))
+      case \.baz:
+        XCTAssertNil(path(Bar.int(42)))
+        XCTAssertEqual(path(Baz.string("Blob")), Foo.baz(.string("Blob")))
+        XCTAssertNil(path(()))
+      case \.fizzBuzz:
+        XCTAssertNil(path(Bar.int(42)))
+        XCTAssertNil(path(Baz.string("Blob")))
+        XCTAssertEqual(path(()), Foo.fizzBuzz)
+      case \.blob:
+        XCTAssertNil(path(42))
+      default:
+        XCTFail()
+      }
+    }
+    XCTAssertEqual(Array(Foo.allCasePaths), [\.bar, \.baz, \.blob, \.fizzBuzz])
+  }
 }
 
 @CasePathable @dynamicMemberLookup enum Foo: Equatable {

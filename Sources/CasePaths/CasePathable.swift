@@ -2,9 +2,10 @@ import XCTestDynamicOverlay
 
 /// A type that provides a collection of all of its case paths.
 ///
-/// Use the ``CasePathable()`` macro to automatically add case paths to an enum.
+/// Use the ``CasePathable()`` macro to automatically add case paths, and this conformance, to an
+/// enum.
 ///
-/// It is also possible, though less common, to manually conform a type to ``CasePathable``. For
+/// It is also possible, though less common, to manually conform a type to `CasePathable`. For
 /// example, the `Result` type is extended to be case-pathable with the following extension:
 ///
 /// ```swift
@@ -37,6 +38,40 @@ import XCTestDynamicOverlay
 public protocol CasePathable {
   /// A type that can represent a collection of all case paths of this type.
   associatedtype AllCasePaths
+
+  /// A collection of all case paths of this type.
+  static var allCasePaths: AllCasePaths { get }
+}
+
+/// A type that provides an iterable collection of all of its case paths.
+///
+/// Usually used in conjunction with ``CasePathable``.
+///
+/// Use the ``CasePathable()`` macro to automatically add case paths, and this conformance, to an
+/// enum.
+///
+/// It is also possible, though less common, to manually conform a type to `CasePathIterable`. For
+/// example, the `Result` type is extended to be case path-iterable with the following extension:
+///
+/// ```swift
+/// extension Result: CasePathIterable {}
+/// extension Result.AllCasePaths: RandomAccessCollection {
+///   public var startIndex: Int { 0 }
+///   public var endIndex: Int { 2 }
+///   public func index(after i: Int) -> Int { i + 1 }
+///   public func index(before i: Int) -> Int { i - 1 }
+///   public subscript(position: Int) -> PartialCaseKeyPath<Result> {
+///     switch position {
+///     case 0: return \.success
+///     case 1: return \.failure
+///     default: fatalError("Index out of range")
+///     }
+///   }
+/// }
+/// ```
+public protocol CasePathIterable {
+  /// A type that can represent a collection of all case paths of this type.
+  associatedtype AllCasePaths: Collection where AllCasePaths.Element == PartialCaseKeyPath<Self>
 
   /// A collection of all case paths of this type.
   static var allCasePaths: AllCasePaths { get }
@@ -312,7 +347,7 @@ extension CasePathable {
     (Case<Self>()[keyPath: keyPath] as? any _AnyCase)?._extract(from: self)
   }
 
-  /// Attempts to replace the associated value of a root enum using a case key path.
+  /// Replaces the associated value of a root enum at a case key path when the case matches.
   ///
   /// For example:
   ///
@@ -329,7 +364,7 @@ extension CasePathable {
   /// // e is SomeEnum.someCase(24)
   ///
   /// e[keyPath: \.anotherCase] = "Hello!"
-  /// // Assignment fails: e is still SomeEnum.someCase(24)
+  /// // e is still SomeEnum.someCase(24)
   /// ```
   ///
   /// See ``CasePathable/subscript(keyPath:)-1zh2e`` for extracting an associated value from a root
