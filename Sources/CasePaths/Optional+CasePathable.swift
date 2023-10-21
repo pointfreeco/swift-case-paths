@@ -1,5 +1,5 @@
 extension Optional: CasePathable, CasePathIterable {
-  public struct AllCasePaths {
+  public struct AllCasePaths: RandomAccessCollection {
     public var none: AnyCasePath<Optional, Void> {
       AnyCasePath(
         embed: { .none },
