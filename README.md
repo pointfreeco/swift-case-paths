@@ -70,7 +70,7 @@ Case paths, like key paths, compose. Where key paths use dot-syntax to dive deep
 \HighScore.user.name
 // WritableKeyPath<HighScore, String>
 
-/Result<Authentication, Error> .. Authentication.authenticated
+/Result<Authentication, Error>.success .. Authentication.authenticated
 // CasePath<Result<Authentication, Error>, String>
 ```
 
