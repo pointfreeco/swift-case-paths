@@ -213,7 +213,7 @@ extension Binding {
 }
 
 struct ItemStatusView: View {
-  @State var status: ItemStatus
+  @Binding var status: ItemStatus
 
   var body: some View {
     switch self.status {
