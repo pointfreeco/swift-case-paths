@@ -150,7 +150,7 @@ let highScoreToUserName = highScoreToUser.append(path: userToName)
 let appActionToUser = \AppAction.Cases.user
 let userActionToHome = \UserAction.Cases.home
 let appActionToHome = appActionToUser.append(path: userActionToHome)
-// CasePath<AppAction, HomeAction>
+// CaseKeyPath<AppAction, HomeAction>
 ```
 
 #### Identity paths
