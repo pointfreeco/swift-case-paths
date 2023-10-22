@@ -136,7 +136,7 @@ case using familiar dot-chaining:
 // WritableKeyPath<HighScore, String>
 
 \AppAction.Cases.user.home
-// CasePath<AppAction, HomeAction>
+// CaseKeyPath<AppAction, HomeAction>
 ```
 
 Or you can append them together:
