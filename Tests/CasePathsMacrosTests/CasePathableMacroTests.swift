@@ -24,14 +24,14 @@ final class CasePathableMacroTests: XCTestCase {
       }
       """
     } expansion: {
-      #"""
+      """
       enum Foo {
         case bar
         case baz(Int)
         case fizz(buzz: String)
         case fizzier(Int, buzzier: String)
 
-        struct AllCasePaths: RandomAccessCollection {
+        struct AllCasePaths {
           var bar: CasePaths.AnyCasePath<Foo, Void> {
             CasePaths.AnyCasePath<Foo, Void>(
               embed: {
@@ -78,39 +78,13 @@ final class CasePathableMacroTests: XCTestCase {
               }
             )
           }
-          var startIndex: Int {
-            0
-          }
-          var endIndex: Int {
-            4
-          }
-          func index(after i: Int) -> Int {
-            i + 1
-          }
-          func index(before i: Int) -> Int {
-            i - 1
-          }
-          subscript(position: Int) -> PartialCaseKeyPath<Foo> {
-            switch position {
-            case 0:
-              return \Foo.Cases.baz
-            case 1:
-              return \Foo.Cases.fizz
-            case 2:
-              return \Foo.Cases.fizzier
-            case 3:
-              return \Foo.Cases.bar
-            default:
-              fatalError("Index out of range")
-            }
-          }
         }
         static var allCasePaths: AllCasePaths { AllCasePaths() }
       }
 
-      extension Foo: CasePaths.CasePathable, CasePaths.CasePathIterable {
+      extension Foo: CasePaths.CasePathable {
       }
-      """#
+      """
     }
   }
 
@@ -122,11 +96,11 @@ final class CasePathableMacroTests: XCTestCase {
       }
       """
     } expansion: {
-      #"""
+      """
       public enum Foo {
         case bar(Int), baz(String)
 
-        public struct AllCasePaths: RandomAccessCollection {
+        public struct AllCasePaths {
           public var bar: CasePaths.AnyCasePath<Foo, Int> {
             CasePaths.AnyCasePath<Foo, Int>(
               embed: Foo.bar,
@@ -149,35 +123,13 @@ final class CasePathableMacroTests: XCTestCase {
               }
             )
           }
-          public var startIndex: Int {
-            0
-          }
-          public var endIndex: Int {
-            2
-          }
-          public func index(after i: Int) -> Int {
-            i + 1
-          }
-          public func index(before i: Int) -> Int {
-            i - 1
-          }
-          public subscript(position: Int) -> PartialCaseKeyPath<Foo> {
-            switch position {
-            case 0:
-              return \Foo.Cases.bar
-            case 1:
-              return \Foo.Cases.baz
-            default:
-              fatalError("Index out of range")
-            }
-          }
         }
         public static var allCasePaths: AllCasePaths { AllCasePaths() }
       }
 
-      extension Foo: CasePaths.CasePathable, CasePaths.CasePathIterable {
+      extension Foo: CasePaths.CasePathable {
       }
-      """#
+      """
     }
   }
 
@@ -189,11 +141,11 @@ final class CasePathableMacroTests: XCTestCase {
       }
       """
     } expansion: {
-      #"""
+      """
       public enum Foo {
         case bar(Int)
 
-        public struct AllCasePaths: RandomAccessCollection {
+        public struct AllCasePaths {
           public var bar: CasePaths.AnyCasePath<Foo, Int> {
             CasePaths.AnyCasePath<Foo, Int>(
               embed: Foo.bar,
@@ -205,33 +157,13 @@ final class CasePathableMacroTests: XCTestCase {
               }
             )
           }
-          public var startIndex: Int {
-            0
-          }
-          public var endIndex: Int {
-            1
-          }
-          public func index(after i: Int) -> Int {
-            i + 1
-          }
-          public func index(before i: Int) -> Int {
-            i - 1
-          }
-          public subscript(position: Int) -> PartialCaseKeyPath<Foo> {
-            switch position {
-            case 0:
-              return \Foo.Cases.bar
-            default:
-              fatalError("Index out of range")
-            }
-          }
         }
         public static var allCasePaths: AllCasePaths { AllCasePaths() }
       }
 
-      extension Foo: CasePaths.CasePathable, CasePaths.CasePathIterable {
+      extension Foo: CasePaths.CasePathable {
       }
-      """#
+      """
     }
     assertMacro {
       """
@@ -240,11 +172,11 @@ final class CasePathableMacroTests: XCTestCase {
       }
       """
     } expansion: {
-      #"""
+      """
       private enum Foo {
         case bar(Int)
 
-        struct AllCasePaths: RandomAccessCollection {
+        struct AllCasePaths {
           var bar: CasePaths.AnyCasePath<Foo, Int> {
             CasePaths.AnyCasePath<Foo, Int>(
               embed: Foo.bar,
@@ -256,33 +188,13 @@ final class CasePathableMacroTests: XCTestCase {
               }
             )
           }
-          var startIndex: Int {
-            0
-          }
-          var endIndex: Int {
-            1
-          }
-          func index(after i: Int) -> Int {
-            i + 1
-          }
-          func index(before i: Int) -> Int {
-            i - 1
-          }
-          subscript(position: Int) -> PartialCaseKeyPath<Foo> {
-            switch position {
-            case 0:
-              return \Foo.Cases.bar
-            default:
-              fatalError("Index out of range")
-            }
-          }
         }
         static var allCasePaths: AllCasePaths { AllCasePaths() }
       }
 
-      extension Foo: CasePaths.CasePathable, CasePaths.CasePathIterable {
+      extension Foo: CasePaths.CasePathable {
       }
-      """#
+      """
     }
   }
 
@@ -332,27 +244,8 @@ final class CasePathableMacroTests: XCTestCase {
       """
       enum Foo: CasePathable {
 
-          struct AllCasePaths: RandomAccessCollection {
+          struct AllCasePaths {
 
-              var startIndex: Int {
-                  0
-              }
-              var endIndex: Int {
-                  0
-              }
-              func index(after i: Int) -> Int {
-                  i + 1
-              }
-              func index(before i: Int) -> Int {
-                  i - 1
-              }
-              subscript(position: Int) -> PartialCaseKeyPath<Foo> {
-                  switch position {
-
-                  default:
-                      fatalError("Index out of range")
-                  }
-              }
           }
           static var allCasePaths: AllCasePaths { AllCasePaths() }
       }
@@ -367,27 +260,8 @@ final class CasePathableMacroTests: XCTestCase {
       """
       enum Foo: CasePaths.CasePathable {
 
-          struct AllCasePaths: RandomAccessCollection {
+          struct AllCasePaths {
 
-              var startIndex: Int {
-                  0
-              }
-              var endIndex: Int {
-                  0
-              }
-              func index(after i: Int) -> Int {
-                  i + 1
-              }
-              func index(before i: Int) -> Int {
-                  i - 1
-              }
-              subscript(position: Int) -> PartialCaseKeyPath<Foo> {
-                  switch position {
-
-                  default:
-                      fatalError("Index out of range")
-                  }
-              }
           }
           static var allCasePaths: AllCasePaths { AllCasePaths() }
       }

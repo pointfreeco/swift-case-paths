@@ -5,7 +5,3 @@
 ### CasePathable conformance
 
 - ``CasePathable``
-
-### CasePathIterable conformance
-
-- ``CasePathIterable``
