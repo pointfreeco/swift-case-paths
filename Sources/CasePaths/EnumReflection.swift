@@ -32,7 +32,10 @@ extension AnyCasePath {
   }
 
   #if swift(>=5.9)
-    @available(*, deprecated, message: "Use a 'CasePathable' case key path, instead")
+    @available(iOS, deprecated: 9999, message: "Use a 'CasePathable' case key path, instead")
+    @available(macOS, deprecated: 9999, message: "Use a 'CasePathable' case key path, instead")
+    @available(tvOS, deprecated: 9999, message: "Use a 'CasePathable' case key path, instead")
+    @available(watchOS, deprecated: 9999, message: "Use a 'CasePathable' case key path, instead")
     public init(_ embed: @escaping (Value) -> Root) {
       func open<Wrapped>(_: Wrapped.Type) -> (Root) -> Value? {
         optionalPromotedExtractHelp(unsafeBitCast(embed, to: ((Value) -> Wrapped?).self))
@@ -73,7 +76,10 @@ extension AnyCasePath {
 
 extension AnyCasePath where Value == Void {
   #if swift(>=5.9)
-    @available(*, deprecated, message: "Use a 'CasePathable' case key path, instead")
+    @available(iOS, deprecated: 9999, message: "Use a 'CasePathable' case key path, instead")
+    @available(macOS, deprecated: 9999, message: "Use a 'CasePathable' case key path, instead")
+    @available(tvOS, deprecated: 9999, message: "Use a 'CasePathable' case key path, instead")
+    @available(watchOS, deprecated: 9999, message: "Use a 'CasePathable' case key path, instead")
     @_disfavoredOverload
     public init(_ root: Root) {
       func open<Wrapped>(_: Wrapped.Type) -> (Root) -> Void? {
@@ -109,7 +115,10 @@ extension AnyCasePath where Value == Void {
 
 extension AnyCasePath where Root == Value {
   #if swift(>=5.9)
-    @available(*, deprecated, message: "Use the '\\.self' case key path, instead")
+    @available(iOS, deprecated: 9999, message: "Use the '\\.self' case key path, instead")
+    @available(macOS, deprecated: 9999, message: "Use the '\\.self' case key path, instead")
+    @available(tvOS, deprecated: 9999, message: "Use the '\\.self' case key path, instead")
+    @available(watchOS, deprecated: 9999, message: "Use the '\\.self' case key path, instead")
     public init(_ type: Root.Type) {
       self = .self
     }

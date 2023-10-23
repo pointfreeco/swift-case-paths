@@ -3,7 +3,20 @@ import Foundation
 
 #if swift(>=5.9)
   @available(
-    *, deprecated, message: "Use XCTest's 'XCTUnwrap' with a 'CasePathable' case property, instead"
+    iOS, deprecated: 9999,
+    message: "Use XCTest's 'XCTUnwrap' with a 'CasePathable' case property, instead"
+  )
+  @available(
+    macOS, deprecated: 9999,
+    message: "Use XCTest's 'XCTUnwrap' with a 'CasePathable' case property, instead"
+  )
+  @available(
+    tvOS, deprecated: 9999,
+    message: "Use XCTest's 'XCTUnwrap' with a 'CasePathable' case property, instead"
+  )
+  @available(
+    watchOS, deprecated: 9999,
+    message: "Use XCTest's 'XCTUnwrap' with a 'CasePathable' case property, instead"
   )
   public func XCTUnwrap<Enum, Case>(
     _ enum: @autoclosure () throws -> Enum,
@@ -111,7 +124,10 @@ public func XCTModify<Enum, Case>(
 }
 
 #if swift(>=5.9)
-  @available(*, deprecated, message: "Use a 'CasePathable' case key path, instead")
+  @available(iOS, deprecated: 9999, message: "Use a 'CasePathable' case key path, instead")
+  @available(macOS, deprecated: 9999, message: "Use a 'CasePathable' case key path, instead")
+  @available(tvOS, deprecated: 9999, message: "Use a 'CasePathable' case key path, instead")
+  @available(watchOS, deprecated: 9999, message: "Use a 'CasePathable' case key path, instead")
   public func XCTModify<Enum, Case>(
     _ enum: inout Enum,
     case casePath: AnyCasePath<Enum, Case>,

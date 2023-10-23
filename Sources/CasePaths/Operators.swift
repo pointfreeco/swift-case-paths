@@ -2,7 +2,10 @@ prefix operator /
 
 extension AnyCasePath {
   #if swift(>=5.9)
-    @available(*, deprecated)
+    @available(iOS, deprecated: 9999)
+    @available(macOS, deprecated: 9999)
+    @available(tvOS, deprecated: 9999)
+    @available(watchOS, deprecated: 9999)
     public static func ~= (pattern: AnyCasePath, value: Root) -> Bool {
       pattern.extract(from: value) != nil
     }
@@ -26,7 +29,10 @@ extension AnyCasePath {
 }
 
 #if swift(>=5.9)
-  @available(*, deprecated, message: "Use a 'CasePathable' case key path, instead")
+  @available(iOS, deprecated: 9999, message: "Use a 'CasePathable' case key path, instead")
+  @available(macOS, deprecated: 9999, message: "Use a 'CasePathable' case key path, instead")
+  @available(tvOS, deprecated: 9999, message: "Use a 'CasePathable' case key path, instead")
+  @available(watchOS, deprecated: 9999, message: "Use a 'CasePathable' case key path, instead")
   @_documentation(visibility: internal)
   public prefix func / <Root, Value>(
     embed: @escaping (Value) -> Root
@@ -48,7 +54,10 @@ extension AnyCasePath {
 #endif
 
 #if swift(>=5.9)
-  @available(*, deprecated, message: "Use a 'CasePathable' case key path, instead")
+  @available(iOS, deprecated: 9999, message: "Use a 'CasePathable' case key path, instead")
+  @available(macOS, deprecated: 9999, message: "Use a 'CasePathable' case key path, instead")
+  @available(tvOS, deprecated: 9999, message: "Use a 'CasePathable' case key path, instead")
+  @available(watchOS, deprecated: 9999, message: "Use a 'CasePathable' case key path, instead")
   @_documentation(visibility: internal)
   public prefix func / <Root, Value>(
     embed: @escaping (Value) -> Root?
@@ -70,7 +79,10 @@ extension AnyCasePath {
 #endif
 
 #if swift(>=5.9)
-  @available(*, deprecated, message: "Use a 'CasePathable' case key path, instead")
+  @available(iOS, deprecated: 9999, message: "Use a 'CasePathable' case key path, instead")
+  @available(macOS, deprecated: 9999, message: "Use a 'CasePathable' case key path, instead")
+  @available(tvOS, deprecated: 9999, message: "Use a 'CasePathable' case key path, instead")
+  @available(watchOS, deprecated: 9999, message: "Use a 'CasePathable' case key path, instead")
   @_documentation(visibility: internal)
   public prefix func / <Root>(
     root: Root
@@ -92,7 +104,10 @@ extension AnyCasePath {
 #endif
 
 #if swift(>=5.9)
-  @available(*, deprecated, message: "Use a 'CasePathable' case key path, instead")
+  @available(iOS, deprecated: 9999, message: "Use a 'CasePathable' case key path, instead")
+  @available(macOS, deprecated: 9999, message: "Use a 'CasePathable' case key path, instead")
+  @available(tvOS, deprecated: 9999, message: "Use a 'CasePathable' case key path, instead")
+  @available(watchOS, deprecated: 9999, message: "Use a 'CasePathable' case key path, instead")
   @_documentation(visibility: internal)
   public prefix func / <Root>(
     root: Root?
@@ -114,7 +129,10 @@ extension AnyCasePath {
 #endif
 
 #if swift(>=5.9)
-  @available(*, deprecated, message: "Use the '\\.self' case key path, instead")
+  @available(iOS, deprecated: 9999, message: "Use the '\\.self' case key path, instead")
+  @available(macOS, deprecated: 9999, message: "Use the '\\.self' case key path, instead")
+  @available(tvOS, deprecated: 9999, message: "Use the '\\.self' case key path, instead")
+  @available(watchOS, deprecated: 9999, message: "Use the '\\.self' case key path, instead")
   @_documentation(visibility: internal)
   public prefix func / <Root>(
     type: Root.Type
@@ -135,7 +153,19 @@ extension AnyCasePath {
 
 #if swift(>=5.9)
   @available(
-    *, deprecated, message: "Use the a case key path (like '\\.self' or '\\.some'), instead"
+    iOS, deprecated: 9999, message: "Use the a case key path (like '\\.self' or '\\.some'), instead"
+  )
+  @available(
+    macOS, deprecated: 9999,
+    message: "Use the a case key path (like '\\.self' or '\\.some'), instead"
+  )
+  @available(
+    tvOS, deprecated: 9999,
+    message: "Use the a case key path (like '\\.self' or '\\.some'), instead"
+  )
+  @available(
+    watchOS, deprecated: 9999,
+    message: "Use the a case key path (like '\\.self' or '\\.some'), instead"
   )
   @_documentation(visibility: internal)
   public prefix func / <Root, Value>(
@@ -157,7 +187,22 @@ extension AnyCasePath {
 #endif
 
 #if swift(>=5.9)
-  @available(*, deprecated, message: "Use a 'CasePathable' case property, instead")
+  @available(
+    iOS, deprecated: 9999,
+    message: "Use a 'CasePathable' case property via dynamic member lookup, instead"
+  )
+  @available(
+    macOS, deprecated: 9999,
+    message: "Use a 'CasePathable' case property via dynamic member lookup, instead"
+  )
+  @available(
+    tvOS, deprecated: 9999,
+    message: "Use a 'CasePathable' case property via dynamic member lookup, instead"
+  )
+  @available(
+    watchOS, deprecated: 9999,
+    message: "Use a 'CasePathable' case property via dynamic member lookup, instead"
+  )
   @_disfavoredOverload
   @_documentation(visibility: internal)
   public prefix func / <Root, Value>(
@@ -191,7 +236,10 @@ extension AnyCasePath {
 #endif
 
 #if swift(>=5.9)
-  @available(*, deprecated, message: "Use a 'CasePathable' case property, instead")
+  @available(iOS, deprecated: 9999, message: "Use a 'CasePathable' case property, instead")
+  @available(macOS, deprecated: 9999, message: "Use a 'CasePathable' case property, instead")
+  @available(tvOS, deprecated: 9999, message: "Use a 'CasePathable' case property, instead")
+  @available(watchOS, deprecated: 9999, message: "Use a 'CasePathable' case property, instead")
   @_disfavoredOverload
   @_documentation(visibility: internal)
   public prefix func / <Root, Value>(
@@ -225,7 +273,22 @@ extension AnyCasePath {
 #endif
 
 #if swift(>=5.9)
-  @available(*, deprecated, message: "Use a 'CasePathable' case property, instead")
+  @available(
+    iOS, deprecated: 9999,
+    message: "Use a 'CasePathable' case property via dynamic member lookup, instead"
+  )
+  @available(
+    macOS, deprecated: 9999,
+    message: "Use a 'CasePathable' case property via dynamic member lookup, instead"
+  )
+  @available(
+    tvOS, deprecated: 9999,
+    message: "Use a 'CasePathable' case property via dynamic member lookup, instead"
+  )
+  @available(
+    watchOS, deprecated: 9999,
+    message: "Use a 'CasePathable' case property via dynamic member lookup, instead"
+  )
   @_disfavoredOverload
   @_documentation(visibility: internal)
   public prefix func / <Root>(
@@ -249,7 +312,22 @@ extension AnyCasePath {
 #endif
 
 #if swift(>=5.9)
-  @available(*, deprecated, message: "Use a 'CasePathable' case property, instead")
+  @available(
+    iOS, deprecated: 9999,
+    message: "Use a 'CasePathable' case property via dynamic member lookup, instead"
+  )
+  @available(
+    macOS, deprecated: 9999,
+    message: "Use a 'CasePathable' case property via dynamic member lookup, instead"
+  )
+  @available(
+    tvOS, deprecated: 9999,
+    message: "Use a 'CasePathable' case property via dynamic member lookup, instead"
+  )
+  @available(
+    watchOS, deprecated: 9999,
+    message: "Use a 'CasePathable' case property via dynamic member lookup, instead"
+  )
   @_disfavoredOverload
   @_documentation(visibility: internal)
   public prefix func / <Root>(
@@ -280,7 +358,10 @@ infix operator ..: CasePathCompositionPrecedence
 
 extension AnyCasePath {
   #if swift(>=5.9)
-    @available(*, deprecated, message: "Append 'CasePathable' case key paths, instead")
+    @available(iOS, deprecated: 9999, message: "Append 'CasePathable' case key paths, instead")
+    @available(macOS, deprecated: 9999, message: "Append 'CasePathable' case key paths, instead")
+    @available(tvOS, deprecated: 9999, message: "Append 'CasePathable' case key paths, instead")
+    @available(watchOS, deprecated: 9999, message: "Append 'CasePathable' case key paths, instead")
     public static func .. <AppendedValue>(
       lhs: AnyCasePath,
       rhs: AnyCasePath<Value, AppendedValue>
@@ -306,7 +387,10 @@ extension AnyCasePath {
   #endif
 
   #if swift(>=5.9)
-    @available(*, deprecated, message: "Append 'CasePathable' case key paths, instead")
+    @available(iOS, deprecated: 9999, message: "Append 'CasePathable' case key paths, instead")
+    @available(macOS, deprecated: 9999, message: "Append 'CasePathable' case key paths, instead")
+    @available(tvOS, deprecated: 9999, message: "Append 'CasePathable' case key paths, instead")
+    @available(watchOS, deprecated: 9999, message: "Append 'CasePathable' case key paths, instead")
     public static func .. <AppendedValue>(
       lhs: AnyCasePath,
       rhs: @escaping (AppendedValue) -> Value
@@ -331,7 +415,10 @@ extension AnyCasePath {
 }
 
 #if swift(>=5.9)
-  @available(*, deprecated, message: "Chain 'CasePathable' case properties, instead")
+  @available(iOS, deprecated: 9999, message: "Chain 'CasePathable' case properties, instead")
+  @available(macOS, deprecated: 9999, message: "Chain 'CasePathable' case properties, instead")
+  @available(tvOS, deprecated: 9999, message: "Chain 'CasePathable' case properties, instead")
+  @available(watchOS, deprecated: 9999, message: "Chain 'CasePathable' case properties, instead")
   public func .. <Root, Value, AppendedValue>(
     lhs: @escaping (Root) -> Value?,
     rhs: @escaping (AppendedValue) -> Value

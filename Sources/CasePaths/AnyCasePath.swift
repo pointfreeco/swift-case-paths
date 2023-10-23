@@ -65,7 +65,20 @@ extension AnyCasePath: CustomDebugStringConvertible {
 extension AnyCasePath {
   #if swift(>=5.9)
     @available(
-      *, deprecated, message: "Use 'CasePathable.modify', or 'extract' and 'embed', instead."
+      iOS, deprecated: 9999,
+      message: "Use 'CasePathable.modify', or 'extract' and 'embed', instead."
+    )
+    @available(
+      macOS, deprecated: 9999,
+      message: "Use 'CasePathable.modify', or 'extract' and 'embed', instead."
+    )
+    @available(
+      tvOS, deprecated: 9999,
+      message: "Use 'CasePathable.modify', or 'extract' and 'embed', instead."
+    )
+    @available(
+      watchOS, deprecated: 9999,
+      message: "Use 'CasePathable.modify', or 'extract' and 'embed', instead."
     )
     public func modify<Result>(
       _ root: inout Root,
@@ -96,7 +109,10 @@ extension AnyCasePath {
   #endif
 
   #if swift(>=5.9)
-    @available(*, deprecated, message: "Chain case key paths together, instead.")
+    @available(iOS, deprecated: 9999, message: "Chain case key paths together, instead.")
+    @available(macOS, deprecated: 9999, message: "Chain case key paths together, instead.")
+    @available(tvOS, deprecated: 9999, message: "Chain case key paths together, instead.")
+    @available(watchOS, deprecated: 9999, message: "Chain case key paths together, instead.")
     public func appending<AppendedValue>(
       path: AnyCasePath<Value, AppendedValue>
     ) -> AnyCasePath<Root, AppendedValue> {

@@ -1,6 +1,9 @@
 extension AnyCasePath where Root == Value {
   #if swift(>=5.9)
-    @available(*, deprecated, message: "Use the '\\.self' case key path, instead")
+    @available(iOS, deprecated: 9999, message: "Use the '\\.self' case key path, instead")
+    @available(macOS, deprecated: 9999, message: "Use the '\\.self' case key path, instead")
+    @available(tvOS, deprecated: 9999, message: "Use the '\\.self' case key path, instead")
+    @available(watchOS, deprecated: 9999, message: "Use the '\\.self' case key path, instead")
     public static var `self`: Self {
       .init(
         embed: { $0 },
@@ -21,7 +24,18 @@ extension AnyCasePath where Root == Value {
 
 extension AnyCasePath where Root: _OptionalProtocol, Value == Root.Wrapped {
   #if swift(>=5.9)
-    @available(*, deprecated, message: "Use the '\\Optional.Cases.some' case key path, instead")
+    @available(
+      iOS, deprecated: 9999, message: "Use the '\\Optional.Cases.some' case key path, instead"
+    )
+    @available(
+      macOS, deprecated: 9999, message: "Use the '\\Optional.Cases.some' case key path, instead"
+    )
+    @available(
+      tvOS, deprecated: 9999, message: "Use the '\\Optional.Cases.some' case key path, instead"
+    )
+    @available(
+      watchOS, deprecated: 9999, message: "Use the '\\Optional.Cases.some' case key path, instead"
+    )
     public static var some: Self {
       .init(embed: Root.init, extract: { $0.optional })
     }
