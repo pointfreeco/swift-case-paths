@@ -92,14 +92,14 @@ root enumeration.
 user[keyPath: \User.name] = "Blob"
 user[keyPath: \.name]  // "Blob"
 
-userAction[keyPath: \UserAction.Cases.home] = .onAppear
-userAction[keyPath: \.home]  // Optional(HomeAction.onAppear)
+userAction[case: \UserAction.Cases.home] = .onAppear
+userAction[case: \.home]  // Optional(HomeAction.onAppear)
 ```
 
 If the case doesn't match, the extraction can fail and return `nil`:
 
 ```swift
-userAction[keyPath: \.settings]  // nil
+userAction[case: \.settings]  // nil
 ```
 
 Case paths have an additional ability, which is to embed an associated value into a brand new root:
@@ -198,11 +198,11 @@ extension Binding {
   subscript<Member>(
     dynamicMember keyPath: CaseKeyPath<Value, Member>
   ) -> Binding<Member>? {
-    guard let member = self.wrappedValue[keyPath: keyPath]
+    guard let member = self.wrappedValue[case: keyPath]
     else { return nil }
     return Binding<Member>(
-      get: { self.wrappedValue ?? member },
-      set: { self.wrappedValue[keyPath: keyPath] = $0 }
+      get: { self.wrappedValue[case: keyPath] ?? member },
+      set: { self.wrappedValue[case: keyPath] = $0 }
     )
   }
 }

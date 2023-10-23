@@ -11,6 +11,9 @@ final class CasePathsTests: XCTestCase {
     XCTAssertEqual(foo[keyPath: \.bar], .int(1))
     XCTAssertEqual(foo[keyPath: \.bar?.int], 1)
 
+    XCTAssertEqual(foo[case: \.bar], .int(1))
+    XCTAssertEqual(foo[case: \.bar.int], 1)
+
     foo[case: \.bar] = .int(42)
 
     XCTAssertEqual(foo, .bar(.int(42)))

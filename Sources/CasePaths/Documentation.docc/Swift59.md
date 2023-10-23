@@ -90,7 +90,7 @@ APIs that take ``CaseKeyPath``s instead. ``CaseKeyPath``s have all the functiona
 casePath.extract(from: root)
 
 // After:
-root[keyPath: casePath]
+root[case: casePath]
 ```
 
 #### Embedding associated values

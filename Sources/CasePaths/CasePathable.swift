@@ -139,10 +139,10 @@ extension Case: _AnyCase {
 /// ```swift
 /// var e = SomeEnum.someCase(12)
 ///
-/// e[keyPath: \.someCase] = 24
+/// e[case: \.someCase] = 24
 /// // e is SomeEnum.someCase(24)
 ///
-/// e[keyPath: \.anotherCase] = "Hello!"
+/// e[case: \.anotherCase] = "Hello!"
 /// // Assignment fails: e is still SomeEnum.someCase(24)
 /// ```
 ///
@@ -169,10 +169,10 @@ extension Case: _AnyCase {
 /// var nested = OuterEnum.outer(.someCase(24))
 /// let nestedCaseKeyPath = \OuterEnum.Cases.outer.someCase
 ///
-/// let nestedValue = nested[keyPath: nestedCaseKeyPath]
+/// let nestedValue = nested[case: nestedCaseKeyPath]
 /// // nestedValue is Optional(24)
 ///
-/// nested[keyPath: \.outer.someCase] = 42
+/// nested[case: \.outer.someCase] = 42
 /// // nested is now OuterEnum.outer(.someCase(42))
 /// ```
 ///
@@ -316,8 +316,8 @@ extension CasePathable {
   ///
   /// let e = SomeEnum.someCase(12)
   ///
-  /// e[keyPath: \.someCase]     // Optional(12)
-  /// e[keyPath: \.anotherCase]  // nil
+  /// e[case: \.someCase]     // Optional(12)
+  /// e[case: \.anotherCase]  // nil
   /// ```
   ///
   /// See ``CasePathable/subscript(case:)-8yr2s`` for replacing an associated value in a root
@@ -346,10 +346,10 @@ extension CasePathable {
   ///
   /// var e = SomeEnum.someCase(12)
   ///
-  /// e[keyPath: \.someCase] = 24
+  /// e[case: \.someCase] = 24
   /// // e is SomeEnum.someCase(24)
   ///
-  /// e[keyPath: \.anotherCase] = "Hello!"
+  /// e[case: \.anotherCase] = "Hello!"
   /// // e is still SomeEnum.someCase(24)
   /// ```
   ///
