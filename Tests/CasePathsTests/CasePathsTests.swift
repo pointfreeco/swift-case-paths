@@ -11,23 +11,23 @@ final class CasePathsTests: XCTestCase {
     XCTAssertEqual(foo[keyPath: \.bar], .int(1))
     XCTAssertEqual(foo[keyPath: \.bar?.int], 1)
 
-    foo[keyPath: \.bar] = .int(42)
+    foo[case: \.bar] = .int(42)
 
     XCTAssertEqual(foo, .bar(.int(42)))
 
-    foo[keyPath: \.baz] = .string("Forty-two")
+    foo[case: \.baz] = .string("Forty-two")
 
     XCTAssertEqual(foo, .bar(.int(42)))
 
-    foo[keyPath: \.bar.int] = 1792
+    foo[case: \.bar.int] = 1792
 
     XCTAssertEqual(foo, .bar(.int(1792)))
 
-    foo[keyPath: \.baz.string] = "Seventeen hundred and ninety-two"
+    foo[case: \.baz.string] = "Seventeen hundred and ninety-two"
 
     XCTAssertEqual(foo, .bar(.int(1792)))
 
-    foo[keyPath: \.bar] = .int(42)
+    foo[case: \.bar] = .int(42)
 
     XCTAssertEqual((\Foo.Cases.self)(.bar(.int(1))), .bar(.int(1)))
     XCTAssertEqual((\Foo.Cases.bar)(.int(1)), .bar(.int(1)))
@@ -50,21 +50,21 @@ final class CasePathsTests: XCTestCase {
   }
 
   func testOptional() {
-    XCTAssertEqual(Int?.some(42)[keyPath: \.some], 42)
-    XCTAssertNil(Int?.none[keyPath: \.some])
+    XCTAssertEqual(Int?.some(42)[case: \.some], 42)
+    XCTAssertNil(Int?.none[case: \.some])
     XCTAssertEqual((\Int?.Cases.some)(42), 42)
-    XCTAssertNil(Int?.some(42)[keyPath: \.none])
-    XCTAssertNotNil(Int?.none[keyPath: \.none])
+    XCTAssertNil(Int?.some(42)[case: \.none])
+    XCTAssertNotNil(Int?.none[case: \.none])
     XCTAssertEqual((\Int?.Cases.none)(), nil)
   }
 
   func testResult() {
     struct SomeError: Error, Equatable {}
-    XCTAssertEqual(Result<Int, Error>.success(42)[keyPath: \.success], 42)
-    XCTAssertNil(Result<Int, Error>.failure(SomeError())[keyPath: \.success])
+    XCTAssertEqual(Result<Int, Error>.success(42)[case: \.success], 42)
+    XCTAssertNil(Result<Int, Error>.failure(SomeError())[case: \.success])
     XCTAssertEqual((\Result<Int, SomeError>.Cases.success)(42), .success(42))
-    XCTAssertNil(Result<Int, Error>.success(42)[keyPath: \.failure])
-    XCTAssertNotNil(Result<Int, Error>.failure(SomeError())[keyPath: \.failure])
+    XCTAssertNil(Result<Int, Error>.success(42)[case: \.failure])
+    XCTAssertNotNil(Result<Int, Error>.failure(SomeError())[case: \.failure])
     XCTAssertEqual((\Result<Int, SomeError>.Cases.failure)(SomeError()), .failure(SomeError()))
   }
 
@@ -83,8 +83,8 @@ final class CasePathsTests: XCTestCase {
     let barToInt = \Bar.Cases.int
     let fooToInt = fooToBar.appending(path: barToInt)
 
-    XCTAssertEqual(Foo.bar(.int(42))[keyPath: fooToInt], 42)
-    XCTAssertEqual(Foo.baz(.string("Hello"))[keyPath: fooToInt], nil)
+    XCTAssertEqual(Foo.bar(.int(42))[case: fooToInt], 42)
+    XCTAssertEqual(Foo.baz(.string("Hello"))[case: fooToInt], nil)
     XCTAssertEqual(Foo.bar(.int(123)), fooToInt(123))
   }
 
@@ -116,8 +116,8 @@ final class CasePathsTests: XCTestCase {
     XCTAssertEqual(.bar(.int(42)), partialPath(Bar.int(42)))
     XCTAssertNil(partialPath(42))
 
-    XCTAssertEqual(.int(42), Foo.bar(.int(42))[keyPath: partialPath] as? Bar)
-    XCTAssertNil(Foo.baz(.string("Hello"))[keyPath: partialPath])
+    XCTAssertEqual(.int(42), Foo.bar(.int(42))[case: partialPath] as? Bar)
+    XCTAssertNil(Foo.baz(.string("Hello"))[case: partialPath])
   }
 }
 

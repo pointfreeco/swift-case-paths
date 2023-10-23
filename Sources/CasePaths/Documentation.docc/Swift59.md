@@ -104,10 +104,10 @@ casePath(value)
 ```
 
 Case key paths can also replace an enum's existing associated value via
-``CasePathable/subscript(keyPath:)-1zh2e``:
+``CasePathable/subscript(case:)-8yr2s``:
 
 ```swift
-root[keyPath: casePath] = value
+root[case: casePath] = value
 ```
 
 #### Modifying associated values

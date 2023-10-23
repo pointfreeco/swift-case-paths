@@ -8,8 +8,8 @@
 
 ### Extracting, replacing, and modifying values
 
-- ``subscript(keyPath:)-1icdd``
-- ``subscript(keyPath:)-1zh2e``
+- ``subscript(case:)-6cdhl``
+- ``subscript(case:)-8yr2s``
 - ``modify(_:yield:file:line:)``
 
 ### Case properties

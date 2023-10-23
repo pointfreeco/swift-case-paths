@@ -15,4 +15,4 @@
 
 - ``PartialCaseKeyPath``
 - ``Swift/PartialKeyPath/callAsFunction(_:)``
-- ``CasePathable/subscript(keyPath:)-6o69c``
+- ``CasePathable/subscript(case:)-8av06``
