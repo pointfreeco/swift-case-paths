@@ -260,6 +260,7 @@ extension PartialCaseKeyPath {
   /// - Parameter value: A value to embed. If the value type does not match the case path's value
   ///   type, the operation will fail.
   /// - Returns: An enum for the case of this key path that holds the given value, or `nil`.
+  @_disfavoredOverload
   public func callAsFunction<Enum: CasePathable, AnyAssociatedValue>(
     _ value: AnyAssociatedValue
   ) -> Enum?
@@ -309,6 +310,7 @@ extension CasePathable {
   }
 
   /// Attempts to extract the associated value from a root enum using a partial case key path.
+  @_disfavoredOverload
   public subscript(keyPath keyPath: PartialCaseKeyPath<Self>) -> Any? {
     (Case<Self>()[keyPath: keyPath] as? any _AnyCase)?._extract(from: self)
   }
