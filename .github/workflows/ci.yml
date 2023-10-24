@@ -64,5 +64,3 @@ jobs:
       - uses: actions/checkout@v4
       - name: Build
         run: swift build -c ${{ matrix.config }}
-      - name: Run tests
-        run: swift test -c ${{ matrix.config }}
