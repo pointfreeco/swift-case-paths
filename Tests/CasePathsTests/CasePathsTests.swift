@@ -88,7 +88,7 @@ final class CasePathsTests: XCTestCase {
       XCTAssertEqual(foo, .bar(.int(42)))
     }
 
-    #if !os(Linux) && !os(Windows)
+    #if DEBUG && !os(Linux) && !os(Windows)
       func testCasePathableModify_Failure() {
         var foo = Foo.bar(.int(21))
         XCTExpectFailure {

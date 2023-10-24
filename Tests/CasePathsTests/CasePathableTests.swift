@@ -9,7 +9,7 @@ final class CasePathableTests: XCTestCase {
     XCTAssertEqual(result, .success(2))
   }
 
-  #if swift(>=5.9) && !os(Linux) && !os(Windows)
+  #if DEBUG && !os(Linux) && !os(Windows)
     func testModifyWrongCase() {
       var response = Result<Int, MyError>.failure(MyError())
       XCTExpectFailure {
