@@ -9,17 +9,22 @@ final class CasePathableTests: XCTestCase {
     XCTAssertEqual(result, .success(2))
   }
 
-  func testModifyWrongCase() {
-    struct MyError: Equatable, Error {}
-    var response = Result<Int, MyError>.failure(MyError())
-    XCTExpectFailure {
-      response.modify(\.success) { $0 += 1 }
-    } issueMatcher: {
-      $0.compactDescription == #"""
-        Can't modify 'failure' via 'CaseKeyPath<Response, Int>' \#
-        (aka '\Case<Response>.subscript(dynamicMember: <unknown>)')
-        """#
+  #if !os(Linux) && !os(Windows)
+    func testModifyWrongCase() {
+      var response = Result<Int, MyError>.failure(MyError())
+      XCTExpectFailure {
+        response.modify(\.success) { $0 += 1 }
+      } issueMatcher: {
+        $0.compactDescription == #"""
+          Can't modify 'failure(CasePathsTests.CasePathableTests.MyError())' \#
+          via 'CaseKeyPath<Result<Int, MyError>, Int>' \#
+          (aka '\Case<Result<Int, MyError>>.subscript(dynamicMember: <unknown>)')
+          """#
+      }
+      XCTAssertEqual(response, .failure(MyError()))
     }
-    XCTAssertEqual(response, .failure(MyError()))
-  }
+  #endif
+
+  struct MyError: Equatable, Error {}
 }
+
