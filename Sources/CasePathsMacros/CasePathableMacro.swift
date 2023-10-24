@@ -31,7 +31,7 @@ extension CasePathableMacro: ExtensionMacro {
     }
     if let inheritanceClause = enumDecl.inheritanceClause,
       inheritanceClause.inheritedTypes.contains(
-        where: { Self.conformanceNames.contains($0.trimmedDescription) }
+        where: { Self.conformanceNames.contains($0.type.trimmedDescription) }
       )
     {
       return []
