@@ -55,8 +55,8 @@ public protocol CasePathable {
 #else
   @dynamicMemberLookup
   public struct Case<Value> {
-    fileprivate let embed: (Value) -> Any
-    fileprivate let extract: (Any) -> Value?
+    fileprivate let _embed: (Value) -> Any
+    fileprivate let _extract: (Any) -> Value?
   }
 #endif
 
