@@ -4,9 +4,11 @@ on:
   push:
     branches:
       - main
+      - case-key-paths
   pull_request:
     branches:
       - '*'
+  workflow_dispatch:
 
 concurrency:
   group: ci-${{ github.ref }}
