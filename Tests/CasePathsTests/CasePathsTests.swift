@@ -2,56 +2,6 @@ import CasePaths
 import XCTest
 
 final class CasePathsTests: XCTestCase {
-  func testCaseKeyPaths() {
-    var foo: Foo = .bar(.int(1))
-
-    XCTAssertEqual(foo.bar, .int(1))
-    XCTAssertEqual(foo.bar?.int, 1)
-
-    XCTAssertEqual(foo[keyPath: \.bar], .int(1))
-    XCTAssertEqual(foo[keyPath: \.bar?.int], 1)
-
-    XCTAssertEqual(foo[case: \.bar], .int(1))
-    XCTAssertEqual(foo[case: \.bar.int], 1)
-
-    foo[case: \.bar] = .int(42)
-
-    XCTAssertEqual(foo, .bar(.int(42)))
-
-    foo[case: \.baz] = .string("Forty-two")
-
-    XCTAssertEqual(foo, .bar(.int(42)))
-
-    foo[case: \.bar.int] = 1792
-
-    XCTAssertEqual(foo, .bar(.int(1792)))
-
-    foo[case: \.baz.string] = "Seventeen hundred and ninety-two"
-
-    XCTAssertEqual(foo, .bar(.int(1792)))
-
-    foo[case: \.bar] = .int(42)
-
-    XCTAssertEqual((\Foo.Cases.self)(.bar(.int(1))), .bar(.int(1)))
-    XCTAssertEqual((\Foo.Cases.bar)(.int(1)), .bar(.int(1)))
-    XCTAssertEqual((\Foo.Cases.bar.int)(1), .bar(.int(1)))
-    XCTAssertEqual((\Foo.Cases.fizzBuzz)(), .fizzBuzz)
-  }
-
-  func testCasePathableModify() {
-    var foo = Foo.bar(.int(21))
-    foo.modify(\.bar.int) { $0 *= 2 }
-    XCTAssertEqual(foo, .bar(.int(42)))
-  }
-
-  func testCasePathableModify_Failure() {
-    var foo = Foo.bar(.int(21))
-    XCTExpectFailure {
-      foo.modify(\.baz.string) { $0.append("!") }
-    }
-    XCTAssertEqual(foo, .bar(.int(21)))
-  }
-
   func testOptional() {
     XCTAssertEqual(Int?.some(42)[case: \.some], 42)
     XCTAssertNil(Int?.none[case: \.some])
@@ -81,60 +31,114 @@ final class CasePathsTests: XCTestCase {
     XCTAssertEqual(loadable, .isLoaded)
   }
 
-  func testAppend() {
-    let fooToBar = \Foo.Cases.bar
-    let barToInt = \Bar.Cases.int
-    let fooToInt = fooToBar.appending(path: barToInt)
+  #if swift(>=5.9)
+    func testCaseKeyPaths() {
+      var foo: Foo = .bar(.int(1))
 
-    XCTAssertEqual(Foo.bar(.int(42))[case: fooToInt], 42)
-    XCTAssertEqual(Foo.baz(.string("Hello"))[case: fooToInt], nil)
-    XCTAssertEqual(Foo.bar(.int(123)), fooToInt(123))
-  }
+      XCTAssertEqual(foo.bar, .int(1))
+      XCTAssertEqual(foo.bar?.int, 1)
 
-  func testMatch() {
-    switch Foo.bar(.int(42)) {
-    case \.bar.int:
-      return
-    default:
-      XCTFail()
+      XCTAssertEqual(foo[keyPath: \.bar], .int(1))
+      XCTAssertEqual(foo[keyPath: \.bar?.int], 1)
+
+      XCTAssertEqual(foo[case: \.bar], .int(1))
+      XCTAssertEqual(foo[case: \.bar.int], 1)
+
+      foo[case: \.bar] = .int(42)
+
+      XCTAssertEqual(foo, .bar(.int(42)))
+
+      foo[case: \.baz] = .string("Forty-two")
+
+      XCTAssertEqual(foo, .bar(.int(42)))
+
+      foo[case: \.bar.int] = 1792
+
+      XCTAssertEqual(foo, .bar(.int(1792)))
+
+      foo[case: \.baz.string] = "Seventeen hundred and ninety-two"
+
+      XCTAssertEqual(foo, .bar(.int(1792)))
+
+      foo[case: \.bar] = .int(42)
+
+      XCTAssertEqual((\Foo.Cases.self)(.bar(.int(1))), .bar(.int(1)))
+      XCTAssertEqual((\Foo.Cases.bar)(.int(1)), .bar(.int(1)))
+      XCTAssertEqual((\Foo.Cases.bar.int)(1), .bar(.int(1)))
+      XCTAssertEqual((\Foo.Cases.fizzBuzz)(), .fizzBuzz)
     }
 
-    switch Foo.bar(.int(42)) {
-    case \.bar:
-      return
-    default:
-      XCTFail()
+    func testCasePathableModify() {
+      var foo = Foo.bar(.int(21))
+      foo.modify(\.bar.int) { $0 *= 2 }
+      XCTAssertEqual(foo, .bar(.int(42)))
     }
 
-    XCTAssertTrue(Foo.bar(.int(42)).is(\.bar))
-    XCTAssertTrue(Foo.bar(.int(42)).is(\.bar.int))
-    XCTAssertFalse(Foo.bar(.int(42)).is(\.baz))
-    XCTAssertFalse(Foo.bar(.int(42)).is(\.baz.string))
-    XCTAssertFalse(Foo.bar(.int(42)).is(\.blob))
-    XCTAssertFalse(Foo.bar(.int(42)).is(\.fizzBuzz))
+    func testCasePathableModify_Failure() {
+      var foo = Foo.bar(.int(21))
+      XCTExpectFailure {
+        foo.modify(\.baz.string) { $0.append("!") }
+      }
+      XCTAssertEqual(foo, .bar(.int(21)))
+    }
+
+    func testAppend() {
+      let fooToBar = \Foo.Cases.bar
+      let barToInt = \Bar.Cases.int
+      let fooToInt = fooToBar.appending(path: barToInt)
+
+      XCTAssertEqual(Foo.bar(.int(42))[case: fooToInt], 42)
+      XCTAssertEqual(Foo.baz(.string("Hello"))[case: fooToInt], nil)
+      XCTAssertEqual(Foo.bar(.int(123)), fooToInt(123))
+    }
+
+    func testMatch() {
+      switch Foo.bar(.int(42)) {
+      case \.bar.int:
+        return
+      default:
+        XCTFail()
+      }
+
+      switch Foo.bar(.int(42)) {
+      case \.bar:
+        return
+      default:
+        XCTFail()
+      }
+
+      XCTAssertTrue(Foo.bar(.int(42)).is(\.bar))
+      XCTAssertTrue(Foo.bar(.int(42)).is(\.bar.int))
+      XCTAssertFalse(Foo.bar(.int(42)).is(\.baz))
+      XCTAssertFalse(Foo.bar(.int(42)).is(\.baz.string))
+      XCTAssertFalse(Foo.bar(.int(42)).is(\.blob))
+      XCTAssertFalse(Foo.bar(.int(42)).is(\.fizzBuzz))
+    }
+
+    func testPartialCaseKeyPath() {
+      let partialPath = \Foo.Cases.bar as PartialCaseKeyPath
+      XCTAssertEqual(.bar(.int(42)), partialPath(Bar.int(42)))
+      XCTAssertNil(partialPath(42))
+
+      XCTAssertEqual(.int(42), Foo.bar(.int(42))[case: partialPath] as? Bar)
+      XCTAssertNil(Foo.baz(.string("Hello"))[case: partialPath])
+    }
+  #endif
+}
+
+#if swift(>=5.9)
+  @CasePathable @dynamicMemberLookup enum Foo: Equatable {
+    case bar(Bar)
+    case baz(Baz)
+    case fizzBuzz
+    case blob(Blob)
   }
-
-  func testPartialCaseKeyPath() {
-    let partialPath = \Foo.Cases.bar as PartialCaseKeyPath
-    XCTAssertEqual(.bar(.int(42)), partialPath(Bar.int(42)))
-    XCTAssertNil(partialPath(42))
-
-    XCTAssertEqual(.int(42), Foo.bar(.int(42))[case: partialPath] as? Bar)
-    XCTAssertNil(Foo.baz(.string("Hello"))[case: partialPath])
+  @CasePathable @dynamicMemberLookup enum Bar: Equatable {
+    case int(Int)
   }
-}
-
-@CasePathable @dynamicMemberLookup enum Foo: Equatable {
-  case bar(Bar)
-  case baz(Baz)
-  case fizzBuzz
-  case blob(Blob)
-}
-@CasePathable @dynamicMemberLookup enum Bar: Equatable {
-  case int(Int)
-}
-@CasePathable @dynamicMemberLookup enum Baz: Equatable {
-  case string(String)
-}
-@CasePathable enum Blob: Equatable {
-}
+  @CasePathable @dynamicMemberLookup enum Baz: Equatable {
+    case string(String)
+  }
+  @CasePathable enum Blob: Equatable {
+  }
+#endif
