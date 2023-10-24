@@ -5,20 +5,34 @@ final class CasePathsTests: XCTestCase {
   func testOptional() {
     XCTAssertEqual(Int?.some(42)[case: \.some], 42)
     XCTAssertNil(Int?.none[case: \.some])
-    XCTAssertEqual((\Int?.Cases.some)(42), 42)
     XCTAssertNil(Int?.some(42)[case: \.none])
     XCTAssertNotNil(Int?.none[case: \.none])
-    XCTAssertEqual((\Int?.Cases.none)(), nil)
+    #if swift(>=5.9)
+      XCTAssertEqual((\Int?.Cases.some)(42), 42)
+      XCTAssertEqual((\Int?.Cases.none)(), nil)
+    #else
+      let somePath: CaseKeyPath<Int?, Int> = \.some
+      let nonePath: CaseKeyPath<Int?, Void> = \.none
+      XCTAssertEqual(somePath(42), 42)
+      XCTAssertEqual(nonePath(), nil)
+    #endif
   }
 
   func testResult() {
     struct SomeError: Error, Equatable {}
     XCTAssertEqual(Result<Int, Error>.success(42)[case: \.success], 42)
     XCTAssertNil(Result<Int, Error>.failure(SomeError())[case: \.success])
-    XCTAssertEqual((\Result<Int, SomeError>.Cases.success)(42), .success(42))
     XCTAssertNil(Result<Int, Error>.success(42)[case: \.failure])
     XCTAssertNotNil(Result<Int, Error>.failure(SomeError())[case: \.failure])
-    XCTAssertEqual((\Result<Int, SomeError>.Cases.failure)(SomeError()), .failure(SomeError()))
+    #if swift(>=5.9)
+      XCTAssertEqual((\Result<Int, SomeError>.Cases.success)(42), .success(42))
+      XCTAssertEqual((\Result<Int, SomeError>.Cases.failure)(SomeError()), .failure(SomeError()))
+    #else
+      let successPath: CaseKeyPath<Result<Int, SomeError>, Int> = \.success
+      let failurePath: CaseKeyPath<Result<Int, SomeError>, SomeError> = \.failure
+      XCTAssertEqual(successPath(42), .success(42))
+      XCTAssertEqual(failurePath(SomeError()), .failure(SomeError()))
+    #endif
   }
 
   func testSelfCaseKeyPathCallAsFunction() {
@@ -74,13 +88,15 @@ final class CasePathsTests: XCTestCase {
       XCTAssertEqual(foo, .bar(.int(42)))
     }
 
-    func testCasePathableModify_Failure() {
-      var foo = Foo.bar(.int(21))
-      XCTExpectFailure {
-        foo.modify(\.baz.string) { $0.append("!") }
+    #if !os(Linux) && !os(Windows)
+      func testCasePathableModify_Failure() {
+        var foo = Foo.bar(.int(21))
+        XCTExpectFailure {
+          foo.modify(\.baz.string) { $0.append("!") }
+        }
+        XCTAssertEqual(foo, .bar(.int(21)))
       }
-      XCTAssertEqual(foo, .bar(.int(21)))
-    }
+    #endif
 
     func testAppend() {
       let fooToBar = \Foo.Cases.bar

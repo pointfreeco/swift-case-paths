@@ -8,7 +8,7 @@ test-linux:
 		-v "$(PWD):$(PWD)" \
 		-w "$(PWD)" \
 		$(SWIFT_DOCKER_IMAGE) \
-		bash -c 'make test-swift'
+		bash -c 'apt-get update && apt-get -y install make && make test-swift'
 
 test-swift:
 	swift test \

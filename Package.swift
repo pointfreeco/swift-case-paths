@@ -17,7 +17,7 @@ let package = Package(
     )
   ],
   dependencies: [
-    .package(name: "Benchmark", url: "https://github.com/google/swift-benchmark", from: "0.1.0"),
+    .package(url: "https://github.com/google/swift-benchmark", from: "0.1.0"),
     .package(url: "https://github.com/pointfreeco/xctest-dynamic-overlay", from: "1.0.0"),
   ],
   targets: [
@@ -35,7 +35,7 @@ let package = Package(
       name: "swift-case-paths-benchmark",
       dependencies: [
         "CasePaths",
-        .product(name: "Benchmark", package: "Benchmark"),
+        .product(name: "Benchmark", package: "swift-benchmark"),
       ]
     ),
   ]
