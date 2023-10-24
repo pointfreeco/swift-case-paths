@@ -1,3 +1,5 @@
+SWIFT_DOCKER_IMAGE = swift:5.6
+
 test-all: test-linux test-swift
 
 test-linux:
@@ -5,7 +7,7 @@ test-linux:
 		--rm \
 		-v "$(PWD):$(PWD)" \
 		-w "$(PWD)" \
-		swift:5.5 \
+		$(SWIFT_DOCKER_IMAGE) \
 		bash -c 'make test-swift'
 
 test-swift:
