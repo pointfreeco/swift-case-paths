@@ -3,13 +3,15 @@ import XCTest
 
 final class CasePathableTests: XCTestCase {
   func testModify() {
-    var response = Response.success(1)
-    response.modify(\.success) { $0 += 1 }
-    XCTAssertEqual(response, .success(2))
+    struct MyError: Equatable, Error {}
+    var result = Result<Int, MyError>.success(1)
+    result.modify(\.success) { $0 += 1 }
+    XCTAssertEqual(result, .success(2))
   }
 
   func testModifyWrongCase() {
-    var response = Response.failure
+    struct MyError: Equatable, Error {}
+    var response = Result<Int, MyError>.failure(MyError())
     XCTExpectFailure {
       response.modify(\.success) { $0 += 1 }
     } issueMatcher: {
@@ -18,12 +20,6 @@ final class CasePathableTests: XCTestCase {
         (aka '\Case<Response>.subscript(dynamicMember: <unknown>)')
         """#
     }
-    XCTAssertEqual(response, .failure)
+    XCTAssertEqual(response, .failure(MyError()))
   }
-}
-
-@CasePathable
-private enum Response: Equatable {
-  case success(Int)
-  case failure
 }
