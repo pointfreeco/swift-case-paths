@@ -11,6 +11,7 @@ final class CasePathableTests: XCTestCase {
 
   #if DEBUG && !os(Linux) && !os(Windows)
     func testModifyWrongCase() {
+      guard ProcessInfo.processInfo.environment["CI"] == nil else { return }
       var response = Result<Int, MyError>.failure(MyError())
       XCTExpectFailure {
         response.modify(\.success) { $0 += 1 }

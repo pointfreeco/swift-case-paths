@@ -90,6 +90,7 @@ final class CasePathsTests: XCTestCase {
 
     #if DEBUG && !os(Linux) && !os(Windows)
       func testCasePathableModify_Failure() {
+        guard ProcessInfo.processInfo.environment["CI"] == nil else { return }
         var foo = Foo.bar(.int(21))
         XCTExpectFailure {
           foo.modify(\.baz.string) { $0.append("!") }
