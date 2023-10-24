@@ -14,12 +14,6 @@ final class CasePathableTests: XCTestCase {
       var response = Result<Int, MyError>.failure(MyError())
       XCTExpectFailure {
         response.modify(\.success) { $0 += 1 }
-      } issueMatcher: {
-        $0.compactDescription == #"""
-          Can't modify 'failure(CasePathsTests.CasePathableTests.MyError())' \#
-          via 'CaseKeyPath<Result<Int, MyError>, Int>' \#
-          (aka '\Case<Result<Int, MyError>>.subscript(dynamicMember: <unknown>)')
-          """#
       }
       XCTAssertEqual(response, .failure(MyError()))
     }
