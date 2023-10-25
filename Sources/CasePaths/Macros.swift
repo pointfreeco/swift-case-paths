@@ -1,8 +1,8 @@
 #if swift(>=5.9)
   /// Defines and implements conformance of the CasePathable protocol.
   ///
-  /// This macro conforms the type to the ``CasePathable`` and ``CasePathIterable`` protocols, and
-  /// adds ``CaseKeyPath`` support for all its cases.
+  /// This macro conforms the type to the ``CasePathable`` protocol, and adds ``CaseKeyPath``
+  /// support for all its cases.
   ///
   /// For example, the following code applies the `CasePathable` macro to the type `UserAction`:
   ///
