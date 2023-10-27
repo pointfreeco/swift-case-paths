@@ -117,7 +117,7 @@ extension Case: _AnyCase {
 ///
 /// ```swift
 /// @CasePathable
-/// struct SomeEnum {
+/// enum SomeEnum {
 ///   case someCase(Int)
 ///   case anotherCase(String)
 /// }
