@@ -268,4 +268,38 @@ final class CasePathableMacroTests: XCTestCase {
       """
     }
   }
+
+  func testSelf() {
+    assertMacro {
+      """
+      @CasePathable enum Foo {
+        case bar(Bar<Self>)
+      }
+      """
+    } expansion: {
+      """
+      enum Foo {
+        case bar(Bar<Self>)
+
+        struct AllCasePaths {
+          var bar: CasePaths.AnyCasePath<Foo, Bar<Foo>> {
+            CasePaths.AnyCasePath<Foo, Bar<Foo>>(
+              embed: Foo.bar,
+              extract: {
+                guard case let .bar(v0) = $0 else {
+                  return nil
+                }
+                return v0
+              }
+            )
+          }
+        }
+        static var allCasePaths: AllCasePaths { AllCasePaths() }
+      }
+
+      extension Foo: CasePaths.CasePathable {
+      }
+      """
+    }
+  }
 }
