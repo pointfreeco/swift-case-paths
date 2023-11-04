@@ -28,8 +28,7 @@ inspect and even change it, all while propagating those changes to the structure
 the silent partner of many modern Swift APIs powered by
 [dynamic member lookup][dynamic-member-lookup-proposal], like SwiftUI
 [bindings][binding-dynamic-member-lookup-docs], but also make more direct appearances, like in the
-SwiftUI [environment][environment-property-wrapper-docs] and [unsafe mutable 
-pointers][pointee].
+SwiftUI [environment][environment-property-wrapper-docs] and [unsafe mutable pointers][pointee].
 
 [pointee]: https://developer.apple.com/documentation/swift/unsafemutablepointer/pointer(to:)-8veyb
 
@@ -57,17 +56,17 @@ case in the enum.
 
 ## Using case paths in libraries
 
-By far the most common use of case paths is as a tool inside a libary that is distributed to other
-developers. Case paths are used in the [Composable Architecture][tca-gh], [SwiftUI 
-Navigation][sui-nav-gh], [Parsers][parsers-gh], and many more other libraries.
+By far the most common use of case paths is as a tool inside a library that is distributed to other
+developers. Case paths are used in the [Composable Architecture][tca-gh],
+[SwiftUI Navigation][sui-nav-gh], [Parsing][parsers-gh], and many other libraries.
 
 [tca-gh]: http://github.com/pointfreeco/swift-composable-architecture
 [sui-nav-gh]: http://github.com/pointfreeco/swiftui-navigation
 [parsers-gh]: http://github.com/pointfreeco/swift-parsing
 
-If you maintain a library where you expect your users to model their domains with enums, then 
-providing case path tools to them can help them break their domains into smaller units. For 
-example, conside the `Binding` type provided by SwiftUI:
+If you maintain a library where you expect your users to model their domains with enums, then
+providing case path tools to them can help them break their domains into smaller units. For
+example, consider the `Binding` type provided by SwiftUI:
 
 ```swift
 struct Binding<Value> {
@@ -100,7 +99,7 @@ If you had a binding of a user, you could simply append `.name` to that binding 
 derive a binding to the user's name:
 
 ```swift
-let user: Binding<User> = …
+let user: Binding<User> = // ...
 let name: Binding<String> = user.name
 ```
 
@@ -111,13 +110,13 @@ enum Destination {
   case home(HomeState)
   case settings(SettingsState)
 }
-let destination: Binding<Destination> = …
+let destination: Binding<Destination> = // ...
 destination.home      // 🛑
 destination.settings  // 🛑
 ```
 
 It is not possible to derive a binding to just the `home` case of a destination binding by using
-simpe dot-chaining syntax.
+simple dot-chaining syntax.
 
 However, if SwiftUI used this CasePaths library, then they could provide this tool quite easily.
 They could provide an additional `dynamicMember` subscript that uses a `CaseKeyPath`, which is a
@@ -143,7 +142,7 @@ extension Binding {
 }
 ```
 
-With that defined, one can annotate their enum with the `@CasePathable` macro and then immediately 
+With that defined, one can annotate their enum with the `@CasePathable` macro and then immediately
 use dot-chaining to derive a binding of a case from a binding of an enum:
 
 ```swift
@@ -152,7 +151,7 @@ enum Destination {
   case home(HomeState)
   case settings(SettingsState)
 }
-let destination: Binding<Destination> = …
+let destination: Binding<Destination> = // ...
 destination.home      // Binding<HomeState>?
 destination.settings  // Binding<SettingsState>?
 ```
@@ -163,7 +162,7 @@ losing out on the ergonomics of structs.
 ## Basics of case paths
 
 While library tooling is the biggest use case for using this library, there are some ways that you
-can use case paths in first-party code too. The library bridges the gap between structs ane enums by 
+can use case paths in first-party code too. The library bridges the gap between structs and enums by
 introducing what we call "case paths": key paths for enum cases.
 
 Case paths can be enabled for an enum using the `@CasePathable` macro:
@@ -302,8 +301,8 @@ userActions.compactMap(\.home)  // [HomeAction.onAppear]
 
 #### Dynamic case lookup
 
-Because case key paths are bona fide key paths unde the hood, they can be used in the same 
-applications, like dynamic member lookup. For example, we can extend SwiftUI's binding type to enum 
+Because case key paths are bona fide key paths under the hood, they can be used in the same
+applications, like dynamic member lookup. For example, we can extend SwiftUI's binding type to enum
 cases by extending it with a subscript:
 
 ```swift
@@ -413,8 +412,8 @@ Do you have a project that uses case paths that you'd like to share? Please
 
 ## Community
 
-If you want to discuss this library or have a question about how to use it to solve 
-a particular problem, there are a number of places you can discuss with fellow 
+If you want to discuss this library or have a question about how to use it to solve a particular
+problem, there are a number of places you can discuss with fellow
 [Point-Free](http://www.pointfree.co) enthusiasts:
 
   * For long-form discussions, we recommend the
@@ -424,7 +423,8 @@ a particular problem, there are a number of places you can discuss with fellow
 
 ## Documentation
 
-The latest documentation for CasePaths' APIs is available [here](https://pointfreeco.github.io/swift-case-paths/main/documentation/casepaths/).
+The latest documentation for CasePaths' APIs is available
+[here](https://pointfreeco.github.io/swift-case-paths/main/documentation/casepaths/).
 
 ## Credit and thanks
 

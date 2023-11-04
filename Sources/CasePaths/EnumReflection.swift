@@ -17,18 +17,26 @@ extension AnyCasePath {
   @available(tvOS, deprecated: 9999, message: "Use a 'CasePathable' case key path, instead")
   @available(watchOS, deprecated: 9999, message: "Use a 'CasePathable' case key path, instead")
   public init(unsafe embed: @escaping (Value) -> Root) {
-    func open<Wrapped>(_: Wrapped.Type) -> (Root) -> Value? {
-      optionalPromotedExtractHelp(unsafeBitCast(embed, to: ((Value) -> Wrapped?).self))
-        as! (Root) -> Value?
-    }
-    let extract =
-      ((_Witness<Root>.self as? _AnyOptional.Type)?.wrappedType)
-      .map { _openExistential($0, do: open) }
-      ?? extractHelp(embed)
-    self.init(
-      embed: embed,
-      extract: extract
-    )
+    self.init(embed)
+  }
+
+  /// Returns a void case path for a case with no associated value.
+  ///
+  /// > Important: This operation is provided for backwards compatibility. Avoid introducing it to
+  /// > your code and instead favor using types that conform to ``CasePathable`` and
+  /// > ``CaseKeyPath``.
+  ///
+  /// - Note: This operator is only intended to be used with enum cases that have no associated
+  ///   values. Its behavior is otherwise undefined.
+  /// - Parameter root: A case with no an associated value.
+  /// - Returns: A void case path.
+  @available(iOS, deprecated: 9999, message: "Use a 'CasePathable' case key path, instead")
+  @available(macOS, deprecated: 9999, message: "Use a 'CasePathable' case key path, instead")
+  @available(tvOS, deprecated: 9999, message: "Use a 'CasePathable' case key path, instead")
+  @available(watchOS, deprecated: 9999, message: "Use a 'CasePathable' case key path, instead")
+  @_disfavoredOverload
+  public init(unsafe root: Root) where Value == Void {
+    self.init(root)
   }
 
   #if swift(>=5.9)
