@@ -61,16 +61,16 @@ public protocol CasePathable {
 #endif
 
 extension Case {
-  public init(
-    embed: @escaping (Value) -> Any,
-    extract: @escaping (Any) -> Value?
+  public init<Root>(
+    embed: @escaping (Value) -> Root,
+    extract: @escaping (Root) -> Value?
   ) {
     self._embed = embed
-    self._extract = extract
+    self._extract = { ($0 as? Root).flatMap(extract) }
   }
 
   public init() {
-    self.init(embed: { $0 }, extract: { $0 as? Value })
+    self.init(embed: { $0 }, extract: { $0 })
   }
 
   public init<Root>(_ keyPath: CaseKeyPath<Root, Value>) {

@@ -8,6 +8,6 @@ extension Never: CasePathable {
 extension Case {
   public var never: Case<Never> {
     func absurd<T>(_: Never) -> T {}
-    return Case<Never>(embed: absurd, extract: { _ in nil })
+    return Case<Never>(embed: absurd, extract: { (_: Value) in nil })
   }
 }
