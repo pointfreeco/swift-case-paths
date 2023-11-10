@@ -44,6 +44,22 @@ extension CasePathableMacro: ExtensionMacro {
   }
 }
 
+extension CasePathableMacro: MemberAttributeMacro {
+	public static func expansion(
+		of node: SwiftSyntax.AttributeSyntax,
+		attachedTo declaration: some SwiftSyntax.DeclGroupSyntax,
+		providingAttributesFor member: some SwiftSyntax.DeclSyntaxProtocol,
+		in context: some SwiftSyntaxMacros.MacroExpansionContext
+	) throws -> [SwiftSyntax.AttributeSyntax] {
+		if let enumDecl = member.as(EnumDeclSyntax.self) {
+			return [
+				AttributeSyntax(attributeName: IdentifierTypeSyntax(name: .identifier("CasePathable")))
+			]
+		}
+		return []
+	}
+}
+
 extension CasePathableMacro: MemberMacro {
   public static func expansion<
     Declaration: DeclGroupSyntax, Context: MacroExpansionContext
