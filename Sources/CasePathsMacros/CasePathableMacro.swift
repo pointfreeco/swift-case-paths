@@ -45,19 +45,28 @@ extension CasePathableMacro: ExtensionMacro {
 }
 
 extension CasePathableMacro: MemberAttributeMacro {
-	public static func expansion(
-		of node: SwiftSyntax.AttributeSyntax,
-		attachedTo declaration: some SwiftSyntax.DeclGroupSyntax,
-		providingAttributesFor member: some SwiftSyntax.DeclSyntaxProtocol,
-		in context: some SwiftSyntaxMacros.MacroExpansionContext
-	) throws -> [SwiftSyntax.AttributeSyntax] {
-		if let enumDecl = member.as(EnumDeclSyntax.self) {
-			return [
-				AttributeSyntax(attributeName: IdentifierTypeSyntax(name: .identifier("CasePathable")))
-			]
-		}
-		return []
-	}
+  public static func expansion(
+    of node: SwiftSyntax.AttributeSyntax,
+    attachedTo declaration: some SwiftSyntax.DeclGroupSyntax,
+    providingAttributesFor member: some SwiftSyntax.DeclSyntaxProtocol,
+    in context: some SwiftSyntaxMacros.MacroExpansionContext
+  ) throws -> [SwiftSyntax.AttributeSyntax] {
+    if let enumDecl = member.as(EnumDeclSyntax.self) {
+      var attributes: [String] = ["CasePathable"]
+      for attribute in enumDecl.attributes {
+        guard
+          case let .attribute(attribute) = attribute,
+          let attributeName = attribute.attributeName.as(IdentifierTypeSyntax.self)?.name.text
+        else { continue }
+        attributes.removeAll(where: { $0 == attributeName })
+      }
+      return attributes.map {
+        AttributeSyntax(attributeName: IdentifierTypeSyntax(name: .identifier($0)))
+      }
+    } else {
+      return []
+    }
+  }
 }
 
 extension CasePathableMacro: MemberMacro {

@@ -366,4 +366,68 @@ final class CasePathableMacroTests: XCTestCase {
       """
     }
   }
+
+  func testNestedCasePathableWhereAlreadyCasePathable() {
+    assertMacro {
+      """
+      @CasePathable enum Foo {
+        case bar
+
+        @CasePathable enum FooBar {
+          case baz
+        }
+      }
+      """
+    } expansion: {
+      """
+      enum Foo {
+        case bar
+
+        enum FooBar {
+          case baz
+
+          struct AllCasePaths {
+            var baz: CasePaths.AnyCasePath<FooBar, Void> {
+              CasePaths.AnyCasePath<FooBar, Void>(
+                embed: {
+                  FooBar.baz
+                },
+                extract: {
+                  guard case .baz = $0 else {
+                    return nil
+                  }
+                  return ()
+                }
+              )
+            }
+          }
+          static var allCasePaths: AllCasePaths { AllCasePaths() }
+        }
+
+        struct AllCasePaths {
+          var bar: CasePaths.AnyCasePath<Foo, Void> {
+            CasePaths.AnyCasePath<Foo, Void>(
+              embed: {
+                Foo.bar
+              },
+              extract: {
+                guard case .bar = $0 else {
+                  return nil
+                }
+                return ()
+              }
+            )
+          }
+        }
+        static var allCasePaths: AllCasePaths { AllCasePaths() }
+      }
+
+      extension FooBar: CasePaths.CasePathable {
+      }
+
+      extension Foo: CasePaths.CasePathable {
+      }
+      """
+    }
+  }
 }
