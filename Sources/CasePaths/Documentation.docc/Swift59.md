@@ -10,7 +10,7 @@ performant, and more powerful than the existing APIs.
 
 In past versions of the library, the primary way to derive a case path was via the form:
 
-```swift
+```
 /<#enum name#>.<#case#>
 ```
 
