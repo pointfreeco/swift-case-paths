@@ -22,4 +22,3 @@ final class CasePathableTests: XCTestCase {
 
   struct MyError: Equatable, Error {}
 }
-

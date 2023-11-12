@@ -245,7 +245,7 @@ extension DeclModifierSyntax {
 
 extension EnumCaseElementListSyntax.Element {
   var trimmedTypeDescription: String {
-    if let associatedValue = self.parameterClause, !associatedValue.parameters.isEmpty {
+    if var associatedValue = self.parameterClause, !associatedValue.parameters.isEmpty {
       if associatedValue.parameters.count == 1,
         let type = associatedValue.parameters.first?.type.trimmed
       {
@@ -253,6 +253,10 @@ extension EnumCaseElementListSyntax.Element {
           ? "(\(type))"
           : "\(type)"
       } else {
+        for index in associatedValue.parameters.indices {
+          associatedValue.parameters[index].type.trailingTrivia = ""
+          associatedValue.parameters[index].defaultValue = nil
+        }
         return "(\(associatedValue.parameters.trimmed))"
       }
     } else {

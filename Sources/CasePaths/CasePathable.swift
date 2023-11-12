@@ -21,7 +21,7 @@ import XCTestDynamicOverlay
 ///       )
 ///     }
 ///
-///     var failure: CasePath<Result, Failure> {
+///     var failure: AnyCasePath<Result, Failure> {
 ///       AnyCasePath(
 ///         embed: { .failure($0) },
 ///         extract: {
