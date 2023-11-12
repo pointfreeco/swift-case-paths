@@ -36,7 +36,10 @@ final class CasePathsTests: XCTestCase {
   }
 
   func testSelfCaseKeyPathCallAsFunction() {
-    enum Loadable: Equatable { case isLoading(progress: Float), isLoaded }
+    enum Loadable: Equatable {
+      case isLoading(progress: Float)
+      case isLoaded
+    }
 
     var loadable = Loadable.isLoading(progress: 0)
     loadable = (\.self as CaseKeyPath<Loadable, Loadable>)(.isLoading(progress: 0.5))

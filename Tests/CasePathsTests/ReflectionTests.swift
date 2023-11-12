@@ -31,8 +31,8 @@ final class ReflectionTests: XCTestCase {
       struct MyIdentifiable: Identifiable {
         let id = 42
       }
-      enum Enum {
-        indirect case indirectCase(MyIdentifiable)
+      indirect enum Enum {
+        case indirectCase(MyIdentifiable)
       }
       let indirect = Enum.indirectCase(MyIdentifiable())
       let anyIdentifiable = try XCTUnwrap(EnumMetadata.project(indirect) as? any Identifiable)
