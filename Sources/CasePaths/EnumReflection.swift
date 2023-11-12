@@ -1,184 +1,153 @@
-extension CasePath {
+import Foundation
+
+extension AnyCasePath {
   /// Returns a case path for the given embed function.
   ///
-  /// - Note: This operator is only intended to be used with enum case initializers. Its behavior is
-  ///   otherwise undefined.
+  /// This initializer generates a case path with an extract function that dynamically resolves
+  /// given an enum embed function.
+  ///
+  /// > Important: This operation is provided for backwards compatibility. Avoid introducing it to
+  /// > your code and instead favor using types that conform to ``CasePathable`` and
+  /// > ``CaseKeyPath``.
+  ///
   /// - Parameter embed: An embed function.
   /// - Returns: A case path.
-  public init(_ embed: @escaping (Value) -> Root) {
-    func open<Wrapped>(_: Wrapped.Type) -> (Root) -> Value? {
-      optionalPromotedExtractHelp(unsafeBitCast(embed, to: ((Value) -> Wrapped?).self))
-        as! (Root) -> Value?
-    }
-    let extract =
-      ((_Witness<Root>.self as? _AnyOptional.Type)?.wrappedType)
-      .map { _openExistential($0, do: open) }
-      ?? extractHelp(embed)
-    self.init(
-      embed: embed,
-      extract: extract
-    )
+  @available(iOS, deprecated: 9999, message: "Use a 'CasePathable' case key path, instead")
+  @available(macOS, deprecated: 9999, message: "Use a 'CasePathable' case key path, instead")
+  @available(tvOS, deprecated: 9999, message: "Use a 'CasePathable' case key path, instead")
+  @available(watchOS, deprecated: 9999, message: "Use a 'CasePathable' case key path, instead")
+  public init(unsafe embed: @escaping (Value) -> Root) {
+    self.init(embed)
   }
-}
 
-extension CasePath where Value == Void {
   /// Returns a void case path for a case with no associated value.
+  ///
+  /// > Important: This operation is provided for backwards compatibility. Avoid introducing it to
+  /// > your code and instead favor using types that conform to ``CasePathable`` and
+  /// > ``CaseKeyPath``.
   ///
   /// - Note: This operator is only intended to be used with enum cases that have no associated
   ///   values. Its behavior is otherwise undefined.
   /// - Parameter root: A case with no an associated value.
   /// - Returns: A void case path.
-  public init(_ root: Root) {
-    func open<Wrapped>(_: Wrapped.Type) -> (Root) -> Void? {
-      optionalPromotedExtractVoidHelp(unsafeBitCast(root, to: Wrapped?.self)) as! (Root) -> Void?
+  @available(iOS, deprecated: 9999, message: "Use a 'CasePathable' case key path, instead")
+  @available(macOS, deprecated: 9999, message: "Use a 'CasePathable' case key path, instead")
+  @available(tvOS, deprecated: 9999, message: "Use a 'CasePathable' case key path, instead")
+  @available(watchOS, deprecated: 9999, message: "Use a 'CasePathable' case key path, instead")
+  @_disfavoredOverload
+  public init(unsafe root: Root) where Value == Void {
+    self.init(root)
+  }
+
+  #if swift(>=5.9)
+    @available(iOS, deprecated: 9999, message: "Use a 'CasePathable' case key path, instead")
+    @available(macOS, deprecated: 9999, message: "Use a 'CasePathable' case key path, instead")
+    @available(tvOS, deprecated: 9999, message: "Use a 'CasePathable' case key path, instead")
+    @available(watchOS, deprecated: 9999, message: "Use a 'CasePathable' case key path, instead")
+    public init(_ embed: @escaping (Value) -> Root) {
+      func open<Wrapped>(_: Wrapped.Type) -> (Root) -> Value? {
+        optionalPromotedExtractHelp(unsafeBitCast(embed, to: ((Value) -> Wrapped?).self))
+          as! (Root) -> Value?
+      }
+      let extract =
+        ((_Witness<Root>.self as? _AnyOptional.Type)?.wrappedType)
+        .map { _openExistential($0, do: open) }
+        ?? extractHelp(embed)
+      self.init(
+        embed: embed,
+        extract: extract
+      )
     }
-    let extract =
-      ((_Witness<Root>.self as? _AnyOptional.Type)?.wrappedType)
-      .map { _openExistential($0, do: open) }
-      ?? extractVoidHelp(root)
-    self.init(embed: { root }, extract: extract)
-  }
+  #else
+    /// Returns a case path for the given embed function.
+    ///
+    /// - Note: This operator is only intended to be used with enum case initializers. Its behavior
+    ///   is otherwise undefined.
+    /// - Parameter embed: An embed function.
+    /// - Returns: A case path.
+    public init(_ embed: @escaping (Value) -> Root) {
+      func open<Wrapped>(_: Wrapped.Type) -> (Root) -> Value? {
+        optionalPromotedExtractHelp(unsafeBitCast(embed, to: ((Value) -> Wrapped?).self))
+          as! (Root) -> Value?
+      }
+      let extract =
+        ((_Witness<Root>.self as? _AnyOptional.Type)?.wrappedType)
+        .map { _openExistential($0, do: open) }
+        ?? extractHelp(embed)
+      self.init(
+        embed: embed,
+        extract: extract
+      )
+    }
+  #endif
 }
 
-extension CasePath where Root == Value {
-  /// Returns the identity case path for the given type. Enables `CasePath(MyType.self)` syntax.
-  ///
-  /// - Parameter type: A type for which to return the identity case path.
-  /// - Returns: An identity case path.
-  public init(_ type: Root.Type) {
-    self = .self
-  }
+extension AnyCasePath where Value == Void {
+  #if swift(>=5.9)
+    @available(iOS, deprecated: 9999, message: "Use a 'CasePathable' case key path, instead")
+    @available(macOS, deprecated: 9999, message: "Use a 'CasePathable' case key path, instead")
+    @available(tvOS, deprecated: 9999, message: "Use a 'CasePathable' case key path, instead")
+    @available(watchOS, deprecated: 9999, message: "Use a 'CasePathable' case key path, instead")
+    @_disfavoredOverload
+    public init(_ root: Root) {
+      func open<Wrapped>(_: Wrapped.Type) -> (Root) -> Void? {
+        optionalPromotedExtractVoidHelp(unsafeBitCast(root, to: Wrapped?.self)) as! (Root) -> Void?
+      }
+      let extract =
+        ((_Witness<Root>.self as? _AnyOptional.Type)?.wrappedType)
+        .map { _openExistential($0, do: open) }
+        ?? extractVoidHelp(root)
+      self.init(embed: { root }, extract: extract)
+    }
+  #else
+    /// Returns a void case path for a case with no associated value.
+    ///
+    /// - Note: This operator is only intended to be used with enum cases that have no associated
+    ///   values. Its behavior is otherwise undefined.
+    /// - Parameter root: A case with no an associated value.
+    /// - Returns: A void case path.
+    @_disfavoredOverload
+    public init(_ root: Root) {
+      func open<Wrapped>(_: Wrapped.Type) -> (Root) -> Void? {
+        optionalPromotedExtractVoidHelp(unsafeBitCast(root, to: Wrapped?.self)) as! (Root) -> Void?
+      }
+      let extract =
+        ((_Witness<Root>.self as? _AnyOptional.Type)?.wrappedType)
+        .map { _openExistential($0, do: open) }
+        ?? extractVoidHelp(root)
+      self.init(embed: { root }, extract: extract)
+    }
+
+  #endif
 }
 
-extension CasePath {
-  /// Returns a case path that extracts values associated with a given enum case initializer.
-  ///
-  /// - Note: This function is only intended to be used with enum case initializers. Its behavior is
-  ///   otherwise undefined.
-  /// - Parameter embed: An enum case initializer.
-  /// - Returns: A case path that extracts associated values from enum cases.
-  @available(*, deprecated, message: "Use case path literal syntax (e.g., '/Root.caseName')")
-  public static func `case`(_ embed: @escaping (Value) -> Root) -> CasePath {
-    self.init(
-      embed: embed,
-      extract: CasePaths.extract(embed)
-    )
-  }
-}
-
-extension CasePath where Value == Void {
-  /// Returns a case path that successfully extracts `()` from a given enum case with no associated
-  /// values.
-  ///
-  /// - Note: This function is only intended to be used with enum cases that have no associated
-  ///   values. Its behavior is otherwise undefined.
-  /// - Parameter value: An enum case with no associated values.
-  /// - Returns: A case path that extracts `()` if the case matches, otherwise `nil`.
-  @available(*, deprecated, message: "Use case path literal syntax (e.g., '/Root.caseName')")
-  public static func `case`(_ value: Root) -> CasePath {
-    CasePath(
-      embed: { value },
-      extract: extractVoidHelp(value)
-    )
-  }
-}
-
-/// Attempts to extract values associated with a given enum case initializer from a given root enum.
-///
-/// ```swift
-/// extract(case: Result<Int, Error>.success, from: .success(42))
-/// // 42
-/// extract(case: Result<Int, Error>.success, from: .failure(MyError())
-/// // nil
-/// ```
-///
-/// - Note: This function is only intended to be used with enum case initializers. Its behavior is
-///   otherwise undefined.
-/// - Parameters:
-///   - embed: An enum case initializer.
-///   - root: A root enum value.
-/// - Returns: Values if they can be extracted from the given enum case initializer and root enum,
-///   otherwise `nil`.
-@available(
-  *, deprecated,
-  message:
-    "Use case path literal syntax (e.g., '/Root.caseName'), or '(/Root.caseName).extract(from:)'"
-)
-public func extract<Root, Value>(case embed: @escaping (Value) -> Root, from root: Root) -> Value? {
-  CasePaths.extract(embed)(root)
-}
-
-/// Attempts to extract values associated with a given enum case initializer from a given root enum.
-///
-/// ```swift
-/// extract(case: Result<Int, Error>.success, from: .success(42))
-/// // 42
-/// extract(case: Result<Int, Error>.success, from: .failure(MyError())
-/// // nil
-/// ```
-///
-/// - Note: This function is only intended to be used with enum case initializers. Its behavior is
-///   otherwise undefined.
-/// - Parameters:
-///   - embed: An enum case initializer.
-///   - root: A root enum value.
-/// - Returns: Values if they can be extracted from the given enum case initializer and root enum,
-///   otherwise `nil`.
-@available(
-  *, deprecated,
-  message:
-    "Use case path literal syntax (e.g., '/Root.caseName'), or '(/Root.caseName).extract(from:)'"
-)
-public func extract<Root, Value>(case embed: @escaping (Value) -> Root?, from root: Root?) -> Value?
-{
-  CasePaths.extract(embed)(root)
-}
-
-/// Returns a function that can attempt to extract associated values from the given enum case
-/// initializer.
-///
-/// Use this function to create new transform functions to pass to higher-order methods like
-/// `compactMap`:
-///
-/// ```swift
-/// [Result<Int, Error>.success(42), .failure(MyError()]
-///   .compactMap(extract(Result.success))
-/// // [42]
-/// ```
-///
-/// - Note: This function is only intended to be used with enum case initializers. Its behavior is
-///   otherwise undefined.
-/// - Parameter embed: An enum case initializer.
-/// - Returns: A function that can attempt to extract associated values from an enum.
-@available(*, deprecated, message: "Use case path literal syntax (e.g., '/Root.caseName')")
-public func extract<Root, Value>(_ embed: @escaping (Value) -> Root) -> (Root) -> Value? {
-  extractHelp(embed)
-}
-
-/// Returns a function that can attempt to extract associated values from the given enum case
-/// initializer.
-///
-/// Use this function to create new transform functions to pass to higher-order methods like
-/// `compactMap`:
-///
-/// ```swift
-/// [Result<Int, Error>.success(42), .failure(MyError()]
-///   .compactMap(extract(Result.success))
-/// // [42]
-/// ```
-///
-/// - Note: This function is only intended to be used with enum case initializers. Its behavior is
-///   otherwise undefined.
-/// - Parameter embed: An enum case initializer.
-/// - Returns: A function that can attempt to extract associated values from an enum.
-@available(*, deprecated, message: "Use case path literal syntax (e.g., '/Root.caseName')")
-public func extract<Root, Value>(_ embed: @escaping (Value) -> Root?) -> (Root?) -> Value? {
-  optionalPromotedExtractHelp(embed)
+extension AnyCasePath where Root == Value {
+  #if swift(>=5.9)
+    @available(iOS, deprecated: 9999, message: "Use the '\\.self' case key path, instead")
+    @available(macOS, deprecated: 9999, message: "Use the '\\.self' case key path, instead")
+    @available(tvOS, deprecated: 9999, message: "Use the '\\.self' case key path, instead")
+    @available(watchOS, deprecated: 9999, message: "Use the '\\.self' case key path, instead")
+    public init(_ type: Root.Type) {
+      self = .self
+    }
+  #else
+    /// Returns the identity case path for the given type. Enables `CasePath(MyType.self)` syntax.
+    ///
+    /// - Parameter type: A type for which to return the identity case path.
+    /// - Returns: An identity case path.
+    public init(_ type: Root.Type) {
+      self = .self
+    }
+  #endif
 }
 
 // MARK: - Extraction helpers
 
+private let lock = NSRecursiveLock()
+
 func extractHelp<Root, Value>(_ embed: @escaping (Value) -> Root) -> (Root) -> Value? {
+  lock.lock()
+  defer { lock.unlock() }
   guard
     let metadata = EnumMetadata(Root.self),
     metadata.typeDescriptor.fieldDescriptor != nil

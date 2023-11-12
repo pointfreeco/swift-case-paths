@@ -15,15 +15,16 @@ concurrency:
   cancel-in-progress: true
 
 jobs:
-  macos-12:
-    name: MacOS 12
-    runs-on: macos-12
+  macos:
+    name: macOS (Xcode ${{ matrix.xcode }})
+    runs-on: macos-13
     strategy:
       matrix:
         xcode:
-          - '14.2'
+          - '14.3.1'
+          - '15.0'
     steps:
-      - uses: actions/checkout@v2
+      - uses: actions/checkout@v4
       - name: Select Xcode ${{ matrix.xcode }}
         run: sudo xcode-select -s /Applications/Xcode_${{ matrix.xcode }}.app
       - name: Print Swift version
@@ -32,33 +33,34 @@ jobs:
         run: make test-swift
 
   linux:
-    name: Ubuntu
-    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        swift:
+          - '5.6'
+          - '5.9'
+    name: Ubuntu (Swift ${{ matrix.swift }})
+    runs-on: ubuntu-20.04
     steps:
-      - uses: actions/checkout@v2
-      - name: Run tests
-        run: make test-linux
+      - uses: swift-actions/setup-swift@v1
+        with:
+          swift-version: ${{ matrix.swift }}
+      - uses: actions/checkout@v4
+      - run: make test-linux
 
   windows:
-    name: Windows
+    name: Windows (Swift ${{ matrix.swift }}, ${{ matrix.config }})
     strategy:
       matrix:
         os: [windows-latest]
         config: ['debug', 'release']
+        swift: ['5.9.1']
       fail-fast: false
     runs-on: ${{ matrix.os }}
     steps:
       - uses: compnerd/gha-setup-swift@main
         with:
-          branch: swift-5.8.1-release
-          tag: 5.8.1-RELEASE
-      - uses: actions/checkout@v3
+          branch: swift-${{ matrix.swift }}-release
+          tag: ${{ matrix.swift }}-RELEASE
+      - uses: actions/checkout@v4
       - name: Build
         run: swift build -c ${{ matrix.config }}
-      - name: Run tests (debug only)
-        # There is an issue that exists in the 5.8.1 toolchain
-        # which fails on release configuration testing, but
-        # this issue is fixed 5.9 so we can remove the if once
-        # that is generally available.
-        if: ${{ matrix.config == 'debug' }}
-        run: swift test

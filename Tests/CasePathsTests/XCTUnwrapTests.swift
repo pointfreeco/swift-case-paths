@@ -2,6 +2,7 @@
   import CasePaths
   import XCTest
 
+  @available(*, deprecated)
   final class XCTUnwrapTests: XCTestCase {
     func testXCTUnwrapFailure() throws {
       try XCTSkipIf(ProcessInfo.processInfo.environment["CI"] != nil)
