@@ -424,7 +424,7 @@ problem, there are a number of places you can discuss with fellow
 ## Documentation
 
 The latest documentation for CasePaths' APIs is available
-[here](https://pointfreeco.github.io/swift-case-paths/main/documentation/casepaths/).
+[here](https://swiftpackageindex.com/pointfreeco/swift-case-paths/main/documentation/casepaths).
 
 ## Credit and thanks
 
