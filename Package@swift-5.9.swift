@@ -28,7 +28,7 @@ let package = Package(
       name: "CasePaths",
       dependencies: [
         "CasePathsMacros",
-        .product(name: "XCTestDynamicOverlay", package: "xctest-dynamic-overlay")
+        .product(name: "XCTestDynamicOverlay", package: "xctest-dynamic-overlay"),
       ]
     ),
     .testTarget(

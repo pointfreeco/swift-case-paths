@@ -28,7 +28,8 @@
   /// ```
   @attached(extension, conformances: CasePathable)
   @attached(member, names: named(AllCasePaths), named(allCasePaths))
-  public macro CasePathable() = #externalMacro(
-    module: "CasePathsMacros", type: "CasePathableMacro"
-  )
+  public macro CasePathable() =
+    #externalMacro(
+      module: "CasePathsMacros", type: "CasePathableMacro"
+    )
 #endif

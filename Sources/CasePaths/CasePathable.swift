@@ -46,7 +46,7 @@ public protocol CasePathable {
 #if swift(>=5.9)
   /// A type that is used to distinguish case key paths from key paths by wrapping the enum and
   /// associated value types.
-  @_documentation(visibility: internal)
+  @_documentation(visibility:internal)
   @dynamicMemberLookup
   public struct Case<Value> {
     fileprivate let _embed: (Value) -> Any
@@ -208,7 +208,7 @@ extension CaseKeyPath {
   where Root == Case<Enum>, Value == Case<AssociatedValue> {
     Case(self).embed(value) as! Enum
   }
-  
+
   /// Returns an enum for this case key path's case.
   ///
   /// Given a case key path to an enum case with no associated value, one can produce a whole new
@@ -263,7 +263,7 @@ extension CaseKeyPath {
   /// - Parameters:
   ///   - lhs: A case key path.
   ///   - rhs: An enum.
-  public static func ~=<Enum: CasePathable, AssociatedValue>(lhs: KeyPath, rhs: Enum) -> Bool
+  public static func ~= <Enum: CasePathable, AssociatedValue>(lhs: KeyPath, rhs: Enum) -> Bool
   where Root == Case<Enum>, Value == Case<AssociatedValue> {
     rhs[case: lhs] != nil
   }

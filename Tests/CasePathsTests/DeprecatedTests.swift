@@ -71,7 +71,9 @@ final class DeprecatedTests: XCTestCase {
       )
     }
     XCTAssert(
-      try unwrap(AnyCasePath(Enum.payload).extract(from: .payload(a: 42, b: "Blob"))) == (42, "Blob")
+      try unwrap(AnyCasePath(Enum.payload).extract(from: .payload(a: 42, b: "Blob"))) == (
+        42, "Blob"
+      )
     )
     XCTAssert(
       try unwrap(AnyCasePath(Enum.payload).extract(from: .payload(a: 42, b: "Blob")))
@@ -284,7 +286,8 @@ final class DeprecatedTests: XCTestCase {
       XCTAssert(try unwrap(path.extract(from: .anyObject(nsObject))) === nsObject)
     }
     XCTAssert(try unwrap(AnyCasePath(Enum.anyObject).extract(from: .anyObject(object))) === object)
-    XCTAssert(try unwrap(AnyCasePath(Enum.anyObject).extract(from: .anyObject(nsObject))) === nsObject)
+    XCTAssert(
+      try unwrap(AnyCasePath(Enum.anyObject).extract(from: .anyObject(nsObject))) === nsObject)
   }
 
   func testProtocolPayload() {
