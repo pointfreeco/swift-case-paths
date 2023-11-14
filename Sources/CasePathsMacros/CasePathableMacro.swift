@@ -238,6 +238,7 @@ extension DeclModifierSyntax {
   var isNeededAccessLevelModifier: Bool {
     switch self.name.tokenKind {
     case .keyword(.public): return true
+    case .keyword(.package): return true
     default: return false
     }
   }
