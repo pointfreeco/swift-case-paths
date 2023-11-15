@@ -299,7 +299,7 @@ final class CasePathableMacroTests: XCTestCase {
       """
     }
   }
-  
+
   func testWildcard() {
     assertMacro {
       """
