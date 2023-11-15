@@ -313,8 +313,8 @@ final class CasePathableMacroTests: XCTestCase {
         case bar(_ int: Int, _ bool: Bool)
 
         struct AllCasePaths {
-          var bar: CasePaths.AnyCasePath<Foo, (int: Int, bool: Bool)> {
-            CasePaths.AnyCasePath<Foo, (int: Int, bool: Bool)>(
+          var bar: CasePaths.AnyCasePath<Foo, (Int, Bool)> {
+            CasePaths.AnyCasePath<Foo, (Int, Bool)>(
               embed: Foo.bar,
               extract: {
                 guard case let .bar(v0, v1) = $0 else {

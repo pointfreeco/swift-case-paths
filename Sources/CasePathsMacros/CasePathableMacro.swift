@@ -258,7 +258,9 @@ extension EnumCaseElementListSyntax.Element {
           associatedValue.parameters[index].type.trailingTrivia = ""
           associatedValue.parameters[index].defaultValue = nil
           if associatedValue.parameters[index].firstName?.tokenKind == .wildcard {
+            associatedValue.parameters[index].colon = nil
             associatedValue.parameters[index].firstName = nil
+            associatedValue.parameters[index].secondName = nil
           }
         }
         return "(\(associatedValue.parameters.trimmed))"
