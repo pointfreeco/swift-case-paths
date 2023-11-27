@@ -15,6 +15,10 @@ let package = Package(
     .library(
       name: "CasePaths",
       targets: ["CasePaths"]
+    ),
+    .library(
+      name: "CasePathsMacros",
+      targets: ["CasePathsMacros"]
     )
   ],
   dependencies: [
