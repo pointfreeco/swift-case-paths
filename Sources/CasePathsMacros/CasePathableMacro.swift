@@ -87,13 +87,53 @@ extension CasePathableMacro: MemberMacro {
       seenCaseNames.insert(name)
     }
 
-    let casePaths: [DeclSyntax] = enumCaseDecls.map { enumCaseDecl in
-      let caseName = enumCaseDecl.name.trimmed
-      let associatedValueName = enumCaseDecl.trimmedTypeDescription
-      let hasPayload = enumCaseDecl.parameterClause.map { !$0.parameters.isEmpty } ?? false
+    let casePaths = generateDeclSyntax(from: memberBlock.members, with: access, enumName: enumName)
+
+    return [
+      """
+      \(access)struct AllCasePaths {
+      \(raw: casePaths.map(\.description).joined(separator: "\n"))
+      }
+      \(access)static var allCasePaths: AllCasePaths { AllCasePaths() }
+      """
+    ]
+  }
+
+  static func generateDeclSyntax(
+    from elements: MemberBlockItemListSyntax,
+    with access: DeclModifierListSyntax.Element?,
+    enumName: TokenSyntax
+  ) -> [DeclSyntax] {
+    elements.flatMap {
+      if let elements = $0.decl.as(EnumCaseDeclSyntax.self)?.elements {
+        return generateDeclSyntax(from: elements, with: access, enumName: enumName)
+      }
+      if let ifConfigDecl = $0.decl.as(IfConfigDeclSyntax.self) {
+        let ifClauses = ifConfigDecl.clauses.flatMap { decl -> [DeclSyntax] in
+          guard let elements = decl.elements?.as(MemberBlockItemListSyntax.self) else {
+            return []
+          }
+          let title = "\(decl.poundKeyword.text) \(decl.condition?.description ?? "")"
+          return ["\(raw: title)"] + generateDeclSyntax(from: elements, with: access, enumName: enumName)
+        }
+        return ifClauses + ["#endif"]
+      }
+      return []
+    }
+  }
+
+  static func generateDeclSyntax(
+    from enumCaseDecls: EnumCaseElementListSyntax,
+    with access: DeclModifierListSyntax.Element?,
+    enumName: TokenSyntax
+  ) -> [DeclSyntax] {
+    enumCaseDecls.map {
+      let caseName = $0.name.trimmed
+      let associatedValueName = $0.trimmedTypeDescription
+      let hasPayload = $0.parameterClause.map { !$0.parameters.isEmpty } ?? false
       let bindingNames: String
       let returnName: String
-      if hasPayload, let associatedValue = enumCaseDecl.parameterClause {
+      if hasPayload, let associatedValue = $0.parameterClause {
         let parameterNames = (0..<associatedValue.parameters.count)
           .map { "v\($0)" }
           .joined(separator: ", ")
@@ -106,8 +146,8 @@ extension CasePathableMacro: MemberMacro {
 
       return """
         \(access)var \(caseName): \
-        \(raw: Self.qualifiedCasePathTypeName)<\(enumName), \(raw: associatedValueName)> {
-        \(raw: Self.qualifiedCasePathTypeName)<\(enumName), \(raw: associatedValueName)>(
+        \(raw: qualifiedCasePathTypeName)<\(enumName), \(raw: associatedValueName)> {
+        \(raw: qualifiedCasePathTypeName)<\(enumName), \(raw: associatedValueName)>(
         embed: \(raw: hasPayload ? "\(enumName).\(caseName)" : "{ \(enumName).\(caseName) }"),
         extract: {
         guard case\(raw: hasPayload ? " let" : "").\(caseName)\(raw: bindingNames) = $0 else { \
@@ -119,15 +159,6 @@ extension CasePathableMacro: MemberMacro {
         }
         """
     }
-
-    return [
-      """
-      \(access)struct AllCasePaths {
-      \(raw: casePaths.map(\.description).joined(separator: "\n"))
-      }
-      \(access)static var allCasePaths: AllCasePaths { AllCasePaths() }
-      """
-    ]
   }
 }
 
