@@ -402,4 +402,167 @@ final class CasePathableMacroTests: XCTestCase {
     }
   }
 
+  func testConditionalCompilation() {
+    assertMacro {
+      """
+      @CasePathable enum Foo {
+        case bar
+
+        #if os(macOS)
+        case macCase
+        case macSecond(Int)
+        #elseif os(iOS)
+        case iosCase
+        #else
+        case elseCase(String)
+        case elseLast
+        #endif
+
+        #if DEBUG
+        #if INNER
+        case twoLevelsDeep
+        case twoLevels(Double)
+        #endif
+        #endif
+      }
+      """
+    } expansion: {
+      """
+      enum Foo {
+        case bar
+
+        #if os(macOS)
+        case macCase
+        case macSecond(Int)
+        #elseif os(iOS)
+        case iosCase
+        #else
+        case elseCase(String)
+        case elseLast
+        #endif
+
+        #if DEBUG
+        #if INNER
+        case twoLevelsDeep
+        case twoLevels(Double)
+        #endif
+        #endif
+
+        struct AllCasePaths {
+          var bar: CasePaths.AnyCasePath<Foo, Void> {
+            CasePaths.AnyCasePath<Foo, Void>(
+              embed: {
+                Foo.bar
+              },
+              extract: {
+                guard case .bar = $0 else {
+                  return nil
+                }
+                return ()
+              }
+            )
+          }
+          #if os(macOS)
+          var macCase: CasePaths.AnyCasePath<Foo, Void> {
+            CasePaths.AnyCasePath<Foo, Void>(
+              embed: {
+                Foo.macCase
+              },
+              extract: {
+                guard case .macCase = $0 else {
+                  return nil
+                }
+                return ()
+              }
+            )
+          }
+          var macSecond: CasePaths.AnyCasePath<Foo, Int> {
+            CasePaths.AnyCasePath<Foo, Int>(
+              embed: Foo.macSecond,
+              extract: {
+                guard case let .macSecond(v0) = $0 else {
+                  return nil
+                }
+                return v0
+              }
+            )
+          }
+          #elseif os(iOS)
+          var iosCase: CasePaths.AnyCasePath<Foo, Void> {
+            CasePaths.AnyCasePath<Foo, Void>(
+              embed: {
+                Foo.iosCase
+              },
+              extract: {
+                guard case .iosCase = $0 else {
+                  return nil
+                }
+                return ()
+              }
+            )
+          }
+          #else
+          var elseCase: CasePaths.AnyCasePath<Foo, String> {
+            CasePaths.AnyCasePath<Foo, String>(
+              embed: Foo.elseCase,
+              extract: {
+                guard case let .elseCase(v0) = $0 else {
+                  return nil
+                }
+                return v0
+              }
+            )
+          }
+          var elseLast: CasePaths.AnyCasePath<Foo, Void> {
+            CasePaths.AnyCasePath<Foo, Void>(
+              embed: {
+                Foo.elseLast
+              },
+              extract: {
+                guard case .elseLast = $0 else {
+                  return nil
+                }
+                return ()
+              }
+            )
+          }
+          #endif
+          #if DEBUG
+          #if INNER
+          var twoLevelsDeep: CasePaths.AnyCasePath<Foo, Void> {
+            CasePaths.AnyCasePath<Foo, Void>(
+              embed: {
+                Foo.twoLevelsDeep
+              },
+              extract: {
+                guard case .twoLevelsDeep = $0 else {
+                  return nil
+                }
+                return ()
+              }
+            )
+          }
+          var twoLevels: CasePaths.AnyCasePath<Foo, Double> {
+            CasePaths.AnyCasePath<Foo, Double>(
+              embed: Foo.twoLevels,
+              extract: {
+                guard case let .twoLevels(v0) = $0 else {
+                  return nil
+                }
+                return v0
+              }
+            )
+          }
+          #endif
+          #endif
+        }
+        static var allCasePaths: AllCasePaths { AllCasePaths() }
+      }
+
+      extension Foo: CasePaths.CasePathable {
+      }
+      """
+    }
+  }
+
 }
