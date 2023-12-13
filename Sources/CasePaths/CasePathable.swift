@@ -408,7 +408,7 @@ extension CasePathable {
   /// userActions.filter { $0.is(\.home) }      // [UserAction.home(.onAppear)]
   /// userActions.filter { $0.is(\.settings) }  // [UserAction.settings(.subscribeButtonTapped)]
   /// ```
-  public func `is`<Value>(_ keyPath: CaseKeyPath<Self, Value>) -> Bool {
+  public func `is`<Value>(_ keyPath: PartialCaseKeyPath<Self>) -> Bool {
     self[case: keyPath] != nil
   }
 
