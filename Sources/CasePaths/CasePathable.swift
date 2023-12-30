@@ -6,7 +6,7 @@ import XCTestDynamicOverlay
 /// enum.
 ///
 /// It is also possible, though less common, to manually conform a type to `CasePathable`. For
-/// example, the `Result` type is extended to be case-pathable with the following extension:
+/// example, the `Result` type can be extended to be case-pathable with the following extension:
 ///
 /// ```swift
 /// extension Result: CasePathable {
@@ -49,50 +49,78 @@ public protocol CasePathable {
   @_documentation(visibility:internal)
   @dynamicMemberLookup
   public struct Case<Value> {
-    fileprivate let _embed: (Value) -> Any
-    fileprivate let _extract: (Any) -> Value?
+    @usableFromInline
+    let path: any _PartialCasePath<Value>
+
+    @inlinable
+    init(path: any _PartialCasePath<Value>) {
+      self.path = path
+    }
   }
 #else
   @dynamicMemberLookup
   public struct Case<Value> {
-    fileprivate let _embed: (Value) -> Any
-    fileprivate let _extract: (Any) -> Value?
+    @usableFromInline
+    let path: any _PartialCasePath<Value>
+
+    @inlinable
+    init(path: any _PartialCasePath<Value>) {
+      self.path = path
+    }
   }
 #endif
 
 extension Case {
+  @available(*, deprecated, message: "Use 'init(path:)' instead.")
   public init<Root>(
     embed: @escaping (Value) -> Root,
     extract: @escaping (Root) -> Value?
   ) {
-    self._embed = embed
-    self._extract = { ($0 as? Root).flatMap(extract) }
+    self.init(path: AnyCasePath(embed: embed, extract: extract))
   }
 
+  @available(*, deprecated, message: "Use 'init(path:)' instead.")
   public init() {
-    self.init(embed: { $0 }, extract: { $0 })
+    self.init(path: _IdentityCasePath())
   }
 
+  @available(*, deprecated, message: "Use 'init(path:)' instead.")
   public init<Root>(_ keyPath: CaseKeyPath<Root, Value>) {
-    self = Case<Root>()[keyPath: keyPath]
+    self = Case<Root>(path: _IdentityCasePath())[keyPath: keyPath]
   }
 
-  public subscript<AppendedValue>(
-    dynamicMember keyPath: KeyPath<Value.AllCasePaths, AnyCasePath<Value, AppendedValue>>
-  ) -> Case<AppendedValue>
-  where Value: CasePathable {
-    Case<AppendedValue>(
-      embed: { self.embed(Value.allCasePaths[keyPath: keyPath].embed($0)) },
-      extract: { self.extract(from: $0).flatMap(Value.allCasePaths[keyPath: keyPath].extract) }
-    )
+  @inlinable
+  public func appending<AppendedValue>(
+    path: some CasePathProtocol<Value, AppendedValue>
+  ) -> Case<AppendedValue> {
+    Case<AppendedValue>(path: self.path.appending(path: path))
   }
 
+  @inlinable
+  public subscript<Member>(
+    dynamicMember keyPath: KeyPath<Value.AllCasePaths, Member>
+  ) -> Case<Member.Value>
+  where Value: CasePathable, Member: CasePathProtocol, Member.Root == Value {
+    self.appending(path: Value.allCasePaths[keyPath: keyPath])
+  }
+
+  @available(*, deprecated, message: "Use 'path.embed(_:)' instead.")
   public func embed(_ value: Value) -> Any {
-    self._embed(value)
+    let path = self.path as! any CasePathProtocol
+    func open<P: CasePathProtocol>(_ path: P) -> Any {
+      return path.embed(value as! P.Value)
+    }
+    return open(path)
   }
 
+  @available(*, deprecated, message: "Use 'path.extract(from:)' instead.")
   public func extract(from root: Any) -> Value? {
-    self._extract(root)
+    let path = self.path as! any CasePathProtocol
+    func open<P: CasePathProtocol>(_ path: P) -> Value? {
+      guard let root = root as? P.Root else { return nil }
+      return path.extract(from: root) as? Value
+    }
+    return open(path)
   }
 }
 
@@ -102,7 +130,12 @@ private protocol _AnyCase {
 
 extension Case: _AnyCase {
   fileprivate func _extract(from root: Any) -> Any? {
-    self.extract(from: root)
+    let path = self.path as! any CasePathProtocol
+    func open<P: CasePathProtocol>(_ path: P) -> Any? {
+      guard let root = root as? P.Root else { return nil }
+      return path.extract(from: root)
+    }
+    return open(path)
   }
 }
 
@@ -183,6 +216,21 @@ extension Case: _AnyCase {
 public typealias CaseKeyPath<Root, Value> = KeyPath<Case<Root>, Case<Value>>
 
 extension CaseKeyPath {
+  @inlinable
+  public func asCasePath<Enum, AssociatedValue>() -> any CasePathProtocol<Enum, AssociatedValue>
+  where Root == Case<Enum>, Value == Case<AssociatedValue> {
+    let path = Case<Enum>(path: _IdentityCasePath())[keyPath: self].path
+    if #available(iOS 16, macOS 13, tvOS 16, watchOS 10, *) {
+      return path as! any CasePathProtocol<Enum, AssociatedValue>
+    } else {
+      let path = path as! any CasePathProtocol
+      func open<P: CasePathProtocol>(_ path: P) -> AnyCasePath<Enum, AssociatedValue> {
+        AnyCasePath<P.Root, P.Value>(path) as! AnyCasePath<Enum, AssociatedValue>
+      }
+      return open(path)
+    }
+  }
+
   /// Embeds a value in an enum at this case key path's case.
   ///
   /// Given a case key path to an enum case, one can produce a whole new root value to that case by
@@ -204,9 +252,10 @@ extension CaseKeyPath {
   ///
   /// - Parameter value: A value to embed.
   /// - Returns: An enum for the case of this key path that holds the given value.
+  @inlinable
   public func callAsFunction<Enum, AssociatedValue>(_ value: AssociatedValue) -> Enum
   where Root == Case<Enum>, Value == Case<AssociatedValue> {
-    Case(self).embed(value) as! Enum
+    self.asCasePath().embed(value)
   }
 
   /// Returns an enum for this case key path's case.
@@ -229,9 +278,10 @@ extension CaseKeyPath {
   /// See ``Swift/KeyPath/callAsFunction(_:)`` for cases with associated values.
   ///
   /// - Returns: An enum for the case of this key path.
+  @inlinable
   public func callAsFunction<Enum>() -> Enum
   where Root == Case<Enum>, Value == Case<Void> {
-    Case(self).embed(()) as! Enum
+    self.asCasePath().embed(())
   }
 
   /// Whether an argument matches the case key path's case.
@@ -263,6 +313,7 @@ extension CaseKeyPath {
   /// - Parameters:
   ///   - lhs: A case key path.
   ///   - rhs: An enum.
+  @inlinable
   public static func ~= <Enum: CasePathable, AssociatedValue>(lhs: KeyPath, rhs: Enum) -> Bool
   where Root == Case<Enum>, Value == Case<AssociatedValue> {
     rhs[case: lhs] != nil
@@ -283,7 +334,7 @@ extension PartialCaseKeyPath {
     _ value: AnyAssociatedValue
   ) -> Enum?
   where Root == Case<Enum> {
-    (Case<Enum>()[keyPath: self] as? Case<AnyAssociatedValue>)?.embed(value) as? Enum
+    (self as? CaseKeyPath<Enum, AnyAssociatedValue>)?(value)
   }
 }
 
@@ -323,14 +374,15 @@ extension CasePathable {
   /// See ``CasePathable/subscript(case:)-8yr2s`` for replacing an associated value in a root
   /// enum, and see ``Swift/KeyPath/callAsFunction(_:)`` for embedding an associated value in a
   /// brand new root enum.
+  @inlinable
   public subscript<Value>(case keyPath: CaseKeyPath<Self, Value>) -> Value? {
-    Case(keyPath).extract(from: self)
+    keyPath.asCasePath().extract(from: self)
   }
 
   /// Attempts to extract the associated value from a root enum using a partial case key path.
   @_disfavoredOverload
   public subscript(case keyPath: PartialCaseKeyPath<Self>) -> Any? {
-    (Case<Self>()[keyPath: keyPath] as? any _AnyCase)?._extract(from: self)
+    (Case<Self>(path: _IdentityCasePath())[keyPath: keyPath] as? any _AnyCase)?._extract(from: self)
   }
 
   /// Replaces the associated value of a root enum at a case key path when the case matches.
@@ -360,10 +412,11 @@ extension CasePathable {
   public subscript<Value>(case keyPath: CaseKeyPath<Self, Value>) -> Value {
     @available(*, unavailable)
     get { fatalError() }
+    @inlinable
     set {
-      let `case` = Case(keyPath)
-      guard `case`.extract(from: self) != nil else { return }
-      self = `case`.embed(newValue) as! Self
+      let casePath = keyPath.asCasePath()
+      guard casePath.extract(from: self) != nil else { return }
+      self = casePath.embed(newValue)
     }
   }
 
@@ -387,8 +440,12 @@ extension CasePathable {
   /// userActions.compactMap(\.home)      // [HomeAction.onAppear]
   /// userActions.compactMap(\.settings)  // [SettingsAction.subscribeButtonTapped]
   /// ```
-  public subscript<Value>(dynamicMember keyPath: CaseKeyPath<Self, Value>) -> Value? {
-    self[case: keyPath]
+  @inlinable
+  public subscript<Member: CasePathProtocol>(
+    dynamicMember keyPath: KeyPath<Self.AllCasePaths, Member>
+  ) -> Member.Value?
+  where Member.Root == Self {
+    Self.allCasePaths[keyPath: keyPath].extract(from: self)
   }
 
   /// Tests the associated value of a case.
@@ -408,6 +465,7 @@ extension CasePathable {
   /// userActions.filter { $0.is(\.home) }      // [UserAction.home(.onAppear)]
   /// userActions.filter { $0.is(\.settings) }  // [UserAction.settings(.subscribeButtonTapped)]
   /// ```
+  @inlinable
   public func `is`(_ keyPath: PartialCaseKeyPath<Self>) -> Bool {
     self[case: keyPath] != nil
   }
@@ -440,8 +498,8 @@ extension CasePathable {
     file: StaticString = #filePath,
     line: UInt = #line
   ) {
-    let `case` = Case(keyPath)
-    guard var value = `case`.extract(from: self) else {
+    let casePath = keyPath.asCasePath()
+    guard var value = casePath.extract(from: self) else {
       XCTFail(
         """
         Can't modify '\(String(describing: self))' via 'CaseKeyPath<\(Self.self), \(Value.self)>' \
@@ -453,7 +511,7 @@ extension CasePathable {
       return
     }
     yield(&value)
-    self = `case`.embed(value) as! Self
+    self = casePath.embed(value)
   }
 }
 
@@ -461,12 +519,9 @@ extension AnyCasePath {
   /// Creates a type-erased case path for given case key path.
   ///
   /// - Parameter keyPath: A case key path.
+  @inlinable
   public init(_ keyPath: CaseKeyPath<Root, Value>) {
-    let `case` = Case(keyPath)
-    self.init(
-      embed: { `case`.embed($0) as! Root },
-      extract: { `case`.extract(from: $0) }
-    )
+    self.init(keyPath.asCasePath())
   }
 }
 
@@ -477,14 +532,16 @@ extension AnyCasePath where Value: CasePathable {
   /// lookup, and should not be invoked directly.
   ///
   /// - Parameter keyPath: A key path to a case-pathable case path.
-  public subscript<AppendedValue>(
-    dynamicMember keyPath: KeyPath<Value.AllCasePaths, AnyCasePath<Value, AppendedValue>>
-  ) -> AnyCasePath<Root, AppendedValue> {
-    AnyCasePath<Root, AppendedValue>(
-      embed: { self.embed(Value.allCasePaths[keyPath: keyPath].embed($0)) },
-      extract: {
-        self.extract(from: $0).flatMap(Value.allCasePaths[keyPath: keyPath].extract(from:))
-      }
-    )
+  @available(*, deprecated, message: "Append case key paths, instead.")
+  public subscript<Member: CasePathProtocol>(
+    dynamicMember keyPath: KeyPath<Value.AllCasePaths, Member>
+  ) -> AnyCasePath<Root, Member.Value>
+  where Member.Root == Value {
+    func open<P: CasePathProtocol<Root, Value>>(
+      _ path: P
+    ) -> AnyCasePath<Root, Member.Value> {
+      AnyCasePath<Root, Member.Value>(path.appending(path: Value.allCasePaths[keyPath: keyPath]))
+    }
+    return open(self.base)
   }
 }

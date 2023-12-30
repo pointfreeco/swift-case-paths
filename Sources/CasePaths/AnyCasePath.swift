@@ -6,16 +6,56 @@ import Foundation
 /// This type defines key path-like semantics for enum cases, and is used to derive ``CaseKeyPath``s
 /// from types that conform to ``CasePathable``.
 @dynamicMemberLookup
-public struct AnyCasePath<Root, Value> {
-  private let _embed: (Value) -> Root
-  private let _extract: (Root) -> Value?
+public struct AnyCasePath<Root, Value>: CasePathProtocol {
+  public let base: any CasePathProtocol<Root, Value>
+
+  @inlinable
+  public init(_ base: some CasePathProtocol<Root, Value>) {
+    self.base = base
+  }
 
   /// Creates a type-erased case path from a pair of functions.
   ///
   /// - Parameters:
   ///   - embed: A function that always succeeds in embedding a value in a root.
   ///   - extract: A function that can optionally fail in extracting a value from a root.
+  @inlinable
   public init(
+    embed: @escaping (Value) -> Root,
+    extract: @escaping (Root) -> Value?
+  ) {
+    self.init(_ClosureCasePath(embed: embed, extract: extract))
+  }
+
+  /// Returns a root by embedding a value.
+  ///
+  /// - Parameter value: A value to embed.
+  /// - Returns: A root that embeds `value`.
+  @inlinable
+  public func embed(_ value: Value) -> Root {
+    self.base.embed(value)
+  }
+
+  /// Attempts to extract a value from a root.
+  ///
+  /// - Parameter root: A root to extract from.
+  /// - Returns: A value if it can be extracted from the given root, otherwise `nil`.
+  @inlinable
+  public func extract(from root: Root) -> Value? {
+    self.base.extract(from: root)
+  }
+}
+
+@usableFromInline
+struct _ClosureCasePath<Root, Value>: CasePathProtocol {
+  @usableFromInline
+  let _embed: (Value) -> Root
+
+  @usableFromInline
+  let _extract: (Root) -> Value?
+
+  @inlinable
+  init(
     embed: @escaping (Value) -> Root,
     extract: @escaping (Root) -> Value?
   ) {
@@ -23,19 +63,13 @@ public struct AnyCasePath<Root, Value> {
     self._extract = extract
   }
 
-  /// Returns a root by embedding a value.
-  ///
-  /// - Parameter value: A value to embed.
-  /// - Returns: A root that embeds `value`.
-  public func embed(_ value: Value) -> Root {
+  @inlinable
+  func embed(_ value: Value) -> Root {
     self._embed(value)
   }
 
-  /// Attempts to extract a value from a root.
-  ///
-  /// - Parameter root: A root to extract from.
-  /// - Returns: A value if it can be extracted from the given root, otherwise `nil`.
-  public func extract(from root: Root) -> Value? {
+  @inlinable
+  func extract(from root: Root) -> Value? {
     self._extract(root)
   }
 }
@@ -47,8 +81,9 @@ extension AnyCasePath where Root == Value {
   ///
   ///   * Given a value to embed, returns the given value.
   ///   * Given a value to extract, returns the given value.
+  @available(*, deprecated, message: "Initialize with an explicit path instead.")
   public init() where Root == Value {
-    self.init(embed: { $0 }, extract: { $0 })
+    self.init(_IdentityCasePath())
   }
 }
 
@@ -116,10 +151,12 @@ extension AnyCasePath {
     public func appending<AppendedValue>(
       path: AnyCasePath<Value, AppendedValue>
     ) -> AnyCasePath<Root, AppendedValue> {
-      AnyCasePath<Root, AppendedValue>(
-        embed: { self.embed(path.embed($0)) },
-        extract: { self.extract(from: $0).flatMap(path.extract) }
-      )
+      func open<P: CasePathProtocol<Root, Value>>(
+        _ p: P
+      ) -> AnyCasePath<Root, AppendedValue> {
+        AnyCasePath<Root, AppendedValue>(p.appending(path: path))
+      }
+      return open(self.base)
     }
   #else
     /// Returns a new case path created by appending the given case path to this one.
@@ -131,10 +168,12 @@ extension AnyCasePath {
     public func appending<AppendedValue>(
       path: AnyCasePath<Value, AppendedValue>
     ) -> AnyCasePath<Root, AppendedValue> {
-      AnyCasePath<Root, AppendedValue>(
-        embed: { self.embed(path.embed($0)) },
-        extract: { self.extract(from: $0).flatMap(path.extract) }
-      )
+      func open<P: CasePathProtocol<Root, Value>>(
+        _ p: P
+      ) -> AnyCasePath<Root, AppendedValue> {
+        AnyCasePath<Root, AppendedValue>(p.appending(path: path))
+      }
+      return open(self.base)
     }
   #endif
 }

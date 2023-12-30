@@ -1,4 +1,4 @@
-SWIFT_DOCKER_IMAGE = swift:5.6
+SWIFT_DOCKER_IMAGE = swift:5.7
 
 test-all: test-linux test-swift
 

@@ -7,7 +7,11 @@ extension Never: CasePathable {
 
 extension Case {
   public var never: Case<Never> {
-    func absurd<T>(_: Never) -> T {}
-    return Case<Never>(embed: absurd, extract: { (_: Value) in nil })
+    Case<Never>(path: self.path.appending(path: _Never<Value>()))
   }
+}
+
+private struct _Never<Root>: CasePathProtocol {
+  func embed(_ value: Never) -> Root {}
+  func extract(from root: Root) -> Never? { nil }
 }
