@@ -387,8 +387,10 @@ extension CasePathable {
   /// userActions.compactMap(\.home)      // [HomeAction.onAppear]
   /// userActions.compactMap(\.settings)  // [SettingsAction.subscribeButtonTapped]
   /// ```
-  public subscript<Value>(dynamicMember keyPath: CaseKeyPath<Self, Value>) -> Value? {
-    self[case: keyPath]
+  public subscript<Value>(
+    dynamicMember keyPath: KeyPath<Self.AllCasePaths, AnyCasePath<Self, Value>>
+  ) -> Value? {
+    Self.allCasePaths[keyPath: keyPath].extract(from: self)
   }
 
   /// Tests the associated value of a case.
