@@ -150,5 +150,5 @@ benchmark("Case Key Path (Appended: 2, Cached + Converted): Extract") {
 #endif
 
 Benchmark.main([
-  defaultBenchmarkSuite,
+  defaultBenchmarkSuite
 ])
