@@ -24,7 +24,7 @@ import CasePaths
  Case Key Path (Appended: 10, Cached): Extract              9333.000 ns ±   5.80 %     150034
  Case Key Path (Appended: 10, Cached + Converted): Embed    3625.000 ns ±   5.56 %     381696
  Case Key Path (Appended: 10, Cached + Converted): Extract  4875.000 ns ±   8.08 %     285089
- Case Pathable (Dynamic Member Lookup: 10)                 19458.000 ns ±   4.13 %      72318
+ Case Pathable (Dynamic Member Lookup: 10)                     0.000 ns ±    inf %     1000000
  */
 
 benchmark("Case Path Reflection (Appended: 2): Embed") {
