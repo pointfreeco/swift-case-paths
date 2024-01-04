@@ -16,6 +16,7 @@ final class CasePathsTests: XCTestCase {
       XCTAssertEqual(somePath(42), 42)
       XCTAssertEqual(nonePath(), nil)
     #endif
+    XCTAssertEqual(Fizz.buzz(.fizzBuzz(.int(42)))[case: \.buzz.fizzBuzz.int], 42)
   }
 
   func testResult() {
@@ -160,5 +161,14 @@ final class CasePathsTests: XCTestCase {
     case string(String)
   }
   @CasePathable enum Blob: Equatable {
+  }
+  @CasePathable @dynamicMemberLookup enum Fizz: Equatable {
+    case buzz(Buzz?)
+  }
+  @CasePathable @dynamicMemberLookup enum Buzz: Equatable {
+    case fizzBuzz(FizzBuzz?)
+  }
+  @CasePathable @dynamicMemberLookup enum FizzBuzz: Equatable {
+    case int(Int)
   }
 #endif
