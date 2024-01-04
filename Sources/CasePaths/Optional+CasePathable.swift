@@ -32,7 +32,7 @@ extension Case {
   /// A case path to the presence of a nested value.
   ///
   /// This subscript can chain into an optional's wrapped value without explicitly specifying each
-  /// `none` component.
+  /// `some` component.
   public subscript<Member>(
     dynamicMember keyPath: KeyPath<Value.AllCasePaths, AnyCasePath<Value, Member?>>
   ) -> Case<Member>
