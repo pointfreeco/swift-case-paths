@@ -18,6 +18,13 @@ final class CasePathsTests: XCTestCase {
     #endif
     #if swift(>=5.9)
       XCTAssertEqual(Fizz.buzz(.fizzBuzz(.int(42)))[case: \.buzz.fizzBuzz.int], 42)
+      let buzzPath1: CaseKeyPath<Fizz, Buzz?> = \Fizz.Cases.buzz
+      let buzzPath2: CaseKeyPath<Fizz, Buzz> = \Fizz.Cases.buzz
+      XCTAssertEqual(buzzPath1, \.buzz)
+      XCTAssertEqual(buzzPath2, \.buzz)
+      let buzzPath3 = \Fizz.Cases.buzz
+      XCTAssertNotEqual(buzzPath1, buzzPath3)
+      XCTAssertEqual(buzzPath2, buzzPath3)
     #endif
   }
 

@@ -40,3 +40,12 @@ extension Optional: CasePathable {
     AllCasePaths()
   }
 }
+
+extension Case {
+  public subscript<Member>(
+    dynamicMember keyPath: KeyPath<Value.AllCasePaths, AnyCasePath<Value, Member?>>
+  ) -> Case<Member>
+  where Value: CasePathable {
+    self[dynamicMember: keyPath].some
+  }
+}
