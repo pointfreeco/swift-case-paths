@@ -1,5 +1,6 @@
 extension Result: CasePathable {
   public struct AllCasePaths {
+    /// A success case path, for embedding or extracting a `Success` value.
     public var success: AnyCasePath<Result, Success> {
       AnyCasePath(
         embed: { .success($0) },
@@ -10,6 +11,7 @@ extension Result: CasePathable {
       )
     }
 
+    /// A failure case path, for embedding or extracting a `Failure` value.
     public var failure: AnyCasePath<Result, Failure> {
       AnyCasePath(
         embed: { .failure($0) },
