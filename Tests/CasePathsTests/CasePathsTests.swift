@@ -16,7 +16,9 @@ final class CasePathsTests: XCTestCase {
       XCTAssertEqual(somePath(42), 42)
       XCTAssertEqual(nonePath(), nil)
     #endif
-    XCTAssertEqual(Fizz.buzz(.fizzBuzz(.int(42)))[case: \.buzz.fizzBuzz.int], 42)
+    #if swift(>=5.9)
+      XCTAssertEqual(Fizz.buzz(.fizzBuzz(.int(42)))[case: \.buzz.fizzBuzz.int], 42)
+    #endif
   }
 
   func testResult() {
