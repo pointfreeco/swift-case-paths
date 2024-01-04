@@ -29,8 +29,8 @@ extension Optional: CasePathable {
       return AnyCasePath(
         embed: { .some(casePath.embed($0)) },
         extract: {
-          guard let wrapped = $0 else { return nil }
-          return casePath.extract(from: wrapped)
+          guard case let .some(value) = $0 else { return nil }
+          return casePath.extract(from: value)
         }
       )
     }
