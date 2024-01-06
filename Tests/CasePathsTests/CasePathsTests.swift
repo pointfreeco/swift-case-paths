@@ -27,6 +27,11 @@ final class CasePathsTests: XCTestCase {
       XCTAssertEqual(buzzPath2, buzzPath3)
       XCTAssertEqual(ifLet(state: \Fizz.buzz, action: \Fizz.Cases.buzz), 42)
       XCTAssertEqual(ifLet(state: \Fizz.buzz, action: \Foo.Cases.bar), nil)
+      let fizzBuzzPath1: CaseKeyPath<Fizz, Int?> = \Fizz.Cases.buzz.fizzBuzz.int
+      let fizzBuzzPath2: CaseKeyPath<Fizz, Int> = \Fizz.Cases.buzz.fizzBuzz.int
+      let fizzBuzzPath3 = \Fizz.Cases.buzz.fizzBuzz.int
+      XCTAssertNotEqual(fizzBuzzPath1, fizzBuzzPath3)
+      XCTAssertEqual(fizzBuzzPath2, fizzBuzzPath3)
     #endif
   }
 

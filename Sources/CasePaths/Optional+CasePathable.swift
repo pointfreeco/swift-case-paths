@@ -1,4 +1,5 @@
 extension Optional: CasePathable {
+  @dynamicMemberLookup
   public struct AllCasePaths {
     /// A case path to the absence of a value.
     public var none: AnyCasePath<Optional, Void> {
@@ -18,6 +19,21 @@ extension Optional: CasePathable {
         extract: {
           guard case let .some(value) = $0 else { return nil }
           return value
+        }
+      )
+    }
+
+    /// A case path to an optional-chained value.
+    public subscript<Member>(
+      dynamicMember keyPath: KeyPath<Wrapped.AllCasePaths, AnyCasePath<Wrapped, Member>>
+    ) -> AnyCasePath<Optional, Member?>
+    where Wrapped: CasePathable {
+      let casePath = Wrapped.allCasePaths[keyPath: keyPath]
+      return AnyCasePath(
+        embed: { $0.map(casePath.embed) },
+        extract: {
+          guard case let .some(value) = $0 else { return nil }
+          return casePath.extract(from: value)
         }
       )
     }
