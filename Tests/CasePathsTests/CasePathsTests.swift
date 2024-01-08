@@ -25,6 +25,13 @@ final class CasePathsTests: XCTestCase {
       let buzzPath3 = \Fizz.Cases.buzz
       XCTAssertNotEqual(buzzPath1, buzzPath3)
       XCTAssertEqual(buzzPath2, buzzPath3)
+      XCTAssertEqual(ifLet(state: \Fizz.buzz, action: \Fizz.Cases.buzz), 42)
+      XCTAssertEqual(ifLet(state: \Fizz.buzz, action: \Foo.Cases.bar), nil)
+      let fizzBuzzPath1: CaseKeyPath<Fizz, Int?> = \Fizz.Cases.buzz.fizzBuzz.int
+      let fizzBuzzPath2: CaseKeyPath<Fizz, Int> = \Fizz.Cases.buzz.fizzBuzz.int
+      let fizzBuzzPath3 = \Fizz.Cases.buzz.fizzBuzz.int
+      XCTAssertNotEqual(fizzBuzzPath1, fizzBuzzPath3)
+      XCTAssertEqual(fizzBuzzPath2, fizzBuzzPath3)
     #endif
   }
 
@@ -180,4 +187,8 @@ final class CasePathsTests: XCTestCase {
   @CasePathable @dynamicMemberLookup enum FizzBuzz: Equatable {
     case int(Int)
   }
+
+  func ifLet<A, B, C, D>(state: KeyPath<A, B?>, action: CaseKeyPath<C, D?>) -> Int? { 42 }
+  @_disfavoredOverload
+  func ifLet<A, B, C, D>(state: KeyPath<A, B?>, action: CaseKeyPath<C, D>) -> Int? { nil }
 #endif
