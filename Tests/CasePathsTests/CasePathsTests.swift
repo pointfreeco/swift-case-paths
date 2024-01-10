@@ -132,14 +132,14 @@ final class CasePathsTests: XCTestCase {
     func testMatch() {
       switch Foo.bar(.int(42)) {
       case \.bar.int:
-        return
+        break
       default:
         XCTFail()
       }
 
       switch Foo.bar(.int(42)) {
       case \.bar:
-        return
+        break
       default:
         XCTFail()
       }
@@ -150,6 +150,9 @@ final class CasePathsTests: XCTestCase {
       XCTAssertFalse(Foo.bar(.int(42)).is(\.baz.string))
       XCTAssertFalse(Foo.bar(.int(42)).is(\.blob))
       XCTAssertFalse(Foo.bar(.int(42)).is(\.fizzBuzz))
+      XCTAssertTrue(Foo.foo(nil).is(\.foo))
+      XCTAssertTrue(Foo.foo("").is(\.foo))
+      XCTAssertFalse(Foo.foo(nil).is(\.bar))
     }
 
     func testPartialCaseKeyPath() {
@@ -169,6 +172,7 @@ final class CasePathsTests: XCTestCase {
     case baz(Baz)
     case fizzBuzz
     case blob(Blob)
+    case foo(String?)
   }
   @CasePathable @dynamicMemberLookup enum Bar: Equatable {
     case int(Int)
