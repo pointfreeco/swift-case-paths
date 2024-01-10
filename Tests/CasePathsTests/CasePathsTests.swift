@@ -151,6 +151,7 @@ final class CasePathsTests: XCTestCase {
       XCTAssertFalse(Foo.bar(.int(42)).is(\.blob))
       XCTAssertFalse(Foo.bar(.int(42)).is(\.fizzBuzz))
       XCTAssertTrue(Foo.foo(nil).is(\.foo))
+      XCTAssertTrue(Foo.foo(nil).is(\.foo.none))
       XCTAssertTrue(Foo.foo("").is(\.foo))
       XCTAssertFalse(Foo.foo(nil).is(\.bar))
     }

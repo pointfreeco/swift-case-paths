@@ -415,8 +415,7 @@ extension CasePathable {
     self[case: keyPath] != nil
   }
 
-  /// Tests the associated value of a case.
-  public func `is`<Value>(_ keyPath: CaseKeyPath<Self, Value>) -> Bool where Value: _OptionalProtocol {
+  public func `is`<Wrapped>(_ keyPath: CaseKeyPath<Self, Wrapped?>) -> Bool {
     self[case: keyPath] != nil
   }
 
