@@ -164,10 +164,30 @@ final class CasePathsTests: XCTestCase {
       XCTAssertEqual(.int(42), Foo.bar(.int(42))[case: partialPath] as? Bar)
       XCTAssertNil(Foo.baz(.string("Hello"))[case: partialPath])
     }
+
+    func testExistentials() {
+      let caseA: PartialCaseKeyPath<A> = \.a
+      let caseB: PartialCaseKeyPath<B> = \.b
+
+      let a = A.a("Hello")
+      guard let valueA = a[case: caseA] else { return XCTFail() }
+      guard let b = caseB(valueA) else { return XCTFail() }
+      XCTAssertEqual(b, .b("Hello"))
+    }
   #endif
 }
 
 #if swift(>=5.9)
+  @CasePathable
+  enum A: Equatable {
+    case a(String)
+  }
+
+  @CasePathable
+  enum B: Equatable {
+    case b(String)
+  }
+
   @CasePathable @dynamicMemberLookup enum Foo: Equatable {
     case bar(Bar)
     case baz(Baz)

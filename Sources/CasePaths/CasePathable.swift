@@ -279,11 +279,14 @@ extension PartialCaseKeyPath {
   ///   type, the operation will fail.
   /// - Returns: An enum for the case of this key path that holds the given value, or `nil`.
   @_disfavoredOverload
-  public func callAsFunction<Enum: CasePathable, AnyAssociatedValue>(
-    _ value: AnyAssociatedValue
+  public func callAsFunction<Enum: CasePathable>(
+    _ value: Any
   ) -> Enum?
   where Root == Case<Enum> {
-    (Case<Enum>()[keyPath: self] as? Case<AnyAssociatedValue>)?.embed(value) as? Enum
+    func open<AnyAssociatedValue>(_ value: AnyAssociatedValue) -> Enum? {
+      (Case<Enum>()[keyPath: self] as? Case<AnyAssociatedValue>)?.embed(value) as? Enum
+    }
+    return _openExistential(value, do: open)
   }
 }
 
