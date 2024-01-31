@@ -16,12 +16,12 @@ concurrency:
 jobs:
   macos:
     name: macOS (Xcode ${{ matrix.xcode }})
-    runs-on: macos-13
+    runs-on: macos-14
     strategy:
       matrix:
         xcode:
           - '14.3.1'
-          - '15.0'
+          - '15.2'
     steps:
       - uses: actions/checkout@v4
       - name: Select Xcode ${{ matrix.xcode }}
@@ -35,23 +35,23 @@ jobs:
     strategy:
       matrix:
         swift:
-          - '5.6'
           - '5.9'
     name: Ubuntu (Swift ${{ matrix.swift }})
-    runs-on: ubuntu-20.04
+    runs-on: ubuntu-latest
+    container: swift:${{ matrix.swift }}
     steps:
-      - uses: swift-actions/setup-swift@v1
-        with:
-          swift-version: ${{ matrix.swift }}
       - uses: actions/checkout@v4
-      - run: make test-linux
+      - name: Run tests
+        run: swift test --parallel
+      - name: Run tests (release)
+        run: swift test -c release --parallel
 
   windows:
     name: Windows (Swift ${{ matrix.swift }}, ${{ matrix.config }})
     strategy:
       matrix:
         os: [windows-latest]
-        config: 
+        config:
           - debug
           #- release
         swift: ['5.9.1']
