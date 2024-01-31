@@ -42,7 +42,10 @@ jobs:
     container: swift:${{ matrix.swift }}
     steps:
       - uses: actions/checkout@v4
-      - run: make test-linux
+      - name: Run tests
+        run: swift test --parallel
+      - name: Run tests (release)
+        run: swift test -c release --parallel
 
   windows:
     name: Windows (Swift ${{ matrix.swift }}, ${{ matrix.config }})
