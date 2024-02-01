@@ -23,8 +23,8 @@ final class CasePathsTests: XCTestCase {
       XCTAssertEqual(buzzPath1, \.buzz)
       XCTAssertEqual(buzzPath2, \.buzz)
       let buzzPath3 = \Fizz.Cases.buzz
-      XCTAssertNotEqual(buzzPath1, buzzPath3)
-      XCTAssertEqual(buzzPath2, buzzPath3)
+      XCTAssertEqual(buzzPath1, buzzPath3)
+      XCTAssertNotEqual(buzzPath2, buzzPath3)
       XCTAssertEqual(ifLet(state: \Fizz.buzz, action: \Fizz.Cases.buzz), 42)
       XCTAssertEqual(ifLet(state: \Fizz.buzz, action: \Foo.Cases.bar), nil)
       let fizzBuzzPath1: CaseKeyPath<Fizz, Int?> = \Fizz.Cases.buzz.fizzBuzz.int
