@@ -272,7 +272,7 @@ extension CaseKeyPath {
 /// A partially type-erased key path, from a concrete root enum to any resulting value type.
 public typealias PartialCaseKeyPath<Root> = PartialKeyPath<Case<Root>>
 
-extension PartialCaseKeyPath {
+extension _AppendKeyPath {
   /// Attempts to embeds any value in an enum at this case key path's case.
   ///
   /// - Parameter value: A value to embed. If the value type does not match the case path's value
@@ -282,9 +282,10 @@ extension PartialCaseKeyPath {
   public func callAsFunction<Enum: CasePathable>(
     _ value: Any
   ) -> Enum?
-  where Root == Case<Enum> {
+  where Self == PartialCaseKeyPath<Enum> {
     func open<AnyAssociatedValue>(_ value: AnyAssociatedValue) -> Enum? {
       (Case<Enum>()[keyPath: self] as? Case<AnyAssociatedValue>)?.embed(value) as? Enum
+        ?? (Case<Enum>()[keyPath: self] as? Case<AnyAssociatedValue?>)?.embed(value) as? Enum
     }
     return _openExistential(value, do: open)
   }

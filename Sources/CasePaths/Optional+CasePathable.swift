@@ -24,6 +24,7 @@ extension Optional: CasePathable {
     }
 
     /// A case path to an optional-chained value.
+    @_disfavoredOverload
     public subscript<Member>(
       dynamicMember keyPath: KeyPath<Wrapped.AllCasePaths, AnyCasePath<Wrapped, Member>>
     ) -> AnyCasePath<Optional, Member?>
@@ -49,6 +50,7 @@ extension Case {
   ///
   /// This subscript can chain into an optional's wrapped value without explicitly specifying each
   /// `some` component.
+  @_disfavoredOverload
   public subscript<Member>(
     dynamicMember keyPath: KeyPath<Value.AllCasePaths, AnyCasePath<Value, Member?>>
   ) -> Case<Member>
