@@ -174,6 +174,13 @@ final class CasePathsTests: XCTestCase {
       guard let b = caseB(valueA) else { return XCTFail() }
       XCTAssertEqual(b, .b("Hello"))
     }
+
+    func testExistentials_Optional() {
+      let foo: PartialCaseKeyPath<Foo> = \.foo
+      XCTAssertNotNil(foo(String?.none as Any))
+      XCTAssertNotNil(foo(String?.some("Blob") as Any))
+      XCTAssertNotNil(foo("Blob"))
+    }
   #endif
 }
 
