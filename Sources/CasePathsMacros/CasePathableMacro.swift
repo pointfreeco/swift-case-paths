@@ -38,7 +38,7 @@ extension CasePathableMacro: ExtensionMacro {
     }
     let ext: DeclSyntax =
       """
-      extension \(type.trimmed): \(raw: Self.qualifiedConformanceName) {}
+      \(declaration.attributes.availability)extension \(type.trimmed): \(raw: Self.qualifiedConformanceName) {}
       """
     return [ext.cast(ExtensionDeclSyntax.self)]
   }
@@ -64,8 +64,6 @@ extension CasePathableMacro: MemberMacro {
     }
     let enumName = enumDecl.name.trimmed
 
-    let access = enumDecl.modifiers.first(where: \.isNeededAccessLevelModifier)
-
     let rewriter = SelfRewriter(selfEquivalent: enumName)
     let memberBlock = rewriter.rewrite(enumDecl.memberBlock).cast(MemberBlockSyntax.self)
 
@@ -87,26 +85,25 @@ extension CasePathableMacro: MemberMacro {
       seenCaseNames.insert(name)
     }
 
-    let casePaths = generateDeclSyntax(from: memberBlock.members, with: access, enumName: enumName)
+    let casePaths = generateDeclSyntax(from: memberBlock.members, enumName: enumName)
 
     return [
       """
-      \(access)struct AllCasePaths {
+      public struct AllCasePaths {
       \(raw: casePaths.map(\.description).joined(separator: "\n"))
       }
-      \(access)static var allCasePaths: AllCasePaths { AllCasePaths() }
+      public static var allCasePaths: AllCasePaths { AllCasePaths() }
       """
     ]
   }
 
   static func generateDeclSyntax(
     from elements: MemberBlockItemListSyntax,
-    with access: DeclModifierListSyntax.Element?,
     enumName: TokenSyntax
   ) -> [DeclSyntax] {
     elements.flatMap {
       if let elements = $0.decl.as(EnumCaseDeclSyntax.self)?.elements {
-        return generateDeclSyntax(from: elements, with: access, enumName: enumName)
+        return generateDeclSyntax(from: elements, enumName: enumName)
       }
       if let ifConfigDecl = $0.decl.as(IfConfigDeclSyntax.self) {
         let ifClauses = ifConfigDecl.clauses.flatMap { decl -> [DeclSyntax] in
@@ -115,7 +112,7 @@ extension CasePathableMacro: MemberMacro {
           }
           let title = "\(decl.poundKeyword.text) \(decl.condition?.description ?? "")"
           return ["\(raw: title)"]
-            + generateDeclSyntax(from: elements, with: access, enumName: enumName)
+            + generateDeclSyntax(from: elements, enumName: enumName)
         }
         return ifClauses + ["#endif"]
       }
@@ -125,7 +122,6 @@ extension CasePathableMacro: MemberMacro {
 
   static func generateDeclSyntax(
     from enumCaseDecls: EnumCaseElementListSyntax,
-    with access: DeclModifierListSyntax.Element?,
     enumName: TokenSyntax
   ) -> [DeclSyntax] {
     enumCaseDecls.map {
@@ -146,7 +142,7 @@ extension CasePathableMacro: MemberMacro {
       }
 
       return """
-        \(access)var \(caseName): \
+        public var \(caseName): \
         \(raw: qualifiedCasePathTypeName)<\(enumName), \(raw: associatedValueName)> {
         \(raw: qualifiedCasePathTypeName)<\(enumName), \(raw: associatedValueName)>(
         embed: \(raw: hasPayload ? "\(enumName).\(caseName)" : "{ \(enumName).\(caseName) }"),
@@ -204,6 +200,96 @@ extension CasePathableMacroDiagnostic: DiagnosticMessage {
 
   func diagnose(at node: Syntax) -> Diagnostic {
     Diagnostic(node: node, message: self)
+  }
+}
+
+extension AttributeListSyntax {
+  var availability: AttributeListSyntax? {
+    var elements = [AttributeListSyntax.Element]()
+    for element in self {
+      if let availability = element.availability {
+        elements.append(availability)
+      }
+    }
+    if elements.isEmpty {
+      return nil
+    }
+    return AttributeListSyntax(elements)
+  }
+}
+
+extension AttributeListSyntax.Element {
+  var availability: AttributeListSyntax.Element? {
+    switch self {
+    case .attribute(let attribute):
+      if let availability = attribute.availability {
+        return .attribute(availability)
+      }
+    case .ifConfigDecl(let ifConfig):
+      if let availability = ifConfig.availability {
+        return .ifConfigDecl(availability)
+      }
+    }
+    return nil
+  }
+}
+
+extension AttributeSyntax {
+  var availability: AttributeSyntax? {
+    if attributeName.identifier == "available" {
+      return self
+    } else {
+      return nil
+    }
+  }
+}
+
+extension IfConfigClauseSyntax {
+  var availability: IfConfigClauseSyntax? {
+    if let availability = elements?.availability {
+      return with(\.elements, availability)
+    } else {
+      return nil
+    }
+  }
+
+  var clonedAsIf: IfConfigClauseSyntax {
+    detached.with(\.poundKeyword, .poundIfToken())
+  }
+}
+
+extension IfConfigClauseSyntax.Elements {
+  var availability: IfConfigClauseSyntax.Elements? {
+    switch self {
+    case .attributes(let attributes):
+      if let availability = attributes.availability {
+        return .attributes(availability)
+      } else {
+        return nil
+      }
+    default:
+      return nil
+    }
+  }
+}
+
+extension IfConfigDeclSyntax {
+  var availability: IfConfigDeclSyntax? {
+    var elements = [IfConfigClauseListSyntax.Element]()
+    for clause in clauses {
+      if let availability = clause.availability {
+        if elements.isEmpty {
+          elements.append(availability.clonedAsIf)
+        } else {
+          elements.append(availability)
+        }
+      }
+    }
+    if elements.isEmpty {
+      return nil
+    } else {
+      return with(\.clauses, IfConfigClauseListSyntax(elements))
+    }
   }
 }
 
@@ -266,16 +352,6 @@ extension DeclGroupSyntax {
   }
 }
 
-extension DeclModifierSyntax {
-  var isNeededAccessLevelModifier: Bool {
-    switch self.name.tokenKind {
-    case .keyword(.public): return true
-    case .keyword(.package): return true
-    default: return false
-    }
-  }
-}
-
 extension EnumCaseElementListSyntax.Element {
   var trimmedTypeDescription: String {
     if var associatedValue = self.parameterClause, !associatedValue.parameters.isEmpty {
@@ -308,6 +384,20 @@ extension SyntaxStringInterpolation {
     if let node {
       self.appendInterpolation(node)
     }
+  }
+}
+
+extension TypeSyntax {
+  var identifier: String? {
+    for token in tokens(viewMode: .all) {
+      switch token.tokenKind {
+      case .identifier(let identifier):
+        return identifier
+      default:
+        break
+      }
+    }
+    return nil
   }
 }
 
