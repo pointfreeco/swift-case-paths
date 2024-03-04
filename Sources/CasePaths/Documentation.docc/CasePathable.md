@@ -14,8 +14,10 @@
 
 ### Case properties
 
-- ``is(_:)``
-- ``subscript(dynamicMember:)``
+- ``is(_:)-26xtm``
+- ``is(_:)-8kyve``
+- ``subscript(dynamicMember:)-7ik0u``
+- ``subscript(dynamicMember:)-7sz4x``
 
 ### Manual conformances
 
