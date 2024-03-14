@@ -64,11 +64,7 @@ extension CasePathableMacro: MemberMacro {
     }
     let enumName = enumDecl.name.trimmed
 
-    let rewriter = SelfRewriter(selfEquivalent: enumName)
-    let memberBlock = rewriter.rewrite(enumDecl.memberBlock).cast(MemberBlockSyntax.self)
-
-    let enumCaseDecls = memberBlock
-      .members
+    let enumCaseDecls = enumDecl.memberBlock.members
       .flatMap { $0.decl.as(EnumCaseDeclSyntax.self)?.elements ?? [] }
 
     var seenCaseNames: Set<String> = []
@@ -85,8 +81,9 @@ extension CasePathableMacro: MemberMacro {
       seenCaseNames.insert(name)
     }
 
+    let rewriter = SelfRewriter(selfEquivalent: enumName)
+    let memberBlock = rewriter.rewrite(enumDecl.memberBlock).cast(MemberBlockSyntax.self)
     let casePaths = generateDeclSyntax(from: memberBlock.members, enumName: enumName)
-
     return [
       """
       public struct AllCasePaths {
