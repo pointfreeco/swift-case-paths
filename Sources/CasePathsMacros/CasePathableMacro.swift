@@ -99,8 +99,8 @@ extension CasePathableMacro: MemberMacro {
     enumName: TokenSyntax
   ) -> [DeclSyntax] {
     elements.flatMap {
-      if let elements = $0.decl.as(EnumCaseDeclSyntax.self)?.elements {
-        return generateDeclSyntax(from: elements, enumName: enumName)
+      if let decl = $0.decl.as(EnumCaseDeclSyntax.self) {
+        return generateDeclSyntax(from: decl, enumName: enumName)
       }
       if let ifConfigDecl = $0.decl.as(IfConfigDeclSyntax.self) {
         let ifClauses = ifConfigDecl.clauses.flatMap { decl -> [DeclSyntax] in
@@ -118,10 +118,10 @@ extension CasePathableMacro: MemberMacro {
   }
 
   static func generateDeclSyntax(
-    from enumCaseDecls: EnumCaseElementListSyntax,
+    from decl: EnumCaseDeclSyntax,
     enumName: TokenSyntax
   ) -> [DeclSyntax] {
-    enumCaseDecls.map {
+    decl.elements.map {
       let caseName = $0.name.trimmed
       let associatedValueName = $0.trimmedTypeDescription
       let hasPayload = $0.parameterClause.map { !$0.parameters.isEmpty } ?? false
@@ -137,9 +137,18 @@ extension CasePathableMacro: MemberMacro {
         bindingNames = ""
         returnName = "()"
       }
-
+      let leadingTriviaLines = decl.leadingTrivia.description
+        .drop(while: \.isNewline)
+        .split(separator: "\n", omittingEmptySubsequences: false)
+      let indent = leadingTriviaLines
+        .compactMap { $0.isEmpty ? nil : $0.prefix(while: \.isWhitespace).count }
+        .min(by: { (lhs: Int, rhs: Int) -> Bool in lhs == 0 ? lhs > rhs : lhs < rhs })
+        ?? 0
+      let leadingTrivia = leadingTriviaLines
+        .map { String($0.dropFirst(indent)) }
+        .joined(separator: "\n")
       return """
-        public var \(caseName): \
+        \(raw: leadingTrivia)public var \(caseName): \
         \(raw: qualifiedCasePathTypeName)<\(enumName), \(raw: associatedValueName)> {
         \(raw: qualifiedCasePathTypeName)<\(enumName), \(raw: associatedValueName)>(
         embed: \(raw: hasPayload ? "\(enumName).\(caseName)" : "{ \(enumName).\(caseName) }"),
