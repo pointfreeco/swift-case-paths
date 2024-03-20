@@ -603,4 +603,45 @@ final class CasePathableMacroTests: XCTestCase {
       """
     }
   }
+
+  func testDocumentation() {
+    assertMacro {
+      """
+      @available(iOS, unavailable)
+      @CasePathable
+      enum Foo {
+        /// The bar case.
+        case bar
+      }
+      """
+    } expansion: {
+      """
+      @available(iOS, unavailable)
+      enum Foo {
+        case bar
+
+        public struct AllCasePaths {
+          /// The bar case.
+          public var bar: CasePaths.AnyCasePath<Foo, Void> {
+            CasePaths.AnyCasePath<Foo, Void>(
+              embed: {
+                Foo.bar
+              },
+              extract: {
+                guard case .bar = $0 else {
+                  return nil
+                }
+                return ()
+              }
+            )
+          }
+        }
+        public static var allCasePaths: AllCasePaths { AllCasePaths() }
+      }
+
+      @available(iOS, unavailable) extension Foo: CasePaths.CasePathable {
+      }
+      """
+    }
+  }
 }
