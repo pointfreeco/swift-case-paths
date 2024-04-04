@@ -603,4 +603,122 @@ final class CasePathableMacroTests: XCTestCase {
       """
     }
   }
+
+  func testDocumentation() {
+    assertMacro {
+      """
+      @CasePathable
+      enum Foo {
+
+        /// The bar case.
+        case bar
+
+        /// The baz case.
+        ///
+        /// A case for baz.
+        case baz
+
+        /**
+         The fizz buzz case.
+
+         A case for fizz and buzz.
+         */
+        case fizz, buzz
+      }
+      """
+    } expansion: {
+      """
+      enum Foo {
+
+        /// The bar case.
+        case bar
+
+        /// The baz case.
+        ///
+        /// A case for baz.
+        case baz
+
+        /**
+         The fizz buzz case.
+
+         A case for fizz and buzz.
+         */
+        case fizz, buzz
+
+        public struct AllCasePaths {
+          /// The bar case.
+          public var bar: CasePaths.AnyCasePath<Foo, Void> {
+            CasePaths.AnyCasePath<Foo, Void>(
+              embed: {
+                Foo.bar
+              },
+              extract: {
+                guard case .bar = $0 else {
+                  return nil
+                }
+                return ()
+              }
+            )
+          }
+          /// The baz case.
+          ///
+          /// A case for baz.
+          public var baz: CasePaths.AnyCasePath<Foo, Void> {
+            CasePaths.AnyCasePath<Foo, Void>(
+              embed: {
+                Foo.baz
+              },
+              extract: {
+                guard case .baz = $0 else {
+                  return nil
+                }
+                return ()
+              }
+            )
+          }
+          /**
+         The fizz buzz case.
+
+         A case for fizz and buzz.
+         */
+          public var fizz: CasePaths.AnyCasePath<Foo, Void> {
+            CasePaths.AnyCasePath<Foo, Void>(
+              embed: {
+                Foo.fizz
+              },
+              extract: {
+                guard case .fizz = $0 else {
+                  return nil
+                }
+                return ()
+              }
+            )
+          }
+          /**
+         The fizz buzz case.
+
+         A case for fizz and buzz.
+         */
+          public var buzz: CasePaths.AnyCasePath<Foo, Void> {
+            CasePaths.AnyCasePath<Foo, Void>(
+              embed: {
+                Foo.buzz
+              },
+              extract: {
+                guard case .buzz = $0 else {
+                  return nil
+                }
+                return ()
+              }
+            )
+          }
+        }
+        public static var allCasePaths: AllCasePaths { AllCasePaths() }
+      }
+
+      extension Foo: CasePaths.CasePathable {
+      }
+      """
+    }
+  }
 }
