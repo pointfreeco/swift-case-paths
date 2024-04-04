@@ -140,11 +140,13 @@ extension CasePathableMacro: MemberMacro {
       let leadingTriviaLines = decl.leadingTrivia.description
         .drop(while: \.isNewline)
         .split(separator: "\n", omittingEmptySubsequences: false)
-      let indent = leadingTriviaLines
+      let indent =
+        leadingTriviaLines
         .compactMap { $0.isEmpty ? nil : $0.prefix(while: \.isWhitespace).count }
         .min(by: { (lhs: Int, rhs: Int) -> Bool in lhs == 0 ? lhs > rhs : lhs < rhs })
         ?? 0
-      let leadingTrivia = leadingTriviaLines
+      let leadingTrivia =
+        leadingTriviaLines
         .map { String($0.dropFirst(indent)) }
         .joined(separator: "\n")
       return """
