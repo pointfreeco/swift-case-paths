@@ -721,4 +721,47 @@ final class CasePathableMacroTests: XCTestCase {
       """
     }
   }
+  
+  func testDocumentationIndentationTrimming() {
+      assertMacro {
+      """
+      @CasePathable
+      enum Foo {
+        // baz
+      // case foo
+        case bar
+      }
+      """
+      } expansion: {
+        """
+        enum Foo {
+          // baz
+        // case foo
+          case bar
+
+          public struct AllCasePaths {
+              // baz
+            // case foo
+            public var bar: CasePaths.AnyCasePath<Foo, Void> {
+              CasePaths.AnyCasePath<Foo, Void>(
+                embed: {
+                  Foo.bar
+                },
+                extract: {
+                  guard case .bar = $0 else {
+                    return nil
+                  }
+                  return ()
+                }
+              )
+            }
+          }
+          public static var allCasePaths: AllCasePaths { AllCasePaths() }
+        }
+
+        extension Foo: CasePaths.CasePathable {
+        }
+        """
+      }
+  }
 }
