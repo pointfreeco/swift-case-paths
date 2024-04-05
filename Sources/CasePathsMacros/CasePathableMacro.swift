@@ -143,7 +143,7 @@ extension CasePathableMacro: MemberMacro {
       let indent =
         leadingTriviaLines
         .compactMap { $0.isEmpty ? nil : $0.prefix(while: \.isWhitespace).count }
-        .min(by: { (lhs: Int, rhs: Int) -> Bool in lhs == 0 ? lhs > rhs : lhs < rhs })
+        .min(by: { (lhs: Int, rhs: Int) -> Bool in lhs < rhs })
         ?? 0
       let leadingTrivia =
         leadingTriviaLines
