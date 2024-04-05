@@ -425,14 +425,14 @@ final class SelfRewriter: SyntaxRewriter {
 }
 
 extension StringProtocol {
-    @inline(__always)
-    func trimmingSuffix(while condition: (Element) throws -> Bool) rethrows -> Self.SubSequence {
-        var view = self[...]
-        
-        while let character = view.last, try condition(character) {
-            view = view.dropLast()
-        }
-        
-        return view
+  @inline(__always)
+  func trimmingSuffix(while condition: (Element) throws -> Bool) rethrows -> Self.SubSequence {
+    var view = self[...]
+
+    while let character = view.last, try condition(character) {
+      view = view.dropLast()
     }
+
+    return view
+  }
 }
