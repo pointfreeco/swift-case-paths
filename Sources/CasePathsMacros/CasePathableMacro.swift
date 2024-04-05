@@ -143,12 +143,13 @@ extension CasePathableMacro: MemberMacro {
       let indent =
         leadingTriviaLines
         .compactMap { $0.isEmpty ? nil : $0.prefix(while: \.isWhitespace).count }
-        .min(by: { (lhs: Int, rhs: Int) -> Bool in lhs == 0 ? lhs > rhs : lhs < rhs })
+        .min(by: { (lhs: Int, rhs: Int) -> Bool in lhs < rhs })
         ?? 0
       let leadingTrivia =
         leadingTriviaLines
         .map { String($0.dropFirst(indent)) }
         .joined(separator: "\n")
+        .trimmingSuffix(while: { $0.isWhitespace && !$0.isNewline })
       return """
         \(raw: leadingTrivia)public var \(caseName): \
         \(raw: qualifiedCasePathTypeName)<\(enumName), \(raw: associatedValueName)> {
@@ -421,4 +422,17 @@ final class SelfRewriter: SyntaxRewriter {
     else { return super.visit(node) }
     return super.visit(node.with(\.name, self.selfEquivalent))
   }
+}
+
+extension StringProtocol {
+    @inline(__always)
+    func trimmingSuffix(while condition: (Element) throws -> Bool) rethrows -> Self.SubSequence {
+        var view = self[...]
+        
+        while let character = view.last, try condition(character) {
+            view = view.dropLast()
+        }
+        
+        return view
+    }
 }
