@@ -33,8 +33,9 @@ extension Optional: CasePathable {
       return AnyCasePath(
         embed: { $0.map(casePath.embed) },
         extract: {
-          guard case let .some(value) = $0 else { return nil }
-          return casePath.extract(from: value)
+          guard case let .some(value) = $0, let member = casePath.extract(from: value)
+          else { return .none }
+          return member
         }
       )
     }
