@@ -182,6 +182,14 @@ final class CasePathsTests: XCTestCase {
       XCTAssertNotNil(foo(String?.some("Blob") as Any))
       XCTAssertNotNil(foo("Blob"))
     }
+
+    func testIs_Optional() {
+      XCTAssertTrue(Optional(Foo.fizzBuzz).is(\.fizzBuzz))
+      XCTAssertFalse(Optional(Foo.fizzBuzz).is(\.bar))
+      XCTAssertFalse(Optional(Foo.fizzBuzz).is(\.baz))
+      XCTAssertFalse(Optional(Foo.fizzBuzz).is(\.blob))
+      XCTAssertFalse(Optional(Foo.fizzBuzz).is(\.foo))
+    }
   #endif
 }
 
