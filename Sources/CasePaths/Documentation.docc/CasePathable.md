@@ -14,8 +14,7 @@
 
 ### Case properties
 
-- ``is(_:)-26xtm``
-- ``is(_:)-8kyve``
+- ``is(_:)``
 - ``subscript(dynamicMember:)-7ik0u``
 - ``subscript(dynamicMember:)-7sz4x``
 
