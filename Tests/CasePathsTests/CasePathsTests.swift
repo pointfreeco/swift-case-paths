@@ -33,6 +33,11 @@ final class CasePathsTests: XCTestCase {
       XCTAssertNotEqual(fizzBuzzPath1, fizzBuzzPath3)
       XCTAssertEqual(fizzBuzzPath2, fizzBuzzPath3)
     #endif
+
+    XCTAssertEqual(Optional.allCasePaths[Int?.some(42)], \.some)
+    XCTAssertNotEqual(Optional.allCasePaths[Int?.some(42)], \.none)
+    XCTAssertEqual(Optional.allCasePaths[Int?.none], \.none)
+    XCTAssertNotEqual(Optional.allCasePaths[Int?.none], \.some)
   }
 
   func testResult() {
@@ -50,6 +55,11 @@ final class CasePathsTests: XCTestCase {
       XCTAssertEqual(successPath(42), .success(42))
       XCTAssertEqual(failurePath(SomeError()), .failure(SomeError()))
     #endif
+
+    XCTAssertEqual(Result.allCasePaths[Result<Int, Error>.success(42)], \.success)
+    XCTAssertNotEqual(Result.allCasePaths[Result<Int, Error>.success(42)], \.failure)
+    XCTAssertEqual(Result.allCasePaths[Result<Int, Error>.failure(SomeError())], \.failure)
+    XCTAssertNotEqual(Result.allCasePaths[Result<Int, Error>.failure(SomeError())], \.success)
   }
 
   func testSelfCaseKeyPathCallAsFunction() {
@@ -101,6 +111,11 @@ final class CasePathsTests: XCTestCase {
       XCTAssertEqual((\Foo.Cases.bar)(.int(1)), .bar(.int(1)))
       XCTAssertEqual((\Foo.Cases.bar.int)(1), .bar(.int(1)))
       XCTAssertEqual((\Foo.Cases.fizzBuzz)(), .fizzBuzz)
+
+      XCTAssertEqual(Foo.allCasePaths[.bar(.int(1))], \.bar)
+      XCTAssertEqual(Foo.allCasePaths[.baz(.string(""))], \.baz)
+      XCTAssertEqual(Foo.allCasePaths[.fizzBuzz], \.fizzBuzz)
+      XCTAssertEqual(Foo.allCasePaths[.foo(nil)], \.foo)
     }
 
     func testCasePathableModify() {

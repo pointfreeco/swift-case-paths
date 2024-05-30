@@ -1,5 +1,13 @@
 extension Result: CasePathable {
   public struct AllCasePaths {
+    /// Returns the case key path for a given root value.
+    public subscript(root: Result) -> PartialCaseKeyPath<Result> {
+      switch root {
+      case .success: return \.success
+      case .failure: return \.failure
+      }
+    }
+
     /// A success case path, for embedding or extracting a `Success` value.
     public var success: AnyCasePath<Result, Success> {
       AnyCasePath(

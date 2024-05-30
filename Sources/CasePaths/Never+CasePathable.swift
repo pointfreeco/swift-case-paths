@@ -1,5 +1,9 @@
 extension Never: CasePathable {
-  public struct AllCasePaths {}
+  public struct AllCasePaths {
+    public subscript(root: Never) -> PartialCaseKeyPath<Never> {
+      \.never
+    }
+  }
   public static var allCasePaths: AllCasePaths {
     AllCasePaths()
   }
