@@ -1,9 +1,11 @@
 extension Never: CasePathable {
   public struct AllCasePaths {
+    /// Returns the case key path for a given root value.
     public subscript(root: Never) -> PartialCaseKeyPath<Never> {
       \.never
     }
   }
+
   public static var allCasePaths: AllCasePaths {
     AllCasePaths()
   }
