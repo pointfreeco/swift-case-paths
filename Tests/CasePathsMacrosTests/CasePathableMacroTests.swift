@@ -519,99 +519,28 @@ final class CasePathableMacroTests: XCTestCase {
             switch root {
             case .bar:
               return \.bar
-              #if os(macOS)
-              public var macCase: CasePaths.AnyCasePath<Foo, Void> {
-                CasePaths.AnyCasePath<Foo, Void>(
-                  embed: {
-                    Foo.macCase
-                  },
-                  extract: {
-                    guard case .macCase = $0 else {
-                      return nil
-                    }
-                    return ()
-                  }
-                )
-              }
-              public var macSecond: CasePaths.AnyCasePath<Foo, Int> {
-                CasePaths.AnyCasePath<Foo, Int>(
-                  embed: Foo.macSecond,
-                  extract: {
-                    guard case let .macSecond(v0) = $0 else {
-                      return nil
-                    }
-                    return v0
-                  }
-                )
-              }
-              #elseif os(iOS)
-              public var iosCase: CasePaths.AnyCasePath<Foo, Void> {
-                CasePaths.AnyCasePath<Foo, Void>(
-                  embed: {
-                    Foo.iosCase
-                  },
-                  extract: {
-                    guard case .iosCase = $0 else {
-                      return nil
-                    }
-                    return ()
-                  }
-                )
-              }
-              #else
-              public var elseCase: CasePaths.AnyCasePath<Foo, String> {
-                CasePaths.AnyCasePath<Foo, String>(
-                  embed: Foo.elseCase,
-                  extract: {
-                    guard case let .elseCase(v0) = $0 else {
-                      return nil
-                    }
-                    return v0
-                  }
-                )
-              }
-              public var elseLast: CasePaths.AnyCasePath<Foo, Void> {
-                CasePaths.AnyCasePath<Foo, Void>(
-                  embed: {
-                    Foo.elseLast
-                  },
-                  extract: {
-                    guard case .elseLast = $0 else {
-                      return nil
-                    }
-                    return ()
-                  }
-                )
-              }
-              #endif
-              #if DEBUG
-              #if INNER
-              public var twoLevelsDeep: CasePaths.AnyCasePath<Foo, Void> {
-                CasePaths.AnyCasePath<Foo, Void>(
-                  embed: {
-                    Foo.twoLevelsDeep
-                  },
-                  extract: {
-                    guard case .twoLevelsDeep = $0 else {
-                      return nil
-                    }
-                    return ()
-                  }
-                )
-              }
-              public var twoLevels: CasePaths.AnyCasePath<Foo, Double> {
-                CasePaths.AnyCasePath<Foo, Double>(
-                  embed: Foo.twoLevels,
-                  extract: {
-                    guard case let .twoLevels(v0) = $0 else {
-                      return nil
-                    }
-                    return v0
-                  }
-                )
-              }
-              #endif
-              #endif
+            #if os(macOS)
+            case .macCase:
+              return \.macCase
+            case .macSecond:
+              return \.macSecond
+            #elseif os(iOS)
+            case .iosCase:
+              return \.iosCase
+            #else
+            case .elseCase:
+              return \.elseCase
+            case .elseLast:
+              return \.elseLast
+            #endif
+            #if DEBUG
+            #if INNER
+            case .twoLevelsDeep:
+              return \.twoLevelsDeep
+            case .twoLevels:
+              return \.twoLevels
+            #endif
+            #endif
             }
           }
           public var bar: CasePaths.AnyCasePath<Foo, Void> {
