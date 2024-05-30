@@ -120,7 +120,7 @@ extension CasePathableMacro: MemberMacro {
           }
           let title = "\(decl.poundKeyword.text) \(decl.condition?.description ?? "")"
           return ["\(raw: title)"]
-            + generateDeclSyntax(from: elements, enumName: enumName)
+            + generateCaseSubscript(from: elements, enumName: enumName)
         }
         return ifClauses + ["#endif"]
       }
