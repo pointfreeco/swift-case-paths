@@ -29,3 +29,9 @@ extension Case {
     return Case<Never>(embed: absurd, extract: { (_: Value) in nil })
   }
 }
+
+extension Never.AllCasePaths: Sequence {
+  public func makeIterator() -> some IteratorProtocol<PartialCaseKeyPath<Never>> {
+    [].makeIterator()
+  }
+}

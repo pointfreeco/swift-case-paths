@@ -116,6 +116,17 @@ final class CasePathsTests: XCTestCase {
       XCTAssertEqual(Foo.allCasePaths[.baz(.string(""))], \.baz)
       XCTAssertEqual(Foo.allCasePaths[.fizzBuzz], \.fizzBuzz)
       XCTAssertEqual(Foo.allCasePaths[.foo(nil)], \.foo)
+
+      XCTAssertEqual(
+        Array(Foo.allCasePaths),
+        [
+          \.bar,
+          \.baz,
+          \.fizzBuzz,
+          \.blob,
+          \.foo,
+        ]
+      )
     }
 
     func testCasePathableModify() {

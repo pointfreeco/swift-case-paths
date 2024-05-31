@@ -47,6 +47,11 @@ extension Optional: CasePathable {
         }
       )
     }
+
+    private let _allCasePaths: [PartialCaseKeyPath<Optional>] = [
+      \.none,
+      \.some,
+    ]
   }
 
   public static var allCasePaths: AllCasePaths {
@@ -65,5 +70,11 @@ extension Case {
   ) -> Case<Member>
   where Value: CasePathable {
     self[dynamicMember: keyPath].some
+  }
+}
+
+extension Optional.AllCasePaths: Sequence {
+  public func makeIterator() -> some IteratorProtocol<PartialCaseKeyPath<Optional>> {
+    _allCasePaths.makeIterator()
   }
 }
