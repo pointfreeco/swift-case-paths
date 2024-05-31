@@ -24,7 +24,7 @@ final class CasePathableMacroTests: XCTestCase {
       }
       """
     } expansion: {
-      """
+      #"""
       enum Foo {
         case bar
         case baz(Int)
@@ -32,6 +32,18 @@ final class CasePathableMacroTests: XCTestCase {
         case fizzier(Int, buzzier: String)
 
         public struct AllCasePaths {
+          public subscript(root: Foo) -> PartialCaseKeyPath<Foo> {
+            switch root {
+            case .bar:
+              return \.bar
+            case .baz:
+              return \.baz
+            case .fizz:
+              return \.fizz
+            case .fizzier:
+              return \.fizzier
+            }
+          }
           public var bar: CasePaths.AnyCasePath<Foo, Void> {
             CasePaths.AnyCasePath<Foo, Void>(
               embed: {
@@ -84,7 +96,7 @@ final class CasePathableMacroTests: XCTestCase {
 
       extension Foo: CasePaths.CasePathable {
       }
-      """
+      """#
     }
   }
 
@@ -96,11 +108,19 @@ final class CasePathableMacroTests: XCTestCase {
       }
       """
     } expansion: {
-      """
+      #"""
       public enum Foo {
         case bar(Int), baz(String)
 
         public struct AllCasePaths {
+          public subscript(root: Foo) -> PartialCaseKeyPath<Foo> {
+            switch root {
+            case .bar:
+              return \.bar
+            case .baz:
+              return \.baz
+            }
+          }
           public var bar: CasePaths.AnyCasePath<Foo, Int> {
             CasePaths.AnyCasePath<Foo, Int>(
               embed: Foo.bar,
@@ -129,7 +149,7 @@ final class CasePathableMacroTests: XCTestCase {
 
       extension Foo: CasePaths.CasePathable {
       }
-      """
+      """#
     }
   }
 
@@ -141,11 +161,17 @@ final class CasePathableMacroTests: XCTestCase {
       }
       """
     } expansion: {
-      """
+      #"""
       public enum Foo {
         case bar(Int)
 
         public struct AllCasePaths {
+          public subscript(root: Foo) -> PartialCaseKeyPath<Foo> {
+            switch root {
+            case .bar:
+              return \.bar
+            }
+          }
           public var bar: CasePaths.AnyCasePath<Foo, Int> {
             CasePaths.AnyCasePath<Foo, Int>(
               embed: Foo.bar,
@@ -163,7 +189,7 @@ final class CasePathableMacroTests: XCTestCase {
 
       extension Foo: CasePaths.CasePathable {
       }
-      """
+      """#
     }
     assertMacro {
       """
@@ -172,11 +198,17 @@ final class CasePathableMacroTests: XCTestCase {
       }
       """
     } expansion: {
-      """
+      #"""
       package enum Foo {
         case bar(Int)
 
         public struct AllCasePaths {
+          public subscript(root: Foo) -> PartialCaseKeyPath<Foo> {
+            switch root {
+            case .bar:
+              return \.bar
+            }
+          }
           public var bar: CasePaths.AnyCasePath<Foo, Int> {
             CasePaths.AnyCasePath<Foo, Int>(
               embed: Foo.bar,
@@ -194,7 +226,7 @@ final class CasePathableMacroTests: XCTestCase {
 
       extension Foo: CasePaths.CasePathable {
       }
-      """
+      """#
     }
     assertMacro {
       """
@@ -203,11 +235,17 @@ final class CasePathableMacroTests: XCTestCase {
       }
       """
     } expansion: {
-      """
+      #"""
       private enum Foo {
         case bar(Int)
 
         public struct AllCasePaths {
+          public subscript(root: Foo) -> PartialCaseKeyPath<Foo> {
+            switch root {
+            case .bar:
+              return \.bar
+            }
+          }
           public var bar: CasePaths.AnyCasePath<Foo, Int> {
             CasePaths.AnyCasePath<Foo, Int>(
               embed: Foo.bar,
@@ -225,7 +263,7 @@ final class CasePathableMacroTests: XCTestCase {
 
       extension Foo: CasePaths.CasePathable {
       }
-      """
+      """#
     }
   }
 
@@ -276,6 +314,11 @@ final class CasePathableMacroTests: XCTestCase {
       enum Foo: CasePathable {
 
           public struct AllCasePaths {
+              public subscript(root: Foo) -> PartialCaseKeyPath<Foo> {
+                  switch root {
+
+                  }
+              }
 
           }
           public static var allCasePaths: AllCasePaths { AllCasePaths() }
@@ -292,6 +335,11 @@ final class CasePathableMacroTests: XCTestCase {
       enum Foo: CasePaths.CasePathable {
 
           public struct AllCasePaths {
+              public subscript(root: Foo) -> PartialCaseKeyPath<Foo> {
+                  switch root {
+
+                  }
+              }
 
           }
           public static var allCasePaths: AllCasePaths { AllCasePaths() }
@@ -308,11 +356,17 @@ final class CasePathableMacroTests: XCTestCase {
       }
       """
     } expansion: {
-      """
+      #"""
       enum Foo {
         case bar(_ int: Int, _ bool: Bool)
 
         public struct AllCasePaths {
+          public subscript(root: Foo) -> PartialCaseKeyPath<Foo> {
+            switch root {
+            case .bar:
+              return \.bar
+            }
+          }
           public var bar: CasePaths.AnyCasePath<Foo, (Int, Bool)> {
             CasePaths.AnyCasePath<Foo, (Int, Bool)>(
               embed: Foo.bar,
@@ -330,7 +384,7 @@ final class CasePathableMacroTests: XCTestCase {
 
       extension Foo: CasePaths.CasePathable {
       }
-      """
+      """#
     }
   }
 
@@ -342,11 +396,17 @@ final class CasePathableMacroTests: XCTestCase {
       }
       """
     } expansion: {
-      """
+      #"""
       enum Foo {
         case bar(Bar<Self>)
 
         public struct AllCasePaths {
+          public subscript(root: Foo) -> PartialCaseKeyPath<Foo> {
+            switch root {
+            case .bar:
+              return \.bar
+            }
+          }
           public var bar: CasePaths.AnyCasePath<Foo, Bar<Foo>> {
             CasePaths.AnyCasePath<Foo, Bar<Foo>>(
               embed: Foo.bar,
@@ -364,7 +424,7 @@ final class CasePathableMacroTests: XCTestCase {
 
       extension Foo: CasePaths.CasePathable {
       }
-      """
+      """#
     }
   }
 
@@ -376,11 +436,17 @@ final class CasePathableMacroTests: XCTestCase {
       }
       """
     } expansion: {
-      """
+      #"""
       enum Foo {
         case bar(int: Int = 42, bool: Bool = true)
 
         public struct AllCasePaths {
+          public subscript(root: Foo) -> PartialCaseKeyPath<Foo> {
+            switch root {
+            case .bar:
+              return \.bar
+            }
+          }
           public var bar: CasePaths.AnyCasePath<Foo, (int: Int, bool: Bool)> {
             CasePaths.AnyCasePath<Foo, (int: Int, bool: Bool)>(
               embed: Foo.bar,
@@ -398,7 +464,7 @@ final class CasePathableMacroTests: XCTestCase {
 
       extension Foo: CasePaths.CasePathable {
       }
-      """
+      """#
     }
   }
 
@@ -427,7 +493,7 @@ final class CasePathableMacroTests: XCTestCase {
       }
       """
     } expansion: {
-      """
+      #"""
       enum Foo {
         case bar
 
@@ -449,6 +515,34 @@ final class CasePathableMacroTests: XCTestCase {
         #endif
 
         public struct AllCasePaths {
+          public subscript(root: Foo) -> PartialCaseKeyPath<Foo> {
+            switch root {
+            case .bar:
+              return \.bar
+            #if os(macOS)
+            case .macCase:
+              return \.macCase
+            case .macSecond:
+              return \.macSecond
+            #elseif os(iOS)
+            case .iosCase:
+              return \.iosCase
+            #else
+            case .elseCase:
+              return \.elseCase
+            case .elseLast:
+              return \.elseLast
+            #endif
+            #if DEBUG
+            #if INNER
+            case .twoLevelsDeep:
+              return \.twoLevelsDeep
+            case .twoLevels:
+              return \.twoLevels
+            #endif
+            #endif
+            }
+          }
           public var bar: CasePaths.AnyCasePath<Foo, Void> {
             CasePaths.AnyCasePath<Foo, Void>(
               embed: {
@@ -561,7 +655,7 @@ final class CasePathableMacroTests: XCTestCase {
 
       extension Foo: CasePaths.CasePathable {
       }
-      """
+      """#
     }
   }
 
@@ -575,12 +669,18 @@ final class CasePathableMacroTests: XCTestCase {
       }
       """
     } expansion: {
-      """
+      #"""
       @available(iOS, unavailable)
       enum Foo {
         case bar
 
         public struct AllCasePaths {
+          public subscript(root: Foo) -> PartialCaseKeyPath<Foo> {
+            switch root {
+            case .bar:
+              return \.bar
+            }
+          }
           public var bar: CasePaths.AnyCasePath<Foo, Void> {
             CasePaths.AnyCasePath<Foo, Void>(
               embed: {
@@ -600,7 +700,7 @@ final class CasePathableMacroTests: XCTestCase {
 
       @available(iOS, unavailable) extension Foo: CasePaths.CasePathable {
       }
-      """
+      """#
     }
   }
 
@@ -627,7 +727,7 @@ final class CasePathableMacroTests: XCTestCase {
       }
       """
     } expansion: {
-      """
+      #"""
       enum Foo {
 
         /// The bar case.
@@ -646,6 +746,18 @@ final class CasePathableMacroTests: XCTestCase {
         case fizz, buzz
 
         public struct AllCasePaths {
+          public subscript(root: Foo) -> PartialCaseKeyPath<Foo> {
+            switch root {
+            case .bar:
+              return \.bar
+            case .baz:
+              return \.baz
+            case .fizz:
+              return \.fizz
+            case .buzz:
+              return \.buzz
+            }
+          }
           /// The bar case.
           public var bar: CasePaths.AnyCasePath<Foo, Void> {
             CasePaths.AnyCasePath<Foo, Void>(
@@ -718,7 +830,7 @@ final class CasePathableMacroTests: XCTestCase {
 
       extension Foo: CasePaths.CasePathable {
       }
-      """
+      """#
     }
   }
 
@@ -733,13 +845,19 @@ final class CasePathableMacroTests: XCTestCase {
       }
       """
     } expansion: {
-      """
+      #"""
       enum Foo {
         // baz
       // case foo
         case bar
 
         public struct AllCasePaths {
+          public subscript(root: Foo) -> PartialCaseKeyPath<Foo> {
+            switch root {
+            case .bar:
+              return \.bar
+            }
+          }
             // baz
           // case foo
           public var bar: CasePaths.AnyCasePath<Foo, Void> {
@@ -761,7 +879,7 @@ final class CasePathableMacroTests: XCTestCase {
 
       extension Foo: CasePaths.CasePathable {
       }
-      """
+      """#
     }
   }
 }
