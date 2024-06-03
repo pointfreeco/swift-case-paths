@@ -1,7 +1,7 @@
 import CasePaths
 import XCTest
 
-protocol TestProtocol {}
+protocol TestProtocol: Sendable {}
 extension Int: TestProtocol {}
 protocol TestClassProtocol: AnyObject {}
 
@@ -465,7 +465,7 @@ final class DeprecatedTests: XCTestCase {
   }
 
   func testContravariantEmbed() {
-    enum Enum {
+    enum Enum: Sendable {
       // associated value type is TestProtocol existential
       case directExistential(TestProtocol)
 
