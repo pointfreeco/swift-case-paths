@@ -348,7 +348,7 @@ final class CasePathableMacroTests: XCTestCase {
               }
 
               public func makeIterator() -> some IteratorProtocol<PartialCaseKeyPath<Foo>> {
-                  var allCasePaths: [PartialCaseKeyPath<Foo>] = []
+                  let allCasePaths: [PartialCaseKeyPath<Foo>] = []
                   return allCasePaths.makeIterator()
               }
           }
@@ -371,7 +371,7 @@ final class CasePathableMacroTests: XCTestCase {
               }
 
               public func makeIterator() -> some IteratorProtocol<PartialCaseKeyPath<Foo>> {
-                  var allCasePaths: [PartialCaseKeyPath<Foo>] = []
+                  let allCasePaths: [PartialCaseKeyPath<Foo>] = []
                   return allCasePaths.makeIterator()
               }
           }

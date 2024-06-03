@@ -106,7 +106,7 @@ extension CasePathableMacro: MemberMacro {
       }
       \(raw: casePaths.map(\.description).joined(separator: "\n"))
       public func makeIterator() -> some IteratorProtocol<PartialCaseKeyPath<\(enumName)>> {
-      var allCasePaths: [PartialCaseKeyPath<\(enumName)>] = []\
+      \(raw: allCases.isEmpty ? "let" : "var") allCasePaths: [PartialCaseKeyPath<\(enumName)>] = []\
       \(raw: allCases.map { "\n\($0.description)" }.joined())
       return allCasePaths.makeIterator()
       }
