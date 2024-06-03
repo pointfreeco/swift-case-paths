@@ -95,7 +95,7 @@ extension CasePathableMacro: MemberMacro {
         """
     let casePaths = generateDeclSyntax(from: memberBlock.members, enumName: enumName)
     let allCases = generateCases(from: memberBlock.members, enumName: enumName) {
-      "_allCasePaths.append(\\.\($0.name))"
+      "allCasePaths.append(\\.\($0.name))"
     }
 
     return [
@@ -105,12 +105,10 @@ extension CasePathableMacro: MemberMacro {
       \(rootSwitch)
       }
       \(raw: casePaths.map(\.description).joined(separator: "\n"))
-      private var _allCasePaths: [PartialCaseKeyPath<\(enumName)>]
-      fileprivate init() {
-      _allCasePaths = []\(raw: allCases.map { "\n\($0.description)" }.joined())
-      }
       public func makeIterator() -> some IteratorProtocol<PartialCaseKeyPath<\(enumName)>> {
-      _allCasePaths.makeIterator()
+      var allCasePaths: [PartialCaseKeyPath<\(enumName)>] = []\
+      \(raw: allCases.map { "\n\($0.description)" }.joined())
+      return allCasePaths.makeIterator()
       }
       }
       public static var allCasePaths: AllCasePaths { AllCasePaths() }

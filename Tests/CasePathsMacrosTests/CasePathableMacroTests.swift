@@ -90,16 +90,13 @@ final class CasePathableMacroTests: XCTestCase {
               }
             )
           }
-          private var _allCasePaths: [PartialCaseKeyPath<Foo>]
-          fileprivate init() {
-            _allCasePaths = []
-            _allCasePaths.append(\.bar)
-            _allCasePaths.append(\.baz)
-            _allCasePaths.append(\.fizz)
-            _allCasePaths.append(\.fizzier)
-          }
           public func makeIterator() -> some IteratorProtocol<PartialCaseKeyPath<Foo>> {
-            _allCasePaths.makeIterator()
+            var allCasePaths: [PartialCaseKeyPath<Foo>] = []
+            allCasePaths.append(\.bar)
+            allCasePaths.append(\.baz)
+            allCasePaths.append(\.fizz)
+            allCasePaths.append(\.fizzier)
+            return allCasePaths.makeIterator()
           }
         }
         public static var allCasePaths: AllCasePaths { AllCasePaths() }
@@ -154,14 +151,11 @@ final class CasePathableMacroTests: XCTestCase {
               }
             )
           }
-          private var _allCasePaths: [PartialCaseKeyPath<Foo>]
-          fileprivate init() {
-            _allCasePaths = []
-            _allCasePaths.append(\.bar)
-            _allCasePaths.append(\.baz)
-          }
           public func makeIterator() -> some IteratorProtocol<PartialCaseKeyPath<Foo>> {
-            _allCasePaths.makeIterator()
+            var allCasePaths: [PartialCaseKeyPath<Foo>] = []
+            allCasePaths.append(\.bar)
+            allCasePaths.append(\.baz)
+            return allCasePaths.makeIterator()
           }
         }
         public static var allCasePaths: AllCasePaths { AllCasePaths() }
@@ -203,13 +197,10 @@ final class CasePathableMacroTests: XCTestCase {
               }
             )
           }
-          private var _allCasePaths: [PartialCaseKeyPath<Foo>]
-          fileprivate init() {
-            _allCasePaths = []
-            _allCasePaths.append(\.bar)
-          }
           public func makeIterator() -> some IteratorProtocol<PartialCaseKeyPath<Foo>> {
-            _allCasePaths.makeIterator()
+            var allCasePaths: [PartialCaseKeyPath<Foo>] = []
+            allCasePaths.append(\.bar)
+            return allCasePaths.makeIterator()
           }
         }
         public static var allCasePaths: AllCasePaths { AllCasePaths() }
@@ -248,13 +239,10 @@ final class CasePathableMacroTests: XCTestCase {
               }
             )
           }
-          private var _allCasePaths: [PartialCaseKeyPath<Foo>]
-          fileprivate init() {
-            _allCasePaths = []
-            _allCasePaths.append(\.bar)
-          }
           public func makeIterator() -> some IteratorProtocol<PartialCaseKeyPath<Foo>> {
-            _allCasePaths.makeIterator()
+            var allCasePaths: [PartialCaseKeyPath<Foo>] = []
+            allCasePaths.append(\.bar)
+            return allCasePaths.makeIterator()
           }
         }
         public static var allCasePaths: AllCasePaths { AllCasePaths() }
@@ -293,13 +281,10 @@ final class CasePathableMacroTests: XCTestCase {
               }
             )
           }
-          private var _allCasePaths: [PartialCaseKeyPath<Foo>]
-          fileprivate init() {
-            _allCasePaths = []
-            _allCasePaths.append(\.bar)
-          }
           public func makeIterator() -> some IteratorProtocol<PartialCaseKeyPath<Foo>> {
-            _allCasePaths.makeIterator()
+            var allCasePaths: [PartialCaseKeyPath<Foo>] = []
+            allCasePaths.append(\.bar)
+            return allCasePaths.makeIterator()
           }
         }
         public static var allCasePaths: AllCasePaths { AllCasePaths() }
@@ -362,12 +347,9 @@ final class CasePathableMacroTests: XCTestCase {
                   \.never
               }
 
-              private var _allCasePaths: [PartialCaseKeyPath<Foo>]
-              fileprivate init() {
-                  _allCasePaths = []
-              }
               public func makeIterator() -> some IteratorProtocol<PartialCaseKeyPath<Foo>> {
-                  _allCasePaths.makeIterator()
+                  var allCasePaths: [PartialCaseKeyPath<Foo>] = []
+                  return allCasePaths.makeIterator()
               }
           }
           public static var allCasePaths: AllCasePaths { AllCasePaths() }
@@ -388,12 +370,9 @@ final class CasePathableMacroTests: XCTestCase {
                   \.never
               }
 
-              private var _allCasePaths: [PartialCaseKeyPath<Foo>]
-              fileprivate init() {
-                  _allCasePaths = []
-              }
               public func makeIterator() -> some IteratorProtocol<PartialCaseKeyPath<Foo>> {
-                  _allCasePaths.makeIterator()
+                  var allCasePaths: [PartialCaseKeyPath<Foo>] = []
+                  return allCasePaths.makeIterator()
               }
           }
           public static var allCasePaths: AllCasePaths { AllCasePaths() }
@@ -432,13 +411,10 @@ final class CasePathableMacroTests: XCTestCase {
               }
             )
           }
-          private var _allCasePaths: [PartialCaseKeyPath<Foo>]
-          fileprivate init() {
-            _allCasePaths = []
-            _allCasePaths.append(\.bar)
-          }
           public func makeIterator() -> some IteratorProtocol<PartialCaseKeyPath<Foo>> {
-            _allCasePaths.makeIterator()
+            var allCasePaths: [PartialCaseKeyPath<Foo>] = []
+            allCasePaths.append(\.bar)
+            return allCasePaths.makeIterator()
           }
         }
         public static var allCasePaths: AllCasePaths { AllCasePaths() }
@@ -480,13 +456,10 @@ final class CasePathableMacroTests: XCTestCase {
               }
             )
           }
-          private var _allCasePaths: [PartialCaseKeyPath<Foo>]
-          fileprivate init() {
-            _allCasePaths = []
-            _allCasePaths.append(\.bar)
-          }
           public func makeIterator() -> some IteratorProtocol<PartialCaseKeyPath<Foo>> {
-            _allCasePaths.makeIterator()
+            var allCasePaths: [PartialCaseKeyPath<Foo>] = []
+            allCasePaths.append(\.bar)
+            return allCasePaths.makeIterator()
           }
         }
         public static var allCasePaths: AllCasePaths { AllCasePaths() }
@@ -528,13 +501,10 @@ final class CasePathableMacroTests: XCTestCase {
               }
             )
           }
-          private var _allCasePaths: [PartialCaseKeyPath<Foo>]
-          fileprivate init() {
-            _allCasePaths = []
-            _allCasePaths.append(\.bar)
-          }
           public func makeIterator() -> some IteratorProtocol<PartialCaseKeyPath<Foo>> {
-            _allCasePaths.makeIterator()
+            var allCasePaths: [PartialCaseKeyPath<Foo>] = []
+            allCasePaths.append(\.bar)
+            return allCasePaths.makeIterator()
           }
         }
         public static var allCasePaths: AllCasePaths { AllCasePaths() }
@@ -727,28 +697,25 @@ final class CasePathableMacroTests: XCTestCase {
           }
           #endif
           #endif
-          private var _allCasePaths: [PartialCaseKeyPath<Foo>]
-          fileprivate init() {
-            _allCasePaths = []
-            _allCasePaths.append(\.bar)
+          public func makeIterator() -> some IteratorProtocol<PartialCaseKeyPath<Foo>> {
+            var allCasePaths: [PartialCaseKeyPath<Foo>] = []
+            allCasePaths.append(\.bar)
             #if os(macOS)
-            _allCasePaths.append(\.macCase)
-            _allCasePaths.append(\.macSecond)
+            allCasePaths.append(\.macCase)
+            allCasePaths.append(\.macSecond)
             #elseif os(iOS)
-            _allCasePaths.append(\.iosCase)
+            allCasePaths.append(\.iosCase)
             #else
-            _allCasePaths.append(\.elseCase)
-            _allCasePaths.append(\.elseLast)
+            allCasePaths.append(\.elseCase)
+            allCasePaths.append(\.elseLast)
             #endif
             #if DEBUG
             #if INNER
-            _allCasePaths.append(\.twoLevelsDeep)
-            _allCasePaths.append(\.twoLevels)
+            allCasePaths.append(\.twoLevelsDeep)
+            allCasePaths.append(\.twoLevels)
             #endif
             #endif
-          }
-          public func makeIterator() -> some IteratorProtocol<PartialCaseKeyPath<Foo>> {
-            _allCasePaths.makeIterator()
+            return allCasePaths.makeIterator()
           }
         }
         public static var allCasePaths: AllCasePaths { AllCasePaths() }
@@ -795,13 +762,10 @@ final class CasePathableMacroTests: XCTestCase {
               }
             )
           }
-          private var _allCasePaths: [PartialCaseKeyPath<Foo>]
-          fileprivate init() {
-            _allCasePaths = []
-            _allCasePaths.append(\.bar)
-          }
           public func makeIterator() -> some IteratorProtocol<PartialCaseKeyPath<Foo>> {
-            _allCasePaths.makeIterator()
+            var allCasePaths: [PartialCaseKeyPath<Foo>] = []
+            allCasePaths.append(\.bar)
+            return allCasePaths.makeIterator()
           }
         }
         public static var allCasePaths: AllCasePaths { AllCasePaths() }
@@ -933,16 +897,13 @@ final class CasePathableMacroTests: XCTestCase {
               }
             )
           }
-          private var _allCasePaths: [PartialCaseKeyPath<Foo>]
-          fileprivate init() {
-            _allCasePaths = []
-            _allCasePaths.append(\.bar)
-            _allCasePaths.append(\.baz)
-            _allCasePaths.append(\.fizz)
-            _allCasePaths.append(\.buzz)
-          }
           public func makeIterator() -> some IteratorProtocol<PartialCaseKeyPath<Foo>> {
-            _allCasePaths.makeIterator()
+            var allCasePaths: [PartialCaseKeyPath<Foo>] = []
+            allCasePaths.append(\.bar)
+            allCasePaths.append(\.baz)
+            allCasePaths.append(\.fizz)
+            allCasePaths.append(\.buzz)
+            return allCasePaths.makeIterator()
           }
         }
         public static var allCasePaths: AllCasePaths { AllCasePaths() }
@@ -993,13 +954,10 @@ final class CasePathableMacroTests: XCTestCase {
               }
             )
           }
-          private var _allCasePaths: [PartialCaseKeyPath<Foo>]
-          fileprivate init() {
-            _allCasePaths = []
-            _allCasePaths.append(\.bar)
-          }
           public func makeIterator() -> some IteratorProtocol<PartialCaseKeyPath<Foo>> {
-            _allCasePaths.makeIterator()
+            var allCasePaths: [PartialCaseKeyPath<Foo>] = []
+            allCasePaths.append(\.bar)
+            return allCasePaths.makeIterator()
           }
         }
         public static var allCasePaths: AllCasePaths { AllCasePaths() }
