@@ -84,7 +84,7 @@ extension CasePathableMacro: MemberMacro {
     let rewriter = SelfRewriter(selfEquivalent: enumName)
     let memberBlock = rewriter.rewrite(enumDecl.memberBlock).cast(MemberBlockSyntax.self)
     let rootSwitchCases = generateCases(from: memberBlock.members, enumName: enumName) {
-      "case .\($0.name): return \\.\($0.name)"
+      "case .\($0.name): return \\.\(raw: $0.name.text)"
     }
     let rootSwitch: DeclSyntax =
       rootSwitchCases.isEmpty

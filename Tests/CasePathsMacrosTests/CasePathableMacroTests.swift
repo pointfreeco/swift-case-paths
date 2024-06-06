@@ -968,4 +968,102 @@ final class CasePathableMacroTests: XCTestCase {
       """#
     }
   }
+
+  func testComments() {
+    assertMacro {
+      """
+      @CasePathable enum Foo {
+        // Comment above case
+        case bar
+        /*Comment before case*/ case baz(Int)
+        case fizz(buzz: String)  // Comment on case
+        case fizzier/*Comment in case*/(Int, buzzier: String)
+      }
+      """
+    } expansion: {
+      #"""
+      enum Foo {
+        // Comment above case
+        case bar
+        /*Comment before case*/ case baz(Int)
+        case fizz(buzz: String)  // Comment on case
+        case fizzier/*Comment in case*/(Int, buzzier: String)
+
+        public struct AllCasePaths: Sequence {
+          public subscript(root: Foo) -> PartialCaseKeyPath<Foo> {
+            switch root {
+            case .bar:
+              return \.bar
+            case .baz:
+              return \.baz
+            case .fizz:
+              return \.fizz
+            case .fizzier/*Comment in case*/:
+              return \.fizzier
+            }
+          }
+          // Comment above case
+          public var bar: CasePaths.AnyCasePath<Foo, Void> {
+            CasePaths.AnyCasePath<Foo, Void>(
+              embed: {
+                Foo.bar
+              },
+              extract: {
+                guard case .bar = $0 else {
+                  return nil
+                }
+                return ()
+              }
+            )
+          }
+          /*Comment before case*/public var baz: CasePaths.AnyCasePath<Foo, Int> {
+            CasePaths.AnyCasePath<Foo, Int>(
+              embed: Foo.baz,
+              extract: {
+                guard case let .baz(v0) = $0 else {
+                  return nil
+                }
+                return v0
+              }
+            )
+          }
+          public var fizz: CasePaths.AnyCasePath<Foo, String> {
+            CasePaths.AnyCasePath<Foo, String>(
+              embed: Foo.fizz,
+              extract: {
+                guard case let .fizz(v0) = $0 else {
+                  return nil
+                }
+                return v0
+              }
+            )
+          }
+          public var fizzier: CasePaths.AnyCasePath<Foo, (Int, buzzier: String)> {
+            CasePaths.AnyCasePath<Foo, (Int, buzzier: String)>(
+              embed: Foo.fizzier,
+              extract: {
+                guard case let .fizzier(v0, v1) = $0 else {
+                  return nil
+                }
+                return (v0, v1)
+              }
+            )
+          }
+          public func makeIterator() -> IndexingIterator<[PartialCaseKeyPath<Foo>]> {
+            var allCasePaths: [PartialCaseKeyPath<Foo>] = []
+            allCasePaths.append(\.bar)
+            allCasePaths.append(\.baz)
+            allCasePaths.append(\.fizz)
+            allCasePaths.append(\.fizzier/*Comment in case*/)
+            return allCasePaths.makeIterator()
+          }
+        }
+        public static var allCasePaths: AllCasePaths { AllCasePaths() }
+      }
+
+      extension Foo: CasePaths.CasePathable {
+      }
+      """#
+    }
+  }
 }
