@@ -86,13 +86,14 @@ extension CasePathableMacro: MemberMacro {
     let rootSwitchCases = generateCases(from: memberBlock.members, enumName: enumName) {
       "case .\($0.name): return \\.\($0.name)"
     }
-    let rootSwitch: DeclSyntax = rootSwitchCases.isEmpty
+    let rootSwitch: DeclSyntax =
+      rootSwitchCases.isEmpty
       ? "\\.never"
       : """
-        switch root {
-        \(raw: rootSwitchCases.map(\.description).joined(separator: "\n"))
-        }
-        """
+      switch root {
+      \(raw: rootSwitchCases.map(\.description).joined(separator: "\n"))
+      }
+      """
     let casePaths = generateDeclSyntax(from: memberBlock.members, enumName: enumName)
     let allCases = generateCases(from: memberBlock.members, enumName: enumName) {
       "allCasePaths.append(\\.\($0.name))"
