@@ -31,7 +31,7 @@ final class CasePathableMacroTests: XCTestCase {
         case fizz(buzz: String)
         case fizzier(Int, buzzier: String)
 
-        public struct AllCasePaths {
+        public struct AllCasePaths: Sequence {
           public subscript(root: Foo) -> PartialCaseKeyPath<Foo> {
             switch root {
             case .bar:
@@ -90,6 +90,14 @@ final class CasePathableMacroTests: XCTestCase {
               }
             )
           }
+          public func makeIterator() -> IndexingIterator<[PartialCaseKeyPath<Foo>]> {
+            var allCasePaths: [PartialCaseKeyPath<Foo>] = []
+            allCasePaths.append(\.bar)
+            allCasePaths.append(\.baz)
+            allCasePaths.append(\.fizz)
+            allCasePaths.append(\.fizzier)
+            return allCasePaths.makeIterator()
+          }
         }
         public static var allCasePaths: AllCasePaths { AllCasePaths() }
       }
@@ -112,7 +120,7 @@ final class CasePathableMacroTests: XCTestCase {
       public enum Foo {
         case bar(Int), baz(String)
 
-        public struct AllCasePaths {
+        public struct AllCasePaths: Sequence {
           public subscript(root: Foo) -> PartialCaseKeyPath<Foo> {
             switch root {
             case .bar:
@@ -143,6 +151,12 @@ final class CasePathableMacroTests: XCTestCase {
               }
             )
           }
+          public func makeIterator() -> IndexingIterator<[PartialCaseKeyPath<Foo>]> {
+            var allCasePaths: [PartialCaseKeyPath<Foo>] = []
+            allCasePaths.append(\.bar)
+            allCasePaths.append(\.baz)
+            return allCasePaths.makeIterator()
+          }
         }
         public static var allCasePaths: AllCasePaths { AllCasePaths() }
       }
@@ -165,7 +179,7 @@ final class CasePathableMacroTests: XCTestCase {
       public enum Foo {
         case bar(Int)
 
-        public struct AllCasePaths {
+        public struct AllCasePaths: Sequence {
           public subscript(root: Foo) -> PartialCaseKeyPath<Foo> {
             switch root {
             case .bar:
@@ -182,6 +196,11 @@ final class CasePathableMacroTests: XCTestCase {
                 return v0
               }
             )
+          }
+          public func makeIterator() -> IndexingIterator<[PartialCaseKeyPath<Foo>]> {
+            var allCasePaths: [PartialCaseKeyPath<Foo>] = []
+            allCasePaths.append(\.bar)
+            return allCasePaths.makeIterator()
           }
         }
         public static var allCasePaths: AllCasePaths { AllCasePaths() }
@@ -202,7 +221,7 @@ final class CasePathableMacroTests: XCTestCase {
       package enum Foo {
         case bar(Int)
 
-        public struct AllCasePaths {
+        public struct AllCasePaths: Sequence {
           public subscript(root: Foo) -> PartialCaseKeyPath<Foo> {
             switch root {
             case .bar:
@@ -219,6 +238,11 @@ final class CasePathableMacroTests: XCTestCase {
                 return v0
               }
             )
+          }
+          public func makeIterator() -> IndexingIterator<[PartialCaseKeyPath<Foo>]> {
+            var allCasePaths: [PartialCaseKeyPath<Foo>] = []
+            allCasePaths.append(\.bar)
+            return allCasePaths.makeIterator()
           }
         }
         public static var allCasePaths: AllCasePaths { AllCasePaths() }
@@ -239,7 +263,7 @@ final class CasePathableMacroTests: XCTestCase {
       private enum Foo {
         case bar(Int)
 
-        public struct AllCasePaths {
+        public struct AllCasePaths: Sequence {
           public subscript(root: Foo) -> PartialCaseKeyPath<Foo> {
             switch root {
             case .bar:
@@ -256,6 +280,11 @@ final class CasePathableMacroTests: XCTestCase {
                 return v0
               }
             )
+          }
+          public func makeIterator() -> IndexingIterator<[PartialCaseKeyPath<Foo>]> {
+            var allCasePaths: [PartialCaseKeyPath<Foo>] = []
+            allCasePaths.append(\.bar)
+            return allCasePaths.makeIterator()
           }
         }
         public static var allCasePaths: AllCasePaths { AllCasePaths() }
@@ -310,20 +339,22 @@ final class CasePathableMacroTests: XCTestCase {
       }
       """
     } expansion: {
-      """
+      #"""
       enum Foo: CasePathable {
 
-          public struct AllCasePaths {
+          public struct AllCasePaths: Sequence {
               public subscript(root: Foo) -> PartialCaseKeyPath<Foo> {
-                  switch root {
-
-                  }
+                  \.never
               }
 
+              public func makeIterator() -> IndexingIterator<[PartialCaseKeyPath<Foo>]> {
+                  let allCasePaths: [PartialCaseKeyPath<Foo>] = []
+                  return allCasePaths.makeIterator()
+              }
           }
           public static var allCasePaths: AllCasePaths { AllCasePaths() }
       }
-      """
+      """#
     }
     assertMacro {
       """
@@ -331,20 +362,22 @@ final class CasePathableMacroTests: XCTestCase {
       }
       """
     } expansion: {
-      """
+      #"""
       enum Foo: CasePaths.CasePathable {
 
-          public struct AllCasePaths {
+          public struct AllCasePaths: Sequence {
               public subscript(root: Foo) -> PartialCaseKeyPath<Foo> {
-                  switch root {
-
-                  }
+                  \.never
               }
 
+              public func makeIterator() -> IndexingIterator<[PartialCaseKeyPath<Foo>]> {
+                  let allCasePaths: [PartialCaseKeyPath<Foo>] = []
+                  return allCasePaths.makeIterator()
+              }
           }
           public static var allCasePaths: AllCasePaths { AllCasePaths() }
       }
-      """
+      """#
     }
   }
 
@@ -360,7 +393,7 @@ final class CasePathableMacroTests: XCTestCase {
       enum Foo {
         case bar(_ int: Int, _ bool: Bool)
 
-        public struct AllCasePaths {
+        public struct AllCasePaths: Sequence {
           public subscript(root: Foo) -> PartialCaseKeyPath<Foo> {
             switch root {
             case .bar:
@@ -377,6 +410,11 @@ final class CasePathableMacroTests: XCTestCase {
                 return (v0, v1)
               }
             )
+          }
+          public func makeIterator() -> IndexingIterator<[PartialCaseKeyPath<Foo>]> {
+            var allCasePaths: [PartialCaseKeyPath<Foo>] = []
+            allCasePaths.append(\.bar)
+            return allCasePaths.makeIterator()
           }
         }
         public static var allCasePaths: AllCasePaths { AllCasePaths() }
@@ -400,7 +438,7 @@ final class CasePathableMacroTests: XCTestCase {
       enum Foo {
         case bar(Bar<Self>)
 
-        public struct AllCasePaths {
+        public struct AllCasePaths: Sequence {
           public subscript(root: Foo) -> PartialCaseKeyPath<Foo> {
             switch root {
             case .bar:
@@ -417,6 +455,11 @@ final class CasePathableMacroTests: XCTestCase {
                 return v0
               }
             )
+          }
+          public func makeIterator() -> IndexingIterator<[PartialCaseKeyPath<Foo>]> {
+            var allCasePaths: [PartialCaseKeyPath<Foo>] = []
+            allCasePaths.append(\.bar)
+            return allCasePaths.makeIterator()
           }
         }
         public static var allCasePaths: AllCasePaths { AllCasePaths() }
@@ -440,7 +483,7 @@ final class CasePathableMacroTests: XCTestCase {
       enum Foo {
         case bar(int: Int = 42, bool: Bool = true)
 
-        public struct AllCasePaths {
+        public struct AllCasePaths: Sequence {
           public subscript(root: Foo) -> PartialCaseKeyPath<Foo> {
             switch root {
             case .bar:
@@ -457,6 +500,11 @@ final class CasePathableMacroTests: XCTestCase {
                 return (v0, v1)
               }
             )
+          }
+          public func makeIterator() -> IndexingIterator<[PartialCaseKeyPath<Foo>]> {
+            var allCasePaths: [PartialCaseKeyPath<Foo>] = []
+            allCasePaths.append(\.bar)
+            return allCasePaths.makeIterator()
           }
         }
         public static var allCasePaths: AllCasePaths { AllCasePaths() }
@@ -514,7 +562,7 @@ final class CasePathableMacroTests: XCTestCase {
         #endif
         #endif
 
-        public struct AllCasePaths {
+        public struct AllCasePaths: Sequence {
           public subscript(root: Foo) -> PartialCaseKeyPath<Foo> {
             switch root {
             case .bar:
@@ -649,6 +697,26 @@ final class CasePathableMacroTests: XCTestCase {
           }
           #endif
           #endif
+          public func makeIterator() -> IndexingIterator<[PartialCaseKeyPath<Foo>]> {
+            var allCasePaths: [PartialCaseKeyPath<Foo>] = []
+            allCasePaths.append(\.bar)
+            #if os(macOS)
+            allCasePaths.append(\.macCase)
+            allCasePaths.append(\.macSecond)
+            #elseif os(iOS)
+            allCasePaths.append(\.iosCase)
+            #else
+            allCasePaths.append(\.elseCase)
+            allCasePaths.append(\.elseLast)
+            #endif
+            #if DEBUG
+            #if INNER
+            allCasePaths.append(\.twoLevelsDeep)
+            allCasePaths.append(\.twoLevels)
+            #endif
+            #endif
+            return allCasePaths.makeIterator()
+          }
         }
         public static var allCasePaths: AllCasePaths { AllCasePaths() }
       }
@@ -674,7 +742,7 @@ final class CasePathableMacroTests: XCTestCase {
       enum Foo {
         case bar
 
-        public struct AllCasePaths {
+        public struct AllCasePaths: Sequence {
           public subscript(root: Foo) -> PartialCaseKeyPath<Foo> {
             switch root {
             case .bar:
@@ -693,6 +761,11 @@ final class CasePathableMacroTests: XCTestCase {
                 return ()
               }
             )
+          }
+          public func makeIterator() -> IndexingIterator<[PartialCaseKeyPath<Foo>]> {
+            var allCasePaths: [PartialCaseKeyPath<Foo>] = []
+            allCasePaths.append(\.bar)
+            return allCasePaths.makeIterator()
           }
         }
         public static var allCasePaths: AllCasePaths { AllCasePaths() }
@@ -745,7 +818,7 @@ final class CasePathableMacroTests: XCTestCase {
          */
         case fizz, buzz
 
-        public struct AllCasePaths {
+        public struct AllCasePaths: Sequence {
           public subscript(root: Foo) -> PartialCaseKeyPath<Foo> {
             switch root {
             case .bar:
@@ -824,6 +897,14 @@ final class CasePathableMacroTests: XCTestCase {
               }
             )
           }
+          public func makeIterator() -> IndexingIterator<[PartialCaseKeyPath<Foo>]> {
+            var allCasePaths: [PartialCaseKeyPath<Foo>] = []
+            allCasePaths.append(\.bar)
+            allCasePaths.append(\.baz)
+            allCasePaths.append(\.fizz)
+            allCasePaths.append(\.buzz)
+            return allCasePaths.makeIterator()
+          }
         }
         public static var allCasePaths: AllCasePaths { AllCasePaths() }
       }
@@ -851,7 +932,7 @@ final class CasePathableMacroTests: XCTestCase {
       // case foo
         case bar
 
-        public struct AllCasePaths {
+        public struct AllCasePaths: Sequence {
           public subscript(root: Foo) -> PartialCaseKeyPath<Foo> {
             switch root {
             case .bar:
@@ -872,6 +953,11 @@ final class CasePathableMacroTests: XCTestCase {
                 return ()
               }
             )
+          }
+          public func makeIterator() -> IndexingIterator<[PartialCaseKeyPath<Foo>]> {
+            var allCasePaths: [PartialCaseKeyPath<Foo>] = []
+            allCasePaths.append(\.bar)
+            return allCasePaths.makeIterator()
           }
         }
         public static var allCasePaths: AllCasePaths { AllCasePaths() }

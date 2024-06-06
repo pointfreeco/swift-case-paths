@@ -29,9 +29,20 @@ extension Result: CasePathable {
         }
       )
     }
+
+    private let _allCasePaths: [PartialCaseKeyPath<Result>] = [
+      \.success,
+      \.failure,
+    ]
   }
 
   public static var allCasePaths: AllCasePaths {
     AllCasePaths()
+  }
+}
+
+extension Result.AllCasePaths: Sequence {
+  public func makeIterator() -> some IteratorProtocol<PartialCaseKeyPath<Result>> {
+    _allCasePaths.makeIterator()
   }
 }

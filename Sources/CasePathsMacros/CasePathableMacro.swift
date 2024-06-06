@@ -83,35 +83,47 @@ extension CasePathableMacro: MemberMacro {
 
     let rewriter = SelfRewriter(selfEquivalent: enumName)
     let memberBlock = rewriter.rewrite(enumDecl.memberBlock).cast(MemberBlockSyntax.self)
-
-    let caseSubscript = generateCaseSubscript(from: memberBlock.members, enumName: enumName)
-
+    let rootSwitchCases = generateCases(from: memberBlock.members, enumName: enumName) {
+      "case .\($0.name): return \\.\($0.name)"
+    }
+    let rootSwitch: DeclSyntax = rootSwitchCases.isEmpty
+      ? "\\.never"
+      : """
+        switch root {
+        \(raw: rootSwitchCases.map(\.description).joined(separator: "\n"))
+        }
+        """
     let casePaths = generateDeclSyntax(from: memberBlock.members, enumName: enumName)
+    let allCases = generateCases(from: memberBlock.members, enumName: enumName) {
+      "allCasePaths.append(\\.\($0.name))"
+    }
 
     return [
       """
-      public struct AllCasePaths {
+      public struct AllCasePaths: Sequence {
       public subscript(root: \(enumName)) -> PartialCaseKeyPath<\(enumName)> {
-      switch root {
-      \(raw: caseSubscript.map(\.description).joined(separator: "\n"))
-      }
+      \(rootSwitch)
       }
       \(raw: casePaths.map(\.description).joined(separator: "\n"))
+      public func makeIterator() -> IndexingIterator<[PartialCaseKeyPath<\(enumName)>]> {
+      \(raw: allCases.isEmpty ? "let" : "var") allCasePaths: [PartialCaseKeyPath<\(enumName)>] = []\
+      \(raw: allCases.map { "\n\($0.description)" }.joined())
+      return allCasePaths.makeIterator()
+      }
       }
       public static var allCasePaths: AllCasePaths { AllCasePaths() }
       """
     ]
   }
 
-  static func generateCaseSubscript(
+  static func generateCases(
     from elements: MemberBlockItemListSyntax,
-    enumName: TokenSyntax
+    enumName: TokenSyntax,
+    body: (EnumCaseElementSyntax) -> DeclSyntax
   ) -> [DeclSyntax] {
     elements.flatMap {
       if let decl = $0.decl.as(EnumCaseDeclSyntax.self) {
-        return decl.elements.map {
-          "case .\($0.name): return \\.\($0.name)" as DeclSyntax
-        }
+        return decl.elements.map(body)
       }
       if let ifConfigDecl = $0.decl.as(IfConfigDeclSyntax.self) {
         let ifClauses = ifConfigDecl.clauses.flatMap { decl -> [DeclSyntax] in
@@ -120,7 +132,7 @@ extension CasePathableMacro: MemberMacro {
           }
           let title = "\(decl.poundKeyword.text) \(decl.condition?.description ?? "")"
           return ["\(raw: title)"]
-            + generateCaseSubscript(from: elements, enumName: enumName)
+            + generateCases(from: elements, enumName: enumName, body: body)
         }
         return ifClauses + ["#endif"]
       }
