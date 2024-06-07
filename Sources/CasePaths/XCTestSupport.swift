@@ -201,7 +201,8 @@ private func _XCTModify<Enum, Case>(
     XCTFail(
       """
       XCTModify failed: expected "\(typeName(Case.self))" value to be modified but it was unchanged.
-      """)
+      """
+    )
   }
 
   `enum` = casePath.embed(value)

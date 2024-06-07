@@ -348,7 +348,6 @@ final class CasePathableMacroTests: XCTestCase {
 
           public struct AllCasePaths: Sequence {
               public subscript(root: Foo) -> PartialCaseKeyPath<Foo> {
-
                   return \.never
               }
 
@@ -372,7 +371,6 @@ final class CasePathableMacroTests: XCTestCase {
 
           public struct AllCasePaths: Sequence {
               public subscript(root: Foo) -> PartialCaseKeyPath<Foo> {
-
                   return \.never
               }
 

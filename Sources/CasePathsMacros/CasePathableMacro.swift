@@ -95,8 +95,7 @@ extension CasePathableMacro: MemberMacro {
       """
       public struct AllCasePaths: Sequence {
       public subscript(root: \(enumName)) -> PartialCaseKeyPath<\(enumName)> {
-      \(raw: rootSubscriptCases.map(\.description).joined(separator: "\n"))
-      return \\.never
+      \(raw: rootSubscriptCases.map { "\($0.description)\n" }.joined())return \\.never
       }
       \(raw: casePaths.map(\.description).joined(separator: "\n"))
       public func makeIterator() -> IndexingIterator<[PartialCaseKeyPath<\(enumName)>]> {
