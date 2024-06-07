@@ -111,6 +111,33 @@ final class CasePathableMacroTests: XCTestCase {
     }
   }
 
+  func testCasePathable_NoCases() {
+    assertMacro {
+      """
+      @CasePathable enum EnumWithNoCases {}
+      """
+    } expansion: {
+      #"""
+      enum EnumWithNoCases {
+
+          public struct AllCasePaths: Sequence {
+              public subscript(root: EnumWithNoCases) -> PartialCaseKeyPath<EnumWithNoCases> {
+                  \.never
+              }
+
+              public func makeIterator() -> IndexingIterator<[PartialCaseKeyPath<EnumWithNoCases>]> {
+                  let allCasePaths: [PartialCaseKeyPath<EnumWithNoCases>] = []
+                  return allCasePaths.makeIterator()
+              }
+          }
+          public static var allCasePaths: AllCasePaths { AllCasePaths() }}
+
+      extension EnumWithNoCases: CasePaths.CasePathable {
+      }
+      """#
+    }
+  }
+
   func testCasePathable_ElementList() {
     assertMacro {
       """
@@ -348,7 +375,7 @@ final class CasePathableMacroTests: XCTestCase {
 
           public struct AllCasePaths: Sequence {
               public subscript(root: Foo) -> PartialCaseKeyPath<Foo> {
-                  return \.never
+                  \.never
               }
 
               public func makeIterator() -> IndexingIterator<[PartialCaseKeyPath<Foo>]> {
@@ -371,7 +398,7 @@ final class CasePathableMacroTests: XCTestCase {
 
           public struct AllCasePaths: Sequence {
               public subscript(root: Foo) -> PartialCaseKeyPath<Foo> {
-                  return \.never
+                  \.never
               }
 
               public func makeIterator() -> IndexingIterator<[PartialCaseKeyPath<Foo>]> {
