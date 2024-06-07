@@ -1018,7 +1018,8 @@ final class CasePathableMacroTests: XCTestCase {
             }
             if root.is(\.fizzier) {
               return \.fizzier
-            case .fizziest:
+            }
+            if root.is(\.fizziest) {
               return \.fizziest
             }
             return \.never
