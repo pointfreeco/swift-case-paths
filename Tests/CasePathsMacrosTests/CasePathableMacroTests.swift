@@ -111,6 +111,31 @@ final class CasePathableMacroTests: XCTestCase {
     }
   }
 
+  func testCasePathable_NoCases() {
+    assertMacro {
+      """
+      @CasePathable enum EnumWithNoCases {}
+      """
+    } expansion: {
+      """
+      enum EnumWithNoCases {
+
+          public struct AllCasePaths: Sequence {
+
+
+              public func makeIterator() -> IndexingIterator<[PartialCaseKeyPath<EnumWithNoCases>]> {
+                  let allCasePaths: [PartialCaseKeyPath<EnumWithNoCases>] = []
+                  return allCasePaths.makeIterator()
+              }
+          }
+          public static var allCasePaths: AllCasePaths { AllCasePaths() }}
+
+      extension EnumWithNoCases: CasePaths.CasePathable {
+      }
+      """
+    }
+  }
+
   func testCasePathable_ElementList() {
     assertMacro {
       """
@@ -343,13 +368,11 @@ final class CasePathableMacroTests: XCTestCase {
       }
       """
     } expansion: {
-      #"""
+      """
       enum Foo: CasePathable {
 
           public struct AllCasePaths: Sequence {
-              public subscript(root: Foo) -> PartialCaseKeyPath<Foo> {
-                  return \.never
-              }
+
 
               public func makeIterator() -> IndexingIterator<[PartialCaseKeyPath<Foo>]> {
                   let allCasePaths: [PartialCaseKeyPath<Foo>] = []
@@ -358,7 +381,7 @@ final class CasePathableMacroTests: XCTestCase {
           }
           public static var allCasePaths: AllCasePaths { AllCasePaths() }
       }
-      """#
+      """
     }
     assertMacro {
       """
@@ -366,13 +389,11 @@ final class CasePathableMacroTests: XCTestCase {
       }
       """
     } expansion: {
-      #"""
+      """
       enum Foo: CasePaths.CasePathable {
 
           public struct AllCasePaths: Sequence {
-              public subscript(root: Foo) -> PartialCaseKeyPath<Foo> {
-                  return \.never
-              }
+
 
               public func makeIterator() -> IndexingIterator<[PartialCaseKeyPath<Foo>]> {
                   let allCasePaths: [PartialCaseKeyPath<Foo>] = []
@@ -381,7 +402,7 @@ final class CasePathableMacroTests: XCTestCase {
           }
           public static var allCasePaths: AllCasePaths { AllCasePaths() }
       }
-      """#
+      """
     }
   }
 
