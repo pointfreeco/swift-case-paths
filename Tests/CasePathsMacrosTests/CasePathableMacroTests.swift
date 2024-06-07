@@ -992,6 +992,7 @@ final class CasePathableMacroTests: XCTestCase {
         /*Comment before case*/ case baz(Int)
         case fizz(buzz: String)  // Comment on case
         case fizzier/*Comment in case*/(Int, buzzier: String)
+        case fizziest // Comment without associated value
       }
       """
     } expansion: {
@@ -1002,6 +1003,7 @@ final class CasePathableMacroTests: XCTestCase {
         /*Comment before case*/ case baz(Int)
         case fizz(buzz: String)  // Comment on case
         case fizzier/*Comment in case*/(Int, buzzier: String)
+        case fizziest // Comment without associated value
 
         public struct AllCasePaths: Sequence {
           public subscript(root: Foo) -> PartialCaseKeyPath<Foo> {
@@ -1016,6 +1018,9 @@ final class CasePathableMacroTests: XCTestCase {
             }
             if root.is(\.fizzier) {
               return \.fizzier
+            }
+            if root.is(\.fizziest) {
+              return \.fizziest
             }
             return \.never
           }
@@ -1066,12 +1071,26 @@ final class CasePathableMacroTests: XCTestCase {
               }
             )
           }
+          public var fizziest: CasePaths.AnyCasePath<Foo, Void> {
+            CasePaths.AnyCasePath<Foo, Void>(
+              embed: {
+                Foo.fizziest
+              },
+              extract: {
+                guard case .fizziest = $0 else {
+                  return nil
+                }
+                return ()
+              }
+            )
+          }
           public func makeIterator() -> IndexingIterator<[PartialCaseKeyPath<Foo>]> {
             var allCasePaths: [PartialCaseKeyPath<Foo>] = []
             allCasePaths.append(\.bar)
             allCasePaths.append(\.baz)
             allCasePaths.append(\.fizz)
-            allCasePaths.append(\.fizzier/*Comment in case*/)
+            allCasePaths.append(\.fizzier)
+            allCasePaths.append(\.fizziest)
             return allCasePaths.makeIterator()
           }
         }

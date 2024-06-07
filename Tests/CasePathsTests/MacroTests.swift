@@ -8,6 +8,7 @@
     /*Comment before case*/ case baz(Int)
     case fizz(buzz: String)  // Comment on case
     case fizzier /*Comment in case*/(Int, buzzier: String)
+    case fizziest
   }
 
   @CasePathable

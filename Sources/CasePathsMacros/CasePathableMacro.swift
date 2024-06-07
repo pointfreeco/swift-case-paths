@@ -88,7 +88,7 @@ extension CasePathableMacro: MemberMacro {
     }
     let casePaths = generateDeclSyntax(from: memberBlock.members, enumName: enumName)
     let allCases = generateCases(from: memberBlock.members, enumName: enumName) {
-      "allCasePaths.append(\\.\($0.name))"
+      "allCasePaths.append(\\.\(raw: $0.name.text))"
     }
 
     return [
