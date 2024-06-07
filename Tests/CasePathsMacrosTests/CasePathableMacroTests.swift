@@ -117,11 +117,13 @@ final class CasePathableMacroTests: XCTestCase {
       @CasePathable enum EnumWithNoCases {}
       """
     } expansion: {
-      """
+      #"""
       enum EnumWithNoCases {
 
           public struct AllCasePaths: Sequence {
-
+              public subscript(root: EnumWithNoCases) -> PartialCaseKeyPath<EnumWithNoCases> {
+                  \.never
+              }
 
               public func makeIterator() -> IndexingIterator<[PartialCaseKeyPath<EnumWithNoCases>]> {
                   let allCasePaths: [PartialCaseKeyPath<EnumWithNoCases>] = []
@@ -132,7 +134,7 @@ final class CasePathableMacroTests: XCTestCase {
 
       extension EnumWithNoCases: CasePaths.CasePathable {
       }
-      """
+      """#
     }
   }
 
@@ -368,11 +370,13 @@ final class CasePathableMacroTests: XCTestCase {
       }
       """
     } expansion: {
-      """
+      #"""
       enum Foo: CasePathable {
 
           public struct AllCasePaths: Sequence {
-
+              public subscript(root: Foo) -> PartialCaseKeyPath<Foo> {
+                  \.never
+              }
 
               public func makeIterator() -> IndexingIterator<[PartialCaseKeyPath<Foo>]> {
                   let allCasePaths: [PartialCaseKeyPath<Foo>] = []
@@ -381,7 +385,7 @@ final class CasePathableMacroTests: XCTestCase {
           }
           public static var allCasePaths: AllCasePaths { AllCasePaths() }
       }
-      """
+      """#
     }
     assertMacro {
       """
@@ -389,11 +393,13 @@ final class CasePathableMacroTests: XCTestCase {
       }
       """
     } expansion: {
-      """
+      #"""
       enum Foo: CasePaths.CasePathable {
 
           public struct AllCasePaths: Sequence {
-
+              public subscript(root: Foo) -> PartialCaseKeyPath<Foo> {
+                  \.never
+              }
 
               public func makeIterator() -> IndexingIterator<[PartialCaseKeyPath<Foo>]> {
                   let allCasePaths: [PartialCaseKeyPath<Foo>] = []
@@ -402,7 +408,7 @@ final class CasePathableMacroTests: XCTestCase {
           }
           public static var allCasePaths: AllCasePaths { AllCasePaths() }
       }
-      """
+      """#
     }
   }
 
