@@ -33,16 +33,19 @@ final class CasePathableMacroTests: XCTestCase {
 
         public struct AllCasePaths: Sequence {
           public subscript(root: Foo) -> PartialCaseKeyPath<Foo> {
-            switch root {
-            case .bar:
+            if root.is(\.bar) {
               return \.bar
-            case .baz:
+            }
+            if root.is(\.baz) {
               return \.baz
-            case .fizz:
+            }
+            if root.is(\.fizz) {
               return \.fizz
-            case .fizzier:
+            }
+            if root.is(\.fizzier) {
               return \.fizzier
             }
+            return \.never
           }
           public var bar: CasePaths.AnyCasePath<Foo, Void> {
             CasePaths.AnyCasePath<Foo, Void>(
@@ -122,12 +125,13 @@ final class CasePathableMacroTests: XCTestCase {
 
         public struct AllCasePaths: Sequence {
           public subscript(root: Foo) -> PartialCaseKeyPath<Foo> {
-            switch root {
-            case .bar:
+            if root.is(\.bar) {
               return \.bar
-            case .baz:
+            }
+            if root.is(\.baz) {
               return \.baz
             }
+            return \.never
           }
           public var bar: CasePaths.AnyCasePath<Foo, Int> {
             CasePaths.AnyCasePath<Foo, Int>(
@@ -181,10 +185,10 @@ final class CasePathableMacroTests: XCTestCase {
 
         public struct AllCasePaths: Sequence {
           public subscript(root: Foo) -> PartialCaseKeyPath<Foo> {
-            switch root {
-            case .bar:
+            if root.is(\.bar) {
               return \.bar
             }
+            return \.never
           }
           public var bar: CasePaths.AnyCasePath<Foo, Int> {
             CasePaths.AnyCasePath<Foo, Int>(
@@ -223,10 +227,10 @@ final class CasePathableMacroTests: XCTestCase {
 
         public struct AllCasePaths: Sequence {
           public subscript(root: Foo) -> PartialCaseKeyPath<Foo> {
-            switch root {
-            case .bar:
+            if root.is(\.bar) {
               return \.bar
             }
+            return \.never
           }
           public var bar: CasePaths.AnyCasePath<Foo, Int> {
             CasePaths.AnyCasePath<Foo, Int>(
@@ -265,10 +269,10 @@ final class CasePathableMacroTests: XCTestCase {
 
         public struct AllCasePaths: Sequence {
           public subscript(root: Foo) -> PartialCaseKeyPath<Foo> {
-            switch root {
-            case .bar:
+            if root.is(\.bar) {
               return \.bar
             }
+            return \.never
           }
           public var bar: CasePaths.AnyCasePath<Foo, Int> {
             CasePaths.AnyCasePath<Foo, Int>(
@@ -344,7 +348,7 @@ final class CasePathableMacroTests: XCTestCase {
 
           public struct AllCasePaths: Sequence {
               public subscript(root: Foo) -> PartialCaseKeyPath<Foo> {
-                  \.never
+                  return \.never
               }
 
               public func makeIterator() -> IndexingIterator<[PartialCaseKeyPath<Foo>]> {
@@ -367,7 +371,7 @@ final class CasePathableMacroTests: XCTestCase {
 
           public struct AllCasePaths: Sequence {
               public subscript(root: Foo) -> PartialCaseKeyPath<Foo> {
-                  \.never
+                  return \.never
               }
 
               public func makeIterator() -> IndexingIterator<[PartialCaseKeyPath<Foo>]> {
@@ -395,10 +399,10 @@ final class CasePathableMacroTests: XCTestCase {
 
         public struct AllCasePaths: Sequence {
           public subscript(root: Foo) -> PartialCaseKeyPath<Foo> {
-            switch root {
-            case .bar:
+            if root.is(\.bar) {
               return \.bar
             }
+            return \.never
           }
           public var bar: CasePaths.AnyCasePath<Foo, (Int, Bool)> {
             CasePaths.AnyCasePath<Foo, (Int, Bool)>(
@@ -440,10 +444,10 @@ final class CasePathableMacroTests: XCTestCase {
 
         public struct AllCasePaths: Sequence {
           public subscript(root: Foo) -> PartialCaseKeyPath<Foo> {
-            switch root {
-            case .bar:
+            if root.is(\.bar) {
               return \.bar
             }
+            return \.never
           }
           public var bar: CasePaths.AnyCasePath<Foo, Bar<Foo>> {
             CasePaths.AnyCasePath<Foo, Bar<Foo>>(
@@ -485,10 +489,10 @@ final class CasePathableMacroTests: XCTestCase {
 
         public struct AllCasePaths: Sequence {
           public subscript(root: Foo) -> PartialCaseKeyPath<Foo> {
-            switch root {
-            case .bar:
+            if root.is(\.bar) {
               return \.bar
             }
+            return \.never
           }
           public var bar: CasePaths.AnyCasePath<Foo, (int: Int, bool: Bool)> {
             CasePaths.AnyCasePath<Foo, (int: Int, bool: Bool)>(
@@ -564,32 +568,39 @@ final class CasePathableMacroTests: XCTestCase {
 
         public struct AllCasePaths: Sequence {
           public subscript(root: Foo) -> PartialCaseKeyPath<Foo> {
-            switch root {
-            case .bar:
+            if root.is(\.bar) {
               return \.bar
+            }
             #if os(macOS)
-            case .macCase:
+            if root.is(\.macCase) {
               return \.macCase
-            case .macSecond:
+            }
+            if root.is(\.macSecond) {
               return \.macSecond
+            }
             #elseif os(iOS)
-            case .iosCase:
+            if root.is(\.iosCase) {
               return \.iosCase
+            }
             #else
-            case .elseCase:
+            if root.is(\.elseCase) {
               return \.elseCase
-            case .elseLast:
+            }
+            if root.is(\.elseLast) {
               return \.elseLast
+            }
             #endif
             #if DEBUG
             #if INNER
-            case .twoLevelsDeep:
+            if root.is(\.twoLevelsDeep) {
               return \.twoLevelsDeep
-            case .twoLevels:
-              return \.twoLevels
-            #endif
-            #endif
             }
+            if root.is(\.twoLevels) {
+              return \.twoLevels
+            }
+            #endif
+            #endif
+            return \.never
           }
           public var bar: CasePaths.AnyCasePath<Foo, Void> {
             CasePaths.AnyCasePath<Foo, Void>(
@@ -744,10 +755,10 @@ final class CasePathableMacroTests: XCTestCase {
 
         public struct AllCasePaths: Sequence {
           public subscript(root: Foo) -> PartialCaseKeyPath<Foo> {
-            switch root {
-            case .bar:
+            if root.is(\.bar) {
               return \.bar
             }
+            return \.never
           }
           public var bar: CasePaths.AnyCasePath<Foo, Void> {
             CasePaths.AnyCasePath<Foo, Void>(
@@ -820,16 +831,19 @@ final class CasePathableMacroTests: XCTestCase {
 
         public struct AllCasePaths: Sequence {
           public subscript(root: Foo) -> PartialCaseKeyPath<Foo> {
-            switch root {
-            case .bar:
+            if root.is(\.bar) {
               return \.bar
-            case .baz:
+            }
+            if root.is(\.baz) {
               return \.baz
-            case .fizz:
+            }
+            if root.is(\.fizz) {
               return \.fizz
-            case .buzz:
+            }
+            if root.is(\.buzz) {
               return \.buzz
             }
+            return \.never
           }
           /// The bar case.
           public var bar: CasePaths.AnyCasePath<Foo, Void> {
@@ -934,10 +948,10 @@ final class CasePathableMacroTests: XCTestCase {
 
         public struct AllCasePaths: Sequence {
           public subscript(root: Foo) -> PartialCaseKeyPath<Foo> {
-            switch root {
-            case .bar:
+            if root.is(\.bar) {
               return \.bar
             }
+            return \.never
           }
             // baz
           // case foo
@@ -991,16 +1005,19 @@ final class CasePathableMacroTests: XCTestCase {
 
         public struct AllCasePaths: Sequence {
           public subscript(root: Foo) -> PartialCaseKeyPath<Foo> {
-            switch root {
-            case .bar:
+            if root.is(\.bar) {
               return \.bar
-            case .baz:
+            }
+            if root.is(\.baz) {
               return \.baz
-            case .fizz:
+            }
+            if root.is(\.fizz) {
               return \.fizz
-            case .fizzier/*Comment in case*/:
+            }
+            if root.is(\.fizzier) {
               return \.fizzier
             }
+            return \.never
           }
           // Comment above case
           public var bar: CasePaths.AnyCasePath<Foo, Void> {
