@@ -83,17 +83,9 @@ extension CasePathableMacro: MemberMacro {
 
     let rewriter = SelfRewriter(selfEquivalent: enumName)
     let memberBlock = rewriter.rewrite(enumDecl.memberBlock).cast(MemberBlockSyntax.self)
-    let rootSwitchCases = generateCases(from: memberBlock.members, enumName: enumName) {
-      "case .\($0.name): return \\.\(raw: $0.name.text)"
+    let rootSubscriptCases = generateCases(from: memberBlock.members, enumName: enumName) {
+      "if root.is(\\.\(raw: $0.name.text)) { return \\.\(raw: $0.name.text) }"
     }
-    let rootSwitch: DeclSyntax =
-      rootSwitchCases.isEmpty
-      ? "\\.never"
-      : """
-      switch root {
-      \(raw: rootSwitchCases.map(\.description).joined(separator: "\n"))
-      }
-      """
     let casePaths = generateDeclSyntax(from: memberBlock.members, enumName: enumName)
     let allCases = generateCases(from: memberBlock.members, enumName: enumName) {
       "allCasePaths.append(\\.\($0.name))"
@@ -103,7 +95,8 @@ extension CasePathableMacro: MemberMacro {
       """
       public struct AllCasePaths: Sequence {
       public subscript(root: \(enumName)) -> PartialCaseKeyPath<\(enumName)> {
-      \(rootSwitch)
+      \(raw: rootSubscriptCases.map(\.description).joined(separator: "\n"))
+      return \\.never
       }
       \(raw: casePaths.map(\.description).joined(separator: "\n"))
       public func makeIterator() -> IndexingIterator<[PartialCaseKeyPath<\(enumName)>]> {

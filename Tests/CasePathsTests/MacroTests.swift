@@ -9,4 +9,9 @@
     case fizz(buzz: String)  // Comment on case
     case fizzier /*Comment in case*/(Int, buzzier: String)
   }
+
+  @CasePathable
+  enum Action {
+    case alert(Never)
+  }
 #endif
