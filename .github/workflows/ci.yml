@@ -60,8 +60,7 @@ jobs:
     steps:
       - uses: compnerd/gha-setup-swift@main
         with:
-          branch: swift-${{ matrix.swift }}-release
-          tag: ${{ matrix.swift }}-RELEASE
+          branch: swift-${{ matrix.swift }}-branch
       - uses: actions/checkout@v4
       - name: Build
         run: swift build -c ${{ matrix.config }}
