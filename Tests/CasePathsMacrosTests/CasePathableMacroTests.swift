@@ -31,7 +31,7 @@ final class CasePathableMacroTests: XCTestCase {
         case fizz(buzz: String)
         case fizzier(Int, buzzier: String)
 
-        public struct AllCasePaths: Sequence {
+        public struct AllCasePaths: Sendable, Sequence {
           public subscript(root: Foo) -> PartialCaseKeyPath<Foo> {
             if root.is(\.bar) {
               return \.bar
@@ -120,7 +120,7 @@ final class CasePathableMacroTests: XCTestCase {
       #"""
       enum EnumWithNoCases {
 
-          public struct AllCasePaths: Sequence {
+          public struct AllCasePaths: Sendable, Sequence {
               public subscript(root: EnumWithNoCases) -> PartialCaseKeyPath<EnumWithNoCases> {
                   \.never
               }
@@ -150,7 +150,7 @@ final class CasePathableMacroTests: XCTestCase {
       public enum Foo {
         case bar(Int), baz(String)
 
-        public struct AllCasePaths: Sequence {
+        public struct AllCasePaths: Sendable, Sequence {
           public subscript(root: Foo) -> PartialCaseKeyPath<Foo> {
             if root.is(\.bar) {
               return \.bar
@@ -210,7 +210,7 @@ final class CasePathableMacroTests: XCTestCase {
       public enum Foo {
         case bar(Int)
 
-        public struct AllCasePaths: Sequence {
+        public struct AllCasePaths: Sendable, Sequence {
           public subscript(root: Foo) -> PartialCaseKeyPath<Foo> {
             if root.is(\.bar) {
               return \.bar
@@ -252,7 +252,7 @@ final class CasePathableMacroTests: XCTestCase {
       package enum Foo {
         case bar(Int)
 
-        public struct AllCasePaths: Sequence {
+        public struct AllCasePaths: Sendable, Sequence {
           public subscript(root: Foo) -> PartialCaseKeyPath<Foo> {
             if root.is(\.bar) {
               return \.bar
@@ -294,7 +294,7 @@ final class CasePathableMacroTests: XCTestCase {
       private enum Foo {
         case bar(Int)
 
-        public struct AllCasePaths: Sequence {
+        public struct AllCasePaths: Sendable, Sequence {
           public subscript(root: Foo) -> PartialCaseKeyPath<Foo> {
             if root.is(\.bar) {
               return \.bar
@@ -373,7 +373,7 @@ final class CasePathableMacroTests: XCTestCase {
       #"""
       enum Foo: CasePathable {
 
-          public struct AllCasePaths: Sequence {
+          public struct AllCasePaths: Sendable, Sequence {
               public subscript(root: Foo) -> PartialCaseKeyPath<Foo> {
                   \.never
               }
@@ -396,7 +396,7 @@ final class CasePathableMacroTests: XCTestCase {
       #"""
       enum Foo: CasePaths.CasePathable {
 
-          public struct AllCasePaths: Sequence {
+          public struct AllCasePaths: Sendable, Sequence {
               public subscript(root: Foo) -> PartialCaseKeyPath<Foo> {
                   \.never
               }
@@ -424,7 +424,7 @@ final class CasePathableMacroTests: XCTestCase {
       enum Foo {
         case bar(_ int: Int, _ bool: Bool)
 
-        public struct AllCasePaths: Sequence {
+        public struct AllCasePaths: Sendable, Sequence {
           public subscript(root: Foo) -> PartialCaseKeyPath<Foo> {
             if root.is(\.bar) {
               return \.bar
@@ -469,7 +469,7 @@ final class CasePathableMacroTests: XCTestCase {
       enum Foo {
         case bar(Bar<Self>)
 
-        public struct AllCasePaths: Sequence {
+        public struct AllCasePaths: Sendable, Sequence {
           public subscript(root: Foo) -> PartialCaseKeyPath<Foo> {
             if root.is(\.bar) {
               return \.bar
@@ -514,7 +514,7 @@ final class CasePathableMacroTests: XCTestCase {
       enum Foo {
         case bar(int: Int = 42, bool: Bool = true)
 
-        public struct AllCasePaths: Sequence {
+        public struct AllCasePaths: Sendable, Sequence {
           public subscript(root: Foo) -> PartialCaseKeyPath<Foo> {
             if root.is(\.bar) {
               return \.bar
@@ -593,7 +593,7 @@ final class CasePathableMacroTests: XCTestCase {
         #endif
         #endif
 
-        public struct AllCasePaths: Sequence {
+        public struct AllCasePaths: Sendable, Sequence {
           public subscript(root: Foo) -> PartialCaseKeyPath<Foo> {
             if root.is(\.bar) {
               return \.bar
@@ -780,7 +780,7 @@ final class CasePathableMacroTests: XCTestCase {
       enum Foo {
         case bar
 
-        public struct AllCasePaths: Sequence {
+        public struct AllCasePaths: Sendable, Sequence {
           public subscript(root: Foo) -> PartialCaseKeyPath<Foo> {
             if root.is(\.bar) {
               return \.bar
@@ -856,7 +856,7 @@ final class CasePathableMacroTests: XCTestCase {
          */
         case fizz, buzz
 
-        public struct AllCasePaths: Sequence {
+        public struct AllCasePaths: Sendable, Sequence {
           public subscript(root: Foo) -> PartialCaseKeyPath<Foo> {
             if root.is(\.bar) {
               return \.bar
@@ -973,7 +973,7 @@ final class CasePathableMacroTests: XCTestCase {
       // case foo
         case bar
 
-        public struct AllCasePaths: Sequence {
+        public struct AllCasePaths: Sendable, Sequence {
           public subscript(root: Foo) -> PartialCaseKeyPath<Foo> {
             if root.is(\.bar) {
               return \.bar
@@ -1032,7 +1032,7 @@ final class CasePathableMacroTests: XCTestCase {
         case fizzier/*Comment in case*/(Int, buzzier: String)
         case fizziest // Comment without associated value
 
-        public struct AllCasePaths: Sequence {
+        public struct AllCasePaths: Sendable, Sequence {
           public subscript(root: Foo) -> PartialCaseKeyPath<Foo> {
             if root.is(\.bar) {
               return \.bar

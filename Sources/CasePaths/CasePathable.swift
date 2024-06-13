@@ -48,25 +48,25 @@ public protocol CasePathable {
   /// associated value types.
   @_documentation(visibility:internal)
   @dynamicMemberLookup
-  public struct Case<Value> {
-    fileprivate let _embed: (Value) -> Any
-    fileprivate let _extract: (Any) -> Value?
+  public struct Case<Value>: Sendable {
+    fileprivate let _embed: @Sendable (Value) -> Any
+    fileprivate let _extract: @Sendable (Any) -> Value?
   }
 #else
   @dynamicMemberLookup
   public struct Case<Value> {
-    fileprivate let _embed: (Value) -> Any
-    fileprivate let _extract: (Any) -> Value?
+    fileprivate let _embed: @Sendable (Value) -> Any
+    fileprivate let _extract: @Sendable (Any) -> Value?
   }
 #endif
 
 extension Case {
   public init<Root>(
-    embed: @escaping (Value) -> Root,
-    extract: @escaping (Root) -> Value?
+    embed: @escaping @Sendable (Value) -> Root,
+    extract: @escaping @Sendable (Root) -> Value?
   ) {
     self._embed = embed
-    self._extract = { ($0 as? Root).flatMap(extract) }
+    self._extract = { @Sendable in ($0 as? Root).flatMap(extract) }
   }
 
   public init() {
@@ -77,15 +77,33 @@ extension Case {
     self = Case<Root>()[keyPath: keyPath]
   }
 
-  public subscript<AppendedValue>(
-    dynamicMember keyPath: KeyPath<Value.AllCasePaths, AnyCasePath<Value, AppendedValue>>
-  ) -> Case<AppendedValue>
-  where Value: CasePathable {
-    Case<AppendedValue>(
-      embed: { self.embed(Value.allCasePaths[keyPath: keyPath].embed($0)) },
-      extract: { self.extract(from: $0).flatMap(Value.allCasePaths[keyPath: keyPath].extract) }
-    )
-  }
+  #if swift(>=6)
+    public subscript<AppendedValue>(
+      dynamicMember keyPath: KeyPath<Value.AllCasePaths, AnyCasePath<Value, AppendedValue>>
+        & Sendable
+    ) -> Case<AppendedValue>
+    where Value: CasePathable {
+      Case<AppendedValue>(
+        embed: { embed(Value.allCasePaths[keyPath: keyPath].embed($0)) },
+        extract: { extract(from: $0).flatMap(Value.allCasePaths[keyPath: keyPath].extract) }
+      )
+    }
+  #else
+    public subscript<AppendedValue>(
+      dynamicMember keyPath: KeyPath<Value.AllCasePaths, AnyCasePath<Value, AppendedValue>>
+    ) -> Case<AppendedValue>
+    where Value: CasePathable {
+      @UncheckedSendable var keyPath = keyPath
+      return Case<AppendedValue>(
+        embed: { [$keyPath] in
+          embed(Value.allCasePaths[keyPath: $keyPath.wrappedValue].embed($0))
+        },
+        extract: { [$keyPath] in
+          extract(from: $0).flatMap(Value.allCasePaths[keyPath: $keyPath.wrappedValue].extract)
+        }
+      )
+    }
+  #endif
 
   public func embed(_ value: Value) -> Any {
     self._embed(value)

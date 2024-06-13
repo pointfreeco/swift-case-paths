@@ -95,7 +95,7 @@ extension CasePathableMacro: MemberMacro {
 
     return [
       """
-      public struct AllCasePaths: Sequence {
+      public struct AllCasePaths: Sendable, Sequence {
       public subscript(root: \(enumName)) -> PartialCaseKeyPath<\(enumName)> {
       \(raw: rootSubscriptCases.map { "\($0.description)\n" }.joined())\(raw: subscriptReturn)
       }
