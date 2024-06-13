@@ -62,7 +62,9 @@ final class CasePathableMacroTests: XCTestCase {
           }
           public var baz: CasePaths.AnyCasePath<Foo, Int> {
             CasePaths.AnyCasePath<Foo, Int>(
-              embed: Foo.baz,
+              embed: {
+                Foo.baz($0)
+              },
               extract: {
                 guard case let .baz(v0) = $0 else {
                   return nil
@@ -73,7 +75,9 @@ final class CasePathableMacroTests: XCTestCase {
           }
           public var fizz: CasePaths.AnyCasePath<Foo, String> {
             CasePaths.AnyCasePath<Foo, String>(
-              embed: Foo.fizz,
+              embed: {
+                Foo.fizz(buzz: $0)
+              },
               extract: {
                 guard case let .fizz(v0) = $0 else {
                   return nil
@@ -84,7 +88,9 @@ final class CasePathableMacroTests: XCTestCase {
           }
           public var fizzier: CasePaths.AnyCasePath<Foo, (Int, buzzier: String)> {
             CasePaths.AnyCasePath<Foo, (Int, buzzier: String)>(
-              embed: Foo.fizzier,
+              embed: {
+                Foo.fizzier($0, buzzier: $1)
+              },
               extract: {
                 guard case let .fizzier(v0, v1) = $0 else {
                   return nil
@@ -162,7 +168,9 @@ final class CasePathableMacroTests: XCTestCase {
           }
           public var bar: CasePaths.AnyCasePath<Foo, Int> {
             CasePaths.AnyCasePath<Foo, Int>(
-              embed: Foo.bar,
+              embed: {
+                Foo.bar($0)
+              },
               extract: {
                 guard case let .bar(v0) = $0 else {
                   return nil
@@ -173,7 +181,9 @@ final class CasePathableMacroTests: XCTestCase {
           }
           public var baz: CasePaths.AnyCasePath<Foo, String> {
             CasePaths.AnyCasePath<Foo, String>(
-              embed: Foo.baz,
+              embed: {
+                Foo.baz($0)
+              },
               extract: {
                 guard case let .baz(v0) = $0 else {
                   return nil
@@ -219,7 +229,9 @@ final class CasePathableMacroTests: XCTestCase {
           }
           public var bar: CasePaths.AnyCasePath<Foo, Int> {
             CasePaths.AnyCasePath<Foo, Int>(
-              embed: Foo.bar,
+              embed: {
+                Foo.bar($0)
+              },
               extract: {
                 guard case let .bar(v0) = $0 else {
                   return nil
@@ -261,7 +273,9 @@ final class CasePathableMacroTests: XCTestCase {
           }
           public var bar: CasePaths.AnyCasePath<Foo, Int> {
             CasePaths.AnyCasePath<Foo, Int>(
-              embed: Foo.bar,
+              embed: {
+                Foo.bar($0)
+              },
               extract: {
                 guard case let .bar(v0) = $0 else {
                   return nil
@@ -303,7 +317,9 @@ final class CasePathableMacroTests: XCTestCase {
           }
           public var bar: CasePaths.AnyCasePath<Foo, Int> {
             CasePaths.AnyCasePath<Foo, Int>(
-              embed: Foo.bar,
+              embed: {
+                Foo.bar($0)
+              },
               extract: {
                 guard case let .bar(v0) = $0 else {
                   return nil
@@ -433,7 +449,9 @@ final class CasePathableMacroTests: XCTestCase {
           }
           public var bar: CasePaths.AnyCasePath<Foo, (Int, Bool)> {
             CasePaths.AnyCasePath<Foo, (Int, Bool)>(
-              embed: Foo.bar,
+              embed: {
+                Foo.bar(_: $0, _: $1)
+              },
               extract: {
                 guard case let .bar(v0, v1) = $0 else {
                   return nil
@@ -478,7 +496,9 @@ final class CasePathableMacroTests: XCTestCase {
           }
           public var bar: CasePaths.AnyCasePath<Foo, Bar<Foo>> {
             CasePaths.AnyCasePath<Foo, Bar<Foo>>(
-              embed: Foo.bar,
+              embed: {
+                Foo.bar($0)
+              },
               extract: {
                 guard case let .bar(v0) = $0 else {
                   return nil
@@ -523,7 +543,9 @@ final class CasePathableMacroTests: XCTestCase {
           }
           public var bar: CasePaths.AnyCasePath<Foo, (int: Int, bool: Bool)> {
             CasePaths.AnyCasePath<Foo, (int: Int, bool: Bool)>(
-              embed: Foo.bar,
+              embed: {
+                Foo.bar(int: $0, bool: $1)
+              },
               extract: {
                 guard case let .bar(v0, v1) = $0 else {
                   return nil
@@ -658,7 +680,9 @@ final class CasePathableMacroTests: XCTestCase {
           }
           public var macSecond: CasePaths.AnyCasePath<Foo, Int> {
             CasePaths.AnyCasePath<Foo, Int>(
-              embed: Foo.macSecond,
+              embed: {
+                Foo.macSecond($0)
+              },
               extract: {
                 guard case let .macSecond(v0) = $0 else {
                   return nil
@@ -684,7 +708,9 @@ final class CasePathableMacroTests: XCTestCase {
           #else
           public var elseCase: CasePaths.AnyCasePath<Foo, String> {
             CasePaths.AnyCasePath<Foo, String>(
-              embed: Foo.elseCase,
+              embed: {
+                Foo.elseCase($0)
+              },
               extract: {
                 guard case let .elseCase(v0) = $0 else {
                   return nil
@@ -724,7 +750,9 @@ final class CasePathableMacroTests: XCTestCase {
           }
           public var twoLevels: CasePaths.AnyCasePath<Foo, Double> {
             CasePaths.AnyCasePath<Foo, Double>(
-              embed: Foo.twoLevels,
+              embed: {
+                Foo.twoLevels($0)
+              },
               extract: {
                 guard case let .twoLevels(v0) = $0 else {
                   return nil
@@ -1067,7 +1095,9 @@ final class CasePathableMacroTests: XCTestCase {
           }
           /*Comment before case*/public var baz: CasePaths.AnyCasePath<Foo, Int> {
             CasePaths.AnyCasePath<Foo, Int>(
-              embed: Foo.baz,
+              embed: {
+                Foo.baz($0)
+              },
               extract: {
                 guard case let .baz(v0) = $0 else {
                   return nil
@@ -1078,7 +1108,9 @@ final class CasePathableMacroTests: XCTestCase {
           }
           public var fizz: CasePaths.AnyCasePath<Foo, String> {
             CasePaths.AnyCasePath<Foo, String>(
-              embed: Foo.fizz,
+              embed: {
+                Foo.fizz(buzz: $0)
+              },
               extract: {
                 guard case let .fizz(v0) = $0 else {
                   return nil
@@ -1089,7 +1121,9 @@ final class CasePathableMacroTests: XCTestCase {
           }
           public var fizzier: CasePaths.AnyCasePath<Foo, (Int, buzzier: String)> {
             CasePaths.AnyCasePath<Foo, (Int, buzzier: String)>(
-              embed: Foo.fizzier,
+              embed: {
+                Foo.fizzier($0, buzzier: $1)
+              },
               extract: {
                 guard case let .fizzier(v0, v1) = $0 else {
                   return nil

@@ -16,7 +16,7 @@ extension AnyCasePath {
   @available(macOS, deprecated: 9999, message: "Use a 'CasePathable' case key path, instead")
   @available(tvOS, deprecated: 9999, message: "Use a 'CasePathable' case key path, instead")
   @available(watchOS, deprecated: 9999, message: "Use a 'CasePathable' case key path, instead")
-  public init(unsafe embed: @escaping @Sendable (Value) -> Root) {
+  public init(unsafe embed: @escaping (Value) -> Root) {
     self.init(embed)
   }
 
@@ -44,17 +44,18 @@ extension AnyCasePath {
     @available(macOS, deprecated: 9999, message: "Use a 'CasePathable' case key path, instead")
     @available(tvOS, deprecated: 9999, message: "Use a 'CasePathable' case key path, instead")
     @available(watchOS, deprecated: 9999, message: "Use a 'CasePathable' case key path, instead")
-    public init(_ embed: @escaping @Sendable (Value) -> Root) {
+    public init(_ embed: @escaping (Value) -> Root) {
       func open<Wrapped>(_: Wrapped.Type) -> @Sendable (Root) -> Value? {
         optionalPromotedExtractHelp(unsafeBitCast(embed, to: (@Sendable (Value) -> Wrapped?).self))
           as! @Sendable (Root) -> Value?
       }
+      @UncheckedSendable var embed = embed
       let extract =
         ((_Witness<Root>.self as? _AnyOptional.Type)?.wrappedType)
         .map { _openExistential($0, do: open) }
-        ?? extractHelp(embed)
+        ?? extractHelp { [$embed] in $embed.wrappedValue($0) }
       self.init(
-        embed: embed,
+        embed: { [$embed] in $embed.wrappedValue($0) },
         extract: extract
       )
     }
@@ -65,7 +66,7 @@ extension AnyCasePath {
     ///   is otherwise undefined.
     /// - Parameter embed: An embed function.
     /// - Returns: A case path.
-    public init(_ embed: @escaping @Sendable (Value) -> Root) {
+    public init(_ embed: @escaping (Value) -> Root) {
       func open<Wrapped>(_: Wrapped.Type) -> @Sendable (Root) -> Value? {
         optionalPromotedExtractHelp(unsafeBitCast(embed, to: (@Sendable (Value) -> Wrapped?).self))
           as! @Sendable (Root) -> Value?
@@ -73,9 +74,9 @@ extension AnyCasePath {
       let extract =
         ((_Witness<Root>.self as? _AnyOptional.Type)?.wrappedType)
         .map { _openExistential($0, do: open) }
-        ?? extractHelp(embed)
+        ?? extractHelp { embed($0) }
       self.init(
-        embed: embed,
+        embed: { embed($0) },
         extract: extract
       )
     }
