@@ -9,10 +9,10 @@ public final class LockIsolated<Value>: @unchecked Sendable {
   func withLock<T: Sendable>(
     _ operation: @Sendable (inout Value) throws -> T
   ) rethrows -> T {
-    try self.lock.withLock {
-      var value = self._value
-      defer { self._value = value }
-      return try operation(&value)
-    }
+    lock.lock()
+    defer { lock.unlock() }
+    var value = _value
+    defer { _value = value }
+    return try operation(&value)
   }
 }
