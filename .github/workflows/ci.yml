@@ -54,7 +54,7 @@ jobs:
         config:
           - debug
           #- release
-        swift: ['5.10']
+        swift: ['6.0']
       fail-fast: false
     runs-on: ${{ matrix.os }}
     steps:
