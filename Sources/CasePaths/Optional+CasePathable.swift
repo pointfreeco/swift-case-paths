@@ -4,8 +4,8 @@ extension Optional: CasePathable {
     /// Returns the case key path for a given root value.
     public subscript(root: Optional) -> PartialCaseKeyPath<Optional> {
       switch root {
-      case .none: return \.none
-      case .some: return \.some
+      case .none: return \Optional.Cases.none
+      case .some: return \Optional.Cases.some
       }
     }
 
