@@ -35,7 +35,7 @@ extension AnyCasePath {
   @available(watchOS, deprecated: 9999, message: "Use a 'CasePathable' case key path, instead")
   @_documentation(visibility:internal)
   public prefix func / <Root, Value>(
-    embed: @escaping (Value) -> Root
+    embed: @escaping @Sendable (Value) -> Root
   ) -> AnyCasePath<Root, Value> {
     .init(embed: embed, extract: extractHelp(embed))
   }
@@ -47,7 +47,7 @@ extension AnyCasePath {
   /// - Parameter embed: An embed function.
   /// - Returns: A case path.
   public prefix func / <Root, Value>(
-    embed: @escaping (Value) -> Root
+    embed: @escaping @Sendable (Value) -> Root
   ) -> AnyCasePath<Root, Value> {
     .init(embed: embed, extract: extractHelp(embed))
   }
@@ -60,9 +60,9 @@ extension AnyCasePath {
   @available(watchOS, deprecated: 9999, message: "Use a 'CasePathable' case key path, instead")
   @_documentation(visibility:internal)
   public prefix func / <Root, Value>(
-    embed: @escaping (Value) -> Root?
+    embed: @escaping @Sendable (Value) -> Root?
   ) -> AnyCasePath<Root?, Value> {
-    .init(embed: embed, extract: optionalPromotedExtractHelp(embed))
+    .init(embed: { embed($0) }, extract: optionalPromotedExtractHelp(embed))
   }
 #else
   /// Returns a case path for the given embed function.
@@ -72,9 +72,9 @@ extension AnyCasePath {
   /// - Parameter embed: An embed function.
   /// - Returns: A case path.
   public prefix func / <Root, Value>(
-    embed: @escaping (Value) -> Root?
+    embed: @escaping @Sendable (Value) -> Root?
   ) -> AnyCasePath<Root?, Value> {
-    .init(embed: embed, extract: optionalPromotedExtractHelp(embed))
+    .init(embed: { embed($0) }, extract: optionalPromotedExtractHelp(embed))
   }
 #endif
 
@@ -85,9 +85,9 @@ extension AnyCasePath {
   @available(watchOS, deprecated: 9999, message: "Use a 'CasePathable' case key path, instead")
   @_documentation(visibility:internal)
   public prefix func / <Root>(
-    root: Root
+    root: @autoclosure @escaping @Sendable () -> Root
   ) -> AnyCasePath<Root, Void> {
-    .init(embed: { root }, extract: extractVoidHelp(root))
+    .init(embed: root, extract: extractVoidHelp(root()))
   }
 #else
   /// Returns a void case path for a case with no associated value.
@@ -97,9 +97,9 @@ extension AnyCasePath {
   /// - Parameter root: A case with no an associated value.
   /// - Returns: A void case path.
   public prefix func / <Root>(
-    root: Root
+    root: @autoclosure @escaping @Sendable () -> Root
   ) -> AnyCasePath<Root, Void> {
-    .init(embed: { root }, extract: extractVoidHelp(root))
+    .init(embed: root, extract: extractVoidHelp(root()))
   }
 #endif
 
@@ -110,9 +110,9 @@ extension AnyCasePath {
   @available(watchOS, deprecated: 9999, message: "Use a 'CasePathable' case key path, instead")
   @_documentation(visibility:internal)
   public prefix func / <Root>(
-    root: Root?
+    root: @autoclosure @escaping @Sendable () -> Root?
   ) -> AnyCasePath<Root?, Void> {
-    .init(embed: { root }, extract: optionalPromotedExtractVoidHelp(root))
+    .init(embed: root, extract: optionalPromotedExtractVoidHelp(root()))
   }
 #else
   /// Returns a void case path for a case with no associated value.
@@ -122,9 +122,9 @@ extension AnyCasePath {
   /// - Parameter root: A case with no an associated value.
   /// - Returns: A void case path.
   public prefix func / <Root>(
-    root: Root?
+    root: @autoclosure @escaping @Sendable () -> Root?
   ) -> AnyCasePath<Root?, Void> {
-    .init(embed: { root }, extract: optionalPromotedExtractVoidHelp(root))
+    .init(embed: root, extract: optionalPromotedExtractVoidHelp(root()))
   }
 #endif
 
@@ -206,7 +206,7 @@ extension AnyCasePath {
   @_disfavoredOverload
   @_documentation(visibility:internal)
   public prefix func / <Root, Value>(
-    embed: @escaping (Value) -> Root
+    embed: @escaping @Sendable (Value) -> Root
   ) -> (Root) -> Value? {
     (/embed).extract(from:)
   }
@@ -229,7 +229,7 @@ extension AnyCasePath {
   /// - Returns: A function that can attempt to extract associated values from an enum.
   @_disfavoredOverload
   public prefix func / <Root, Value>(
-    embed: @escaping (Value) -> Root
+    embed: @escaping @Sendable (Value) -> Root
   ) -> (Root) -> Value? {
     (/embed).extract(from:)
   }
@@ -243,7 +243,7 @@ extension AnyCasePath {
   @_disfavoredOverload
   @_documentation(visibility:internal)
   public prefix func / <Root, Value>(
-    embed: @escaping (Value) -> Root?
+    embed: @escaping @Sendable (Value) -> Root?
   ) -> (Root?) -> Value? {
     (/embed).extract(from:)
   }
@@ -266,7 +266,7 @@ extension AnyCasePath {
   /// - Returns: A function that can attempt to extract associated values from an enum.
   @_disfavoredOverload
   public prefix func / <Root, Value>(
-    embed: @escaping (Value) -> Root?
+    embed: @escaping @Sendable (Value) -> Root?
   ) -> (Root?) -> Value? {
     (/embed).extract(from:)
   }
@@ -292,7 +292,7 @@ extension AnyCasePath {
   @_disfavoredOverload
   @_documentation(visibility:internal)
   public prefix func / <Root>(
-    root: Root
+    root: @autoclosure @escaping @Sendable () -> Root
   ) -> (Root) -> Void? {
     (/root).extract(from:)
   }
@@ -305,7 +305,7 @@ extension AnyCasePath {
   /// - Returns: A void case path.
   @_disfavoredOverload
   public prefix func / <Root>(
-    root: Root
+    root: @autoclosure @escaping @Sendable () -> Root
   ) -> (Root) -> Void? {
     (/root).extract(from:)
   }
@@ -331,7 +331,7 @@ extension AnyCasePath {
   @_disfavoredOverload
   @_documentation(visibility:internal)
   public prefix func / <Root>(
-    root: Root
+    root: @autoclosure @escaping @Sendable () -> Root
   ) -> (Root?) -> Void? {
     (/root).extract(from:)
   }
@@ -344,7 +344,7 @@ extension AnyCasePath {
   /// - Returns: A void case path.
   @_disfavoredOverload
   public prefix func / <Root>(
-    root: Root
+    root: @autoclosure @escaping @Sendable () -> Root
   ) -> (Root?) -> Void? {
     (/root).extract(from:)
   }
@@ -393,7 +393,7 @@ extension AnyCasePath {
     @available(watchOS, deprecated: 9999, message: "Append 'CasePathable' case key paths, instead")
     public static func .. <AppendedValue>(
       lhs: AnyCasePath,
-      rhs: @escaping (AppendedValue) -> Value
+      rhs: @escaping @Sendable (AppendedValue) -> Value
     ) -> AnyCasePath<Root, AppendedValue> {
       lhs.appending(path: /rhs)
     }
@@ -407,7 +407,7 @@ extension AnyCasePath {
     ///   value.
     public static func .. <AppendedValue>(
       lhs: AnyCasePath,
-      rhs: @escaping (AppendedValue) -> Value
+      rhs: @escaping @Sendable (AppendedValue) -> Value
     ) -> AnyCasePath<Root, AppendedValue> {
       lhs.appending(path: /rhs)
     }
@@ -420,8 +420,8 @@ extension AnyCasePath {
   @available(tvOS, deprecated: 9999, message: "Chain 'CasePathable' case properties, instead")
   @available(watchOS, deprecated: 9999, message: "Chain 'CasePathable' case properties, instead")
   public func .. <Root, Value, AppendedValue>(
-    lhs: @escaping (Root) -> Value?,
-    rhs: @escaping (AppendedValue) -> Value
+    lhs: @escaping @Sendable (Root) -> Value?,
+    rhs: @escaping @Sendable (AppendedValue) -> Value
   ) -> (Root) -> AppendedValue? {
     return { root in lhs(root).flatMap((/rhs).extract(from:)) }
   }
@@ -442,8 +442,8 @@ extension AnyCasePath {
   /// - Returns: A new extract function from the first extract function's root to the second embed
   ///   function's appended value.
   public func .. <Root, Value, AppendedValue>(
-    lhs: @escaping (Root) -> Value?,
-    rhs: @escaping (AppendedValue) -> Value
+    lhs: @escaping @Sendable (Root) -> Value?,
+    rhs: @escaping @Sendable (AppendedValue) -> Value
   ) -> (Root) -> AppendedValue? {
     return { root in lhs(root).flatMap((/rhs).extract(from:)) }
   }

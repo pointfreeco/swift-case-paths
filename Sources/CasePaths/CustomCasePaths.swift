@@ -7,7 +7,7 @@ extension AnyCasePath where Root == Value {
     public static var `self`: Self {
       .init(
         embed: { $0 },
-        extract: Optional.some
+        extract: { .some($0) }
       )
     }
   #else
@@ -16,7 +16,7 @@ extension AnyCasePath where Root == Value {
     public static var `self`: Self {
       .init(
         embed: { $0 },
-        extract: Optional.some
+        extract: { .some($0) }
       )
     }
   #endif
@@ -37,12 +37,12 @@ extension AnyCasePath where Root: _OptionalProtocol, Value == Root.Wrapped {
       watchOS, deprecated: 9999, message: "Use the '\\Optional.Cases.some' case key path, instead"
     )
     public static var some: Self {
-      .init(embed: Root.init, extract: { $0.optional })
+      .init(embed: { Root($0) }, extract: { $0.optional })
     }
   #else
     /// The optional case path: a case path that unwraps an optional value.
     public static var some: Self {
-      .init(embed: Root.init, extract: { $0.optional })
+      .init(embed: { Root($0) }, extract: { $0.optional })
     }
   #endif
 }
