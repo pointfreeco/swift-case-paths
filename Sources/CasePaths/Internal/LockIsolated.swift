@@ -1,6 +1,6 @@
 import Foundation
 
-public final class LockIsolated<Value>: @unchecked Sendable {
+final class LockIsolated<Value>: @unchecked Sendable {
   private var _value: Value
   private let lock = NSRecursiveLock()
   init(_ value: @autoclosure @Sendable () throws -> Value) rethrows {
