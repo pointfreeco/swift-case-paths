@@ -16,8 +16,20 @@ extension AnyCasePath {
   @available(macOS, deprecated: 9999, message: "Use a 'CasePathable' case key path, instead")
   @available(tvOS, deprecated: 9999, message: "Use a 'CasePathable' case key path, instead")
   @available(watchOS, deprecated: 9999, message: "Use a 'CasePathable' case key path, instead")
-  public init(unsafe embed: @escaping (Value) -> Root) {
-    self.init(embed)
+  public init(unsafe embed: @escaping @Sendable (Value) -> Root) {
+    func open<Wrapped>(_: Wrapped.Type) -> @Sendable (Root) -> Value? {
+      optionalPromotedExtractHelp(unsafeBitCast(embed, to: (@Sendable (Value) -> Wrapped?).self))
+        as! @Sendable (Root) -> Value?
+    }
+    @UncheckedSendable var embed = embed
+    let extract =
+      ((_Witness<Root>.self as? _AnyOptional.Type)?.wrappedType)
+      .map { _openExistential($0, do: open) }
+      ?? extractHelp { [$embed] in $embed.wrappedValue($0) }
+    self.init(
+      embed: { [$embed] in $embed.wrappedValue($0) },
+      extract: extract
+    )
   }
 
   /// Returns a void case path for a case with no associated value.
@@ -36,111 +48,28 @@ extension AnyCasePath {
   @available(watchOS, deprecated: 9999, message: "Use a 'CasePathable' case key path, instead")
   @_disfavoredOverload
   public init(unsafe root: @autoclosure @escaping @Sendable () -> Root) where Value == Void {
-    self.init(root)
+    func open<Wrapped>(_: Wrapped.Type) -> @Sendable (Root) -> Void? {
+      optionalPromotedExtractVoidHelp(
+        unsafeBitCast(root, to: Wrapped?.self)
+      ) as! @Sendable (Root) -> Void?
+    }
+    let extract =
+      ((_Witness<Root>.self as? _AnyOptional.Type)?.wrappedType)
+      .map { _openExistential($0, do: open) }
+      ?? extractVoidHelp(root())
+    self.init(embed: root, extract: extract)
   }
 
   #if swift(>=5.9)
-    @available(iOS, deprecated: 9999, message: "Use a 'CasePathable' case key path, instead")
-    @available(macOS, deprecated: 9999, message: "Use a 'CasePathable' case key path, instead")
-    @available(tvOS, deprecated: 9999, message: "Use a 'CasePathable' case key path, instead")
-    @available(watchOS, deprecated: 9999, message: "Use a 'CasePathable' case key path, instead")
+    @available(*, deprecated, message: "Use a 'CasePathable' case key path, instead")
     public init(_ embed: @escaping (Value) -> Root) {
-      func open<Wrapped>(_: Wrapped.Type) -> @Sendable (Root) -> Value? {
-        optionalPromotedExtractHelp(unsafeBitCast(embed, to: (@Sendable (Value) -> Wrapped?).self))
-          as! @Sendable (Root) -> Value?
-      }
       @UncheckedSendable var embed = embed
-      let extract =
-        ((_Witness<Root>.self as? _AnyOptional.Type)?.wrappedType)
-        .map { _openExistential($0, do: open) }
-        ?? extractHelp { [$embed] in $embed.wrappedValue($0) }
-      self.init(
-        embed: { [$embed] in $embed.wrappedValue($0) },
-        extract: extract
-      )
+      self.init(unsafe: { [$embed] in $embed.wrappedValue($0) })
     }
   #else
-    /// Returns a case path for the given embed function.
-    ///
-    /// - Note: This operator is only intended to be used with enum case initializers. Its behavior
-    ///   is otherwise undefined.
-    /// - Parameter embed: An embed function.
-    /// - Returns: A case path.
     public init(_ embed: @escaping (Value) -> Root) {
-      func open<Wrapped>(_: Wrapped.Type) -> @Sendable (Root) -> Value? {
-        optionalPromotedExtractHelp(unsafeBitCast(embed, to: (@Sendable (Value) -> Wrapped?).self))
-          as! @Sendable (Root) -> Value?
-      }
-      let extract =
-        ((_Witness<Root>.self as? _AnyOptional.Type)?.wrappedType)
-        .map { _openExistential($0, do: open) }
-        ?? extractHelp { embed($0) }
-      self.init(
-        embed: { embed($0) },
-        extract: extract
-      )
-    }
-  #endif
-}
-
-extension AnyCasePath where Value == Void {
-  #if swift(>=5.9)
-    @available(iOS, deprecated: 9999, message: "Use a 'CasePathable' case key path, instead")
-    @available(macOS, deprecated: 9999, message: "Use a 'CasePathable' case key path, instead")
-    @available(tvOS, deprecated: 9999, message: "Use a 'CasePathable' case key path, instead")
-    @available(watchOS, deprecated: 9999, message: "Use a 'CasePathable' case key path, instead")
-    @_disfavoredOverload
-    public init(_ root: @autoclosure @escaping @Sendable () -> Root) {
-      func open<Wrapped>(_: Wrapped.Type) -> @Sendable (Root) -> Void? {
-        optionalPromotedExtractVoidHelp(
-          unsafeBitCast(root, to: Wrapped?.self)
-        ) as! @Sendable (Root) -> Void?
-      }
-      let extract =
-        ((_Witness<Root>.self as? _AnyOptional.Type)?.wrappedType)
-        .map { _openExistential($0, do: open) }
-        ?? extractVoidHelp(root())
-      self.init(embed: root, extract: extract)
-    }
-  #else
-    /// Returns a void case path for a case with no associated value.
-    ///
-    /// - Note: This operator is only intended to be used with enum cases that have no associated
-    ///   values. Its behavior is otherwise undefined.
-    /// - Parameter root: A case with no an associated value.
-    /// - Returns: A void case path.
-    @_disfavoredOverload
-    public init(_ root: @autoclosure @escaping @Sendable () -> Root) {
-      func open<Wrapped>(_: Wrapped.Type) -> @Sendable (Root) -> Void? {
-        optionalPromotedExtractVoidHelp(
-          unsafeBitCast(root, to: Wrapped?.self)
-        ) as! @Sendable (Root) -> Void?
-      }
-      let extract =
-        ((_Witness<Root>.self as? _AnyOptional.Type)?.wrappedType)
-        .map { _openExistential($0, do: open) }
-        ?? extractVoidHelp(root())
-      self.init(embed: root, extract: extract)
-    }
-  #endif
-}
-
-extension AnyCasePath where Root == Value {
-  #if swift(>=5.9)
-    @available(iOS, deprecated: 9999, message: "Use the '\\.self' case key path, instead")
-    @available(macOS, deprecated: 9999, message: "Use the '\\.self' case key path, instead")
-    @available(tvOS, deprecated: 9999, message: "Use the '\\.self' case key path, instead")
-    @available(watchOS, deprecated: 9999, message: "Use the '\\.self' case key path, instead")
-    public init(_ type: Root.Type) {
-      self = .self
-    }
-  #else
-    /// Returns the identity case path for the given type. Enables `CasePath(MyType.self)` syntax.
-    ///
-    /// - Parameter type: A type for which to return the identity case path.
-    /// - Returns: An identity case path.
-    public init(_ type: Root.Type) {
-      self = .self
+      @UncheckedSendable var embed = embed
+      self.init(unsafe: { [$embed] in $embed.wrappedValue($0) })
     }
   #endif
 }
