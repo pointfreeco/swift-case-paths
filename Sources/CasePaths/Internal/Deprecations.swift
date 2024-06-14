@@ -1,3 +1,9 @@
+@_spi(CurrentTestCase) import XCTestDynamicOverlay
+
+#if canImport(ObjectiveC)
+  import ObjectiveC
+#endif
+
 // Deprecated after 1.5.0:
 
 extension AnyCasePath where Root == Value {
@@ -329,6 +335,98 @@ extension AnyCasePath {
     rhs: @escaping (AppendedValue) -> Value
   ) -> (Root) -> AppendedValue? {
     return { root in lhs(root).flatMap((/rhs).extract(from:)) }
+  }
+#endif
+
+#if swift(>=5.9)
+  @available(
+    *, deprecated, message: "Use XCTest's 'XCTUnwrap' with a 'CasePathable' case property, instead"
+  )
+  public func XCTUnwrap<Enum, Case>(
+    _ enum: @autoclosure () throws -> Enum,
+    case extract: (Enum) -> Case?,
+    _ message: @autoclosure () -> String = "",
+    file: StaticString = #file,
+    line: UInt = #line
+  ) throws -> Case {
+    let `enum` = try `enum`()
+    guard let value = extract(`enum`)
+    else {
+      #if canImport(ObjectiveC)
+        _ = XCTCurrentTestCase?.perform(Selector(("setContinueAfterFailure:")), with: false)
+      #endif
+      let message = message()
+      XCTFail(
+        """
+        XCTUnwrap failed: expected to extract value of type "\(typeName(Case.self))" from \
+        "\(typeName(Enum.self))"\
+        \(message.isEmpty ? "" : " - " + message) …
+
+          Actual:
+            \(String(describing: `enum`))
+        """,
+        file: file,
+        line: line
+      )
+      throw UnwrappingCase()
+    }
+    return value
+  }
+#else
+  public func XCTUnwrap<Enum, Case>(
+    _ enum: @autoclosure () throws -> Enum,
+    case extract: (Enum) -> Case?,
+    _ message: @autoclosure () -> String = "",
+    file: StaticString = #file,
+    line: UInt = #line
+  ) throws -> Case {
+    let `enum` = try `enum`()
+    guard let value = extract(`enum`)
+    else {
+      #if canImport(ObjectiveC)
+        _ = XCTCurrentTestCase?.perform(Selector(("setContinueAfterFailure:")), with: false)
+      #endif
+      let message = message()
+      XCTFail(
+        """
+        XCTUnwrap failed: expected to extract value of type "\(typeName(Case.self))" from \
+        "\(typeName(Enum.self))"\
+        \(message.isEmpty ? "" : " - " + message) …
+
+          Actual:
+            \(String(describing: `enum`))
+        """,
+        file: file,
+        line: line
+      )
+      throw UnwrappingCase()
+    }
+    return value
+  }
+#endif
+
+#if swift(>=5.9)
+  @available(*, deprecated, message: "Use a 'CasePathable' case key path, instead")
+  public func XCTModify<Enum, Case>(
+    _ enum: inout Enum,
+    case casePath: AnyCasePath<Enum, Case>,
+    _ message: @autoclosure () -> String = "",
+    _ body: (inout Case) throws -> Void,
+    file: StaticString = #file,
+    line: UInt = #line
+  ) {
+    _XCTModify(&`enum`, case: casePath, message(), body, file: file, line: line)
+  }
+#else
+  public func XCTModify<Enum, Case>(
+    _ enum: inout Enum,
+    case casePath: AnyCasePath<Enum, Case>,
+    _ message: @autoclosure () -> String = "",
+    _ body: (inout Case) throws -> Void,
+    file: StaticString = #file,
+    line: UInt = #line
+  ) {
+    _XCTModify(&`enum`, case: casePath, message(), body, file: file, line: line)
   }
 #endif
 
