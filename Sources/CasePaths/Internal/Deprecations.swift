@@ -4,7 +4,7 @@
   import ObjectiveC
 #endif
 
-// Deprecated after 1.5.0:
+// Deprecated after 1.4.2:
 
 extension AnyCasePath where Root == Value {
   #if swift(>=5.9)
