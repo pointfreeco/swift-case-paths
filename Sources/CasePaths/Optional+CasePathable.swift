@@ -2,12 +2,12 @@ extension Optional: CasePathable {
   @dynamicMemberLookup
   public struct AllCasePaths: Sendable {
     /// Returns the case key path for a given root value.
-    public subscript(root: Optional) -> PartialCaseKeyPath<Optional> {
-      switch root {
-      case .none: return \.none
-      case .some: return \.some
-      }
-    }
+//    public subscript(root: Optional) -> PartialCaseKeyPath<Optional> {
+//      switch root {
+//      case .none: return \.none
+//      case .some: return \.some
+//      }
+//    }
 
     /// A case path to the absence of a value.
     public var none: AnyCasePath<Optional, Void> {
