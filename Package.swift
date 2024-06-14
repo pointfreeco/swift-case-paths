@@ -1,5 +1,6 @@
-// swift-tools-version: 5.6
+// swift-tools-version: 5.9
 
+import CompilerPluginSupport
 import PackageDescription
 
 let package = Package(
@@ -17,18 +18,35 @@ let package = Package(
     )
   ],
   dependencies: [
-    .package(url: "https://github.com/pointfreeco/xctest-dynamic-overlay", from: "1.0.0")
+    .package(url: "https://github.com/apple/swift-syntax", "509.0.0"..<"601.0.0"),
+    .package(url: "https://github.com/pointfreeco/swift-macro-testing", from: "0.2.0"),
+    .package(url: "https://github.com/pointfreeco/xctest-dynamic-overlay", from: "1.0.0"),
   ],
   targets: [
     .target(
       name: "CasePaths",
       dependencies: [
-        .product(name: "XCTestDynamicOverlay", package: "xctest-dynamic-overlay")
+        "CasePathsMacros",
+        .product(name: "XCTestDynamicOverlay", package: "xctest-dynamic-overlay"),
       ]
     ),
     .testTarget(
       name: "CasePathsTests",
       dependencies: ["CasePaths"]
+    ),
+    .macro(
+      name: "CasePathsMacros",
+      dependencies: [
+        .product(name: "SwiftSyntaxMacros", package: "swift-syntax"),
+        .product(name: "SwiftCompilerPlugin", package: "swift-syntax"),
+      ]
+    ),
+    .testTarget(
+      name: "CasePathsMacrosTests",
+      dependencies: [
+        "CasePathsMacros",
+        .product(name: "MacroTesting", package: "swift-macro-testing"),
+      ]
     ),
   ]
 )
@@ -39,3 +57,15 @@ let package = Package(
     .package(url: "https://github.com/apple/swift-docc-plugin", from: "1.0.0")
   )
 #endif
+
+for target in package.targets {
+  target.swiftSettings = target.swiftSettings ?? []
+  target.swiftSettings?.append(contentsOf: [
+    .enableExperimentalFeature("StrictConcurrency")
+  ])
+  // target.swiftSettings?.append(
+  //   .unsafeFlags([
+  //     "-enable-library-evolution",
+  //   ])
+  // )
+}
