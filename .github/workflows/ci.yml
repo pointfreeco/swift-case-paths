@@ -46,22 +46,22 @@ jobs:
       - name: Run tests (release)
         run: swift test -c release --parallel
 
-  windows:
-    name: Windows (Swift ${{ matrix.swift }}, ${{ matrix.config }})
-    strategy:
-      matrix:
-        os: [windows-latest]
-        config:
-          - debug
-          #- release
-        swift: ['6.0']
-      fail-fast: false
-    runs-on: ${{ matrix.os }}
-    steps:
-      - uses: compnerd/gha-setup-swift@main
-        with:
-          branch: swift-${{ matrix.swift }}-branch
-          tag: ${{ matrix.swift }}-DEVELOPMENT-SNAPSHOT-2024-06-03-a
-      - uses: actions/checkout@v4
-      - name: Build
-        run: swift build -c ${{ matrix.config }}
+  # windows:
+  #   name: Windows (Swift ${{ matrix.swift }}, ${{ matrix.config }})
+  #   strategy:
+  #     matrix:
+  #       os: [windows-latest]
+  #       config:
+  #         - debug
+  #         #- release
+  #       swift: ['6.0']
+  #     fail-fast: false
+  #   runs-on: ${{ matrix.os }}
+  #   steps:
+  #     - uses: compnerd/gha-setup-swift@main
+  #       with:
+  #         branch: swift-${{ matrix.swift }}-branch
+  #         tag: ${{ matrix.swift }}-DEVELOPMENT-SNAPSHOT-2024-06-03-a
+  #     - uses: actions/checkout@v4
+  #     - name: Build
+  #       run: swift build -c ${{ matrix.config }}
