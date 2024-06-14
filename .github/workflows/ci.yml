@@ -20,8 +20,7 @@ jobs:
     strategy:
       matrix:
         xcode:
-          - '14.3.1'
-          - '15.2'
+          - '15.4'
     steps:
       - uses: actions/checkout@v4
       - name: Select Xcode ${{ matrix.xcode }}
@@ -35,7 +34,7 @@ jobs:
     strategy:
       matrix:
         swift:
-          - '5.9'
+          - '5.10'
     name: Ubuntu (Swift ${{ matrix.swift }})
     runs-on: ubuntu-latest
     container: swift:${{ matrix.swift }}

@@ -222,12 +222,7 @@ private struct MetadataKind: Equatable {
   }
 
   @_spi(Reflection) public func tag<Enum>(of value: Enum) -> UInt32 {
-    #if swift(<5.8)
-      // NB: Workaround for https://github.com/apple/swift/issues/61708
-      guard self.typeDescriptor.emptyCaseCount + self.typeDescriptor.payloadCaseCount > 1
-      else { return 0 }
-    #endif
-    return withUnsafePointer(to: value) {
+    withUnsafePointer(to: value) {
       self.valueWitnessTable.getEnumTag($0, self.ptr)
     }
   }

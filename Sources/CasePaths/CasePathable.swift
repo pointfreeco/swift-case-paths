@@ -43,22 +43,14 @@ public protocol CasePathable {
   static var allCasePaths: AllCasePaths { get }
 }
 
-#if swift(>=5.9)
-  /// A type that is used to distinguish case key paths from key paths by wrapping the enum and
-  /// associated value types.
-  @_documentation(visibility:internal)
-  @dynamicMemberLookup
-  public struct Case<Value>: Sendable {
-    fileprivate let _embed: @Sendable (Value) -> Any
-    fileprivate let _extract: @Sendable (Any) -> Value?
-  }
-#else
-  @dynamicMemberLookup
-  public struct Case<Value> {
-    fileprivate let _embed: @Sendable (Value) -> Any
-    fileprivate let _extract: @Sendable (Any) -> Value?
-  }
-#endif
+/// A type that is used to distinguish case key paths from key paths by wrapping the enum and
+/// associated value types.
+@_documentation(visibility:internal)
+@dynamicMemberLookup
+public struct Case<Value>: Sendable {
+  fileprivate let _embed: @Sendable (Value) -> Any
+  fileprivate let _extract: @Sendable (Any) -> Value?
+}
 
 extension Case {
   public init<Root>(

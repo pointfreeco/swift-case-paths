@@ -1,4 +1,4 @@
-#if swift(>=5.9) && DEBUG && (os(iOS) || os(macOS) || os(tvOS) || os(watchOS))
+#if DEBUG && (os(iOS) || os(macOS) || os(tvOS) || os(watchOS))
   @_spi(Internals) import CasePaths
   import XCTest
 
