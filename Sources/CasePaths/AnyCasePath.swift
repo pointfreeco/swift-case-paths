@@ -7,8 +7,8 @@ import Foundation
 /// from types that conform to ``CasePathable``.
 @dynamicMemberLookup
 public struct AnyCasePath<Root, Value> {
-  private let _embed: (Value) -> Root
-  private let _extract: (Root) -> Value?
+  private let _embed: @Sendable (Value) -> Root
+  private let _extract: @Sendable (Root) -> Value?
 
   /// Creates a type-erased case path from a pair of functions.
   ///
@@ -16,8 +16,8 @@ public struct AnyCasePath<Root, Value> {
   ///   - embed: A function that always succeeds in embedding a value in a root.
   ///   - extract: A function that can optionally fail in extracting a value from a root.
   public init(
-    embed: @escaping (Value) -> Root,
-    extract: @escaping (Root) -> Value?
+    embed: @escaping @Sendable (Value) -> Root,
+    extract: @escaping @Sendable (Root) -> Value?
   ) {
     self._embed = embed
     self._extract = extract

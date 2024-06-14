@@ -1,4 +1,4 @@
-// swift-tools-version:5.6
+// swift-tools-version: 5.6
 
 import PackageDescription
 
@@ -17,7 +17,6 @@ let package = Package(
     )
   ],
   dependencies: [
-    .package(url: "https://github.com/google/swift-benchmark", from: "0.1.0"),
     .package(url: "https://github.com/pointfreeco/xctest-dynamic-overlay", from: "1.0.0"),
   ],
   targets: [
@@ -30,13 +29,6 @@ let package = Package(
     .testTarget(
       name: "CasePathsTests",
       dependencies: ["CasePaths"]
-    ),
-    .executableTarget(
-      name: "swift-case-paths-benchmark",
-      dependencies: [
-        "CasePaths",
-        .product(name: "Benchmark", package: "swift-benchmark"),
-      ]
     ),
   ]
 )

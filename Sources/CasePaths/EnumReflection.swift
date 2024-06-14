@@ -16,8 +16,20 @@ extension AnyCasePath {
   @available(macOS, deprecated: 9999, message: "Use a 'CasePathable' case key path, instead")
   @available(tvOS, deprecated: 9999, message: "Use a 'CasePathable' case key path, instead")
   @available(watchOS, deprecated: 9999, message: "Use a 'CasePathable' case key path, instead")
-  public init(unsafe embed: @escaping (Value) -> Root) {
-    self.init(embed)
+  public init(unsafe embed: @escaping @Sendable (Value) -> Root) {
+    func open<Wrapped>(_: Wrapped.Type) -> @Sendable (Root) -> Value? {
+      optionalPromotedExtractHelp(unsafeBitCast(embed, to: (@Sendable (Value) -> Wrapped?).self))
+        as! @Sendable (Root) -> Value?
+    }
+    @UncheckedSendable var embed = embed
+    let extract =
+      ((_Witness<Root>.self as? _AnyOptional.Type)?.wrappedType)
+      .map { _openExistential($0, do: open) }
+      ?? extractHelp { [$embed] in $embed.wrappedValue($0) }
+    self.init(
+      embed: { [$embed] in $embed.wrappedValue($0) },
+      extract: extract
+    )
   }
 
   /// Returns a void case path for a case with no associated value.
@@ -35,119 +47,30 @@ extension AnyCasePath {
   @available(tvOS, deprecated: 9999, message: "Use a 'CasePathable' case key path, instead")
   @available(watchOS, deprecated: 9999, message: "Use a 'CasePathable' case key path, instead")
   @_disfavoredOverload
-  public init(unsafe root: Root) where Value == Void {
-    self.init(root)
+  public init(unsafe root: @autoclosure @escaping @Sendable () -> Root) where Value == Void {
+    func open<Wrapped>(_: Wrapped.Type) -> @Sendable (Root) -> Void? {
+      optionalPromotedExtractVoidHelp(
+        unsafeBitCast(root, to: Wrapped?.self)
+      ) as! @Sendable (Root) -> Void?
+    }
+    let extract =
+      ((_Witness<Root>.self as? _AnyOptional.Type)?.wrappedType)
+      .map { _openExistential($0, do: open) }
+      ?? extractVoidHelp(root())
+    self.init(embed: root, extract: extract)
   }
-
-  #if swift(>=5.9)
-    @available(iOS, deprecated: 9999, message: "Use a 'CasePathable' case key path, instead")
-    @available(macOS, deprecated: 9999, message: "Use a 'CasePathable' case key path, instead")
-    @available(tvOS, deprecated: 9999, message: "Use a 'CasePathable' case key path, instead")
-    @available(watchOS, deprecated: 9999, message: "Use a 'CasePathable' case key path, instead")
-    public init(_ embed: @escaping (Value) -> Root) {
-      func open<Wrapped>(_: Wrapped.Type) -> (Root) -> Value? {
-        optionalPromotedExtractHelp(unsafeBitCast(embed, to: ((Value) -> Wrapped?).self))
-          as! (Root) -> Value?
-      }
-      let extract =
-        ((_Witness<Root>.self as? _AnyOptional.Type)?.wrappedType)
-        .map { _openExistential($0, do: open) }
-        ?? extractHelp(embed)
-      self.init(
-        embed: embed,
-        extract: extract
-      )
-    }
-  #else
-    /// Returns a case path for the given embed function.
-    ///
-    /// - Note: This operator is only intended to be used with enum case initializers. Its behavior
-    ///   is otherwise undefined.
-    /// - Parameter embed: An embed function.
-    /// - Returns: A case path.
-    public init(_ embed: @escaping (Value) -> Root) {
-      func open<Wrapped>(_: Wrapped.Type) -> (Root) -> Value? {
-        optionalPromotedExtractHelp(unsafeBitCast(embed, to: ((Value) -> Wrapped?).self))
-          as! (Root) -> Value?
-      }
-      let extract =
-        ((_Witness<Root>.self as? _AnyOptional.Type)?.wrappedType)
-        .map { _openExistential($0, do: open) }
-        ?? extractHelp(embed)
-      self.init(
-        embed: embed,
-        extract: extract
-      )
-    }
-  #endif
-}
-
-extension AnyCasePath where Value == Void {
-  #if swift(>=5.9)
-    @available(iOS, deprecated: 9999, message: "Use a 'CasePathable' case key path, instead")
-    @available(macOS, deprecated: 9999, message: "Use a 'CasePathable' case key path, instead")
-    @available(tvOS, deprecated: 9999, message: "Use a 'CasePathable' case key path, instead")
-    @available(watchOS, deprecated: 9999, message: "Use a 'CasePathable' case key path, instead")
-    @_disfavoredOverload
-    public init(_ root: Root) {
-      func open<Wrapped>(_: Wrapped.Type) -> (Root) -> Void? {
-        optionalPromotedExtractVoidHelp(unsafeBitCast(root, to: Wrapped?.self)) as! (Root) -> Void?
-      }
-      let extract =
-        ((_Witness<Root>.self as? _AnyOptional.Type)?.wrappedType)
-        .map { _openExistential($0, do: open) }
-        ?? extractVoidHelp(root)
-      self.init(embed: { root }, extract: extract)
-    }
-  #else
-    /// Returns a void case path for a case with no associated value.
-    ///
-    /// - Note: This operator is only intended to be used with enum cases that have no associated
-    ///   values. Its behavior is otherwise undefined.
-    /// - Parameter root: A case with no an associated value.
-    /// - Returns: A void case path.
-    @_disfavoredOverload
-    public init(_ root: Root) {
-      func open<Wrapped>(_: Wrapped.Type) -> (Root) -> Void? {
-        optionalPromotedExtractVoidHelp(unsafeBitCast(root, to: Wrapped?.self)) as! (Root) -> Void?
-      }
-      let extract =
-        ((_Witness<Root>.self as? _AnyOptional.Type)?.wrappedType)
-        .map { _openExistential($0, do: open) }
-        ?? extractVoidHelp(root)
-      self.init(embed: { root }, extract: extract)
-    }
-
-  #endif
-}
-
-extension AnyCasePath where Root == Value {
-  #if swift(>=5.9)
-    @available(iOS, deprecated: 9999, message: "Use the '\\.self' case key path, instead")
-    @available(macOS, deprecated: 9999, message: "Use the '\\.self' case key path, instead")
-    @available(tvOS, deprecated: 9999, message: "Use the '\\.self' case key path, instead")
-    @available(watchOS, deprecated: 9999, message: "Use the '\\.self' case key path, instead")
-    public init(_ type: Root.Type) {
-      self = .self
-    }
-  #else
-    /// Returns the identity case path for the given type. Enables `CasePath(MyType.self)` syntax.
-    ///
-    /// - Parameter type: A type for which to return the identity case path.
-    /// - Returns: An identity case path.
-    public init(_ type: Root.Type) {
-      self = .self
-    }
-  #endif
 }
 
 // MARK: - Extraction helpers
 
-private let lock = NSRecursiveLock()
+private struct Cache: Sendable {
+  var tag: UInt32?
+  var strategy: (isIndirect: Bool, associatedValueType: Any.Type)?
+}
 
-func extractHelp<Root, Value>(_ embed: @escaping (Value) -> Root) -> (Root) -> Value? {
-  lock.lock()
-  defer { lock.unlock() }
+func extractHelp<Root, Value>(
+  _ embed: @escaping @Sendable (Value) -> Root
+) -> @Sendable (Root) -> Value? {
   guard
     let metadata = EnumMetadata(Root.self),
     metadata.typeDescriptor.fieldDescriptor != nil
@@ -156,18 +79,21 @@ func extractHelp<Root, Value>(_ embed: @escaping (Value) -> Root) -> (Root) -> V
     return { _ in nil }
   }
 
-  var cachedTag: UInt32?
-  var cachedStrategy: (isIndirect: Bool, associatedValueType: Any.Type)?
+  let cache = LockIsolated(Cache())
 
   return { root in
     let rootTag = metadata.tag(of: root)
 
-    if let cachedTag = cachedTag, let (isIndirect, associatedValueType) = cachedStrategy {
+    if
+      case let (cachedTag?, (isIndirect, associatedValueType)?)
+        = cache.withLock({ ($0.tag, $0.strategy) })
+    {
       guard rootTag == cachedTag else { return nil }
-      return
+      let value =
         EnumMetadata
         ._project(root, isIndirect: isIndirect, associatedValueType: associatedValueType)?
         .value as? Value
+      return value
     }
 
     guard
@@ -176,19 +102,19 @@ func extractHelp<Root, Value>(_ embed: @escaping (Value) -> Root) -> (Root) -> V
     else { return nil }
 
     let embedTag = metadata.tag(of: embed(value))
-    cachedTag = embedTag
-    if embedTag == rootTag {
-      cachedStrategy = (isIndirect, type)
-      return value
-    } else {
-      return nil
+    cache.withLock {
+      $0.tag = embedTag
+      if embedTag == rootTag {
+        $0.strategy = (isIndirect, type)
+      }
     }
+    return embedTag == rootTag ? value : nil
   }
 }
 
 func optionalPromotedExtractHelp<Root, Value>(
-  _ embed: @escaping (Value) -> Root?
-) -> (Root?) -> Value? {
+  _ embed: @escaping @Sendable (Value) -> Root?
+) -> @Sendable (Root?) -> Value? {
   guard Root.self != Value.self else { return { $0 as! Value? } }
   guard
     let metadata = EnumMetadata(Root.self),
@@ -198,14 +124,14 @@ func optionalPromotedExtractHelp<Root, Value>(
     return { _ in nil }
   }
 
-  var cachedTag: UInt32?
+  let cachedTag = LockIsolated<UInt32?>(nil)
 
   return { optionalRoot in
     guard let root = optionalRoot else { return nil }
 
     let rootTag = metadata.tag(of: root)
 
-    if let cachedTag = cachedTag {
+    if let cachedTag = cachedTag.withLock({ $0 }) {
       guard rootTag == cachedTag else { return nil }
     }
 
@@ -214,12 +140,12 @@ func optionalPromotedExtractHelp<Root, Value>(
 
     guard let embedded = embed(value) else { return nil }
     let embedTag = metadata.tag(of: embedded)
-    cachedTag = embedTag
+    cachedTag.withLock { $0 = embedTag }
     return embedTag == rootTag ? value : nil
   }
 }
 
-func extractVoidHelp<Root>(_ root: Root) -> (Root) -> Void? {
+func extractVoidHelp<Root>(_ root: Root) -> @Sendable (Root) -> Void? {
   guard
     let metadata = EnumMetadata(Root.self),
     metadata.typeDescriptor.fieldDescriptor != nil
@@ -232,7 +158,7 @@ func extractVoidHelp<Root>(_ root: Root) -> (Root) -> Void? {
   return { root in metadata.tag(of: root) == cachedTag ? () : nil }
 }
 
-func optionalPromotedExtractVoidHelp<Root>(_ root: Root?) -> (Root?) -> Void? {
+func optionalPromotedExtractVoidHelp<Root>(_ root: Root?) -> @Sendable (Root?) -> Void? {
   guard
     let root = root,
     let metadata = EnumMetadata(Root.self),
@@ -273,7 +199,7 @@ private struct MetadataKind: Equatable {
   static var existential: Self { .init(rawValue: 0x303) }
 }
 
-@_spi(Reflection) public struct EnumMetadata: Metadata {
+@_spi(Reflection) public struct EnumMetadata: Metadata, @unchecked Sendable {
   let ptr: UnsafeRawPointer
 
   fileprivate init(assumingEnum type: Any.Type) {

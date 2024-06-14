@@ -31,7 +31,7 @@ final class CasePathableMacroTests: XCTestCase {
         case fizz(buzz: String)
         case fizzier(Int, buzzier: String)
 
-        public struct AllCasePaths: Sequence {
+        public struct AllCasePaths: Sendable, Sequence {
           public subscript(root: Foo) -> PartialCaseKeyPath<Foo> {
             if root.is(\.bar) {
               return \.bar
@@ -62,7 +62,9 @@ final class CasePathableMacroTests: XCTestCase {
           }
           public var baz: CasePaths.AnyCasePath<Foo, Int> {
             CasePaths.AnyCasePath<Foo, Int>(
-              embed: Foo.baz,
+              embed: {
+                Foo.baz($0)
+              },
               extract: {
                 guard case let .baz(v0) = $0 else {
                   return nil
@@ -73,7 +75,9 @@ final class CasePathableMacroTests: XCTestCase {
           }
           public var fizz: CasePaths.AnyCasePath<Foo, String> {
             CasePaths.AnyCasePath<Foo, String>(
-              embed: Foo.fizz,
+              embed: {
+                Foo.fizz(buzz: $0)
+              },
               extract: {
                 guard case let .fizz(v0) = $0 else {
                   return nil
@@ -84,7 +88,9 @@ final class CasePathableMacroTests: XCTestCase {
           }
           public var fizzier: CasePaths.AnyCasePath<Foo, (Int, buzzier: String)> {
             CasePaths.AnyCasePath<Foo, (Int, buzzier: String)>(
-              embed: Foo.fizzier,
+              embed: {
+                Foo.fizzier($0, buzzier: $1)
+              },
               extract: {
                 guard case let .fizzier(v0, v1) = $0 else {
                   return nil
@@ -120,7 +126,7 @@ final class CasePathableMacroTests: XCTestCase {
       #"""
       enum EnumWithNoCases {
 
-          public struct AllCasePaths: Sequence {
+          public struct AllCasePaths: Sendable, Sequence {
               public subscript(root: EnumWithNoCases) -> PartialCaseKeyPath<EnumWithNoCases> {
                   \.never
               }
@@ -150,7 +156,7 @@ final class CasePathableMacroTests: XCTestCase {
       public enum Foo {
         case bar(Int), baz(String)
 
-        public struct AllCasePaths: Sequence {
+        public struct AllCasePaths: Sendable, Sequence {
           public subscript(root: Foo) -> PartialCaseKeyPath<Foo> {
             if root.is(\.bar) {
               return \.bar
@@ -162,7 +168,9 @@ final class CasePathableMacroTests: XCTestCase {
           }
           public var bar: CasePaths.AnyCasePath<Foo, Int> {
             CasePaths.AnyCasePath<Foo, Int>(
-              embed: Foo.bar,
+              embed: {
+                Foo.bar($0)
+              },
               extract: {
                 guard case let .bar(v0) = $0 else {
                   return nil
@@ -173,7 +181,9 @@ final class CasePathableMacroTests: XCTestCase {
           }
           public var baz: CasePaths.AnyCasePath<Foo, String> {
             CasePaths.AnyCasePath<Foo, String>(
-              embed: Foo.baz,
+              embed: {
+                Foo.baz($0)
+              },
               extract: {
                 guard case let .baz(v0) = $0 else {
                   return nil
@@ -210,7 +220,7 @@ final class CasePathableMacroTests: XCTestCase {
       public enum Foo {
         case bar(Int)
 
-        public struct AllCasePaths: Sequence {
+        public struct AllCasePaths: Sendable, Sequence {
           public subscript(root: Foo) -> PartialCaseKeyPath<Foo> {
             if root.is(\.bar) {
               return \.bar
@@ -219,7 +229,9 @@ final class CasePathableMacroTests: XCTestCase {
           }
           public var bar: CasePaths.AnyCasePath<Foo, Int> {
             CasePaths.AnyCasePath<Foo, Int>(
-              embed: Foo.bar,
+              embed: {
+                Foo.bar($0)
+              },
               extract: {
                 guard case let .bar(v0) = $0 else {
                   return nil
@@ -252,7 +264,7 @@ final class CasePathableMacroTests: XCTestCase {
       package enum Foo {
         case bar(Int)
 
-        public struct AllCasePaths: Sequence {
+        public struct AllCasePaths: Sendable, Sequence {
           public subscript(root: Foo) -> PartialCaseKeyPath<Foo> {
             if root.is(\.bar) {
               return \.bar
@@ -261,7 +273,9 @@ final class CasePathableMacroTests: XCTestCase {
           }
           public var bar: CasePaths.AnyCasePath<Foo, Int> {
             CasePaths.AnyCasePath<Foo, Int>(
-              embed: Foo.bar,
+              embed: {
+                Foo.bar($0)
+              },
               extract: {
                 guard case let .bar(v0) = $0 else {
                   return nil
@@ -294,7 +308,7 @@ final class CasePathableMacroTests: XCTestCase {
       private enum Foo {
         case bar(Int)
 
-        public struct AllCasePaths: Sequence {
+        public struct AllCasePaths: Sendable, Sequence {
           public subscript(root: Foo) -> PartialCaseKeyPath<Foo> {
             if root.is(\.bar) {
               return \.bar
@@ -303,7 +317,9 @@ final class CasePathableMacroTests: XCTestCase {
           }
           public var bar: CasePaths.AnyCasePath<Foo, Int> {
             CasePaths.AnyCasePath<Foo, Int>(
-              embed: Foo.bar,
+              embed: {
+                Foo.bar($0)
+              },
               extract: {
                 guard case let .bar(v0) = $0 else {
                   return nil
@@ -373,7 +389,7 @@ final class CasePathableMacroTests: XCTestCase {
       #"""
       enum Foo: CasePathable {
 
-          public struct AllCasePaths: Sequence {
+          public struct AllCasePaths: Sendable, Sequence {
               public subscript(root: Foo) -> PartialCaseKeyPath<Foo> {
                   \.never
               }
@@ -396,7 +412,7 @@ final class CasePathableMacroTests: XCTestCase {
       #"""
       enum Foo: CasePaths.CasePathable {
 
-          public struct AllCasePaths: Sequence {
+          public struct AllCasePaths: Sendable, Sequence {
               public subscript(root: Foo) -> PartialCaseKeyPath<Foo> {
                   \.never
               }
@@ -424,7 +440,7 @@ final class CasePathableMacroTests: XCTestCase {
       enum Foo {
         case bar(_ int: Int, _ bool: Bool)
 
-        public struct AllCasePaths: Sequence {
+        public struct AllCasePaths: Sendable, Sequence {
           public subscript(root: Foo) -> PartialCaseKeyPath<Foo> {
             if root.is(\.bar) {
               return \.bar
@@ -433,7 +449,9 @@ final class CasePathableMacroTests: XCTestCase {
           }
           public var bar: CasePaths.AnyCasePath<Foo, (Int, Bool)> {
             CasePaths.AnyCasePath<Foo, (Int, Bool)>(
-              embed: Foo.bar,
+              embed: {
+                Foo.bar(_: $0, _: $1)
+              },
               extract: {
                 guard case let .bar(v0, v1) = $0 else {
                   return nil
@@ -469,7 +487,7 @@ final class CasePathableMacroTests: XCTestCase {
       enum Foo {
         case bar(Bar<Self>)
 
-        public struct AllCasePaths: Sequence {
+        public struct AllCasePaths: Sendable, Sequence {
           public subscript(root: Foo) -> PartialCaseKeyPath<Foo> {
             if root.is(\.bar) {
               return \.bar
@@ -478,7 +496,9 @@ final class CasePathableMacroTests: XCTestCase {
           }
           public var bar: CasePaths.AnyCasePath<Foo, Bar<Foo>> {
             CasePaths.AnyCasePath<Foo, Bar<Foo>>(
-              embed: Foo.bar,
+              embed: {
+                Foo.bar($0)
+              },
               extract: {
                 guard case let .bar(v0) = $0 else {
                   return nil
@@ -514,7 +534,7 @@ final class CasePathableMacroTests: XCTestCase {
       enum Foo {
         case bar(int: Int = 42, bool: Bool = true)
 
-        public struct AllCasePaths: Sequence {
+        public struct AllCasePaths: Sendable, Sequence {
           public subscript(root: Foo) -> PartialCaseKeyPath<Foo> {
             if root.is(\.bar) {
               return \.bar
@@ -523,7 +543,9 @@ final class CasePathableMacroTests: XCTestCase {
           }
           public var bar: CasePaths.AnyCasePath<Foo, (int: Int, bool: Bool)> {
             CasePaths.AnyCasePath<Foo, (int: Int, bool: Bool)>(
-              embed: Foo.bar,
+              embed: {
+                Foo.bar(int: $0, bool: $1)
+              },
               extract: {
                 guard case let .bar(v0, v1) = $0 else {
                   return nil
@@ -593,7 +615,7 @@ final class CasePathableMacroTests: XCTestCase {
         #endif
         #endif
 
-        public struct AllCasePaths: Sequence {
+        public struct AllCasePaths: Sendable, Sequence {
           public subscript(root: Foo) -> PartialCaseKeyPath<Foo> {
             if root.is(\.bar) {
               return \.bar
@@ -658,7 +680,9 @@ final class CasePathableMacroTests: XCTestCase {
           }
           public var macSecond: CasePaths.AnyCasePath<Foo, Int> {
             CasePaths.AnyCasePath<Foo, Int>(
-              embed: Foo.macSecond,
+              embed: {
+                Foo.macSecond($0)
+              },
               extract: {
                 guard case let .macSecond(v0) = $0 else {
                   return nil
@@ -684,7 +708,9 @@ final class CasePathableMacroTests: XCTestCase {
           #else
           public var elseCase: CasePaths.AnyCasePath<Foo, String> {
             CasePaths.AnyCasePath<Foo, String>(
-              embed: Foo.elseCase,
+              embed: {
+                Foo.elseCase($0)
+              },
               extract: {
                 guard case let .elseCase(v0) = $0 else {
                   return nil
@@ -724,7 +750,9 @@ final class CasePathableMacroTests: XCTestCase {
           }
           public var twoLevels: CasePaths.AnyCasePath<Foo, Double> {
             CasePaths.AnyCasePath<Foo, Double>(
-              embed: Foo.twoLevels,
+              embed: {
+                Foo.twoLevels($0)
+              },
               extract: {
                 guard case let .twoLevels(v0) = $0 else {
                   return nil
@@ -780,7 +808,7 @@ final class CasePathableMacroTests: XCTestCase {
       enum Foo {
         case bar
 
-        public struct AllCasePaths: Sequence {
+        public struct AllCasePaths: Sendable, Sequence {
           public subscript(root: Foo) -> PartialCaseKeyPath<Foo> {
             if root.is(\.bar) {
               return \.bar
@@ -856,7 +884,7 @@ final class CasePathableMacroTests: XCTestCase {
          */
         case fizz, buzz
 
-        public struct AllCasePaths: Sequence {
+        public struct AllCasePaths: Sendable, Sequence {
           public subscript(root: Foo) -> PartialCaseKeyPath<Foo> {
             if root.is(\.bar) {
               return \.bar
@@ -973,7 +1001,7 @@ final class CasePathableMacroTests: XCTestCase {
       // case foo
         case bar
 
-        public struct AllCasePaths: Sequence {
+        public struct AllCasePaths: Sendable, Sequence {
           public subscript(root: Foo) -> PartialCaseKeyPath<Foo> {
             if root.is(\.bar) {
               return \.bar
@@ -1032,7 +1060,7 @@ final class CasePathableMacroTests: XCTestCase {
         case fizzier/*Comment in case*/(Int, buzzier: String)
         case fizziest // Comment without associated value
 
-        public struct AllCasePaths: Sequence {
+        public struct AllCasePaths: Sendable, Sequence {
           public subscript(root: Foo) -> PartialCaseKeyPath<Foo> {
             if root.is(\.bar) {
               return \.bar
@@ -1067,7 +1095,9 @@ final class CasePathableMacroTests: XCTestCase {
           }
           /*Comment before case*/public var baz: CasePaths.AnyCasePath<Foo, Int> {
             CasePaths.AnyCasePath<Foo, Int>(
-              embed: Foo.baz,
+              embed: {
+                Foo.baz($0)
+              },
               extract: {
                 guard case let .baz(v0) = $0 else {
                   return nil
@@ -1078,7 +1108,9 @@ final class CasePathableMacroTests: XCTestCase {
           }
           public var fizz: CasePaths.AnyCasePath<Foo, String> {
             CasePaths.AnyCasePath<Foo, String>(
-              embed: Foo.fizz,
+              embed: {
+                Foo.fizz(buzz: $0)
+              },
               extract: {
                 guard case let .fizz(v0) = $0 else {
                   return nil
@@ -1089,7 +1121,9 @@ final class CasePathableMacroTests: XCTestCase {
           }
           public var fizzier: CasePaths.AnyCasePath<Foo, (Int, buzzier: String)> {
             CasePaths.AnyCasePath<Foo, (Int, buzzier: String)>(
-              embed: Foo.fizzier,
+              embed: {
+                Foo.fizzier($0, buzzier: $1)
+              },
               extract: {
                 guard case let .fizzier(v0, v1) = $0 else {
                   return nil

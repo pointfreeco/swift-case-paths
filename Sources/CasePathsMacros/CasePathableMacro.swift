@@ -95,7 +95,7 @@ extension CasePathableMacro: MemberMacro {
 
     return [
       """
-      public struct AllCasePaths: Sequence {
+      public struct AllCasePaths: Sendable, Sequence {
       public subscript(root: \(enumName)) -> PartialCaseKeyPath<\(enumName)> {
       \(raw: rootSubscriptCases.map { "\($0.description)\n" }.joined())\(raw: subscriptReturn)
       }
@@ -166,15 +166,20 @@ extension CasePathableMacro: MemberMacro {
       let caseName = $0.name.trimmed
       let associatedValueName = $0.trimmedTypeDescription
       let hasPayload = $0.parameterClause.map { !$0.parameters.isEmpty } ?? false
+      let embedNames: String
       let bindingNames: String
       let returnName: String
       if hasPayload, let associatedValue = $0.parameterClause {
+        embedNames = "(" + associatedValue.parameters.enumerated()
+          .map { "\($1.firstName.map { "\($0.text): " } ?? "")$\($0)" }
+          .joined(separator: ", ") + ")"
         let parameterNames = (0..<associatedValue.parameters.count)
           .map { "v\($0)" }
           .joined(separator: ", ")
         bindingNames = "(\(parameterNames))"
         returnName = associatedValue.parameters.count == 1 ? parameterNames : bindingNames
       } else {
+        embedNames = ""
         bindingNames = ""
         returnName = "()"
       }
@@ -195,7 +200,7 @@ extension CasePathableMacro: MemberMacro {
         \(raw: leadingTrivia)public var \(caseName): \
         \(raw: qualifiedCasePathTypeName)<\(enumName), \(raw: associatedValueName)> {
         \(raw: qualifiedCasePathTypeName)<\(enumName), \(raw: associatedValueName)>(
-        embed: \(raw: hasPayload ? "\(enumName).\(caseName)" : "{ \(enumName).\(caseName) }"),
+        embed: { \(enumName).\(caseName)\(raw: embedNames) },
         extract: {
         guard case\(raw: hasPayload ? " let" : "").\(caseName)\(raw: bindingNames) = $0 else { \
         return nil \
