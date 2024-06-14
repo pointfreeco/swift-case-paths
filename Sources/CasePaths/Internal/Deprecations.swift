@@ -48,6 +48,21 @@ extension Optional: _OptionalProtocol {
   public var optional: Wrapped? { self }
 }
 
+extension AnyCasePath {
+  #if swift(>=5.9)
+    @available(*, deprecated, message: "Use a 'CasePathable' case key path, instead")
+    public init(_ embed: @escaping (Value) -> Root) {
+      @UncheckedSendable var embed = embed
+      self.init(unsafe: { [$embed] in $embed.wrappedValue($0) })
+    }
+  #else
+    public init(_ embed: @escaping (Value) -> Root) {
+      @UncheckedSendable var embed = embed
+      self.init(unsafe: { [$embed] in $embed.wrappedValue($0) })
+    }
+  #endif
+}
+
 extension AnyCasePath where Value == Void {
   #if swift(>=5.9)
     @available(*, deprecated, message: "Use a 'CasePathable' case key path, instead")
