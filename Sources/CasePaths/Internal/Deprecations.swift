@@ -592,8 +592,7 @@ public func extract<Root, Value>(
 public func extract<Root, Value>(
   case embed: @escaping @Sendable (Value) -> Root?,
   from root: Root?
-) -> Value?
-{
+) -> Value? {
   CasePaths.extract(embed)(root)
 }
 

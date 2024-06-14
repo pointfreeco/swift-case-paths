@@ -170,7 +170,9 @@ extension CasePathableMacro: MemberMacro {
       let bindingNames: String
       let returnName: String
       if hasPayload, let associatedValue = $0.parameterClause {
-        embedNames = "(" + associatedValue.parameters.enumerated()
+        embedNames =
+          "("
+          + associatedValue.parameters.enumerated()
           .map { "\($1.firstName.map { "\($0.text): " } ?? "")$\($0)" }
           .joined(separator: ", ") + ")"
         let parameterNames = (0..<associatedValue.parameters.count)
