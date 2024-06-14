@@ -34,10 +34,10 @@ final class CasePathsTests: XCTestCase {
       XCTAssertEqual(fizzBuzzPath2, fizzBuzzPath3)
     #endif
 
-//    XCTAssertEqual(Optional.allCasePaths[Int?.some(42)], \.some)
-//    XCTAssertNotEqual(Optional.allCasePaths[Int?.some(42)], \.none)
-//    XCTAssertEqual(Optional.allCasePaths[Int?.none], \.none)
-//    XCTAssertNotEqual(Optional.allCasePaths[Int?.none], \.some)
+    XCTAssertEqual(Optional.allCasePaths[Int?.some(42)], \.some)
+    XCTAssertNotEqual(Optional.allCasePaths[Int?.some(42)], \.none)
+    XCTAssertEqual(Optional.allCasePaths[Int?.none], \.none)
+    XCTAssertNotEqual(Optional.allCasePaths[Int?.none], \.some)
   }
 
   func testResult() {
