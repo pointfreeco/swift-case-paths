@@ -3,48 +3,180 @@
   import Testing
 
   @dynamicMemberLookup
-  public struct CaseSet<Root: CasePathable>: Sequence {
-    private var storage: [PartialCaseKeyPath<Root> & Sendable: Root] = [:]
+  public struct CaseSet<Element: CasePathable> {
+    private var storage: [PartialCaseKeyPath<Element>: Element] = [:]
 
     public init() {}
 
-    public init(_ elements: some Collection<Root>)
-    where Root.AllCasePaths: CasePathReflectable<Root> {
-      self.storage = [PartialCaseKeyPath<Root> & Sendable: Root](
-        uniqueKeysWithValues: elements.map { (Root.allCasePaths[$0], $0) }
+    public init(_ elements: some Collection<Element>)
+    where Element.AllCasePaths: CasePathReflectable<Element> {
+      self.storage = [PartialCaseKeyPath<Element> & Sendable: Element](
+        uniqueKeysWithValues: elements.map { (Element.allCasePaths[$0], $0) }
       )
     }
 
     public subscript<Member>(
-      dynamicMember keyPath: CaseKeyPath<Root, Member> & Sendable
+      dynamicMember keyPath: CaseKeyPath<Element, Member> & Sendable
     ) -> Member? {
       get { storage[keyPath].flatMap { $0[case: keyPath] } }
       set { storage[keyPath] = newValue.map(keyPath.callAsFunction) }
     }
 
     public subscript(
-      dynamicMember keyPath: CaseKeyPath<Root, Void> & Sendable
+      dynamicMember keyPath: CaseKeyPath<Element, Void> & Sendable
     ) -> Bool {
       get { storage[keyPath].flatMap { $0[case: keyPath] } != nil }
       set { storage[keyPath] = newValue ? keyPath() : nil }
     }
+  }
 
-    public func makeIterator() -> some IteratorProtocol<Root> {
-      storage.values.makeIterator()
+  extension CaseSet: Collection {
+    public struct Index: Comparable {
+      fileprivate let rawValue: [PartialCaseKeyPath<Element>: Element].Index
+
+      public static func < (lhs: Self, rhs: Self) -> Bool {
+        lhs.rawValue < rhs.rawValue
+      }
+    }
+
+    public var startIndex: Index { Index(rawValue: storage.startIndex) }
+    public var endIndex: Index { Index(rawValue: storage.endIndex) }
+    public func index(after i: Index) -> Index { Index(rawValue: storage.index(after: i.rawValue)) }
+    public subscript(position: Index) -> Element { storage[position.rawValue].value }
+  }
+
+  extension CaseSet: SetAlgebra
+  where Element: Equatable, Element.AllCasePaths: CasePathReflectable<Element> {
+    public var isEmpty: Bool { storage.isEmpty }
+
+    public func union(_ other: CaseSet<Element>) -> CaseSet<Element> {
+      var copy = self
+      copy.formUnion(other)
+      return copy
+    }
+
+    public func intersection(_ other: CaseSet<Element>) -> CaseSet<Element> {
+      var copy = self
+      copy.formIntersection(other)
+      return copy
+    }
+
+    public func symmetricDifference(_ other: CaseSet<Element>) -> CaseSet<Element> {
+      var copy = self
+      copy.formSymmetricDifference(other)
+      return copy
+    }
+
+    @discardableResult
+    public mutating func insert(
+      _ newMember: Element
+    ) -> (inserted: Bool, memberAfterInsert: Element) {
+      let inserted = storage.updateValue(newMember, forKey: Element.allCasePaths[newMember]) == nil
+      return (inserted, newMember)
+    }
+
+    @discardableResult
+    public mutating func remove(_ member: Element) -> Element? {
+      storage.removeValue(forKey: Element.allCasePaths[member])
+    }
+
+    @discardableResult
+    public mutating func update(with newMember: Element) -> Element? {
+      let inserted = storage.updateValue(newMember, forKey: Element.allCasePaths[newMember]) == nil
+      return inserted ? nil : newMember
+    }
+
+    public mutating func formUnion(_ other: CaseSet<Element>) {
+      storage.merge(other.storage, uniquingKeysWith: { $1 })
+    }
+
+    public mutating func formIntersection(_ other: CaseSet<Element>) {
+      for keyPath in other.storage.keys {
+        if !storage.keys.contains(keyPath) {
+          storage.removeValue(forKey: keyPath)
+        }
+      }
+    }
+
+    public mutating func formSymmetricDifference(_ other: CaseSet<Element>) {
+      for (keyPath, value) in other.storage {
+        if storage.keys.contains(keyPath) {
+          storage.removeValue(forKey: keyPath)
+        } else {
+          storage[keyPath] = value
+        }
+      }
     }
   }
 
-  extension CaseSet: Equatable where Root: Equatable {}
-  extension CaseSet: Hashable where Root: Hashable {}
-  extension CaseSet: Sendable where Root: Sendable {}
+  extension CaseSet: Equatable where Element: Equatable {}
+  extension CaseSet: Hashable where Element: Hashable {}
+  extension CaseSet: @unchecked Sendable where Element: Sendable {}
 
-  extension CaseSet: ExpressibleByArrayLiteral where Root.AllCasePaths: CasePathReflectable<Root> {
-    public init(arrayLiteral elements: Root...) {
+  extension CaseSet: Decodable
+  where Element: Decodable, Element.AllCasePaths: CasePathReflectable<Element> {
+    public init(from decoder: any Decoder) throws {
+      var container = try decoder.unkeyedContainer()
+      if let count = container.count {
+        storage.reserveCapacity(count)
+      }
+      while !container.isAtEnd {
+        let element = try container.decode(Element.self)
+        if let original = storage.updateValue(element, forKey: Element.allCasePaths[element]) {
+          throw DecodingError.dataCorrupted(
+            DecodingError.Context(
+              codingPath: container.codingPath,
+              debugDescription: "Duplicate elements for case: '\(original)', '\(element)'"
+            )
+          )
+        }
+      }
+    }
+  }
+
+  extension CaseSet: Encodable where Element: Encodable {
+    public func encode(to encoder: any Encoder) throws {
+      var container = encoder.unkeyedContainer()
+      for element in storage.values {
+        try container.encode(element)
+      }
+    }
+  }
+
+  extension CaseSet: ExpressibleByArrayLiteral
+  where Element.AllCasePaths: CasePathReflectable<Element> {
+    public init(arrayLiteral elements: Element...) {
       self.init(elements)
     }
   }
 
-  @CasePathable private enum Post {
+  extension CaseSet {
+    @_disfavoredOverload
+    public subscript<Member>(
+      dynamicMember keyPath: CaseKeyPath<Element, Member> & Sendable
+    ) -> CaseSetBuilder<Element, Member> {
+      CaseSetBuilder(set: self, keyPath: keyPath)
+    }
+  }
+
+  public struct CaseSetBuilder<Root: CasePathable, Value> {
+    let set: CaseSet<Root>
+    let keyPath: CaseKeyPath<Root, Value> & Sendable
+
+    public func callAsFunction(_ value: Value?) -> CaseSet<Root> {
+      var set = set
+      set[dynamicMember: keyPath] = value
+      return set
+    }
+
+    public func callAsFunction(_ value: Bool = true) -> CaseSet<Root> where Value == Void {
+      var set = set
+      set[dynamicMember: keyPath] = value ? () : nil
+      return set
+    }
+  }
+
+  @CasePathable private enum Post: Equatable {
     case title(String)
     case body(String)
     case isHidden
@@ -58,5 +190,13 @@
     #expect(set.title == "Hello")
     #expect(set.body == "World")
     #expect(set.isHidden)
+
+    let newSet = set.title("Goodnight")
+      .body("Moon")
+      .isHidden(false)
+
+    #expect(newSet == [.title("Goodnight"), .body("Moon")])
+
+    #expect(newSet.title(nil).body(nil).isEmpty)
   }
 #endif
