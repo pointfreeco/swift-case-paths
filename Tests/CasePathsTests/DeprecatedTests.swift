@@ -26,27 +26,24 @@ final class DeprecatedTests: XCTestCase {
     XCTAssertEqual(AnyCasePath(Enum.payload(label:)).extract(from: .payload(label: 42)), 42)
   }
 
-  // This test crashes Xcode 11.7's compiler.
-  #if compiler(>=5.3)
-    func testSimpleOverloadedPayload() {
-      enum Enum {
-        case payload(a: Int)
-        case payload(b: Int)
-      }
-      let pathA = /Enum.payload(a:)
-      let pathB = /Enum.payload(b:)
-      for _ in 1...2 {
-        XCTAssertEqual(pathA.extract(from: .payload(a: 42)), 42)
-        XCTAssertEqual(pathA.extract(from: .payload(b: 42)), nil)
-        XCTAssertEqual(pathB.extract(from: .payload(a: 42)), nil)
-        XCTAssertEqual(pathB.extract(from: .payload(b: 42)), 42)
-      }
-      XCTAssertEqual(AnyCasePath(Enum.payload(a:)).extract(from: .payload(a: 42)), 42)
-      XCTAssertEqual(AnyCasePath(Enum.payload(a:)).extract(from: .payload(b: 42)), nil)
-      XCTAssertEqual(AnyCasePath(Enum.payload(b:)).extract(from: .payload(a: 42)), nil)
-      XCTAssertEqual(AnyCasePath(Enum.payload(b:)).extract(from: .payload(b: 42)), 42)
+  func testSimpleOverloadedPayload() {
+    enum Enum {
+      case payload(a: Int)
+      case payload(b: Int)
     }
-  #endif
+    let pathA = /Enum.payload(a:)
+    let pathB = /Enum.payload(b:)
+    for _ in 1...2 {
+      XCTAssertEqual(pathA.extract(from: .payload(a: 42)), 42)
+      XCTAssertEqual(pathA.extract(from: .payload(b: 42)), nil)
+      XCTAssertEqual(pathB.extract(from: .payload(a: 42)), nil)
+      XCTAssertEqual(pathB.extract(from: .payload(b: 42)), 42)
+    }
+    XCTAssertEqual(AnyCasePath(Enum.payload(a:)).extract(from: .payload(a: 42)), 42)
+    XCTAssertEqual(AnyCasePath(Enum.payload(a:)).extract(from: .payload(b: 42)), nil)
+    XCTAssertEqual(AnyCasePath(Enum.payload(b:)).extract(from: .payload(a: 42)), nil)
+    XCTAssertEqual(AnyCasePath(Enum.payload(b:)).extract(from: .payload(b: 42)), 42)
+  }
 
   func testMultiPayload() {
     enum Enum { case payload(Int, String) }
@@ -1208,29 +1205,27 @@ final class DeprecatedTests: XCTestCase {
     )
   }
 
-  #if canImport(_Concurrency) && compiler(>=5.5.2)
-    #if os(Windows)
-      // There seems to be some strangeness with the current
-      // concurrency implmentation on Windows that breaks if
-      // you have more than 100 tasks here.
-      let maxIterations = 100
-    #else
-      let maxIterations = 100_000
-    #endif
+  #if os(Windows)
+    // There seems to be some strangeness with the current
+    // concurrency implmentation on Windows that breaks if
+    // you have more than 100 tasks here.
+    let maxIterations = 100
+  #else
+    let maxIterations = 100_000
+  #endif
 
-    func testConcurrency_SharedCasePath() async throws {
-      enum Enum { case payload(Int) }
-      let casePath = /Enum.payload
+  func testConcurrency_SharedCasePath() async throws {
+    enum Enum { case payload(Int) }
+    let casePath = /Enum.payload
 
-      await withTaskGroup(of: Void.self) { group in
-        for index in 1...maxIterations {
-          group.addTask {
-            XCTAssertEqual(casePath.extract(from: Enum.payload(index)), index)
-          }
+    await withTaskGroup(of: Void.self) { group in
+      for index in 1...maxIterations {
+        group.addTask {
+          XCTAssertEqual(casePath.extract(from: Enum.payload(index)), index)
         }
       }
     }
-  #endif
+  }
 }
 
 private class TestObject: Equatable {

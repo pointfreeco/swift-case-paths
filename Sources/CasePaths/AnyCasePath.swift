@@ -6,7 +6,7 @@ import Foundation
 /// This type defines key path-like semantics for enum cases, and is used to derive ``CaseKeyPath``s
 /// from types that conform to ``CasePathable``.
 @dynamicMemberLookup
-public struct AnyCasePath<Root, Value> {
+public struct AnyCasePath<Root, Value>: Sendable {
   private let _embed: @Sendable (Value) -> Root
   private let _extract: @Sendable (Root) -> Value?
 
@@ -57,10 +57,6 @@ extension AnyCasePath: CustomDebugStringConvertible {
     "AnyCasePath<\(typeName(Root.self)), \(typeName(Value.self))>"
   }
 }
-
-#if canImport(_Concurrency) && compiler(>=5.5.2)
-  extension AnyCasePath: @unchecked Sendable {}
-#endif
 
 extension AnyCasePath {
   @available(
