@@ -176,13 +176,27 @@
     }
   }
 
+  extension CaseSet {
+    public func require<each Value>(
+      _ keyPath: repeat CaseKeyPath<Element, each Value> & Sendable
+    ) -> (repeat each Value)? {
+      func unwrap<Wrapped>(_ wrapped: Wrapped?) throws -> Wrapped {
+        guard let wrapped else { throw Nil() }
+        return wrapped
+      }
+      return try? (repeat unwrap(self[dynamicMember: each keyPath]))
+    }
+
+    private struct Nil: Error {}
+  }
+
   @CasePathable private enum Post: Equatable {
     case title(String)
     case body(String)
     case isHidden
   }
 
-  @Test private func caseSet() {
+  @Test private func caseSet() throws {
     var set: CaseSet<Post> = [.title("Hello")]
     set.body = "World"
     set.isHidden = true
@@ -198,5 +212,10 @@
     #expect(newSet == [.title("Goodnight"), .body("Moon")])
 
     #expect(newSet.title(nil).body(nil).isEmpty)
+
+    let required = try #require(newSet.require(\.title, \.body))
+    #expect(required == ("Goodnight", "Moon"))
+
+    #expect(newSet.require(\.title, \.isHidden) == nil)
   }
 #endif

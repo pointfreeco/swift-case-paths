@@ -6,8 +6,6 @@ import SwiftSyntaxMacros
 public struct CasePathableMacro {
   static let moduleName = "CasePaths"
   static let casePathTypeName = "AnyCasePath"
-  static var qualifiedCasePathTypeName: String { "\(moduleName).\(casePathTypeName)" }
-  static var qualifiedCaseTypeName: String { "\(moduleName).Case" }
 }
 
 extension CasePathableMacro: ExtensionMacro {
@@ -30,13 +28,13 @@ extension CasePathableMacro: ExtensionMacro {
     if let inheritanceClause = enumDecl.inheritanceClause {
       for type in ["CasePathable", "CasePathIterable"] {
         if !inheritanceClause.inheritedTypes.contains(where: {
-          [type, "\(moduleName).\(type)"].contains($0.type.trimmedDescription)
+          [type, type.qualified].contains($0.type.trimmedDescription)
         }) {
           conformances.append("\(moduleName).\(type)")
         }
       }
     } else {
-      conformances = ["CasePathable", "CasePathIterable"]
+      conformances = ["CasePathable", "CasePathIterable"].qualified
     }
     guard !conformances.isEmpty else { return [] }
     return [
@@ -102,13 +100,14 @@ extension CasePathableMacro: MemberMacro {
 
     return [
       """
-      public struct AllCasePaths: CasePathReflectable, Hashable, Sendable, Sequence {
-      public subscript(root: \(enumName)) -> PartialCaseKeyPath<\(enumName)> {
+      public struct AllCasePaths: CasePaths.CasePathReflectable, Sendable, Sequence {
+      public subscript(root: \(enumName)) -> CasePaths.PartialCaseKeyPath<\(enumName)> {
       \(raw: rootSubscriptCases.map { "\($0.description)\n" }.joined())\(raw: subscriptReturn)
       }
       \(raw: casePaths.map(\.description).joined(separator: "\n"))
-      public func makeIterator() -> IndexingIterator<[PartialCaseKeyPath<\(enumName)>]> {
-      \(raw: allCases.isEmpty ? "let" : "var") allCasePaths: [PartialCaseKeyPath<\(enumName)>] = []\
+      public func makeIterator() -> IndexingIterator<[CasePaths.PartialCaseKeyPath<\(enumName)>]> {
+      \(raw: allCases.isEmpty ? "let" : "var") allCasePaths: \
+      [CasePaths.PartialCaseKeyPath<\(enumName)>] = []\
       \(raw: allCases.map { "\n\($0.description)" }.joined())
       return allCasePaths.makeIterator()
       }
@@ -207,8 +206,8 @@ extension CasePathableMacro: MemberMacro {
         .trimmingSuffix(while: { $0.isWhitespace && !$0.isNewline })
       return """
         \(raw: leadingTrivia)public var \(caseName): \
-        \(raw: qualifiedCasePathTypeName)<\(enumName), \(raw: associatedValueName)> {
-        \(raw: qualifiedCasePathTypeName)<\(enumName), \(raw: associatedValueName)>(
+        \(raw: casePathTypeName.qualified)<\(enumName), \(raw: associatedValueName)> {
+        \(raw: casePathTypeName.qualified)<\(enumName), \(raw: associatedValueName)>(
         embed: { \(enumName).\(caseName)\(raw: embedNames) },
         extract: {
         guard case\(raw: hasPayload ? " let" : "").\(caseName)\(raw: bindingNames) = $0 else { \
@@ -476,6 +475,18 @@ final class SelfRewriter: SyntaxRewriter {
     guard node.name.text == "Self"
     else { return super.visit(node) }
     return super.visit(node.with(\.name, self.selfEquivalent))
+  }
+}
+
+extension [String] {
+  fileprivate var qualified: [String] {
+    map(\.qualified)
+  }
+}
+
+extension String {
+  fileprivate var qualified: String {
+    "\(CasePathableMacro.moduleName).\(self)"
   }
 }
 

@@ -31,8 +31,8 @@ final class CasePathableMacroTests: XCTestCase {
         case fizz(buzz: String)
         case fizzier(Int, buzzier: String)
 
-        public struct AllCasePaths: CasePathReflectable, Hashable, Sendable, Sequence {
-          public subscript(root: Foo) -> PartialCaseKeyPath<Foo> {
+        public struct AllCasePaths: CasePaths.CasePathReflectable, Sendable, Sequence {
+          public subscript(root: Foo) -> CasePaths.PartialCaseKeyPath<Foo> {
             if root.is(\.bar) {
               return \.bar
             }
@@ -99,8 +99,8 @@ final class CasePathableMacroTests: XCTestCase {
               }
             )
           }
-          public func makeIterator() -> IndexingIterator<[PartialCaseKeyPath<Foo>]> {
-            var allCasePaths: [PartialCaseKeyPath<Foo>] = []
+          public func makeIterator() -> IndexingIterator<[CasePaths.PartialCaseKeyPath<Foo>]> {
+            var allCasePaths: [CasePaths.PartialCaseKeyPath<Foo>] = []
             allCasePaths.append(\.bar)
             allCasePaths.append(\.baz)
             allCasePaths.append(\.fizz)
@@ -111,7 +111,7 @@ final class CasePathableMacroTests: XCTestCase {
         public static var allCasePaths: AllCasePaths { AllCasePaths() }
       }
 
-      extension Foo: CasePathable, CasePathIterable {
+      extension Foo: CasePaths.CasePathable, CasePaths.CasePathIterable {
       }
       """#
     }
@@ -126,19 +126,19 @@ final class CasePathableMacroTests: XCTestCase {
       #"""
       enum EnumWithNoCases {
 
-          public struct AllCasePaths: CasePathReflectable, Hashable, Sendable, Sequence {
-              public subscript(root: EnumWithNoCases) -> PartialCaseKeyPath<EnumWithNoCases> {
+          public struct AllCasePaths: CasePaths.CasePathReflectable, Sendable, Sequence {
+              public subscript(root: EnumWithNoCases) -> CasePaths.PartialCaseKeyPath<EnumWithNoCases> {
                   \.never
               }
 
-              public func makeIterator() -> IndexingIterator<[PartialCaseKeyPath<EnumWithNoCases>]> {
-                  let allCasePaths: [PartialCaseKeyPath<EnumWithNoCases>] = []
+              public func makeIterator() -> IndexingIterator<[CasePaths.PartialCaseKeyPath<EnumWithNoCases>]> {
+                  let allCasePaths: [CasePaths.PartialCaseKeyPath<EnumWithNoCases>] = []
                   return allCasePaths.makeIterator()
               }
           }
           public static var allCasePaths: AllCasePaths { AllCasePaths() }}
 
-      extension EnumWithNoCases: CasePathable, CasePathIterable {
+      extension EnumWithNoCases: CasePaths.CasePathable, CasePaths.CasePathIterable {
       }
       """#
     }
@@ -156,8 +156,8 @@ final class CasePathableMacroTests: XCTestCase {
       public enum Foo {
         case bar(Int), baz(String)
 
-        public struct AllCasePaths: CasePathReflectable, Hashable, Sendable, Sequence {
-          public subscript(root: Foo) -> PartialCaseKeyPath<Foo> {
+        public struct AllCasePaths: CasePaths.CasePathReflectable, Sendable, Sequence {
+          public subscript(root: Foo) -> CasePaths.PartialCaseKeyPath<Foo> {
             if root.is(\.bar) {
               return \.bar
             }
@@ -192,8 +192,8 @@ final class CasePathableMacroTests: XCTestCase {
               }
             )
           }
-          public func makeIterator() -> IndexingIterator<[PartialCaseKeyPath<Foo>]> {
-            var allCasePaths: [PartialCaseKeyPath<Foo>] = []
+          public func makeIterator() -> IndexingIterator<[CasePaths.PartialCaseKeyPath<Foo>]> {
+            var allCasePaths: [CasePaths.PartialCaseKeyPath<Foo>] = []
             allCasePaths.append(\.bar)
             allCasePaths.append(\.baz)
             return allCasePaths.makeIterator()
@@ -202,7 +202,7 @@ final class CasePathableMacroTests: XCTestCase {
         public static var allCasePaths: AllCasePaths { AllCasePaths() }
       }
 
-      extension Foo: CasePathable, CasePathIterable {
+      extension Foo: CasePaths.CasePathable, CasePaths.CasePathIterable {
       }
       """#
     }
@@ -220,8 +220,8 @@ final class CasePathableMacroTests: XCTestCase {
       public enum Foo {
         case bar(Int)
 
-        public struct AllCasePaths: CasePathReflectable, Hashable, Sendable, Sequence {
-          public subscript(root: Foo) -> PartialCaseKeyPath<Foo> {
+        public struct AllCasePaths: CasePaths.CasePathReflectable, Sendable, Sequence {
+          public subscript(root: Foo) -> CasePaths.PartialCaseKeyPath<Foo> {
             if root.is(\.bar) {
               return \.bar
             }
@@ -240,8 +240,8 @@ final class CasePathableMacroTests: XCTestCase {
               }
             )
           }
-          public func makeIterator() -> IndexingIterator<[PartialCaseKeyPath<Foo>]> {
-            var allCasePaths: [PartialCaseKeyPath<Foo>] = []
+          public func makeIterator() -> IndexingIterator<[CasePaths.PartialCaseKeyPath<Foo>]> {
+            var allCasePaths: [CasePaths.PartialCaseKeyPath<Foo>] = []
             allCasePaths.append(\.bar)
             return allCasePaths.makeIterator()
           }
@@ -249,7 +249,7 @@ final class CasePathableMacroTests: XCTestCase {
         public static var allCasePaths: AllCasePaths { AllCasePaths() }
       }
 
-      extension Foo: CasePathable, CasePathIterable {
+      extension Foo: CasePaths.CasePathable, CasePaths.CasePathIterable {
       }
       """#
     }
@@ -264,8 +264,8 @@ final class CasePathableMacroTests: XCTestCase {
       package enum Foo {
         case bar(Int)
 
-        public struct AllCasePaths: CasePathReflectable, Hashable, Sendable, Sequence {
-          public subscript(root: Foo) -> PartialCaseKeyPath<Foo> {
+        public struct AllCasePaths: CasePaths.CasePathReflectable, Sendable, Sequence {
+          public subscript(root: Foo) -> CasePaths.PartialCaseKeyPath<Foo> {
             if root.is(\.bar) {
               return \.bar
             }
@@ -284,8 +284,8 @@ final class CasePathableMacroTests: XCTestCase {
               }
             )
           }
-          public func makeIterator() -> IndexingIterator<[PartialCaseKeyPath<Foo>]> {
-            var allCasePaths: [PartialCaseKeyPath<Foo>] = []
+          public func makeIterator() -> IndexingIterator<[CasePaths.PartialCaseKeyPath<Foo>]> {
+            var allCasePaths: [CasePaths.PartialCaseKeyPath<Foo>] = []
             allCasePaths.append(\.bar)
             return allCasePaths.makeIterator()
           }
@@ -293,7 +293,7 @@ final class CasePathableMacroTests: XCTestCase {
         public static var allCasePaths: AllCasePaths { AllCasePaths() }
       }
 
-      extension Foo: CasePathable, CasePathIterable {
+      extension Foo: CasePaths.CasePathable, CasePaths.CasePathIterable {
       }
       """#
     }
@@ -308,8 +308,8 @@ final class CasePathableMacroTests: XCTestCase {
       private enum Foo {
         case bar(Int)
 
-        public struct AllCasePaths: CasePathReflectable, Hashable, Sendable, Sequence {
-          public subscript(root: Foo) -> PartialCaseKeyPath<Foo> {
+        public struct AllCasePaths: CasePaths.CasePathReflectable, Sendable, Sequence {
+          public subscript(root: Foo) -> CasePaths.PartialCaseKeyPath<Foo> {
             if root.is(\.bar) {
               return \.bar
             }
@@ -328,8 +328,8 @@ final class CasePathableMacroTests: XCTestCase {
               }
             )
           }
-          public func makeIterator() -> IndexingIterator<[PartialCaseKeyPath<Foo>]> {
-            var allCasePaths: [PartialCaseKeyPath<Foo>] = []
+          public func makeIterator() -> IndexingIterator<[CasePaths.PartialCaseKeyPath<Foo>]> {
+            var allCasePaths: [CasePaths.PartialCaseKeyPath<Foo>] = []
             allCasePaths.append(\.bar)
             return allCasePaths.makeIterator()
           }
@@ -337,7 +337,7 @@ final class CasePathableMacroTests: XCTestCase {
         public static var allCasePaths: AllCasePaths { AllCasePaths() }
       }
 
-      extension Foo: CasePathable, CasePathIterable {
+      extension Foo: CasePaths.CasePathable, CasePaths.CasePathIterable {
       }
       """#
     }
@@ -389,13 +389,13 @@ final class CasePathableMacroTests: XCTestCase {
       #"""
       enum Foo: CasePathable {
 
-          public struct AllCasePaths: CasePathReflectable, Hashable, Sendable, Sequence {
-              public subscript(root: Foo) -> PartialCaseKeyPath<Foo> {
+          public struct AllCasePaths: CasePaths.CasePathReflectable, Sendable, Sequence {
+              public subscript(root: Foo) -> CasePaths.PartialCaseKeyPath<Foo> {
                   \.never
               }
 
-              public func makeIterator() -> IndexingIterator<[PartialCaseKeyPath<Foo>]> {
-                  let allCasePaths: [PartialCaseKeyPath<Foo>] = []
+              public func makeIterator() -> IndexingIterator<[CasePaths.PartialCaseKeyPath<Foo>]> {
+                  let allCasePaths: [CasePaths.PartialCaseKeyPath<Foo>] = []
                   return allCasePaths.makeIterator()
               }
           }
@@ -415,13 +415,13 @@ final class CasePathableMacroTests: XCTestCase {
       #"""
       enum Foo: CasePaths.CasePathable {
 
-          public struct AllCasePaths: CasePathReflectable, Hashable, Sendable, Sequence {
-              public subscript(root: Foo) -> PartialCaseKeyPath<Foo> {
+          public struct AllCasePaths: CasePaths.CasePathReflectable, Sendable, Sequence {
+              public subscript(root: Foo) -> CasePaths.PartialCaseKeyPath<Foo> {
                   \.never
               }
 
-              public func makeIterator() -> IndexingIterator<[PartialCaseKeyPath<Foo>]> {
-                  let allCasePaths: [PartialCaseKeyPath<Foo>] = []
+              public func makeIterator() -> IndexingIterator<[CasePaths.PartialCaseKeyPath<Foo>]> {
+                  let allCasePaths: [CasePaths.PartialCaseKeyPath<Foo>] = []
                   return allCasePaths.makeIterator()
               }
           }
@@ -446,8 +446,8 @@ final class CasePathableMacroTests: XCTestCase {
       enum Foo {
         case bar(_ int: Int, _ bool: Bool)
 
-        public struct AllCasePaths: CasePathReflectable, Hashable, Sendable, Sequence {
-          public subscript(root: Foo) -> PartialCaseKeyPath<Foo> {
+        public struct AllCasePaths: CasePaths.CasePathReflectable, Sendable, Sequence {
+          public subscript(root: Foo) -> CasePaths.PartialCaseKeyPath<Foo> {
             if root.is(\.bar) {
               return \.bar
             }
@@ -466,8 +466,8 @@ final class CasePathableMacroTests: XCTestCase {
               }
             )
           }
-          public func makeIterator() -> IndexingIterator<[PartialCaseKeyPath<Foo>]> {
-            var allCasePaths: [PartialCaseKeyPath<Foo>] = []
+          public func makeIterator() -> IndexingIterator<[CasePaths.PartialCaseKeyPath<Foo>]> {
+            var allCasePaths: [CasePaths.PartialCaseKeyPath<Foo>] = []
             allCasePaths.append(\.bar)
             return allCasePaths.makeIterator()
           }
@@ -475,7 +475,7 @@ final class CasePathableMacroTests: XCTestCase {
         public static var allCasePaths: AllCasePaths { AllCasePaths() }
       }
 
-      extension Foo: CasePathable, CasePathIterable {
+      extension Foo: CasePaths.CasePathable, CasePaths.CasePathIterable {
       }
       """#
     }
@@ -493,8 +493,8 @@ final class CasePathableMacroTests: XCTestCase {
       enum Foo {
         case bar(Bar<Self>)
 
-        public struct AllCasePaths: CasePathReflectable, Hashable, Sendable, Sequence {
-          public subscript(root: Foo) -> PartialCaseKeyPath<Foo> {
+        public struct AllCasePaths: CasePaths.CasePathReflectable, Sendable, Sequence {
+          public subscript(root: Foo) -> CasePaths.PartialCaseKeyPath<Foo> {
             if root.is(\.bar) {
               return \.bar
             }
@@ -513,8 +513,8 @@ final class CasePathableMacroTests: XCTestCase {
               }
             )
           }
-          public func makeIterator() -> IndexingIterator<[PartialCaseKeyPath<Foo>]> {
-            var allCasePaths: [PartialCaseKeyPath<Foo>] = []
+          public func makeIterator() -> IndexingIterator<[CasePaths.PartialCaseKeyPath<Foo>]> {
+            var allCasePaths: [CasePaths.PartialCaseKeyPath<Foo>] = []
             allCasePaths.append(\.bar)
             return allCasePaths.makeIterator()
           }
@@ -522,7 +522,7 @@ final class CasePathableMacroTests: XCTestCase {
         public static var allCasePaths: AllCasePaths { AllCasePaths() }
       }
 
-      extension Foo: CasePathable, CasePathIterable {
+      extension Foo: CasePaths.CasePathable, CasePaths.CasePathIterable {
       }
       """#
     }
@@ -540,8 +540,8 @@ final class CasePathableMacroTests: XCTestCase {
       enum Foo {
         case bar(int: Int = 42, bool: Bool = true)
 
-        public struct AllCasePaths: CasePathReflectable, Hashable, Sendable, Sequence {
-          public subscript(root: Foo) -> PartialCaseKeyPath<Foo> {
+        public struct AllCasePaths: CasePaths.CasePathReflectable, Sendable, Sequence {
+          public subscript(root: Foo) -> CasePaths.PartialCaseKeyPath<Foo> {
             if root.is(\.bar) {
               return \.bar
             }
@@ -560,8 +560,8 @@ final class CasePathableMacroTests: XCTestCase {
               }
             )
           }
-          public func makeIterator() -> IndexingIterator<[PartialCaseKeyPath<Foo>]> {
-            var allCasePaths: [PartialCaseKeyPath<Foo>] = []
+          public func makeIterator() -> IndexingIterator<[CasePaths.PartialCaseKeyPath<Foo>]> {
+            var allCasePaths: [CasePaths.PartialCaseKeyPath<Foo>] = []
             allCasePaths.append(\.bar)
             return allCasePaths.makeIterator()
           }
@@ -569,7 +569,7 @@ final class CasePathableMacroTests: XCTestCase {
         public static var allCasePaths: AllCasePaths { AllCasePaths() }
       }
 
-      extension Foo: CasePathable, CasePathIterable {
+      extension Foo: CasePaths.CasePathable, CasePaths.CasePathIterable {
       }
       """#
     }
@@ -621,8 +621,8 @@ final class CasePathableMacroTests: XCTestCase {
         #endif
         #endif
 
-        public struct AllCasePaths: CasePathReflectable, Hashable, Sendable, Sequence {
-          public subscript(root: Foo) -> PartialCaseKeyPath<Foo> {
+        public struct AllCasePaths: CasePaths.CasePathReflectable, Sendable, Sequence {
+          public subscript(root: Foo) -> CasePaths.PartialCaseKeyPath<Foo> {
             if root.is(\.bar) {
               return \.bar
             }
@@ -769,8 +769,8 @@ final class CasePathableMacroTests: XCTestCase {
           }
           #endif
           #endif
-          public func makeIterator() -> IndexingIterator<[PartialCaseKeyPath<Foo>]> {
-            var allCasePaths: [PartialCaseKeyPath<Foo>] = []
+          public func makeIterator() -> IndexingIterator<[CasePaths.PartialCaseKeyPath<Foo>]> {
+            var allCasePaths: [CasePaths.PartialCaseKeyPath<Foo>] = []
             allCasePaths.append(\.bar)
             #if os(macOS)
             allCasePaths.append(\.macCase)
@@ -793,7 +793,7 @@ final class CasePathableMacroTests: XCTestCase {
         public static var allCasePaths: AllCasePaths { AllCasePaths() }
       }
 
-      extension Foo: CasePathable, CasePathIterable {
+      extension Foo: CasePaths.CasePathable, CasePaths.CasePathIterable {
       }
       """#
     }
@@ -814,8 +814,8 @@ final class CasePathableMacroTests: XCTestCase {
       enum Foo {
         case bar
 
-        public struct AllCasePaths: CasePathReflectable, Hashable, Sendable, Sequence {
-          public subscript(root: Foo) -> PartialCaseKeyPath<Foo> {
+        public struct AllCasePaths: CasePaths.CasePathReflectable, Sendable, Sequence {
+          public subscript(root: Foo) -> CasePaths.PartialCaseKeyPath<Foo> {
             if root.is(\.bar) {
               return \.bar
             }
@@ -834,8 +834,8 @@ final class CasePathableMacroTests: XCTestCase {
               }
             )
           }
-          public func makeIterator() -> IndexingIterator<[PartialCaseKeyPath<Foo>]> {
-            var allCasePaths: [PartialCaseKeyPath<Foo>] = []
+          public func makeIterator() -> IndexingIterator<[CasePaths.PartialCaseKeyPath<Foo>]> {
+            var allCasePaths: [CasePaths.PartialCaseKeyPath<Foo>] = []
             allCasePaths.append(\.bar)
             return allCasePaths.makeIterator()
           }
@@ -843,7 +843,7 @@ final class CasePathableMacroTests: XCTestCase {
         public static var allCasePaths: AllCasePaths { AllCasePaths() }
       }
 
-      @available(iOS, unavailable) extension Foo: CasePathable, CasePathIterable {
+      @available(iOS, unavailable) extension Foo: CasePaths.CasePathable, CasePaths.CasePathIterable {
       }
       """#
     }
@@ -890,8 +890,8 @@ final class CasePathableMacroTests: XCTestCase {
          */
         case fizz, buzz
 
-        public struct AllCasePaths: CasePathReflectable, Hashable, Sendable, Sequence {
-          public subscript(root: Foo) -> PartialCaseKeyPath<Foo> {
+        public struct AllCasePaths: CasePaths.CasePathReflectable, Sendable, Sequence {
+          public subscript(root: Foo) -> CasePaths.PartialCaseKeyPath<Foo> {
             if root.is(\.bar) {
               return \.bar
             }
@@ -972,8 +972,8 @@ final class CasePathableMacroTests: XCTestCase {
               }
             )
           }
-          public func makeIterator() -> IndexingIterator<[PartialCaseKeyPath<Foo>]> {
-            var allCasePaths: [PartialCaseKeyPath<Foo>] = []
+          public func makeIterator() -> IndexingIterator<[CasePaths.PartialCaseKeyPath<Foo>]> {
+            var allCasePaths: [CasePaths.PartialCaseKeyPath<Foo>] = []
             allCasePaths.append(\.bar)
             allCasePaths.append(\.baz)
             allCasePaths.append(\.fizz)
@@ -984,7 +984,7 @@ final class CasePathableMacroTests: XCTestCase {
         public static var allCasePaths: AllCasePaths { AllCasePaths() }
       }
 
-      extension Foo: CasePathable, CasePathIterable {
+      extension Foo: CasePaths.CasePathable, CasePaths.CasePathIterable {
       }
       """#
     }
@@ -1007,8 +1007,8 @@ final class CasePathableMacroTests: XCTestCase {
       // case foo
         case bar
 
-        public struct AllCasePaths: CasePathReflectable, Hashable, Sendable, Sequence {
-          public subscript(root: Foo) -> PartialCaseKeyPath<Foo> {
+        public struct AllCasePaths: CasePaths.CasePathReflectable, Sendable, Sequence {
+          public subscript(root: Foo) -> CasePaths.PartialCaseKeyPath<Foo> {
             if root.is(\.bar) {
               return \.bar
             }
@@ -1029,8 +1029,8 @@ final class CasePathableMacroTests: XCTestCase {
               }
             )
           }
-          public func makeIterator() -> IndexingIterator<[PartialCaseKeyPath<Foo>]> {
-            var allCasePaths: [PartialCaseKeyPath<Foo>] = []
+          public func makeIterator() -> IndexingIterator<[CasePaths.PartialCaseKeyPath<Foo>]> {
+            var allCasePaths: [CasePaths.PartialCaseKeyPath<Foo>] = []
             allCasePaths.append(\.bar)
             return allCasePaths.makeIterator()
           }
@@ -1038,7 +1038,7 @@ final class CasePathableMacroTests: XCTestCase {
         public static var allCasePaths: AllCasePaths { AllCasePaths() }
       }
 
-      extension Foo: CasePathable, CasePathIterable {
+      extension Foo: CasePaths.CasePathable, CasePaths.CasePathIterable {
       }
       """#
     }
@@ -1066,8 +1066,8 @@ final class CasePathableMacroTests: XCTestCase {
         case fizzier/*Comment in case*/(Int, buzzier: String)
         case fizziest // Comment without associated value
 
-        public struct AllCasePaths: CasePathReflectable, Hashable, Sendable, Sequence {
-          public subscript(root: Foo) -> PartialCaseKeyPath<Foo> {
+        public struct AllCasePaths: CasePaths.CasePathReflectable, Sendable, Sequence {
+          public subscript(root: Foo) -> CasePaths.PartialCaseKeyPath<Foo> {
             if root.is(\.bar) {
               return \.bar
             }
@@ -1151,8 +1151,8 @@ final class CasePathableMacroTests: XCTestCase {
               }
             )
           }
-          public func makeIterator() -> IndexingIterator<[PartialCaseKeyPath<Foo>]> {
-            var allCasePaths: [PartialCaseKeyPath<Foo>] = []
+          public func makeIterator() -> IndexingIterator<[CasePaths.PartialCaseKeyPath<Foo>]> {
+            var allCasePaths: [CasePaths.PartialCaseKeyPath<Foo>] = []
             allCasePaths.append(\.bar)
             allCasePaths.append(\.baz)
             allCasePaths.append(\.fizz)
@@ -1164,7 +1164,7 @@ final class CasePathableMacroTests: XCTestCase {
         public static var allCasePaths: AllCasePaths { AllCasePaths() }
       }
 
-      extension Foo: CasePathable, CasePathIterable {
+      extension Foo: CasePaths.CasePathable, CasePaths.CasePathIterable {
       }
       """#
     }
