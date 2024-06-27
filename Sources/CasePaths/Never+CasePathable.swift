@@ -1,6 +1,5 @@
-extension Never: CasePathable {
-  public struct AllCasePaths: Sendable {
-    /// Returns the case key path for a given root value.
+extension Never: CasePathable, CasePathIterable {
+  public struct AllCasePaths: CasePathReflectable, Sendable {
     public subscript(root: Never) -> PartialCaseKeyPath<Never> {
       \.never
     }

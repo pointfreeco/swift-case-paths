@@ -1,7 +1,6 @@
-extension Optional: CasePathable {
+extension Optional: CasePathable, CasePathIterable {
   @dynamicMemberLookup
-  public struct AllCasePaths: Sendable {
-    /// Returns the case key path for a given root value.
+  public struct AllCasePaths: CasePathReflectable, Sendable {
     public subscript(root: Optional) -> PartialCaseKeyPath<Optional> {
       switch root {
       case .none: return \.none
