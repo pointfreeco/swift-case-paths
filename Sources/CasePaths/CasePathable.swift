@@ -1,4 +1,4 @@
-import XCTestDynamicOverlay
+import IssueReporting
 
 /// A type that provides a collection of all of its case paths.
 ///
@@ -479,18 +479,22 @@ extension CasePathable {
   public mutating func modify<Value>(
     _ keyPath: CaseKeyPath<Self, Value>,
     yield: (inout Value) -> Void,
-    file: StaticString = #filePath,
-    line: UInt = #line
+    fileID: StaticString = #fileID,
+    filePath: StaticString = #filePath,
+    line: UInt = #line,
+    column: UInt = #column
   ) {
     let `case` = Case(keyPath)
     guard var value = `case`.extract(from: self) else {
-      XCTFail(
+      reportIssue(
         """
         Can't modify '\(String(describing: self))' via 'CaseKeyPath<\(Self.self), \(Value.self)>' \
         (aka '\(String(reflecting: keyPath))')
         """,
-        file: file,
-        line: line
+        fileID: fileID,
+        filePath: filePath,
+        line: line,
+        column: column
       )
       return
     }
