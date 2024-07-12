@@ -18,6 +18,11 @@
 - ``subscript(dynamicMember:)-7ik0u``
 - ``subscript(dynamicMember:)-7sz4x``
 
+### Iteration and reflection
+
+- ``CasePathIterable``
+- ``CasePathReflectable``
+
 ### Manual conformances
 
 - ``AllCasePaths``
