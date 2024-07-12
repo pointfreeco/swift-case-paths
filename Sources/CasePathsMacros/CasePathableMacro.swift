@@ -5,12 +5,7 @@ import SwiftSyntaxMacros
 
 public struct CasePathableMacro {
   static let moduleName = "CasePaths"
-  static let conformanceName = "CasePathable"
-  static var qualifiedConformanceName: String { "\(Self.moduleName).\(Self.conformanceName)" }
-  static var conformanceNames: [String] { [Self.conformanceName, Self.qualifiedConformanceName] }
   static let casePathTypeName = "AnyCasePath"
-  static var qualifiedCasePathTypeName: String { "\(Self.moduleName).\(Self.casePathTypeName)" }
-  static var qualifiedCaseTypeName: String { "\(Self.moduleName).Case" }
 }
 
 extension CasePathableMacro: ExtensionMacro {
@@ -29,18 +24,28 @@ extension CasePathableMacro: ExtensionMacro {
       // TODO: Diagnostic?
       return []
     }
-    if let inheritanceClause = enumDecl.inheritanceClause,
-      inheritanceClause.inheritedTypes.contains(
-        where: { Self.conformanceNames.contains($0.type.trimmedDescription) }
-      )
-    {
-      return []
+    var conformances: [String] = []
+    if let inheritanceClause = enumDecl.inheritanceClause {
+      for type in ["CasePathable", "CasePathIterable"] {
+        if !inheritanceClause.inheritedTypes.contains(where: {
+          [type, type.qualified].contains($0.type.trimmedDescription)
+        }) {
+          conformances.append("\(moduleName).\(type)")
+        }
+      }
+    } else {
+      conformances = ["CasePathable", "CasePathIterable"].qualified
     }
-    let ext: DeclSyntax =
-      """
-      \(declaration.attributes.availability)extension \(type.trimmed): \(raw: Self.qualifiedConformanceName) {}
-      """
-    return [ext.cast(ExtensionDeclSyntax.self)]
+    guard !conformances.isEmpty else { return [] }
+    return [
+      DeclSyntax(
+        """
+        \(declaration.attributes.availability)extension \(type.trimmed): \
+        \(raw: conformances.joined(separator: ", ")) {}
+        """
+      )
+      .cast(ExtensionDeclSyntax.self)
+    ]
   }
 }
 
@@ -95,13 +100,14 @@ extension CasePathableMacro: MemberMacro {
 
     return [
       """
-      public struct AllCasePaths: Sendable, Sequence {
-      public subscript(root: \(enumName)) -> PartialCaseKeyPath<\(enumName)> {
+      public struct AllCasePaths: CasePaths.CasePathReflectable, Sendable, Sequence {
+      public subscript(root: \(enumName)) -> CasePaths.PartialCaseKeyPath<\(enumName)> {
       \(raw: rootSubscriptCases.map { "\($0.description)\n" }.joined())\(raw: subscriptReturn)
       }
       \(raw: casePaths.map(\.description).joined(separator: "\n"))
-      public func makeIterator() -> IndexingIterator<[PartialCaseKeyPath<\(enumName)>]> {
-      \(raw: allCases.isEmpty ? "let" : "var") allCasePaths: [PartialCaseKeyPath<\(enumName)>] = []\
+      public func makeIterator() -> IndexingIterator<[CasePaths.PartialCaseKeyPath<\(enumName)>]> {
+      \(raw: allCases.isEmpty ? "let" : "var") allCasePaths: \
+      [CasePaths.PartialCaseKeyPath<\(enumName)>] = []\
       \(raw: allCases.map { "\n\($0.description)" }.joined())
       return allCasePaths.makeIterator()
       }
@@ -200,8 +206,8 @@ extension CasePathableMacro: MemberMacro {
         .trimmingSuffix(while: { $0.isWhitespace && !$0.isNewline })
       return """
         \(raw: leadingTrivia)public var \(caseName): \
-        \(raw: qualifiedCasePathTypeName)<\(enumName), \(raw: associatedValueName)> {
-        \(raw: qualifiedCasePathTypeName)<\(enumName), \(raw: associatedValueName)>(
+        \(raw: casePathTypeName.qualified)<\(enumName), \(raw: associatedValueName)> {
+        \(raw: casePathTypeName.qualified)<\(enumName), \(raw: associatedValueName)>(
         embed: { \(enumName).\(caseName)\(raw: embedNames) },
         extract: {
         guard case\(raw: hasPayload ? " let" : "").\(caseName)\(raw: bindingNames) = $0 else { \
@@ -469,6 +475,18 @@ final class SelfRewriter: SyntaxRewriter {
     guard node.name.text == "Self"
     else { return super.visit(node) }
     return super.visit(node.with(\.name, self.selfEquivalent))
+  }
+}
+
+extension [String] {
+  fileprivate var qualified: [String] {
+    map(\.qualified)
+  }
+}
+
+extension String {
+  fileprivate var qualified: String {
+    "\(CasePathableMacro.moduleName).\(self)"
   }
 }
 

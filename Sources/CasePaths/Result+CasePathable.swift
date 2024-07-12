@@ -1,6 +1,5 @@
-extension Result: CasePathable {
-  public struct AllCasePaths: Sendable {
-    /// Returns the case key path for a given root value.
+extension Result: CasePathable, CasePathIterable {
+  public struct AllCasePaths: CasePathReflectable, Sendable {
     public subscript(root: Result) -> PartialCaseKeyPath<Result> {
       switch root {
       case .success: return \.success
