@@ -144,6 +144,52 @@ final class CasePathableMacroTests: XCTestCase {
     }
   }
 
+  func testCasePathable_NeverCase() {
+    assertMacro {
+      """
+      @CasePathable enum Foo {
+        case bar(Never)
+      }
+      """
+    } expansion: {
+      #"""
+      enum Foo {
+        case bar(Never)
+
+        public struct AllCasePaths: CasePaths.CasePathReflectable, Sendable, Sequence {
+          public subscript(root: Foo) -> CasePaths.PartialCaseKeyPath<Foo> {
+            if root.is(\.bar) {
+              return \.bar
+            }
+            return \.never
+          }
+          public var bar: CasePaths.AnyCasePath<Foo, Never> {
+            CasePaths.AnyCasePath<Foo, Never>(
+              embed: {  _ -> Foo in
+              },
+              extract: {
+                guard case let .bar(v0) = $0 else {
+                  return nil
+                }
+                return v0
+              }
+            )
+          }
+          public func makeIterator() -> IndexingIterator<[CasePaths.PartialCaseKeyPath<Foo>]> {
+            var allCasePaths: [CasePaths.PartialCaseKeyPath<Foo>] = []
+            allCasePaths.append(\.bar)
+            return allCasePaths.makeIterator()
+          }
+        }
+        public static var allCasePaths: AllCasePaths { AllCasePaths() }
+      }
+
+      extension Foo: CasePaths.CasePathable, CasePaths.CasePathIterable {
+      }
+      """#
+    }
+  }
+
   func testCasePathable_ElementList() {
     assertMacro {
       """
