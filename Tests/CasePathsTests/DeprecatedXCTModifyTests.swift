@@ -23,7 +23,7 @@
 
       XCTExpectFailure {
         $0.compactDescription == """
-          XCTModify failed: expected to extract value of type "Int" from "Result<Int, Error>" …
+          failed - XCTModify: Expected to extract value of type "Int" from "Result<Int, Error>" …
 
             Actual:
               failure(CasePathsTests.DeprecatedXCTModifyTests.SomeError())
@@ -41,7 +41,7 @@
 
       XCTExpectFailure {
         $0.compactDescription == """
-          XCTModify failed: expected to extract value of type \
+          failed - XCTModify: Expected to extract value of type \
           "DeprecatedXCTModifyTests.Sheet.State" from \
           "DeprecatedXCTModifyTests.Destination.State?" …
 
@@ -61,7 +61,7 @@
 
       XCTExpectFailure {
         $0.compactDescription == """
-          XCTModify failed: expected to extract value of type "Int" from \
+          failed - XCTModify: Expected to extract value of type "Int" from \
           "Optional<Result<Int, Error>>" …
 
             Actual:
@@ -80,7 +80,7 @@
 
       XCTExpectFailure {
         $0.compactDescription == """
-          XCTModify failed: expected to extract value of type "Int" from "Result<Int, Error>" - \
+          failed - XCTModify: Expected to extract value of type "Int" from "Result<Int, Error>" - \
           Should be success …
 
             Actual:
@@ -119,7 +119,7 @@
 
       XCTExpectFailure {
         $0.compactDescription == """
-          XCTModify failed: expected "Int" value to be modified but it was unchanged.
+          failed - XCTModify: Expected "Int" value to be modified but it was unchanged.
           """
       }
 
@@ -135,7 +135,7 @@
 
       XCTExpectFailure {
         $0.compactDescription == """
-          Threw error: SomeError()
+          failed - Threw error: SomeError()
           """
       }
 

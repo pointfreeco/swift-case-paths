@@ -9,7 +9,7 @@
 
       XCTExpectFailure {
         $0.compactDescription == """
-          XCTUnwrap failed: expected to extract value of type "Error" from "Result<Int, Error>" …
+          failed - XCTUnwrap: Expected to extract value of type "Error" from "Result<Int, Error>" …
 
             Actual:
               success(2)
@@ -23,7 +23,7 @@
 
       XCTExpectFailure {
         $0.compactDescription == """
-          XCTUnwrap failed: expected to extract value of type "Error" from "Result<Int, Error>" - \
+          failed - XCTUnwrap: Expected to extract value of type "Error" from "Result<Int, Error>" - \
           Should be 'failure' …
 
             Actual:

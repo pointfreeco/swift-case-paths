@@ -53,7 +53,7 @@ func _XCTModify<Enum, Case>(
     let message = message()
     XCTFail(
       """
-      XCTModify failed: expected to extract value of type "\(typeName(Case.self))" from \
+      XCTModify: Expected to extract value of type "\(typeName(Case.self))" from \
       "\(typeName(Enum.self))"\
       \(message.isEmpty ? "" : " - " + message) …
 
@@ -79,7 +79,7 @@ func _XCTModify<Enum, Case>(
   {
     XCTFail(
       """
-      XCTModify failed: expected "\(typeName(Case.self))" value to be modified but it was unchanged.
+      XCTModify: Expected "\(typeName(Case.self))" value to be modified but it was unchanged.
       """
     )
   }

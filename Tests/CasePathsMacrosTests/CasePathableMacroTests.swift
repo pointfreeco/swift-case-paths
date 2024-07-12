@@ -136,7 +136,8 @@ final class CasePathableMacroTests: XCTestCase {
                   return allCasePaths.makeIterator()
               }
           }
-          public static var allCasePaths: AllCasePaths { AllCasePaths() }}
+          public static var allCasePaths: AllCasePaths { AllCasePaths() }
+      }
 
       extension EnumWithNoCases: CasePaths.CasePathable, CasePaths.CasePathIterable {
       }
