@@ -54,19 +54,19 @@ extension Optional: CasePathable, CasePathIterable {
 }
 
 extension Case {
-  #if swift(>=6)
-    /// A case path to the presence of a nested value.
-    ///
-    /// This subscript can chain into an optional's wrapped value without explicitly specifying each
-    /// `some` component.
-    @_disfavoredOverload
-    public subscript<Member>(
-      dynamicMember keyPath: KeyPath<Value.AllCasePaths, AnyCasePath<Value, Member?>> & Sendable
-    ) -> Case<Member>
-    where Value: CasePathable {
-      self[dynamicMember: keyPath].some
-    }
-  #else
+  // #if swift(>=6)
+  //   /// A case path to the presence of a nested value.
+  //   ///
+  //   /// This subscript can chain into an optional's wrapped value without explicitly specifying each
+  //   /// `some` component.
+  //   @_disfavoredOverload
+  //   public subscript<Member>(
+  //     dynamicMember keyPath: KeyPath<Value.AllCasePaths, AnyCasePath<Value, Member?>> & Sendable
+  //   ) -> Case<Member>
+  //   where Value: CasePathable {
+  //     self[dynamicMember: keyPath].some
+  //   }
+  // #else
     /// A case path to the presence of a nested value.
     ///
     /// This subscript can chain into an optional's wrapped value without explicitly specifying each
@@ -78,7 +78,7 @@ extension Case {
     where Value: CasePathable {
       self[dynamicMember: keyPath].some
     }
-  #endif
+  // #endif
 }
 
 extension Optional.AllCasePaths: Sequence {
