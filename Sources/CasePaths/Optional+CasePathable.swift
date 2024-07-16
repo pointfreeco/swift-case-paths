@@ -67,17 +67,17 @@ extension Case {
   //     self[dynamicMember: keyPath].some
   //   }
   // #else
-    /// A case path to the presence of a nested value.
-    ///
-    /// This subscript can chain into an optional's wrapped value without explicitly specifying each
-    /// `some` component.
-    @_disfavoredOverload
-    public subscript<Member>(
-      dynamicMember keyPath: KeyPath<Value.AllCasePaths, AnyCasePath<Value, Member?>>
-    ) -> Case<Member>
-    where Value: CasePathable {
-      self[dynamicMember: keyPath].some
-    }
+  /// A case path to the presence of a nested value.
+  ///
+  /// This subscript can chain into an optional's wrapped value without explicitly specifying each
+  /// `some` component.
+  @_disfavoredOverload
+  public subscript<Member>(
+    dynamicMember keyPath: KeyPath<Value.AllCasePaths, AnyCasePath<Value, Member?>>
+  ) -> Case<Member>
+  where Value: CasePathable {
+    self[dynamicMember: keyPath].some
+  }
   // #endif
 }
 
