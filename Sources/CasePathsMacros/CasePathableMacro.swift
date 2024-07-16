@@ -204,11 +204,14 @@ extension CasePathableMacro: MemberMacro {
         .map { String($0.dropFirst(indent)) }
         .joined(separator: "\n")
         .trimmingSuffix(while: { $0.isWhitespace && !$0.isNewline })
+      let embed: DeclSyntax = ["Never", "Swift.Never"].contains(associatedValueName)
+        ? " _ -> \(enumName) in "
+        : "\(enumName).\(caseName)\(raw: embedNames)"
       return """
         \(raw: leadingTrivia)public var \(caseName): \
         \(raw: casePathTypeName.qualified)<\(enumName), \(raw: associatedValueName)> {
         \(raw: casePathTypeName.qualified)<\(enumName), \(raw: associatedValueName)>(
-        embed: { \(enumName).\(caseName)\(raw: embedNames) },
+        embed: { \(embed) },
         extract: {
         guard case\(raw: hasPayload ? " let" : "").\(caseName)\(raw: bindingNames) = $0 else { \
         return nil \
