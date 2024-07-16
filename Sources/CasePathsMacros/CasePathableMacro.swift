@@ -204,7 +204,8 @@ extension CasePathableMacro: MemberMacro {
         .map { String($0.dropFirst(indent)) }
         .joined(separator: "\n")
         .trimmingSuffix(while: { $0.isWhitespace && !$0.isNewline })
-      let embed: DeclSyntax = ["Never", "Swift.Never"].contains(associatedValueName)
+      let embed: DeclSyntax =
+        ["Never", "Swift.Never"].contains(associatedValueName)
         ? " _ -> \(enumName) in "
         : "\(enumName).\(caseName)\(raw: embedNames)"
       return """
