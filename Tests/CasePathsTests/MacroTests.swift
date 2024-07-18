@@ -12,5 +12,10 @@ private enum Comments {
 
 @CasePathable
 enum Action {
+  case alert(Alert)
+}
+
+@CasePathable
+enum Alert {
   case alert(Never)
 }
