@@ -98,7 +98,7 @@ extension CasePathableMacro: MemberMacro {
 
     let subscriptReturn = allCases.isEmpty ? #"\.never"# : #"return \.never"#
 
-    return [
+    var decls: [DeclSyntax] = [
       """
       public struct AllCasePaths: CasePaths.CasePathReflectable, Sendable, Sequence {
       public subscript(root: \(enumName)) -> CasePaths.PartialCaseKeyPath<\(enumName)> {
@@ -115,6 +115,16 @@ extension CasePathableMacro: MemberMacro {
       public static var allCasePaths: AllCasePaths { AllCasePaths() }
       """
     ]
+
+    let hasElementGeneric =
+      enumDecl.genericParameterClause?.parameters
+      .contains { $0.name.text == "Element" }
+      ?? false
+    if hasElementGeneric {
+      decls.append("public typealias _$Element = Element")
+    }
+
+    return decls
   }
 
   static func generateCases(
@@ -170,7 +180,10 @@ extension CasePathableMacro: MemberMacro {
   ) -> [DeclSyntax] {
     decl.elements.map {
       let caseName = $0.name.trimmed
-      let associatedValueName = $0.trimmedTypeDescription
+      let associatedValueName =
+        $0.trimmedTypeDescription == "Element"
+        ? "_$Element"
+        : $0.trimmedTypeDescription
       let hasPayload = $0.parameterClause.map { !$0.parameters.isEmpty } ?? false
       let embed: DeclSyntax = hasPayload ? "\(enumName).\(caseName)" : "{ \(enumName).\(caseName) }"
       let bindingNames: String

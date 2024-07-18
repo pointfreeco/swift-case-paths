@@ -19,3 +19,7 @@ enum Action {
 enum Alert {
   case alert(Never)
 }
+
+@CasePathable enum EnumWithElementGeneric<Element> {
+  case element(Element)
+}
