@@ -23,8 +23,8 @@
       "kind" : "remoteSourceControl",
       "location" : "https://github.com/pointfreeco/swift-macro-testing",
       "state" : {
-        "revision" : "5c4a1b9d7c23cd5c08ea50677d8e89080365cb00",
-        "version" : "0.4.0"
+        "revision" : "a35257b7e9ce44e92636447003a8eeefb77b145c",
+        "version" : "0.5.1"
       }
     },
     {
@@ -32,8 +32,8 @@
       "kind" : "remoteSourceControl",
       "location" : "https://github.com/pointfreeco/swift-snapshot-testing",
       "state" : {
-        "revision" : "625ccca8570773dd84a34ee51a81aa2bc5a4f97a",
-        "version" : "1.16.0"
+        "revision" : "c097f955b4e724690f0fc8ffb7a6d4b881c9c4e3",
+        "version" : "1.17.2"
       }
     },
     {
