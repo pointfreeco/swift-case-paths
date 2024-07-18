@@ -185,22 +185,16 @@ extension CasePathableMacro: MemberMacro {
         ? "_$Element"
         : $0.trimmedTypeDescription
       let hasPayload = $0.parameterClause.map { !$0.parameters.isEmpty } ?? false
-      let embedNames: String
+      let embed: DeclSyntax = hasPayload ? "\(enumName).\(caseName)" : "{ \(enumName).\(caseName) }"
       let bindingNames: String
       let returnName: String
       if hasPayload, let associatedValue = $0.parameterClause {
-        embedNames =
-          "("
-          + associatedValue.parameters.enumerated()
-          .map { "\($1.firstName.map { "\($0.text): " } ?? "")$\($0)" }
-          .joined(separator: ", ") + ")"
         let parameterNames = (0..<associatedValue.parameters.count)
           .map { "v\($0)" }
           .joined(separator: ", ")
         bindingNames = "(\(parameterNames))"
         returnName = associatedValue.parameters.count == 1 ? parameterNames : bindingNames
       } else {
-        embedNames = ""
         bindingNames = ""
         returnName = "()"
       }
@@ -217,22 +211,15 @@ extension CasePathableMacro: MemberMacro {
         .map { String($0.dropFirst(indent)) }
         .joined(separator: "\n")
         .trimmingSuffix(while: { $0.isWhitespace && !$0.isNewline })
-      let embed: DeclSyntax =
-        ["Never", "Swift.Never"].contains(associatedValueName)
-        ? " _ -> \(enumName) in "
-        : "\(enumName).\(caseName)\(raw: embedNames)"
       return """
         \(raw: leadingTrivia)public var \(caseName): \
         \(raw: casePathTypeName.qualified)<\(enumName), \(raw: associatedValueName)> {
-        \(raw: casePathTypeName.qualified)<\(enumName), \(raw: associatedValueName)>(
-        embed: { \(embed) },
-        extract: {
+        ._$embed(\(embed)) {
         guard case\(raw: hasPayload ? " let" : "").\(caseName)\(raw: bindingNames) = $0 else { \
         return nil \
         }
         return \(raw: returnName)
         }
-        )
         }
         """
     }
