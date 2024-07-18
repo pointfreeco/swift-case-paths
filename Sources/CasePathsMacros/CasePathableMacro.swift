@@ -116,7 +116,8 @@ extension CasePathableMacro: MemberMacro {
       """
     ]
 
-    let hasElementGeneric = enumDecl.genericParameterClause?.parameters
+    let hasElementGeneric =
+      enumDecl.genericParameterClause?.parameters
       .contains { $0.name.text == "Element" }
       ?? false
     if hasElementGeneric {
@@ -179,7 +180,8 @@ extension CasePathableMacro: MemberMacro {
   ) -> [DeclSyntax] {
     decl.elements.map {
       let caseName = $0.name.trimmed
-      let associatedValueName = $0.trimmedTypeDescription == "Element"
+      let associatedValueName =
+        $0.trimmedTypeDescription == "Element"
         ? "_$Element"
         : $0.trimmedTypeDescription
       let hasPayload = $0.parameterClause.map { !$0.parameters.isEmpty } ?? false
