@@ -86,6 +86,16 @@ extension CasePathableMacro: MemberMacro {
       seenCaseNames.insert(name)
     }
 
+    let hasElementGeneric = enumDecl.genericParameterClause?.parameters
+      .contains { $0.name.text == "Element" }
+    ?? false
+    let elementTypeAlias: TokenSyntax?
+    if hasElementGeneric {
+      elementTypeAlias = "public typealias _$Element = Element"
+    } else {
+      elementTypeAlias = nil
+    }
+
     let rewriter = SelfRewriter(selfEquivalent: enumName)
     let memberBlock = rewriter.rewrite(enumDecl.memberBlock).cast(MemberBlockSyntax.self)
     let rootSubscriptCases = generateCases(from: memberBlock.members, enumName: enumName) {
@@ -100,6 +110,7 @@ extension CasePathableMacro: MemberMacro {
 
     return [
       """
+      \(elementTypeAlias)
       public struct AllCasePaths: CasePaths.CasePathReflectable, Sendable, Sequence {
       public subscript(root: \(enumName)) -> CasePaths.PartialCaseKeyPath<\(enumName)> {
       \(raw: rootSubscriptCases.map { "\($0.description)\n" }.joined())\(raw: subscriptReturn)
@@ -170,7 +181,9 @@ extension CasePathableMacro: MemberMacro {
   ) -> [DeclSyntax] {
     decl.elements.map {
       let caseName = $0.name.trimmed
-      let associatedValueName = $0.trimmedTypeDescription
+      let associatedValueName = $0.trimmedTypeDescription == "Element"
+        ? "_$Element"
+        : $0.trimmedTypeDescription
       let hasPayload = $0.parameterClause.map { !$0.parameters.isEmpty } ?? false
       let embedNames: String
       let bindingNames: String

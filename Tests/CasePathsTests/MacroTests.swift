@@ -14,3 +14,7 @@ private enum Comments {
 enum Action {
   case alert(Never)
 }
+
+@CasePathable enum EnumWithElementGeneric<Element> {
+  case element(Element)
+}
