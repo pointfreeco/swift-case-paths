@@ -27,8 +27,13 @@ public struct AnyCasePath<Root, Value>: Sendable {
     _ embed: @escaping (Value) -> Root,
     extract: @escaping @Sendable (Root) -> Value?
   ) -> Self {
-    @UncheckedSendable var embed = embed
-    return Self(embed: { [$embed] in $embed.wrappedValue($0) }, extract: extract)
+    #if swift(>=5.10)
+      nonisolated(unsafe) let embed = embed
+      return Self(embed: { embed($0) }, extract: extract)
+    #else
+      @UncheckedSendable var embed = embed
+      return Self(embed: { [$embed] in $embed.wrappedValue($0) }, extract: extract)
+    #endif
   }
 
   /// Returns a root by embedding a value.
