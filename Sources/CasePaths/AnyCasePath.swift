@@ -23,6 +23,14 @@ public struct AnyCasePath<Root, Value>: Sendable {
     self._extract = extract
   }
 
+  public static func _$embed(
+    _ embed: @escaping (Value) -> Root,
+    extract: @escaping @Sendable (Root) -> Value?
+  ) -> Self {
+    @UncheckedSendable var embed = embed
+    return Self(embed: { [$embed] in $embed.wrappedValue($0) }, extract: extract)
+  }
+
   /// Returns a root by embedding a value.
   ///
   /// - Parameter value: A value to embed.
