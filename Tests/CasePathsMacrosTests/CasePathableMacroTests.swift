@@ -6,7 +6,7 @@ import XCTest
 final class CasePathableMacroTests: XCTestCase {
   override func invokeTest() {
     withMacroTesting(
-      //isRecording: true,
+      //record: .failed,
       macros: [CasePathableMacro.self]
     ) {
       super.invokeTest()
@@ -1111,7 +1111,7 @@ final class CasePathableMacroTests: XCTestCase {
         case fizz(buzz: String)  // Comment on case
         case fizzier/*Comment in case*/(Int, buzzier: String)
         case fizziest // Comment without associated value
-      
+
         public struct AllCasePaths: CasePaths.CasePathReflectable, Sendable, Sequence {
           public subscript(root: Foo) -> CasePaths.PartialCaseKeyPath<Foo> {
             if root.is(\.bar) {
@@ -1209,7 +1209,7 @@ final class CasePathableMacroTests: XCTestCase {
         }
         public static var allCasePaths: AllCasePaths { AllCasePaths() }
       }
-      
+
       extension Foo: CasePaths.CasePathable, CasePaths.CasePathIterable {
       }
       """#
@@ -1228,28 +1228,35 @@ final class CasePathableMacroTests: XCTestCase {
       enum Action<Element> {
         case element(Element)
 
-        public typealias _$Element = Element
         public struct AllCasePaths: CasePaths.CasePathReflectable, Sendable, Sequence {
-        public subscript(root: Action) -> CasePaths.PartialCaseKeyPath<Action> {
-        if root.is(\.element) { return \.element }
-        return \.never
-        }
-        public var element: CasePaths.AnyCasePath<Action, _$Element> {
-        CasePaths.AnyCasePath<Action, _$Element>(
-        embed: { Action.element($0) },
-        extract: {
-        guard case let.element(v0) = $0 else { return nil }
-        return v0
-        }
-        )
-        }
-        public func makeIterator() -> IndexingIterator<[CasePaths.PartialCaseKeyPath<Action>]> {
-        var allCasePaths: [CasePaths.PartialCaseKeyPath<Action>] = []
-        allCasePaths.append(\.element)
-        return allCasePaths.makeIterator()
-        }
+          public subscript(root: Action) -> CasePaths.PartialCaseKeyPath<Action> {
+            if root.is(\.element) {
+              return \.element
+            }
+            return \.never
+          }
+          public var element: CasePaths.AnyCasePath<Action, _$Element> {
+            CasePaths.AnyCasePath<Action, _$Element>(
+              embed: {
+                Action.element($0)
+              },
+              extract: {
+                guard case let .element(v0) = $0 else {
+                  return nil
+                }
+                return v0
+              }
+            )
+          }
+          public func makeIterator() -> IndexingIterator<[CasePaths.PartialCaseKeyPath<Action>]> {
+            var allCasePaths: [CasePaths.PartialCaseKeyPath<Action>] = []
+            allCasePaths.append(\.element)
+            return allCasePaths.makeIterator()
+          }
         }
         public static var allCasePaths: AllCasePaths { AllCasePaths() }
+
+        public typealias _$Element = Element
       }
 
       extension Action: CasePaths.CasePathable, CasePaths.CasePathIterable {
