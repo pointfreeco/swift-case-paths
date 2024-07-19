@@ -69,33 +69,33 @@ extension Case {
     self = Case<Root>()[keyPath: keyPath]
   }
 
-  #if swift(>=6)
-    public subscript<AppendedValue>(
-      dynamicMember keyPath: KeyPath<Value.AllCasePaths, AnyCasePath<Value, AppendedValue>>
-        & Sendable
-    ) -> Case<AppendedValue>
-    where Value: CasePathable {
-      Case<AppendedValue>(
-        embed: { embed(Value.allCasePaths[keyPath: keyPath].embed($0)) },
-        extract: { extract(from: $0).flatMap(Value.allCasePaths[keyPath: keyPath].extract) }
-      )
-    }
-  #else
-    public subscript<AppendedValue>(
-      dynamicMember keyPath: KeyPath<Value.AllCasePaths, AnyCasePath<Value, AppendedValue>>
-    ) -> Case<AppendedValue>
-    where Value: CasePathable {
-      @UncheckedSendable var keyPath = keyPath
-      return Case<AppendedValue>(
-        embed: { [$keyPath] in
-          embed(Value.allCasePaths[keyPath: $keyPath.wrappedValue].embed($0))
-        },
-        extract: { [$keyPath] in
-          extract(from: $0).flatMap(Value.allCasePaths[keyPath: $keyPath.wrappedValue].extract)
-        }
-      )
-    }
-  #endif
+  // #if swift(>=6)
+  //   public subscript<AppendedValue>(
+  //     dynamicMember keyPath: KeyPath<Value.AllCasePaths, AnyCasePath<Value, AppendedValue>>
+  //       & Sendable
+  //   ) -> Case<AppendedValue>
+  //   where Value: CasePathable {
+  //     Case<AppendedValue>(
+  //       embed: { embed(Value.allCasePaths[keyPath: keyPath].embed($0)) },
+  //       extract: { extract(from: $0).flatMap(Value.allCasePaths[keyPath: keyPath].extract) }
+  //     )
+  //   }
+  // #else
+  public subscript<AppendedValue>(
+    dynamicMember keyPath: KeyPath<Value.AllCasePaths, AnyCasePath<Value, AppendedValue>>
+  ) -> Case<AppendedValue>
+  where Value: CasePathable {
+    @UncheckedSendable var keyPath = keyPath
+    return Case<AppendedValue>(
+      embed: { [$keyPath] in
+        embed(Value.allCasePaths[keyPath: $keyPath.wrappedValue].embed($0))
+      },
+      extract: { [$keyPath] in
+        extract(from: $0).flatMap(Value.allCasePaths[keyPath: $keyPath.wrappedValue].extract)
+      }
+    )
+  }
+  // #endif
 
   public func embed(_ value: Value) -> Any {
     self._embed(value)
@@ -517,45 +517,45 @@ extension AnyCasePath {
 }
 
 extension AnyCasePath where Value: CasePathable {
-  #if swift(>=6)
-    /// Returns a new case path created by appending the case path at the given key path to this one.
-    ///
-    /// This subscript is automatically invoked by case key path expressions via dynamic member
-    /// lookup, and should not be invoked directly.
-    ///
-    /// - Parameter keyPath: A key path to a case-pathable case path.
-    public subscript<AppendedValue>(
-      dynamicMember keyPath: KeyPath<Value.AllCasePaths, AnyCasePath<Value, AppendedValue>>
-        & Sendable
-    ) -> AnyCasePath<Root, AppendedValue> {
-      AnyCasePath<Root, AppendedValue>(
-        embed: { self.embed(Value.allCasePaths[keyPath: keyPath].embed($0)) },
-        extract: {
-          self.extract(from: $0).flatMap(Value.allCasePaths[keyPath: keyPath].extract(from:))
-        }
-      )
-    }
-  #else
-    /// Returns a new case path created by appending the case path at the given key path to this one.
-    ///
-    /// This subscript is automatically invoked by case key path expressions via dynamic member
-    /// lookup, and should not be invoked directly.
-    ///
-    /// - Parameter keyPath: A key path to a case-pathable case path.
-    public subscript<AppendedValue>(
-      dynamicMember keyPath: KeyPath<Value.AllCasePaths, AnyCasePath<Value, AppendedValue>>
-    ) -> AnyCasePath<Root, AppendedValue> {
-      @UncheckedSendable var keyPath = keyPath
-      return AnyCasePath<Root, AppendedValue>(
-        embed: { [$keyPath] in
-          embed(Value.allCasePaths[keyPath: $keyPath.wrappedValue].embed($0))
-        },
-        extract: { [$keyPath] in
-          extract(from: $0).flatMap(
-            Value.allCasePaths[keyPath: $keyPath.wrappedValue].extract(from:)
-          )
-        }
-      )
-    }
-  #endif
+  // #if swift(>=6)
+  //   /// Returns a new case path created by appending the case path at the given key path to this one.
+  //   ///
+  //   /// This subscript is automatically invoked by case key path expressions via dynamic member
+  //   /// lookup, and should not be invoked directly.
+  //   ///
+  //   /// - Parameter keyPath: A key path to a case-pathable case path.
+  //   public subscript<AppendedValue>(
+  //     dynamicMember keyPath: KeyPath<Value.AllCasePaths, AnyCasePath<Value, AppendedValue>>
+  //       & Sendable
+  //   ) -> AnyCasePath<Root, AppendedValue> {
+  //     AnyCasePath<Root, AppendedValue>(
+  //       embed: { self.embed(Value.allCasePaths[keyPath: keyPath].embed($0)) },
+  //       extract: {
+  //         self.extract(from: $0).flatMap(Value.allCasePaths[keyPath: keyPath].extract(from:))
+  //       }
+  //     )
+  //   }
+  // #else
+  /// Returns a new case path created by appending the case path at the given key path to this one.
+  ///
+  /// This subscript is automatically invoked by case key path expressions via dynamic member
+  /// lookup, and should not be invoked directly.
+  ///
+  /// - Parameter keyPath: A key path to a case-pathable case path.
+  public subscript<AppendedValue>(
+    dynamicMember keyPath: KeyPath<Value.AllCasePaths, AnyCasePath<Value, AppendedValue>>
+  ) -> AnyCasePath<Root, AppendedValue> {
+    @UncheckedSendable var keyPath = keyPath
+    return AnyCasePath<Root, AppendedValue>(
+      embed: { [$keyPath] in
+        embed(Value.allCasePaths[keyPath: $keyPath.wrappedValue].embed($0))
+      },
+      extract: { [$keyPath] in
+        extract(from: $0).flatMap(
+          Value.allCasePaths[keyPath: $keyPath.wrappedValue].extract(from:)
+        )
+      }
+    )
+  }
+  // #endif
 }

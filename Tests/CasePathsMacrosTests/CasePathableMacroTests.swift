@@ -6,7 +6,7 @@ import XCTest
 final class CasePathableMacroTests: XCTestCase {
   override func invokeTest() {
     withMacroTesting(
-      // isRecording: true,
+      // record: .failed,
       macros: [CasePathableMacro.self]
     ) {
       super.invokeTest()
@@ -48,56 +48,38 @@ final class CasePathableMacroTests: XCTestCase {
             return \.never
           }
           public var bar: CasePaths.AnyCasePath<Foo, Void> {
-            CasePaths.AnyCasePath<Foo, Void>(
-              embed: {
+            ._$embed({
                 Foo.bar
-              },
-              extract: {
-                guard case .bar = $0 else {
-                  return nil
-                }
-                return ()
+              }) {
+              guard case .bar = $0 else {
+                return nil
               }
-            )
+              return ()
+            }
           }
           public var baz: CasePaths.AnyCasePath<Foo, Int> {
-            CasePaths.AnyCasePath<Foo, Int>(
-              embed: {
-                Foo.baz($0)
-              },
-              extract: {
-                guard case let .baz(v0) = $0 else {
-                  return nil
-                }
-                return v0
+            ._$embed(Foo.baz) {
+              guard case let .baz(v0) = $0 else {
+                return nil
               }
-            )
+              return v0
+            }
           }
           public var fizz: CasePaths.AnyCasePath<Foo, String> {
-            CasePaths.AnyCasePath<Foo, String>(
-              embed: {
-                Foo.fizz(buzz: $0)
-              },
-              extract: {
-                guard case let .fizz(v0) = $0 else {
-                  return nil
-                }
-                return v0
+            ._$embed(Foo.fizz) {
+              guard case let .fizz(v0) = $0 else {
+                return nil
               }
-            )
+              return v0
+            }
           }
           public var fizzier: CasePaths.AnyCasePath<Foo, (Int, buzzier: String)> {
-            CasePaths.AnyCasePath<Foo, (Int, buzzier: String)>(
-              embed: {
-                Foo.fizzier($0, buzzier: $1)
-              },
-              extract: {
-                guard case let .fizzier(v0, v1) = $0 else {
-                  return nil
-                }
-                return (v0, v1)
+            ._$embed(Foo.fizzier) {
+              guard case let .fizzier(v0, v1) = $0 else {
+                return nil
               }
-            )
+              return (v0, v1)
+            }
           }
           public func makeIterator() -> IndexingIterator<[CasePaths.PartialCaseKeyPath<Foo>]> {
             var allCasePaths: [CasePaths.PartialCaseKeyPath<Foo>] = []
@@ -145,6 +127,48 @@ final class CasePathableMacroTests: XCTestCase {
     }
   }
 
+  func testCasePathable_NeverCase() {
+    assertMacro {
+      """
+      @CasePathable enum Foo {
+        case bar(Never)
+      }
+      """
+    } expansion: {
+      #"""
+      enum Foo {
+        case bar(Never)
+
+        public struct AllCasePaths: CasePaths.CasePathReflectable, Sendable, Sequence {
+          public subscript(root: Foo) -> CasePaths.PartialCaseKeyPath<Foo> {
+            if root.is(\.bar) {
+              return \.bar
+            }
+            return \.never
+          }
+          public var bar: CasePaths.AnyCasePath<Foo, Never> {
+            ._$embed(Foo.bar) {
+              guard case let .bar(v0) = $0 else {
+                return nil
+              }
+              return v0
+            }
+          }
+          public func makeIterator() -> IndexingIterator<[CasePaths.PartialCaseKeyPath<Foo>]> {
+            var allCasePaths: [CasePaths.PartialCaseKeyPath<Foo>] = []
+            allCasePaths.append(\.bar)
+            return allCasePaths.makeIterator()
+          }
+        }
+        public static var allCasePaths: AllCasePaths { AllCasePaths() }
+      }
+
+      extension Foo: CasePaths.CasePathable, CasePaths.CasePathIterable {
+      }
+      """#
+    }
+  }
+
   func testCasePathable_ElementList() {
     assertMacro {
       """
@@ -168,30 +192,20 @@ final class CasePathableMacroTests: XCTestCase {
             return \.never
           }
           public var bar: CasePaths.AnyCasePath<Foo, Int> {
-            CasePaths.AnyCasePath<Foo, Int>(
-              embed: {
-                Foo.bar($0)
-              },
-              extract: {
-                guard case let .bar(v0) = $0 else {
-                  return nil
-                }
-                return v0
+            ._$embed(Foo.bar) {
+              guard case let .bar(v0) = $0 else {
+                return nil
               }
-            )
+              return v0
+            }
           }
           public var baz: CasePaths.AnyCasePath<Foo, String> {
-            CasePaths.AnyCasePath<Foo, String>(
-              embed: {
-                Foo.baz($0)
-              },
-              extract: {
-                guard case let .baz(v0) = $0 else {
-                  return nil
-                }
-                return v0
+            ._$embed(Foo.baz) {
+              guard case let .baz(v0) = $0 else {
+                return nil
               }
-            )
+              return v0
+            }
           }
           public func makeIterator() -> IndexingIterator<[CasePaths.PartialCaseKeyPath<Foo>]> {
             var allCasePaths: [CasePaths.PartialCaseKeyPath<Foo>] = []
@@ -229,17 +243,12 @@ final class CasePathableMacroTests: XCTestCase {
             return \.never
           }
           public var bar: CasePaths.AnyCasePath<Foo, Int> {
-            CasePaths.AnyCasePath<Foo, Int>(
-              embed: {
-                Foo.bar($0)
-              },
-              extract: {
-                guard case let .bar(v0) = $0 else {
-                  return nil
-                }
-                return v0
+            ._$embed(Foo.bar) {
+              guard case let .bar(v0) = $0 else {
+                return nil
               }
-            )
+              return v0
+            }
           }
           public func makeIterator() -> IndexingIterator<[CasePaths.PartialCaseKeyPath<Foo>]> {
             var allCasePaths: [CasePaths.PartialCaseKeyPath<Foo>] = []
@@ -273,17 +282,12 @@ final class CasePathableMacroTests: XCTestCase {
             return \.never
           }
           public var bar: CasePaths.AnyCasePath<Foo, Int> {
-            CasePaths.AnyCasePath<Foo, Int>(
-              embed: {
-                Foo.bar($0)
-              },
-              extract: {
-                guard case let .bar(v0) = $0 else {
-                  return nil
-                }
-                return v0
+            ._$embed(Foo.bar) {
+              guard case let .bar(v0) = $0 else {
+                return nil
               }
-            )
+              return v0
+            }
           }
           public func makeIterator() -> IndexingIterator<[CasePaths.PartialCaseKeyPath<Foo>]> {
             var allCasePaths: [CasePaths.PartialCaseKeyPath<Foo>] = []
@@ -317,17 +321,12 @@ final class CasePathableMacroTests: XCTestCase {
             return \.never
           }
           public var bar: CasePaths.AnyCasePath<Foo, Int> {
-            CasePaths.AnyCasePath<Foo, Int>(
-              embed: {
-                Foo.bar($0)
-              },
-              extract: {
-                guard case let .bar(v0) = $0 else {
-                  return nil
-                }
-                return v0
+            ._$embed(Foo.bar) {
+              guard case let .bar(v0) = $0 else {
+                return nil
               }
-            )
+              return v0
+            }
           }
           public func makeIterator() -> IndexingIterator<[CasePaths.PartialCaseKeyPath<Foo>]> {
             var allCasePaths: [CasePaths.PartialCaseKeyPath<Foo>] = []
@@ -455,17 +454,12 @@ final class CasePathableMacroTests: XCTestCase {
             return \.never
           }
           public var bar: CasePaths.AnyCasePath<Foo, (Int, Bool)> {
-            CasePaths.AnyCasePath<Foo, (Int, Bool)>(
-              embed: {
-                Foo.bar(_: $0, _: $1)
-              },
-              extract: {
-                guard case let .bar(v0, v1) = $0 else {
-                  return nil
-                }
-                return (v0, v1)
+            ._$embed(Foo.bar) {
+              guard case let .bar(v0, v1) = $0 else {
+                return nil
               }
-            )
+              return (v0, v1)
+            }
           }
           public func makeIterator() -> IndexingIterator<[CasePaths.PartialCaseKeyPath<Foo>]> {
             var allCasePaths: [CasePaths.PartialCaseKeyPath<Foo>] = []
@@ -502,17 +496,12 @@ final class CasePathableMacroTests: XCTestCase {
             return \.never
           }
           public var bar: CasePaths.AnyCasePath<Foo, Bar<Foo>> {
-            CasePaths.AnyCasePath<Foo, Bar<Foo>>(
-              embed: {
-                Foo.bar($0)
-              },
-              extract: {
-                guard case let .bar(v0) = $0 else {
-                  return nil
-                }
-                return v0
+            ._$embed(Foo.bar) {
+              guard case let .bar(v0) = $0 else {
+                return nil
               }
-            )
+              return v0
+            }
           }
           public func makeIterator() -> IndexingIterator<[CasePaths.PartialCaseKeyPath<Foo>]> {
             var allCasePaths: [CasePaths.PartialCaseKeyPath<Foo>] = []
@@ -549,17 +538,12 @@ final class CasePathableMacroTests: XCTestCase {
             return \.never
           }
           public var bar: CasePaths.AnyCasePath<Foo, (int: Int, bool: Bool)> {
-            CasePaths.AnyCasePath<Foo, (int: Int, bool: Bool)>(
-              embed: {
-                Foo.bar(int: $0, bool: $1)
-              },
-              extract: {
-                guard case let .bar(v0, v1) = $0 else {
-                  return nil
-                }
-                return (v0, v1)
+            ._$embed(Foo.bar) {
+              guard case let .bar(v0, v1) = $0 else {
+                return nil
               }
-            )
+              return (v0, v1)
+            }
           }
           public func makeIterator() -> IndexingIterator<[CasePaths.PartialCaseKeyPath<Foo>]> {
             var allCasePaths: [CasePaths.PartialCaseKeyPath<Foo>] = []
@@ -659,114 +643,84 @@ final class CasePathableMacroTests: XCTestCase {
             return \.never
           }
           public var bar: CasePaths.AnyCasePath<Foo, Void> {
-            CasePaths.AnyCasePath<Foo, Void>(
-              embed: {
+            ._$embed({
                 Foo.bar
-              },
-              extract: {
-                guard case .bar = $0 else {
-                  return nil
-                }
-                return ()
+              }) {
+              guard case .bar = $0 else {
+                return nil
               }
-            )
+              return ()
+            }
           }
           #if os(macOS)
           public var macCase: CasePaths.AnyCasePath<Foo, Void> {
-            CasePaths.AnyCasePath<Foo, Void>(
-              embed: {
+            ._$embed({
                 Foo.macCase
-              },
-              extract: {
-                guard case .macCase = $0 else {
-                  return nil
-                }
-                return ()
+              }) {
+              guard case .macCase = $0 else {
+                return nil
               }
-            )
+              return ()
+            }
           }
           public var macSecond: CasePaths.AnyCasePath<Foo, Int> {
-            CasePaths.AnyCasePath<Foo, Int>(
-              embed: {
-                Foo.macSecond($0)
-              },
-              extract: {
-                guard case let .macSecond(v0) = $0 else {
-                  return nil
-                }
-                return v0
+            ._$embed(Foo.macSecond) {
+              guard case let .macSecond(v0) = $0 else {
+                return nil
               }
-            )
+              return v0
+            }
           }
           #elseif os(iOS)
           public var iosCase: CasePaths.AnyCasePath<Foo, Void> {
-            CasePaths.AnyCasePath<Foo, Void>(
-              embed: {
+            ._$embed({
                 Foo.iosCase
-              },
-              extract: {
-                guard case .iosCase = $0 else {
-                  return nil
-                }
-                return ()
+              }) {
+              guard case .iosCase = $0 else {
+                return nil
               }
-            )
+              return ()
+            }
           }
           #else
           public var elseCase: CasePaths.AnyCasePath<Foo, String> {
-            CasePaths.AnyCasePath<Foo, String>(
-              embed: {
-                Foo.elseCase($0)
-              },
-              extract: {
-                guard case let .elseCase(v0) = $0 else {
-                  return nil
-                }
-                return v0
+            ._$embed(Foo.elseCase) {
+              guard case let .elseCase(v0) = $0 else {
+                return nil
               }
-            )
+              return v0
+            }
           }
           public var elseLast: CasePaths.AnyCasePath<Foo, Void> {
-            CasePaths.AnyCasePath<Foo, Void>(
-              embed: {
+            ._$embed({
                 Foo.elseLast
-              },
-              extract: {
-                guard case .elseLast = $0 else {
-                  return nil
-                }
-                return ()
+              }) {
+              guard case .elseLast = $0 else {
+                return nil
               }
-            )
+              return ()
+            }
           }
           #endif
           #if DEBUG
           #if INNER
           public var twoLevelsDeep: CasePaths.AnyCasePath<Foo, Void> {
-            CasePaths.AnyCasePath<Foo, Void>(
-              embed: {
+            ._$embed({
                 Foo.twoLevelsDeep
-              },
-              extract: {
-                guard case .twoLevelsDeep = $0 else {
-                  return nil
-                }
-                return ()
+              }) {
+              guard case .twoLevelsDeep = $0 else {
+                return nil
               }
-            )
+              return ()
+            }
           }
           public var twoLevels: CasePaths.AnyCasePath<Foo, Double> {
-            CasePaths.AnyCasePath<Foo, Double>(
-              embed: {
-                Foo.twoLevels($0)
-              },
-              extract: {
-                guard case let .twoLevels(v0) = $0 else {
-                  return nil
-                }
-                return v0
+            ._$embed(Foo.twoLevels) {
+              guard case let .twoLevels(v0) = $0 else {
+                return nil
               }
-            )
+              return v0
+            }
           }
           #endif
           #endif
@@ -823,17 +777,14 @@ final class CasePathableMacroTests: XCTestCase {
             return \.never
           }
           public var bar: CasePaths.AnyCasePath<Foo, Void> {
-            CasePaths.AnyCasePath<Foo, Void>(
-              embed: {
+            ._$embed({
                 Foo.bar
-              },
-              extract: {
-                guard case .bar = $0 else {
-                  return nil
-                }
-                return ()
+              }) {
+              guard case .bar = $0 else {
+                return nil
               }
-            )
+              return ()
+            }
           }
           public func makeIterator() -> IndexingIterator<[CasePaths.PartialCaseKeyPath<Foo>]> {
             var allCasePaths: [CasePaths.PartialCaseKeyPath<Foo>] = []
@@ -909,33 +860,27 @@ final class CasePathableMacroTests: XCTestCase {
           }
           /// The bar case.
           public var bar: CasePaths.AnyCasePath<Foo, Void> {
-            CasePaths.AnyCasePath<Foo, Void>(
-              embed: {
+            ._$embed({
                 Foo.bar
-              },
-              extract: {
-                guard case .bar = $0 else {
-                  return nil
-                }
-                return ()
+              }) {
+              guard case .bar = $0 else {
+                return nil
               }
-            )
+              return ()
+            }
           }
           /// The baz case.
           ///
           /// A case for baz.
           public var baz: CasePaths.AnyCasePath<Foo, Void> {
-            CasePaths.AnyCasePath<Foo, Void>(
-              embed: {
+            ._$embed({
                 Foo.baz
-              },
-              extract: {
-                guard case .baz = $0 else {
-                  return nil
-                }
-                return ()
+              }) {
+              guard case .baz = $0 else {
+                return nil
               }
-            )
+              return ()
+            }
           }
           /**
          The fizz buzz case.
@@ -943,17 +888,14 @@ final class CasePathableMacroTests: XCTestCase {
          A case for fizz and buzz.
          */
           public var fizz: CasePaths.AnyCasePath<Foo, Void> {
-            CasePaths.AnyCasePath<Foo, Void>(
-              embed: {
+            ._$embed({
                 Foo.fizz
-              },
-              extract: {
-                guard case .fizz = $0 else {
-                  return nil
-                }
-                return ()
+              }) {
+              guard case .fizz = $0 else {
+                return nil
               }
-            )
+              return ()
+            }
           }
           /**
          The fizz buzz case.
@@ -961,17 +903,14 @@ final class CasePathableMacroTests: XCTestCase {
          A case for fizz and buzz.
          */
           public var buzz: CasePaths.AnyCasePath<Foo, Void> {
-            CasePaths.AnyCasePath<Foo, Void>(
-              embed: {
+            ._$embed({
                 Foo.buzz
-              },
-              extract: {
-                guard case .buzz = $0 else {
-                  return nil
-                }
-                return ()
+              }) {
+              guard case .buzz = $0 else {
+                return nil
               }
-            )
+              return ()
+            }
           }
           public func makeIterator() -> IndexingIterator<[CasePaths.PartialCaseKeyPath<Foo>]> {
             var allCasePaths: [CasePaths.PartialCaseKeyPath<Foo>] = []
@@ -1018,17 +957,14 @@ final class CasePathableMacroTests: XCTestCase {
             // baz
           // case foo
           public var bar: CasePaths.AnyCasePath<Foo, Void> {
-            CasePaths.AnyCasePath<Foo, Void>(
-              embed: {
+            ._$embed({
                 Foo.bar
-              },
-              extract: {
-                guard case .bar = $0 else {
-                  return nil
-                }
-                return ()
+              }) {
+              guard case .bar = $0 else {
+                return nil
               }
-            )
+              return ()
+            }
           }
           public func makeIterator() -> IndexingIterator<[CasePaths.PartialCaseKeyPath<Foo>]> {
             var allCasePaths: [CasePaths.PartialCaseKeyPath<Foo>] = []
@@ -1088,69 +1024,48 @@ final class CasePathableMacroTests: XCTestCase {
           }
           // Comment above case
           public var bar: CasePaths.AnyCasePath<Foo, Void> {
-            CasePaths.AnyCasePath<Foo, Void>(
-              embed: {
+            ._$embed({
                 Foo.bar
-              },
-              extract: {
-                guard case .bar = $0 else {
-                  return nil
-                }
-                return ()
+              }) {
+              guard case .bar = $0 else {
+                return nil
               }
-            )
+              return ()
+            }
           }
           /*Comment before case*/public var baz: CasePaths.AnyCasePath<Foo, Int> {
-            CasePaths.AnyCasePath<Foo, Int>(
-              embed: {
-                Foo.baz($0)
-              },
-              extract: {
-                guard case let .baz(v0) = $0 else {
-                  return nil
-                }
-                return v0
+            ._$embed(Foo.baz) {
+              guard case let .baz(v0) = $0 else {
+                return nil
               }
-            )
+              return v0
+            }
           }
           public var fizz: CasePaths.AnyCasePath<Foo, String> {
-            CasePaths.AnyCasePath<Foo, String>(
-              embed: {
-                Foo.fizz(buzz: $0)
-              },
-              extract: {
-                guard case let .fizz(v0) = $0 else {
-                  return nil
-                }
-                return v0
+            ._$embed(Foo.fizz) {
+              guard case let .fizz(v0) = $0 else {
+                return nil
               }
-            )
+              return v0
+            }
           }
           public var fizzier: CasePaths.AnyCasePath<Foo, (Int, buzzier: String)> {
-            CasePaths.AnyCasePath<Foo, (Int, buzzier: String)>(
-              embed: {
-                Foo.fizzier($0, buzzier: $1)
-              },
-              extract: {
-                guard case let .fizzier(v0, v1) = $0 else {
-                  return nil
-                }
-                return (v0, v1)
+            ._$embed(Foo.fizzier) {
+              guard case let .fizzier(v0, v1) = $0 else {
+                return nil
               }
-            )
+              return (v0, v1)
+            }
           }
           public var fizziest: CasePaths.AnyCasePath<Foo, Void> {
-            CasePaths.AnyCasePath<Foo, Void>(
-              embed: {
+            ._$embed({
                 Foo.fizziest
-              },
-              extract: {
-                guard case .fizziest = $0 else {
-                  return nil
-                }
-                return ()
+              }) {
+              guard case .fizziest = $0 else {
+                return nil
               }
-            )
+              return ()
+            }
           }
           public func makeIterator() -> IndexingIterator<[CasePaths.PartialCaseKeyPath<Foo>]> {
             var allCasePaths: [CasePaths.PartialCaseKeyPath<Foo>] = []
@@ -1166,6 +1081,50 @@ final class CasePathableMacroTests: XCTestCase {
       }
 
       extension Foo: CasePaths.CasePathable, CasePaths.CasePathIterable {
+      }
+      """#
+    }
+  }
+
+  func testElementGeneric() {
+    assertMacro {
+      """
+      @CasePathable enum Action<Element> {
+        case element(Element)
+      }
+      """
+    } expansion: {
+      #"""
+      enum Action<Element> {
+        case element(Element)
+
+        public struct AllCasePaths: CasePaths.CasePathReflectable, Sendable, Sequence {
+          public subscript(root: Action) -> CasePaths.PartialCaseKeyPath<Action> {
+            if root.is(\.element) {
+              return \.element
+            }
+            return \.never
+          }
+          public var element: CasePaths.AnyCasePath<Action, _$Element> {
+            ._$embed(Action.element) {
+              guard case let .element(v0) = $0 else {
+                return nil
+              }
+              return v0
+            }
+          }
+          public func makeIterator() -> IndexingIterator<[CasePaths.PartialCaseKeyPath<Action>]> {
+            var allCasePaths: [CasePaths.PartialCaseKeyPath<Action>] = []
+            allCasePaths.append(\.element)
+            return allCasePaths.makeIterator()
+          }
+        }
+        public static var allCasePaths: AllCasePaths { AllCasePaths() }
+
+        public typealias _$Element = Element
+      }
+
+      extension Action: CasePaths.CasePathable, CasePaths.CasePathIterable {
       }
       """#
     }
