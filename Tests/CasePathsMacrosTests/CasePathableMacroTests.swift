@@ -1129,4 +1129,168 @@ final class CasePathableMacroTests: XCTestCase {
       """#
     }
   }
+
+  func testParentElementGeneric() {
+    assertMacro {
+      """
+      struct Reducer<Element> {
+        @CasePathable enum Action {
+          case element(Element)
+        }
+      }
+      """
+    } expansion: {
+      #"""
+      struct Reducer<Element> {
+        enum Action {
+          case element(Element)
+
+          public struct AllCasePaths: CasePaths.CasePathReflectable, Sendable, Sequence {
+            public subscript(root: Action) -> CasePaths.PartialCaseKeyPath<Action> {
+              if root.is(\.element) {
+                return \.element
+              }
+              return \.never
+            }
+            public var element: CasePaths.AnyCasePath<Action, _$Element> {
+              ._$embed(Action.element) {
+                guard case let .element(v0) = $0 else {
+                  return nil
+                }
+                return v0
+              }
+            }
+            public func makeIterator() -> IndexingIterator<[CasePaths.PartialCaseKeyPath<Action>]> {
+              var allCasePaths: [CasePaths.PartialCaseKeyPath<Action>] = []
+              allCasePaths.append(\.element)
+              return allCasePaths.makeIterator()
+            }
+          }
+          public static var allCasePaths: AllCasePaths { AllCasePaths() }
+
+          public typealias _$Element = Element
+        }
+      }
+
+      extension Reducer.Action: CasePaths.CasePathable, CasePaths.CasePathIterable {
+      }
+      """#
+    }
+  }
+
+  func testAssociatedValueElementArray() {
+    assertMacro {
+      """
+      @CasePathable enum Action<Element> {
+        case element(Array<Element>)
+      }
+      """
+    } expansion: {
+      #"""
+      enum Action<Element> {
+        case element(Array<Element>)
+
+        public struct AllCasePaths: CasePaths.CasePathReflectable, Sendable, Sequence {
+          public subscript(root: Action) -> CasePaths.PartialCaseKeyPath<Action> {
+            if root.is(\.element) {
+              return \.element
+            }
+            return \.never
+          }
+          public var element: CasePaths.AnyCasePath<Action, Array<_$Element>> {
+            ._$embed(Action.element) {
+              guard case let .element(v0) = $0 else {
+                return nil
+              }
+              return v0
+            }
+          }
+          public func makeIterator() -> IndexingIterator<[CasePaths.PartialCaseKeyPath<Action>]> {
+            var allCasePaths: [CasePaths.PartialCaseKeyPath<Action>] = []
+            allCasePaths.append(\.element)
+            return allCasePaths.makeIterator()
+          }
+        }
+        public static var allCasePaths: AllCasePaths { AllCasePaths() }
+
+        public typealias _$Element = Element
+      }
+
+      extension Action: CasePaths.CasePathable, CasePaths.CasePathIterable {
+      }
+      """#
+    }
+  }
+
+  func testMultipleAssociatedValueElement() {
+    assertMacro {
+      """
+      @CasePathable enum Action<Element> {
+        case element(Array<Element>)
+        case secondElement(Element)
+        case thirdElement(Element, Element, Int)
+      }
+      """
+    } expansion: {
+      #"""
+      enum Action<Element> {
+        case element(Array<Element>)
+        case secondElement(Element)
+        case thirdElement(Element, Element, Int)
+
+        public struct AllCasePaths: CasePaths.CasePathReflectable, Sendable, Sequence {
+          public subscript(root: Action) -> CasePaths.PartialCaseKeyPath<Action> {
+            if root.is(\.element) {
+              return \.element
+            }
+            if root.is(\.secondElement) {
+              return \.secondElement
+            }
+            if root.is(\.thirdElement) {
+              return \.thirdElement
+            }
+            return \.never
+          }
+          public var element: CasePaths.AnyCasePath<Action, Array<_$Element>> {
+            ._$embed(Action.element) {
+              guard case let .element(v0) = $0 else {
+                return nil
+              }
+              return v0
+            }
+          }
+          public var secondElement: CasePaths.AnyCasePath<Action, _$Element> {
+            ._$embed(Action.secondElement) {
+              guard case let .secondElement(v0) = $0 else {
+                return nil
+              }
+              return v0
+            }
+          }
+          public var thirdElement: CasePaths.AnyCasePath<Action, (_$Element, _$Element, Int)> {
+            ._$embed(Action.thirdElement) {
+              guard case let .thirdElement(v0, v1, v2) = $0 else {
+                return nil
+              }
+              return (v0, v1, v2)
+            }
+          }
+          public func makeIterator() -> IndexingIterator<[CasePaths.PartialCaseKeyPath<Action>]> {
+            var allCasePaths: [CasePaths.PartialCaseKeyPath<Action>] = []
+            allCasePaths.append(\.element)
+            allCasePaths.append(\.secondElement)
+            allCasePaths.append(\.thirdElement)
+            return allCasePaths.makeIterator()
+          }
+        }
+        public static var allCasePaths: AllCasePaths { AllCasePaths() }
+
+        public typealias _$Element = Element
+      }
+
+      extension Action: CasePaths.CasePathable, CasePaths.CasePathIterable {
+      }
+      """#
+    }
+  }
 }
