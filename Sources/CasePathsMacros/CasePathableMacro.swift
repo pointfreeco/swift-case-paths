@@ -86,12 +86,13 @@ extension CasePathableMacro: MemberMacro {
       seenCaseNames.insert(name)
     }
 
-    let rewriter = SelfRewriter(selfEquivalent: enumName)
-    let memberBlock = rewriter.rewrite(enumDecl.memberBlock).cast(MemberBlockSyntax.self)
+    let selfRewriter = SelfRewriter(selfEquivalent: enumName)
+    let memberBlock = selfRewriter.rewrite(enumDecl.memberBlock).cast(MemberBlockSyntax.self)
     let rootSubscriptCases = generateCases(from: memberBlock.members, enumName: enumName) {
       "if root.is(\\.\(raw: $0.name.text)) { return \\.\(raw: $0.name.text) }"
     }
-    let casePaths = generateDeclSyntax(from: memberBlock.members, enumName: enumName)
+    let elementRewriter = ElementRewriter()
+    let casePaths = generateDeclSyntax(from: memberBlock.members, enumName: enumName).map { elementRewriter.rewrite($0) }
     let allCases = generateCases(from: memberBlock.members, enumName: enumName) {
       "allCasePaths.append(\\.\(raw: $0.name.text))"
     }
@@ -116,11 +117,7 @@ extension CasePathableMacro: MemberMacro {
       """
     ]
 
-    let hasElementGeneric =
-      enumDecl.genericParameterClause?.parameters
-      .contains { $0.name.text == "Element" }
-      ?? false
-    if hasElementGeneric {
+    if elementRewriter.didRewriteElement {
       decls.append("public typealias _$Element = Element")
     }
 
@@ -180,10 +177,7 @@ extension CasePathableMacro: MemberMacro {
   ) -> [DeclSyntax] {
     decl.elements.map {
       let caseName = $0.name.trimmed
-      let associatedValueName =
-        $0.trimmedTypeDescription == "Element"
-        ? "_$Element"
-        : $0.trimmedTypeDescription
+      let associatedValueName = $0.trimmedTypeDescription
       let hasPayload = $0.parameterClause.map { !$0.parameters.isEmpty } ?? false
       let embed: DeclSyntax = hasPayload ? "\(enumName).\(caseName)" : "{ \(enumName).\(caseName) }"
       let bindingNames: String
@@ -479,6 +473,17 @@ final class SelfRewriter: SyntaxRewriter {
     guard node.name.text == "Self"
     else { return super.visit(node) }
     return super.visit(node.with(\.name, self.selfEquivalent))
+  }
+}
+
+final class ElementRewriter: SyntaxRewriter {
+  var didRewriteElement = false
+
+  override func visit(_ node: IdentifierTypeSyntax) -> TypeSyntax {
+    guard node.name.text == "Element"
+    else { return super.visit(node) }
+    didRewriteElement = true
+    return super.visit(node.with(\.name, "_$Element"))
   }
 }
 
