@@ -92,7 +92,9 @@ extension CasePathableMacro: MemberMacro {
       "if root.is(\\.\(raw: $0.name.text)) { return \\.\(raw: $0.name.text) }"
     }
     let elementRewriter = ElementRewriter()
-    let casePaths = generateDeclSyntax(from: memberBlock.members, enumName: enumName).map { elementRewriter.rewrite($0) }
+    let casePaths = generateDeclSyntax(from: memberBlock.members, enumName: enumName).map {
+      elementRewriter.rewrite($0)
+    }
     let allCases = generateCases(from: memberBlock.members, enumName: enumName) {
       "allCasePaths.append(\\.\(raw: $0.name.text))"
     }
