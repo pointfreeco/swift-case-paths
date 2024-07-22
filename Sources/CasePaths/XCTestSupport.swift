@@ -7,11 +7,12 @@ import Foundation
 ///   - optional: An optional value.
 ///   - message: An optional description of a failure.
 ///   - body: A closure that can modify the wrapped value of the given optional.
+@available(*, deprecated, message: "Use 'CasePathable.modify' to mutate an expected case, instead.")
 public func XCTModify<Wrapped>(
   _ optional: inout Wrapped?,
   _ message: @autoclosure () -> String = "",
   _ body: (inout Wrapped) throws -> Void,
-  file: StaticString = #file,
+  file: StaticString = #filePath,
   line: UInt = #line
 ) {
   XCTModify(&optional, case: \.some, message(), body, file: file, line: line)
@@ -24,12 +25,13 @@ public func XCTModify<Wrapped>(
 ///   - casePath: A case path that can extract and embed the associated value of a particular case.
 ///   - message: An optional description of a failure.
 ///   - body: A closure that can modify the associated value of the given case.
+@available(*, deprecated, message: "Use 'CasePathable.modify' to mutate an expected case, instead.")
 public func XCTModify<Enum, Case>(
   _ enum: inout Enum,
   case keyPath: CaseKeyPath<Enum, Case>,
   _ message: @autoclosure () -> String = "",
   _ body: (inout Case) throws -> Void,
-  file: StaticString = #file,
+  file: StaticString = #filePath,
   line: UInt = #line
 ) {
   _XCTModify(&`enum`, case: AnyCasePath(keyPath), message(), body, file: file, line: line)
@@ -40,7 +42,7 @@ func _XCTModify<Enum, Case>(
   case casePath: AnyCasePath<Enum, Case>,
   _ message: @autoclosure () -> String = "",
   _ body: (inout Case) throws -> Void,
-  file: StaticString = #file,
+  file: StaticString = #filePath,
   line: UInt = #line
 ) {
   guard var value = casePath.extract(from: `enum`)
@@ -51,7 +53,7 @@ func _XCTModify<Enum, Case>(
     let message = message()
     XCTFail(
       """
-      XCTModify failed: expected to extract value of type "\(typeName(Case.self))" from \
+      XCTModify: Expected to extract value of type "\(typeName(Case.self))" from \
       "\(typeName(Enum.self))"\
       \(message.isEmpty ? "" : " - " + message) …
 
@@ -77,7 +79,7 @@ func _XCTModify<Enum, Case>(
   {
     XCTFail(
       """
-      XCTModify failed: expected "\(typeName(Case.self))" value to be modified but it was unchanged.
+      XCTModify: Expected "\(typeName(Case.self))" value to be modified but it was unchanged.
       """
     )
   }

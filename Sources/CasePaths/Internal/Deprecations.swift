@@ -220,7 +220,7 @@ public func XCTUnwrap<Enum, Case>(
     let message = message()
     XCTFail(
       """
-      XCTUnwrap failed: expected to extract value of type "\(typeName(Case.self))" from \
+      XCTUnwrap: Expected to extract value of type "\(typeName(Case.self))" from \
       "\(typeName(Enum.self))"\
       \(message.isEmpty ? "" : " - " + message) …
 
