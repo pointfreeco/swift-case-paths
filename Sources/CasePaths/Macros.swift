@@ -13,7 +13,7 @@
 /// }
 /// ```
 ///
-/// This macro application extends the type with the ability to derive a case key paths from each
+/// This macro application extends the type with the ability to derive case key paths from each
 /// of its cases using a familiar key path expression:
 ///
 /// ```swift
