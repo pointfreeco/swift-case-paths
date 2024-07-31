@@ -476,6 +476,10 @@ extension CasePathable {
   /// - Parameters:
   ///   - keyPath: A case key path to an associated value.
   ///   - yield: A closure given mutable access to that associated value.
+  ///   - fileID: The fileID where the modify occurs.
+  ///   - filePath: The filePath where the modify occurs.
+  ///   - line: The line where the modify occurs.
+  ///   - column: The column where the modify occurs.
   public mutating func modify<Value>(
     _ keyPath: CaseKeyPath<Self, Value>,
     yield: (inout Value) -> Void,

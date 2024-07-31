@@ -227,7 +227,7 @@ public func XCTUnwrap<Enum, Case>(
         Actual:
           \(String(describing: `enum`))
       """,
-      file: file,
+      file: (file),
       line: line
     )
     throw UnwrappingCase()
@@ -244,7 +244,7 @@ public func XCTModify<Enum, Case>(
   file: StaticString = #file,
   line: UInt = #line
 ) {
-  _XCTModify(&`enum`, case: casePath, message(), body, file: file, line: line)
+  _XCTModify(&`enum`, case: casePath, message(), body, file: (file), line: line)
 }
 
 // Deprecated after 1.0.0:
