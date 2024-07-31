@@ -10,13 +10,13 @@ Avoid using deprecated APIs in your app. See the replacement that you should use
 
 ### Creating paths
 
-- ``AnyCasePath/init(unsafe:)-4xq8n``
-- ``AnyCasePath/init(unsafe:)-2skr2``
+- ``AnyCasePath/init(unsafe:)-5fryq``
+- ``AnyCasePath/init(unsafe:)-93j7i``
 - ``AnyCasePath/init(_:)-5t7e8``
-- ``AnyCasePath/init(_:)-5hb2e``
+- ``AnyCasePath/init(_:)-65qkv``
 - ``AnyCasePath/init(_:)-2cuas``
-- ``AnyCasePath/case(_:)-4lmya``
-- ``AnyCasePath/case(_:)-6gkwv``
+- ``AnyCasePath/case(_:)-1k3jw``
+- ``AnyCasePath/case(_:)-g885``
 - ``AnyCasePath/constant(_:)``
 - ``AnyCasePath/self``
 - ``AnyCasePath/some``
@@ -31,13 +31,7 @@ Avoid using deprecated APIs in your app. See the replacement that you should use
 ### Appending paths
 
 - ``AnyCasePath/appending(path:)``
-- ``AnyCasePath/..(_:_:)-8bw4h``
-- ``AnyCasePath/..(_:_:)-8n2ce``
-- ``CasePaths/..(_:_:)``
-
-### Matching paths
-
-- ``AnyCasePath/~=(_:_:)``
+- ``AnyCasePath/modify(_:_:)``
 
 ### Type alias
 

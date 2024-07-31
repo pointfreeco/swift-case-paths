@@ -208,7 +208,7 @@ public func XCTUnwrap<Enum, Case>(
   _ enum: @autoclosure () throws -> Enum,
   case extract: (Enum) -> Case?,
   _ message: @autoclosure () -> String = "",
-  file: StaticString = #file,
+  file: StaticString = #filePath,
   line: UInt = #line
 ) throws -> Case {
   let `enum` = try `enum`()
@@ -241,7 +241,7 @@ public func XCTModify<Enum, Case>(
   case casePath: AnyCasePath<Enum, Case>,
   _ message: @autoclosure () -> String = "",
   _ body: (inout Case) throws -> Void,
-  file: StaticString = #file,
+  file: StaticString = #filePath,
   line: UInt = #line
 ) {
   _XCTModify(&`enum`, case: casePath, message(), body, file: file, line: line)
