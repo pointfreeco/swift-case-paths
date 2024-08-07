@@ -19,8 +19,8 @@ let package = Package(
   ],
   dependencies: [
     .package(url: "https://github.com/swiftlang/swift-syntax", "509.0.0"..<"601.0.0-prerelease"),
+    .package(url: "https://github.com/pointfreeco/swift-macro-testing", branch: "fix-test-trait"),
     .package(url: "https://github.com/pointfreeco/xctest-dynamic-overlay", from: "1.2.2"),
-    .package(url: "https://github.com/pointfreeco/swift-macro-testing", from: "0.2.0"),
   ],
   targets: [
     .target(
@@ -50,7 +50,7 @@ let package = Package(
       ]
     ),
   ],
-  swiftLanguageVersions: [.v6]
+  swiftLanguageModes: [.v6]
 )
 
 #if !os(Windows)

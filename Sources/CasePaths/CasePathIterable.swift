@@ -14,4 +14,4 @@
 /// Array(Field.allCasePaths)  // [\.title, \.body, \.isLive]
 /// ```
 public protocol CasePathIterable: CasePathable
-where AllCasePaths: Sequence, AllCasePaths.Element == PartialCaseKeyPath<Self> {}
+where AllCasePaths: Sequence, AllCasePaths.Element == PartialOptionalKeyPath<Self> {}

@@ -602,9 +602,6 @@ final class DeprecatedTests: XCTestCase {
       let actual = path.extract(from: root)
       XCTAssertEqual(actual, "deadbeef")
     }
-    #if swift(>=6)
-      XCTExpectFailure()
-    #endif
     XCTAssertEqual(AnyCasePath(Authentication.authenticated).extract(from: root), "deadbeef")
   }
 
