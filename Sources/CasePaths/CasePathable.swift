@@ -590,9 +590,9 @@ extension AnyOptionalPath {
     self.init(
       get: { `case`.extract(from: $0) },
       set: {
-        var any = $0 as Any
-        `case`.set(into: &any, $1)
-        $0 = any as! Root
+        var anyRoot = $0 as Any
+        `case`.set(into: &anyRoot, $1)
+        $0 = anyRoot as! Root
       }
     )
   }
