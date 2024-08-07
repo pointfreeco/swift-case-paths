@@ -397,7 +397,7 @@ extension CasePathable {
   /// Attempts to extract the associated value from a root enum using a partial case key path.
   @_disfavoredOverload
   public subscript(case keyPath: PartialOptionalKeyPath<Self>) -> Any? {
-    (Case<Self>()[keyPath: keyPath] as? any _AnyCase)?._extract(from: self)
+    keyPath.extract(from: self)
   }
 
   /// Replaces the associated value of a root enum at a case key path when the case matches.
