@@ -324,6 +324,12 @@ extension OptionalKeyPath {
   public func extract<R, V>(from root: R) -> V? where Root == Case<R>, Value == Case<V> {
     Case(self).extract(from: root)
   }
+
+  public func set<R, V>(into root: inout R, _ value: V) where Root == Case<R>, Value == Case<V> {
+    var anyRoot = root as Any
+    Case(self).set(into: &anyRoot, value)
+    root = anyRoot as! R
+  }
 }
 
 /// A partially type-erased key path, from a concrete root enum to any resulting value type.
@@ -563,7 +569,7 @@ extension CasePathable {
 }
 
 extension AnyCasePath {
-  /// Creates a type-erased case path for given case key path.
+  /// Creates a type-erased case path for a given case key path.
   ///
   /// - Parameter keyPath: A case key path.
   public init(_ keyPath: CaseKeyPath<Root, Value>) {
@@ -571,6 +577,23 @@ extension AnyCasePath {
     self.init(
       embed: { `case`.embed($0) as! Root },
       extract: { `case`.extract(from: $0) }
+    )
+  }
+}
+
+extension AnyOptionalPath {
+  /// Creates a type-erased optional path for a given optional key path.
+  ///
+  /// - Parameter keyPath: An optional key path.
+  public init(_ keyPath: OptionalKeyPath<Root, Value>) {
+    let `case` = Case(keyPath)
+    self.init(
+      get: { `case`.extract(from: $0) },
+      set: {
+        var any = $0 as Any
+        `case`.set(into: &any, $1)
+        $0 = any as! Root
+      }
     )
   }
 }
