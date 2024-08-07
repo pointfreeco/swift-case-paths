@@ -1,6 +1,6 @@
 extension Result: CasePathable, CasePathIterable {
   public struct AllCasePaths: CasePathReflectable, Sendable {
-    public subscript(root: Result) -> PartialCaseKeyPath<Result> {
+    public subscript(root: Result) -> PartialOptionalKeyPath<Result> {
       switch root {
       case .success: return \.success
       case .failure: return \.failure
@@ -36,7 +36,7 @@ extension Result: CasePathable, CasePathIterable {
 }
 
 extension Result.AllCasePaths: Sequence {
-  public func makeIterator() -> some IteratorProtocol<PartialCaseKeyPath<Result>> {
+  public func makeIterator() -> some IteratorProtocol<PartialOptionalKeyPath<Result>> {
     [\.success, \.failure].makeIterator()
   }
 }
