@@ -116,7 +116,7 @@ final class CasePathsTests: XCTestCase {
     XCTAssertEqual(foo, .bar(.int(42)))
   }
 
-  #if DEBUG && !os(Linux) && !os(Windows)
+  #if DEBUG && !os(Linux) && !os(Windows) && !os(WASI)
     func testCasePathableModify_Failure() {
       guard ProcessInfo.processInfo.environment["CI"] == nil else { return }
       var foo = Foo.bar(.int(21))

@@ -9,7 +9,7 @@ final class CasePathableTests: XCTestCase {
     XCTAssertEqual(result, .success(2))
   }
 
-  #if DEBUG && !os(Linux) && !os(Windows)
+  #if DEBUG && !os(Linux) && !os(Windows) && !os(WASI)
     func testModifyWrongCase() {
       guard ProcessInfo.processInfo.environment["CI"] == nil else { return }
       var response = Result<Int, MyError>.failure(MyError())
