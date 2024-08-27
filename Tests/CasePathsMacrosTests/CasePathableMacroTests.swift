@@ -1,3 +1,4 @@
+#if canImport(MacroTesting)
 import CasePathsMacros
 import MacroTesting
 import SwiftSyntaxMacros
@@ -1294,3 +1295,4 @@ final class CasePathableMacroTests: XCTestCase {
     }
   }
 }
+#endif
