@@ -51,7 +51,6 @@ jobs:
     strategy:
       matrix:
         toolchain:
-          - wasm-5.9.2-RELEASE
           - wasm-5.10.0-RELEASE 
     steps:
       - name: Cache toolchains
