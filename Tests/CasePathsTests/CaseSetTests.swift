@@ -1,4 +1,4 @@
-#if swift(>=6)
+#if canImport(Testing) && swift(>=6)
   import CasePaths
   import Testing
 
