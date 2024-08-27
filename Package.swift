@@ -46,7 +46,7 @@ let package = Package(
       name: "CasePathsMacrosTests",
       dependencies: [
         "CasePathsMacros",
-        .product.product(
+        .product(
           name: "MacroTesting",
           package: "swift-macro-testing",
           condition: .when(
