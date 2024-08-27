@@ -48,18 +48,19 @@ let package = Package(
         "CasePathsMacros",
         .product(
           name: "MacroTesting",
-          package: "swift-macro-testing",
-          condition: .when(
-            platforms: [
-              .iOS,
-              .linux,
-              .macCatalyst,
-              .macOS,
-              .tvOS,
-              .watchOS,
-              .windows,
-            ]
-          )
+          package: "swift-macro-testing"
+//          ,
+//          condition: .when(
+//            platforms: [
+//              .iOS,
+//              .linux,
+//              .macCatalyst,
+//              .macOS,
+//              .tvOS,
+//              .watchOS,
+//              .windows,
+//            ]
+//          )
         ),
       ]
     ),
