@@ -64,7 +64,10 @@ jobs:
         with:
           swift-version: ${{ matrix.toolchain }}
       - name: Build tests
-        run: swift build --triple wasm32-unknown-wasi --build-tests -Xlinker -z -Xlinker stack-size=$((1024 * 1024))
+        run: swift build \
+          --triple wasm32-unknown-wasi \
+          --build-tests -Xlinker -z -Xlinker stack-size=$((1024 * 1024)) \
+          --static-swift-stdlib
       - name: Run tests
         run: wasmtime .build/debug/swift-case-pathsPackageTests.wasm
 
