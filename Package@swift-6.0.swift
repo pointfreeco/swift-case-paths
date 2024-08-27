@@ -42,28 +42,6 @@ let package = Package(
         .product(name: "SwiftCompilerPlugin", package: "swift-syntax"),
       ]
     ),
-    .testTarget(
-      name: "CasePathsMacrosTests",
-      dependencies: [
-        "CasePathsMacros",
-        .product(
-          name: "MacroTesting",
-          package: "swift-macro-testing"
-          ,
-          condition: .when(
-            platforms: [
-              .iOS,
-              .linux,
-              .macCatalyst,
-              .macOS,
-              .tvOS,
-              .watchOS,
-              .windows,
-            ]
-          )
-        ),
-      ]
-    ),
   ],
   swiftLanguageVersions: [.v6]
 )
@@ -74,3 +52,20 @@ let package = Package(
     .package(url: "https://github.com/apple/swift-docc-plugin", from: "1.0.0")
   )
 #endif
+
+import Foundation
+
+if ProcessInfo.processInfo.environment["OMIT_MACRO_TESTS"] == nil {
+  package.targets.append(
+    .testTarget(
+      name: "CasePathsMacrosTests",
+      dependencies: [
+        "CasePathsMacros",
+        .product(
+          name: "MacroTesting",
+          package: "swift-macro-testing"
+        )
+      ]
+    )
+  )
+}
