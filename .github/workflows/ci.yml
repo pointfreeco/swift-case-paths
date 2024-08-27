@@ -48,10 +48,12 @@ jobs:
   wasm:
     name: SwiftWasm
     runs-on: ubuntu-latest
+    env:
+      OMIT_MACRO_TESTS: 1
     strategy:
       matrix:
         toolchain:
-          - wasm-DEVELOPMENT-SNAPSHOT-2024-07-16-a
+          - wasm-DEVELOPMENT-SNAPSHOT-2024-08-26-a
     steps:
       - name: Cache toolchains
         uses: actions/cache@v3
@@ -64,7 +66,7 @@ jobs:
         with:
           swift-version: ${{ matrix.toolchain }}
       - name: Build tests
-        run: OMIT_MACRO_TESTS=1 swift build --static-swift-stdlib --triple wasm32-unknown-wasi --build-tests -Xlinker -z -Xlinker stack-size=$((1024 * 1024))
+        run: swift build --static-swift-stdlib --triple wasm32-unknown-wasi --build-tests -Xlinker -z -Xlinker stack-size=$((1024 * 1024))
       - name: Run tests
         run: wasmtime .build/debug/swift-case-pathsPackageTests.wasm
 
