@@ -71,7 +71,7 @@ jobs:
       - name: Build tests
         run: swift build --swift-sdk wasm32-unknown-wasi --build-tests -Xlinker -z -Xlinker stack-size=$((1024 * 1024))
       - name: Run tests
-        run: wasmtime .build/debug/swift-case-pathsPackageTests.wasm
+        run: wasmtime --dir . .build/debug/swift-case-pathsPackageTests.wasm
 
   # windows:
   #   name: Windows (Swift ${{ matrix.swift }}, ${{ matrix.config }})
