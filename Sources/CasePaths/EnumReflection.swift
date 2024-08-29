@@ -78,9 +78,11 @@ func extractHelp<Root, Value>(
   return { root in
     let rootTag = metadata.tag(of: root)
 
-    if case let (cachedTag?, (isIndirect: isIndirect, associatedValueType: associatedValueType)?) = cache.withLock({
-      ($0.tag, $0.strategy)
-    }) {
+    if case let (cachedTag?, (isIndirect: isIndirect, associatedValueType: associatedValueType)?) =
+      cache.withLock({
+        ($0.tag, $0.strategy)
+      })
+    {
       guard rootTag == cachedTag else { return nil }
       let value =
         EnumMetadata

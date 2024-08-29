@@ -1,6 +1,7 @@
 // swift-tools-version: 5.9
 
 import CompilerPluginSupport
+import Foundation
 import PackageDescription
 
 let package = Package(
@@ -51,8 +52,6 @@ let package = Package(
   )
 #endif
 
-import Foundation
-
 if ProcessInfo.processInfo.environment["OMIT_MACRO_TESTS"] == nil {
   package.dependencies.append(
     .package(url: "https://github.com/pointfreeco/swift-macro-testing", from: "0.2.0")
@@ -65,7 +64,7 @@ if ProcessInfo.processInfo.environment["OMIT_MACRO_TESTS"] == nil {
         .product(
           name: "MacroTesting",
           package: "swift-macro-testing"
-        )
+        ),
       ]
     )
   )
