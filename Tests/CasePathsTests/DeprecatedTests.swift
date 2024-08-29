@@ -144,20 +144,37 @@ final class DeprecatedTests: XCTestCase {
     XCTAssertNil(AnyCasePath(Enum.uninhabited).extract(from: .value))
   }
 
-  func testClosurePayload() throws {
-    enum Enum { case closure(() -> Void) }
-    let path = /Enum.closure
-    for _ in 1...2 {
+  // Dynamic closure payload extraction is not supported on WebAssembly
+  //
+  // Discussion:
+  // Closure payloads `() -> Void` are extracted via generic abstraction
+  // `Value` in `extractHelp`, and the extracted closure is called as
+  // `() -> @out τ_0_0 where τ_0_0 == Void`.
+  // However, the closure value is stored without generic abstraction
+  // in the enum payload storage, and not wrapped by abstraction thunk.
+  // This abstraction mismatch causes signature mismatch between the
+  // call-site and the actual callee. On most platforms, this mismatch
+  // is luckily not a problem, but WebAssembly enforces the signature
+  // match and causes a runtime crash.
+  // Ideally, `extractHelp` should insert an abstraction thunk when
+  // extracting a closure payload, but it cannot be done without
+  // JIT code generation (and WebAssembly does not support JIT...)
+  #if !arch(wasm32)
+    func testClosurePayload() throws {
+      enum Enum { case closure(() -> Void) }
+      let path = /Enum.closure
+      for _ in 1...2 {
+        var invoked = false
+        let closure = try unwrap(path.extract(from: .closure { invoked = true }))
+        closure()
+        XCTAssertTrue(invoked)
+      }
       var invoked = false
-      let closure = try unwrap(path.extract(from: .closure { invoked = true }))
+      let closure = try unwrap(AnyCasePath(Enum.closure).extract(from: .closure { invoked = true }))
       closure()
       XCTAssertTrue(invoked)
     }
-    var invoked = false
-    let closure = try unwrap(AnyCasePath(Enum.closure).extract(from: .closure { invoked = true }))
-    closure()
-    XCTAssertTrue(invoked)
-  }
+  #endif
 
   func testRecursivePayload() {
     indirect enum Enum: Equatable {
@@ -602,9 +619,6 @@ final class DeprecatedTests: XCTestCase {
       let actual = path.extract(from: root)
       XCTAssertEqual(actual, "deadbeef")
     }
-    #if swift(>=6)
-      XCTExpectFailure()
-    #endif
     XCTAssertEqual(AnyCasePath(Authentication.authenticated).extract(from: root), "deadbeef")
   }
 
@@ -894,21 +908,25 @@ final class DeprecatedTests: XCTestCase {
     )
   }
 
-  func testEnumsWithClosures() {
-    enum Foo {
-      case bar(() -> Void)
-    }
+  // Dynamic closure payload extraction is not supported on WebAssembly
+  // See testClosurePayload for more details
+  #if !arch(wasm32)
+    func testEnumsWithClosures() {
+      enum Foo {
+        case bar(() -> Void)
+      }
 
-    var didRun = false
-    let fooBar = /Foo.bar
-    guard let bar = fooBar.extract(from: .bar { didRun = true })
-    else {
-      XCTFail()
-      return
+      var didRun = false
+      let fooBar = /Foo.bar
+      guard let bar = fooBar.extract(from: .bar { didRun = true })
+      else {
+        XCTFail()
+        return
+      }
+      bar()
+      XCTAssertTrue(didRun)
     }
-    bar()
-    XCTAssertTrue(didRun)
-  }
+  #endif
 
   func testRecursive() {
     indirect enum Foo {
@@ -1205,10 +1223,12 @@ final class DeprecatedTests: XCTestCase {
     )
   }
 
-  #if os(Windows)
+  #if os(Windows) || arch(wasm32)
     // There seems to be some strangeness with the current
     // concurrency implmentation on Windows that breaks if
     // you have more than 100 tasks here.
+    // WebAssembly doesn't support tail-call for now, so we
+    // have smaller limit as well.
     let maxIterations = 100
   #else
     let maxIterations = 100_000
