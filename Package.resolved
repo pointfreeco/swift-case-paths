@@ -1,4 +1,5 @@
 {
+  "originHash" : "1d5b1b96f9e9f04f52a6effd94db47d675cb0faea4b3846b36b610fd4a8c05ed",
   "pins" : [
     {
       "identity" : "swift-docc-plugin",
@@ -16,6 +17,15 @@
       "state" : {
         "revision" : "b45d1f2ed151d057b54504d653e0da5552844e34",
         "version" : "1.0.0"
+      }
+    },
+    {
+      "identity" : "swift-issue-reporting",
+      "kind" : "remoteSourceControl",
+      "location" : "https://github.com/pointfreeco/swift-issue-reporting",
+      "state" : {
+        "revision" : "96beb108a57f24c8476ae1f309239270772b2940",
+        "version" : "1.2.5"
       }
     },
     {
@@ -44,16 +54,7 @@
         "revision" : "4c6cc0a3b9e8f14b3ae2307c5ccae4de6167ac2c",
         "version" : "600.0.0-prerelease-2024-06-12"
       }
-    },
-    {
-      "identity" : "xctest-dynamic-overlay",
-      "kind" : "remoteSourceControl",
-      "location" : "https://github.com/pointfreeco/xctest-dynamic-overlay",
-      "state" : {
-        "revision" : "357ca1e5dd31f613a1d43320870ebc219386a495",
-        "version" : "1.2.2"
-      }
     }
   ],
-  "version" : 2
+  "version" : 3
 }
