@@ -73,6 +73,18 @@ jobs:
       - name: Run tests
         run: wasmtime --dir . .build/debug/swift-case-pathsPackageTests.wasm
 
+  check-macro-compatibility:
+    name: Check Macro Compatibility
+    runs-on: macos-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+      - name: Run Swift Macro Compatibility Check
+        uses: Matejkob/swift-macro-compatibility-check@v1.0.0
+        with:
+          run-tests: false
+          major-versions-only: false
+
   # windows:
   #   name: Windows (Swift ${{ matrix.swift }}, ${{ matrix.config }})
   #   strategy:
