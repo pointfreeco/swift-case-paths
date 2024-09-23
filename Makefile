@@ -17,6 +17,13 @@ test-swift:
 		-c release \
 		--parallel
 
+build-for-library-evolution:
+	swift build \
+		-c release \
+		--target CasePaths \
+		-Xswiftc -emit-module-interface \
+		-Xswiftc -enable-library-evolution
+
 format:
 	swift format --in-place --recursive .
 
