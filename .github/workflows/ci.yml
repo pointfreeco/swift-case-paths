@@ -21,6 +21,7 @@ jobs:
       matrix:
         xcode:
           - '15.4'
+          - '16.0'
     steps:
       - uses: actions/checkout@v4
       - name: Select Xcode ${{ matrix.xcode }}
