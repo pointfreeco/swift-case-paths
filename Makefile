@@ -22,8 +22,8 @@ build-for-library-evolution:
 		-c release \
 		--target CasePaths \
 		-Xswiftc -emit-module-interface \
-		-Xswiftc -enable-library-evolution
-		-Xswiftc -DRESILIENT_LIBRARIES \ # Required to build swift-syntax; see https://github.com/swiftlang/swift-syntax/pull/2540
+		-Xswiftc -enable-library-evolution \
+		-Xswiftc -DRESILIENT_LIBRARIES # Required to build swift-syntax; see https://github.com/swiftlang/swift-syntax/pull/2540
 
 format:
 	swift format --in-place --recursive .
