@@ -59,14 +59,14 @@ extension AnyCasePath where Root == Value {
 prefix operator /
 
 extension AnyCasePath {
-  @_documentation(visibility:internal)
+  @_documentation(visibility: internal)
   @available(*, deprecated, message: "Use 'CasePathable.is' with a case key path, instead")
   public static func ~= (pattern: AnyCasePath, value: Root) -> Bool {
     pattern.extract(from: value) != nil
   }
 }
 
-@_documentation(visibility:internal)
+@_documentation(visibility: internal)
 @available(*, deprecated, message: "Use a 'CasePathable' case key path, instead")
 public prefix func / <Root, Value>(
   embed: @escaping (Value) -> Root
@@ -78,7 +78,7 @@ public prefix func / <Root, Value>(
   )
 }
 
-@_documentation(visibility:internal)
+@_documentation(visibility: internal)
 @available(*, deprecated, message: "Use a 'CasePathable' case key path, instead")
 public prefix func / <Root, Value>(
   embed: @escaping (Value) -> Root?
@@ -90,7 +90,7 @@ public prefix func / <Root, Value>(
   )
 }
 
-@_documentation(visibility:internal)
+@_documentation(visibility: internal)
 @available(*, deprecated, message: "Use a 'CasePathable' case key path, instead")
 public prefix func / <Root>(
   root: @autoclosure @escaping @Sendable () -> Root
@@ -98,7 +98,7 @@ public prefix func / <Root>(
   .init(embed: root, extract: extractVoidHelp(root()))
 }
 
-@_documentation(visibility:internal)
+@_documentation(visibility: internal)
 @available(*, deprecated, message: "Use a 'CasePathable' case key path, instead")
 public prefix func / <Root>(
   root: @autoclosure @escaping @Sendable () -> Root?
@@ -106,7 +106,7 @@ public prefix func / <Root>(
   .init(embed: root, extract: optionalPromotedExtractVoidHelp(root()))
 }
 
-@_documentation(visibility:internal)
+@_documentation(visibility: internal)
 @available(*, deprecated, message: "Use the '\\.self' case key path, instead")
 public prefix func / <Root>(
   type: Root.Type
@@ -114,7 +114,7 @@ public prefix func / <Root>(
   .self
 }
 
-@_documentation(visibility:internal)
+@_documentation(visibility: internal)
 @available(*, deprecated, message: "Use a case key path (like '\\.self' or '\\.some'), instead")
 public prefix func / <Root, Value>(
   path: AnyCasePath<Root, Value>
@@ -123,7 +123,7 @@ public prefix func / <Root, Value>(
 }
 
 @_disfavoredOverload
-@_documentation(visibility:internal)
+@_documentation(visibility: internal)
 @available(
   *, deprecated, message: "Use a 'CasePathable' case property via dynamic member lookup, instead"
 )
@@ -134,7 +134,7 @@ public prefix func / <Root, Value>(
 }
 
 @_disfavoredOverload
-@_documentation(visibility:internal)
+@_documentation(visibility: internal)
 @available(
   *, deprecated, message: "Use a 'CasePathable' case property via dynamic member lookup, instead"
 )
@@ -145,7 +145,7 @@ public prefix func / <Root, Value>(
 }
 
 @_disfavoredOverload
-@_documentation(visibility:internal)
+@_documentation(visibility: internal)
 @available(
   *, deprecated, message: "Use a 'CasePathable' case property via dynamic member lookup, instead"
 )
@@ -156,7 +156,7 @@ public prefix func / <Root>(
 }
 
 @_disfavoredOverload
-@_documentation(visibility:internal)
+@_documentation(visibility: internal)
 @available(
   *, deprecated, message: "Use a 'CasePathable' case property via dynamic member lookup, instead"
 )
@@ -173,7 +173,7 @@ precedencegroup CasePathCompositionPrecedence {
 infix operator .. : CasePathCompositionPrecedence
 
 extension AnyCasePath {
-  @_documentation(visibility:internal)
+  @_documentation(visibility: internal)
   @available(*, deprecated, message: "Append 'CasePathable' case key paths, instead")
   public static func .. <AppendedValue>(
     lhs: AnyCasePath,
@@ -182,7 +182,7 @@ extension AnyCasePath {
     lhs.appending(path: rhs)
   }
 
-  @_documentation(visibility:internal)
+  @_documentation(visibility: internal)
   @available(*, deprecated, message: "Append 'CasePathable' case key paths, instead")
   public static func .. <AppendedValue>(
     lhs: AnyCasePath,
@@ -192,7 +192,7 @@ extension AnyCasePath {
   }
 }
 
-@_documentation(visibility:internal)
+@_documentation(visibility: internal)
 @available(*, deprecated, message: "Chain 'CasePathable' case properties, instead")
 public func .. <Root, Value, AppendedValue>(
   lhs: @escaping (Root) -> Value?,

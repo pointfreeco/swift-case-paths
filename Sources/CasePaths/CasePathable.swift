@@ -45,7 +45,7 @@ public protocol CasePathable {
 
 /// A type that is used to distinguish case key paths from key paths by wrapping the enum and
 /// associated value types.
-@_documentation(visibility:internal)
+@_documentation(visibility: internal)
 @dynamicMemberLookup
 public struct Case<Value>: Sendable {
   fileprivate let _embed: @Sendable (Value) -> Any
