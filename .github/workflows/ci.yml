@@ -16,7 +16,7 @@ concurrency:
 jobs:
   macos:
     name: macOS (Xcode ${{ matrix.xcode }})
-    runs-on: macos-latest
+    runs-on: macos-14
     strategy:
       matrix:
         xcode:
