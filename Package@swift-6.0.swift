@@ -43,7 +43,7 @@ let package = Package(
       ]
     ),
   ],
-  swiftLanguageVersions: [.v6]
+  swiftLanguageModes: [.v6]
 )
 
 #if !os(Windows)
