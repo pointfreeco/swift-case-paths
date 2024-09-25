@@ -73,7 +73,7 @@ jobs:
         include:
           - toolchain: swift-DEVELOPMENT-SNAPSHOT-2024-09-18-a
             swift-sdk: swift-wasm-DEVELOPMENT-SNAPSHOT-2024-09-20-a
-            swift-sdk-checksum: 30c5b7a67c1274c53b618a26da3a977c
+            swift-sdk-checksum: ac7318b8beee4870162292715654499127833b847af6b3d94c32e574579ea189
     steps:
       - uses: actions/checkout@v4
       - uses: bytecodealliance/actions/wasmtime/setup@v1
