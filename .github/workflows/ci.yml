@@ -16,7 +16,7 @@ concurrency:
 jobs:
   macos:
     name: macOS (Xcode ${{ matrix.xcode }})
-    runs-on: macos-latest
+    runs-on: macos-14
     strategy:
       matrix:
         xcode:
@@ -33,7 +33,7 @@ jobs:
 
   macos-library-evolution:
     name: macOS Library Evolution (Xcode ${{ matrix.xcode }})
-    runs-on: macos-latest
+    runs-on: macos-14
     strategy:
       matrix:
         xcode:
@@ -93,7 +93,7 @@ jobs:
 
   check-macro-compatibility:
     name: Check Macro Compatibility
-    runs-on: macos-latest
+    runs-on: macos-14
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
