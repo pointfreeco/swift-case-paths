@@ -86,3 +86,9 @@ extension Optional.AllCasePaths: Sequence {
     [\.none, \.some].makeIterator()
   }
 }
+
+extension Optional where Wrapped: CasePathable {
+  public func `is`(_ keyPath: PartialCaseKeyPath<Wrapped>) -> Bool {
+    self?[case: keyPath] != nil
+  }
+}
