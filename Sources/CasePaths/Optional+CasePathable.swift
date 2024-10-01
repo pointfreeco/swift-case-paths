@@ -88,6 +88,23 @@ extension Optional.AllCasePaths: Sequence {
 }
 
 extension Optional where Wrapped: CasePathable {
+  /// Tests the associated value of an optional case.
+  ///
+  /// ```swift
+  /// @CasePathable
+  /// enum UserAction {
+  ///   case home(HomeAction)
+  ///   case settings(SettingsAction)
+  /// }
+  ///
+  /// let userAction: UserAction? = .home(.onAppear)
+  /// userAction.is(\.home)      // true
+  /// userAction.is(\.settings)  // false
+  ///
+  /// let userActions: [UserAction] = [.home(.onAppear), .settings(.subscribeButtonTapped)]
+  /// userActions.filter { $0.is(\.home) }      // [UserAction.home(.onAppear)]
+  /// userActions.filter { $0.is(\.settings) }  // [UserAction.settings(.subscribeButtonTapped)]
+  /// ```
   public func `is`(_ keyPath: PartialCaseKeyPath<Wrapped>) -> Bool {
     self?[case: keyPath] != nil
   }
