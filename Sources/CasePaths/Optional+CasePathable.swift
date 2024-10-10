@@ -89,7 +89,7 @@ extension Optional.AllCasePaths: Sequence {
 
 extension Optional where Wrapped: CasePathable {
   @_disfavoredOverload
-  @_documentation(visibility:internal)
+  @_documentation(visibility: internal)
   public func `is`(_ keyPath: PartialCaseKeyPath<Wrapped>) -> Bool {
     self?[case: keyPath] != nil
   }
