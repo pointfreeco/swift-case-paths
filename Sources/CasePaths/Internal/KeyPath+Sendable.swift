@@ -5,10 +5,10 @@
 //     * https://github.com/swiftlang/swift/issues/77105
 extension _AppendKeyPath {
   @_transparent
-  package func unsafeSendable<Root, Value>() -> _SendableKeyPath<Root, Value>
+  package func unsafeSendable<Root, Value>() -> any Sendable & KeyPath<Root, Value>
   where Self == KeyPath<Root, Value> {
     #if compiler(>=6)
-      unsafeBitCast(self, to: _SendableKeyPath<Root, Value>.self)
+      unsafeBitCast(self, to: (any Sendable & KeyPath<Root, Value>).self)
     #else
       self
     #endif
