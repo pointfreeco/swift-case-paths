@@ -16,24 +16,30 @@ let package = Package(
     .library(
       name: "CasePaths",
       targets: ["CasePaths"]
-    )
+    ),
+    .library(
+      name: "CasePathsCore",
+      targets: ["CasePathsCore"]
+    ),
   ],
   dependencies: [
-    .package(url: "https://github.com/swiftlang/swift-syntax", "509.0.0"..<"601.0.0-prerelease"),
+    .package(url: "https://github.com/swiftlang/swift-syntax", "509.0.0"..<"601.0.0"),
     .package(url: "https://github.com/pointfreeco/xctest-dynamic-overlay", from: "1.2.2"),
   ],
   targets: [
     .target(
       name: "CasePaths",
       dependencies: [
+        "CasePathsCore",
         "CasePathsMacros",
+      ]
+    ),
+    .target(
+      name: "CasePathsCore",
+      dependencies: [
         .product(name: "IssueReporting", package: "xctest-dynamic-overlay"),
         .product(name: "XCTestDynamicOverlay", package: "xctest-dynamic-overlay"),
       ]
-    ),
-    .testTarget(
-      name: "CasePathsTests",
-      dependencies: ["CasePaths"]
     ),
     .macro(
       name: "CasePathsMacros",
@@ -41,6 +47,10 @@ let package = Package(
         .product(name: "SwiftSyntaxMacros", package: "swift-syntax"),
         .product(name: "SwiftCompilerPlugin", package: "swift-syntax"),
       ]
+    ),
+    .testTarget(
+      name: "CasePathsTests",
+      dependencies: ["CasePaths"]
     ),
   ]
 )

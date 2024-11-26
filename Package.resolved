@@ -1,5 +1,5 @@
 {
-  "originHash" : "d955dccabe54030895917a92ad252b0a5d4e823f6fefc262cdb2869f8731dbe4",
+  "originHash" : "75a28c180eaa852896a1e043cbbf340d2f28af3ec620072b1a1b7d9a6041d14e",
   "pins" : [
     {
       "identity" : "swift-docc-plugin",
@@ -42,8 +42,8 @@
       "kind" : "remoteSourceControl",
       "location" : "https://github.com/swiftlang/swift-syntax",
       "state" : {
-        "revision" : "cb53fa1bd3219b0b23ded7dfdd3b2baff266fd25",
-        "version" : "600.0.0"
+        "revision" : "0687f71944021d616d34d922343dcef086855920",
+        "version" : "600.0.1"
       }
     },
     {

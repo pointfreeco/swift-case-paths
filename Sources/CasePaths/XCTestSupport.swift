@@ -10,7 +10,7 @@ public func XCTModify<Wrapped>(
   file: StaticString = #filePath,
   line: UInt = #line
 ) {
-  XCTModify(&optional, case: \.some, message(), body, file: file, line: line)
+  XCTModify(&optional, case: .some, message(), body, file: file, line: line)
 }
 
 /// Asserts that an enum value matches a particular case and modifies the associated value in place.
@@ -81,3 +81,13 @@ func _XCTModify<Enum, Case>(
 }
 
 struct UnwrappingCase: Error {}
+
+func _isEqual(_ lhs: Any, _ rhs: Any) -> Bool? {
+  (lhs as? any Equatable)?.isEqual(other: rhs)
+}
+
+extension Equatable {
+  fileprivate func isEqual(other: Any) -> Bool {
+    self == other as? Self
+  }
+}
