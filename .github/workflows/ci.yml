@@ -127,5 +127,7 @@ jobs:
   android:
     name: Android
     runs-on: ubuntu-22.04
+    env:
+      OMIT_MACRO_TESTS: 1
     steps:
       - uses: johankool/swift-android-test-action@v1
