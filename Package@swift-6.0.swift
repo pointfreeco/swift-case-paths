@@ -20,7 +20,6 @@ let package = Package(
   ],
   dependencies: [
     .package(url: "https://github.com/swiftlang/swift-syntax", "509.0.0"..<"601.0.0-prerelease"),
-    .package(url: "https://github.com/pointfreeco/swift-macro-testing", from: "0.5.2"),
     .package(url: "https://github.com/pointfreeco/xctest-dynamic-overlay", from: "1.2.2"),
   ],
   targets: [
@@ -56,7 +55,7 @@ let package = Package(
 
 if ProcessInfo.processInfo.environment["OMIT_MACRO_TESTS"] == nil {
   package.dependencies.append(
-    .package(url: "https://github.com/pointfreeco/swift-macro-testing", from: "0.2.0")
+    .package(url: "https://github.com/pointfreeco/swift-macro-testing", from: "0.5.2")
   )
   package.targets.append(
     .testTarget(
