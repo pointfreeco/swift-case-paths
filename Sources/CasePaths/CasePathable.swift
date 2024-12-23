@@ -45,7 +45,7 @@ public protocol CasePathable {
 
 /// A type that is used to distinguish case key paths from key paths by wrapping the enum and
 /// associated value types.
-@_documentation(visibility:internal)
+@_documentation(visibility: internal)
 @dynamicMemberLookup
 public struct Case<Value>: Sendable {
   fileprivate let _embed: @Sendable (Value) -> Any
@@ -99,17 +99,11 @@ extension Case {
   ) -> Case<AppendedValue>
   where Value: CasePathable {
     get {
-      @UncheckedSendable var keyPath = keyPath
+      let keyPath = keyPath.unsafeSendable()
       return Case<AppendedValue>(
-        embed: { [$keyPath] in
-          embed(Value.allCasePaths[keyPath: $keyPath.wrappedValue].embed($0))
-        },
-        get: { [$keyPath] in
-          extract(from: $0).flatMap(Value.allCasePaths[keyPath: $keyPath.wrappedValue].extract)
-        },
-        set: { [$keyPath] in
-          set(into: &$0, Value.allCasePaths[keyPath: $keyPath.wrappedValue].embed($1))
-        }
+        embed: { embed(Value.allCasePaths[keyPath: keyPath].embed($0)) },
+        get: { extract(from: $0).flatMap(Value.allCasePaths[keyPath: keyPath].extract) },
+        set: { set(into: &$0, Value.allCasePaths[keyPath: keyPath].embed($1) }
       )
     }
     set {}
@@ -119,14 +113,12 @@ extension Case {
   public subscript<AppendedValue>(
     dynamicMember keyPath: WritableKeyPath<Value, AppendedValue>
   ) -> Case<AppendedValue> {
-    @UncheckedSendable var keyPath = keyPath
+    let keyPath = keyPath.unsafeSendable()
     return Case<AppendedValue>(
-      get: { [$keyPath] in
-        extract(from: $0)?[keyPath: $keyPath.wrappedValue]
-      },
-      set: { [$keyPath] in
+      get: { extract(from: $0)?[keyPath: keyPath] },
+      set: {
         guard var value = extract(from: $0) else { return }
-        value[keyPath: $keyPath.wrappedValue] = $1
+        value[keyPath: keyPath] = $1
         set(into: &$0, value)
       }
     )
@@ -608,14 +600,14 @@ extension AnyCasePath where Value: CasePathable {
   public subscript<AppendedValue>(
     dynamicMember keyPath: KeyPath<Value.AllCasePaths, AnyCasePath<Value, AppendedValue>>
   ) -> AnyCasePath<Root, AppendedValue> {
-    @UncheckedSendable var keyPath = keyPath
+    let keyPath = keyPath.unsafeSendable()
     return AnyCasePath<Root, AppendedValue>(
-      embed: { [$keyPath] in
-        embed(Value.allCasePaths[keyPath: $keyPath.wrappedValue].embed($0))
+      embed: {
+        embed(Value.allCasePaths[keyPath: keyPath].embed($0))
       },
-      extract: { [$keyPath] in
+      extract: {
         extract(from: $0).flatMap(
-          Value.allCasePaths[keyPath: $keyPath.wrappedValue].extract(from:)
+          Value.allCasePaths[keyPath: keyPath].extract(from:)
         )
       }
     )
