@@ -16,14 +16,14 @@
     }
 
     public subscript<Member>(
-      dynamicMember keyPath: CaseKeyPath<Element, Member> // & Sendable
+      dynamicMember keyPath: CaseKeyPath<Element, Member>  // & Sendable
     ) -> Member? {
       get { storage[keyPath].flatMap { $0[case: keyPath] } }
       set { storage[keyPath] = newValue.map(keyPath.callAsFunction) }
     }
 
     public subscript(
-      dynamicMember keyPath: CaseKeyPath<Element, Void> // & Sendable
+      dynamicMember keyPath: CaseKeyPath<Element, Void>  // & Sendable
     ) -> Bool {
       get { storage[keyPath].flatMap { $0[case: keyPath] } != nil }
       set { storage[keyPath] = newValue ? keyPath() : nil }
@@ -153,7 +153,7 @@
   extension CaseSet {
     @_disfavoredOverload
     public subscript<Member>(
-      dynamicMember keyPath: CaseKeyPath<Element, Member> // & Sendable
+      dynamicMember keyPath: CaseKeyPath<Element, Member>  // & Sendable
     ) -> CaseSetBuilder<Element, Member> {
       CaseSetBuilder(set: self, keyPath: keyPath.unsafeSendable())
     }
