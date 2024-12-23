@@ -23,5 +23,5 @@ public protocol CasePathReflectable<Root> {
   ///
   /// - Parameter root: An root value.
   /// - Returns: A case path to the root value.
-  subscript(root: Root) -> PartialCaseKeyPath<Root> { get }
+  subscript(root: Root) -> PartialOptionalKeyPath<Root> { get }
 }

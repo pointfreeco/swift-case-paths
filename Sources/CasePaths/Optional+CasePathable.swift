@@ -1,7 +1,7 @@
 extension Optional: CasePathable, CasePathIterable {
   @dynamicMemberLookup
   public struct AllCasePaths: CasePathReflectable, Sendable {
-    public subscript(root: Optional) -> PartialCaseKeyPath<Optional> {
+    public subscript(root: Optional) -> PartialOptionalKeyPath<Optional> {
       switch root {
       case .none: return \.none
       case .some: return \.some
@@ -63,12 +63,13 @@ extension Case {
     dynamicMember keyPath: KeyPath<Value.AllCasePaths, AnyCasePath<Value, Member?>>
   ) -> Case<Member>
   where Value: CasePathable {
-    self[dynamicMember: keyPath].some
+    get { self[dynamicMember: keyPath].some }
+    set {}
   }
 }
 
 extension Optional.AllCasePaths: Sequence {
-  public func makeIterator() -> some IteratorProtocol<PartialCaseKeyPath<Optional>> {
+  public func makeIterator() -> some IteratorProtocol<PartialOptionalKeyPath<Optional>> {
     [\.none, \.some].makeIterator()
   }
 }
