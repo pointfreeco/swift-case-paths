@@ -4,6 +4,49 @@
   import ObjectiveC
 #endif
 
+extension AnyCasePath {
+  @available(
+    iOS, deprecated: 9999,
+    message: "Use 'CasePathable.modify', or 'extract' and 'embed', instead."
+  )
+  @available(
+    macOS, deprecated: 9999,
+    message: "Use 'CasePathable.modify', or 'extract' and 'embed', instead."
+  )
+  @available(
+    tvOS, deprecated: 9999,
+    message: "Use 'CasePathable.modify', or 'extract' and 'embed', instead."
+  )
+  @available(
+    watchOS, deprecated: 9999,
+    message: "Use 'CasePathable.modify', or 'extract' and 'embed', instead."
+  )
+  public func modify<Result>(
+    _ root: inout Root,
+    _ body: (inout Value) throws -> Result
+  ) throws -> Result {
+    guard var value = self.extract(from: root) else { throw ExtractionFailed() }
+    let result = try body(&value)
+    root = self.embed(value)
+    return result
+  }
+
+  @available(iOS, deprecated: 9999, message: "Chain case key paths together, instead.")
+  @available(macOS, deprecated: 9999, message: "Chain case key paths together, instead.")
+  @available(tvOS, deprecated: 9999, message: "Chain case key paths together, instead.")
+  @available(watchOS, deprecated: 9999, message: "Chain case key paths together, instead.")
+  public func appending<AppendedValue>(
+    path: AnyCasePath<Value, AppendedValue>
+  ) -> AnyCasePath<Root, AppendedValue> {
+    AnyCasePath<Root, AppendedValue>(
+      embed: { self.embed(path.embed($0)) },
+      extract: { self.extract(from: $0).flatMap(path.extract) }
+    )
+  }
+}
+
+struct ExtractionFailed: Error {}
+
 // Deprecated after 1.4.2:
 
 extension AnyCasePath where Root == Value {
@@ -23,12 +66,14 @@ extension AnyCasePath where Root: _OptionalProtocol, Value == Root.Wrapped {
   }
 }
 
+@_documentation(visibility: private)
 public protocol _OptionalProtocol {
   associatedtype Wrapped
   var optional: Wrapped? { get }
   init(_ some: Wrapped)
 }
 
+@_documentation(visibility: private)
 extension Optional: _OptionalProtocol {
   public var optional: Wrapped? { self }
 }
@@ -252,8 +297,8 @@ public func XCTModify<Enum, Case>(
 /// A type-erased case path that supports embedding a value in a root and attempting to extract a
 /// root's embedded value.
 ///
-/// This type has been renamed to ``AnyCasePath`` and is primarily employed by the
-/// ``CasePathable()`` macro to derive ``CaseKeyPath``s from an enum's cases.
+/// This type has been renamed to `AnyCasePath` and is primarily employed by the ``CasePathable()``
+/// macro to derive `CaseKeyPath`s from an enum's cases.
 @available(*, deprecated, renamed: "AnyCasePath")
 public typealias CasePath = AnyCasePath
 

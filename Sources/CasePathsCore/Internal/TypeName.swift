@@ -1,5 +1,5 @@
 // NB: This is adapted from Custom Dump and should ideally be kept in sync.
-func typeName(
+package func typeName(
   _ type: Any.Type,
   qualified: Bool = true,
   genericsAbbreviated: Bool = false  // NB: This defaults to `true` in Custom Dump
