@@ -1,8 +1,5 @@
 # Migrating to 1.1
 
-Case Paths 1.1 introduces the `@CasePathable` macro and case key paths for faster, safer, and more
-ergonomic case paths.
-
 Learn how to migrate existing case path code to utilize the new `@CasePathable` macro and
 ``CaseKeyPath``s.
 
