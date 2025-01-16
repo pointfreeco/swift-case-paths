@@ -1,9 +1,9 @@
 /// A type that can reflect a case path from a given case.
 ///
-/// The ``CasePathable()`` macro automatically generates a conformance to this protocol on the
-/// enum's ``CasePathable/AllCasePaths`` type.
+/// The `@CasePathable` macro automatically generates a conformance to this protocol on the enum's
+/// ``CasePathable/AllCasePaths`` type.
 ///
-/// You can look up an enum's case path by passing it to ``subscript(root:)``:
+/// You can look up an enum's case path by passing it to ``CasePathReflectable/subscript(_:)``:
 ///
 /// ```swift
 /// @CasePathable

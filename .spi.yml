@@ -1,4 +1,4 @@
 version: 1
 builder:
   configs:
-  - documentation_targets: [CasePaths]
+  - documentation_targets: [CasePathsCore, CasePaths]

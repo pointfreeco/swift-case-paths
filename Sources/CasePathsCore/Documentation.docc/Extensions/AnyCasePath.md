@@ -1,11 +1,11 @@
-# ``CasePaths/AnyCasePath``
+# ``CasePathsCore/AnyCasePath``
 
 ## Topics
 
 ### Creating paths
 
 - ``init(embed:extract:)``
-- ``init(_:)-65qkv``
+- ``init(_:)``
 - ``init()``
 
 ### Extracting and embedding values
@@ -16,7 +16,3 @@
 ### Appending paths
 
 - ``subscript(dynamicMember:)``
-
-### Deprecated interfaces
-
-- <doc:AnyCasePathDeprecations>

@@ -4,30 +4,16 @@ Case paths bring the power and ergonomics of key paths to enums.
 
 ## Overview
 
-<!-- TODO: Copy over README -->
+This module exports the core functionality of the Case Paths library, as well as the `@CasePathable`
+macro.
+
+To read the core documentation, see the [`CasePathsCore`](../casepathscore) module.
 
 ## Topics
-
-### Case paths
-
-- ``CaseKeyPath``
 
 ### Creating case paths
 
 - ``CasePathable()``
-
-### Swift support
-
-- ``Swift/Optional``
-- ``Swift/Result``
-
-### XCTest support
-
-- ``XCTModify(_:case:_:_:file:line:)-94qma``
-
-### Guides
-
-- <doc:Swift59>
 
 ### Deprecated interfaces
 

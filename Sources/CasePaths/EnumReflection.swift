@@ -7,8 +7,7 @@ extension AnyCasePath {
   /// given an enum embed function.
   ///
   /// > Important: This operation is provided for backwards compatibility. Avoid introducing it to
-  /// > your code and instead favor using types that conform to ``CasePathable`` and
-  /// > ``CaseKeyPath``.
+  /// > your code and instead favor using types that employ the ``CasePathable()`` macro.
   ///
   /// - Parameter embed: An embed function.
   @available(iOS, deprecated: 9999, message: "Use a 'CasePathable' case key path, instead")
@@ -34,8 +33,7 @@ extension AnyCasePath {
   /// Returns a void case path for a case with no associated value.
   ///
   /// > Important: This operation is provided for backwards compatibility. Avoid introducing it to
-  /// > your code and instead favor using types that conform to ``CasePathable`` and
-  /// > ``CaseKeyPath``.
+  /// > your code and instead favor using types that employ the ``CasePathable()`` macro.
   @available(iOS, deprecated: 9999, message: "Use a 'CasePathable' case key path, instead")
   @available(macOS, deprecated: 9999, message: "Use a 'CasePathable' case key path, instead")
   @available(tvOS, deprecated: 9999, message: "Use a 'CasePathable' case key path, instead")

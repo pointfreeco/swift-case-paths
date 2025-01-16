@@ -10,7 +10,7 @@ Avoid using deprecated APIs in your app. See the replacement that you should use
 
 ### XCTModify
 
-- ``XCTModify(_:case:_:_:file:line:)-1lm9s``
+- ``XCTModify(_:case:_:_:file:line:)-1pef3``
 
 ### XCTUnwrap
 

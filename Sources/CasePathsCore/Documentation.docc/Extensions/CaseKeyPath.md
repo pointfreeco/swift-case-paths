@@ -14,4 +14,4 @@
 ### Partial case paths
 
 - ``PartialCaseKeyPath``
-- ``CasePathable/subscript(case:)-8av06``
+- ``CasePathable/subscript(case:)-73fim``

@@ -1,6 +1,9 @@
-# Upgrading to CasePaths 1.1 and Swift 5.9
+# Migrating to 1.1
 
-Learn how to migrate existing case path code to utilize the new ``CasePathable()`` macro and
+Case Paths 1.1 introduces the `@CasePathable` macro and case key paths for faster, safer, and more
+ergonomic case paths.
+
+Learn how to migrate existing case path code to utilize the new `@CasePathable` macro and
 ``CaseKeyPath``s.
 
 ## Overview
@@ -16,7 +19,7 @@ In past versions of the library, the primary way to derive a case path was via t
 
 It kind of looks like a key path with the `\` tilting the wrong way, but is actually an invocation
 of a `/` prefix operator with an `Enum.case` initializer. Given just this initializer, the function
-uses runtime reflection to produce a ``CasePath`` value.
+uses runtime reflection to produce a `CasePath` value.
 
 So given an enum:
 
@@ -37,7 +40,7 @@ runtime, it now offers a much better solution that is free of reflection-based c
 
 Deriving case paths is now a two-step process that is still mostly free of boilerplate:
 
-1. You attach the ``CasePathable()`` macro to your enum
+1. You attach the `@CasePathable` macro to your enum:
 
 ```swift
 @CasePathable
@@ -58,9 +61,8 @@ that can extract, modify, and embed the associated value of an enum case.
 ### Passing case key paths to APIs that take case paths
 
 While libraries that use case paths should be updated to take ``CaseKeyPath``s directly, and should
-deprecate APIs that take ``CasePath``s (now ``AnyCasePath``s), you can continue to use these
-existing APIs by converting case key paths to type-erased case paths via
-``AnyCasePath/init(_:)-65qkv``:
+deprecate APIs that take `CasePath`s (now ``AnyCasePath``s), you can continue to use these existing
+APIs by converting case key paths to type-erased case paths via ``AnyCasePath/init(_:)``:
 
 ```swift
 // Before:
@@ -79,7 +81,7 @@ action: \.home
 
 ### Working with case key paths
 
-If you maintain APIs that take ``CasePath`` (now ``AnyCasePath``) values, you should introduce new
+If you maintain APIs that take `CasePath` (now ``AnyCasePath``) values, you should introduce new
 APIs that take ``CaseKeyPath``s instead. ``CaseKeyPath``s have all the functionality of
 ``AnyCasePath``s (and more), but you work with them more like regular key paths:
 
@@ -104,7 +106,7 @@ casePath(value)
 ```
 
 Case key paths can also replace an enum's existing associated value via
-``CasePathable/subscript(case:)-8yr2s``:
+``CasePathable/subscript(case:)-2t4f8``:
 
 ```swift
 root[case: casePath] = value

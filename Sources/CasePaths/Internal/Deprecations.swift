@@ -66,12 +66,14 @@ extension AnyCasePath where Root: _OptionalProtocol, Value == Root.Wrapped {
   }
 }
 
+@_documentation(visibility: private)
 public protocol _OptionalProtocol {
   associatedtype Wrapped
   var optional: Wrapped? { get }
   init(_ some: Wrapped)
 }
 
+@_documentation(visibility: private)
 extension Optional: _OptionalProtocol {
   public var optional: Wrapped? { self }
 }
@@ -295,8 +297,8 @@ public func XCTModify<Enum, Case>(
 /// A type-erased case path that supports embedding a value in a root and attempting to extract a
 /// root's embedded value.
 ///
-/// This type has been renamed to ``AnyCasePath`` and is primarily employed by the
-/// ``CasePathable()`` macro to derive ``CaseKeyPath``s from an enum's cases.
+/// This type has been renamed to `AnyCasePath` and is primarily employed by the ``CasePathable()``
+/// macro to derive `CaseKeyPath`s from an enum's cases.
 @available(*, deprecated, renamed: "AnyCasePath")
 public typealias CasePath = AnyCasePath
 

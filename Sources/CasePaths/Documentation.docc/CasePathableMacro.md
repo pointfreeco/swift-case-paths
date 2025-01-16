@@ -1,7 +1,6 @@
 # ``CasePaths/CasePathable()``
 
-## Topics
+## Further reading
 
-### CasePathable conformance
-
-- ``CasePathable``
+See the [`CasePathsCore`](../casepathscore) module for the `CasePathable` protocol and other core
+library types.
