@@ -1,7 +1,7 @@
 import CasePaths
 
 @CasePathable
-private enum EnumWithExtractCase {
+private enum EnumWithExtractAndEmbedCase {
   case embed
   case extract
 }
