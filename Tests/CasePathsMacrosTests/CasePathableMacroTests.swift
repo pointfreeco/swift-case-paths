@@ -32,7 +32,7 @@
           case fizz(buzz: String)
           case fizzier(Int, buzzier: String)
 
-          public struct AllCasePaths: CasePaths.CasePathReflectable, Sendable, Sequence {
+          public struct AllCasePaths: CasePaths.CasePathReflectable, Swift.Sendable, Swift.Sequence {
             public subscript(root: Foo) -> CasePaths.PartialCaseKeyPath<Foo> {
               if root.is(\.bar) {
                 return \.bar
@@ -82,7 +82,7 @@
                 return (v0, v1)
               }
             }
-            public func makeIterator() -> IndexingIterator<[CasePaths.PartialCaseKeyPath<Foo>]> {
+            public func makeIterator() -> Swift.IndexingIterator<[CasePaths.PartialCaseKeyPath<Foo>]> {
               var allCasePaths: [CasePaths.PartialCaseKeyPath<Foo>] = []
               allCasePaths.append(\.bar)
               allCasePaths.append(\.baz)
@@ -109,12 +109,12 @@
         #"""
         enum EnumWithNoCases {
 
-            public struct AllCasePaths: CasePaths.CasePathReflectable, Sendable, Sequence {
+            public struct AllCasePaths: CasePaths.CasePathReflectable, Swift.Sendable, Swift.Sequence {
                 public subscript(root: EnumWithNoCases) -> CasePaths.PartialCaseKeyPath<EnumWithNoCases> {
                     \.never
                 }
 
-                public func makeIterator() -> IndexingIterator<[CasePaths.PartialCaseKeyPath<EnumWithNoCases>]> {
+                public func makeIterator() -> Swift.IndexingIterator<[CasePaths.PartialCaseKeyPath<EnumWithNoCases>]> {
                     let allCasePaths: [CasePaths.PartialCaseKeyPath<EnumWithNoCases>] = []
                     return allCasePaths.makeIterator()
                 }
@@ -140,7 +140,7 @@
         enum Foo {
           case bar(Never)
 
-          public struct AllCasePaths: CasePaths.CasePathReflectable, Sendable, Sequence {
+          public struct AllCasePaths: CasePaths.CasePathReflectable, Swift.Sendable, Swift.Sequence {
             public subscript(root: Foo) -> CasePaths.PartialCaseKeyPath<Foo> {
               if root.is(\.bar) {
                 return \.bar
@@ -155,7 +155,7 @@
                 return v0
               }
             }
-            public func makeIterator() -> IndexingIterator<[CasePaths.PartialCaseKeyPath<Foo>]> {
+            public func makeIterator() -> Swift.IndexingIterator<[CasePaths.PartialCaseKeyPath<Foo>]> {
               var allCasePaths: [CasePaths.PartialCaseKeyPath<Foo>] = []
               allCasePaths.append(\.bar)
               return allCasePaths.makeIterator()
@@ -182,7 +182,7 @@
         public enum Foo {
           case bar(Int), baz(String)
 
-          public struct AllCasePaths: CasePaths.CasePathReflectable, Sendable, Sequence {
+          public struct AllCasePaths: CasePaths.CasePathReflectable, Swift.Sendable, Swift.Sequence {
             public subscript(root: Foo) -> CasePaths.PartialCaseKeyPath<Foo> {
               if root.is(\.bar) {
                 return \.bar
@@ -208,7 +208,7 @@
                 return v0
               }
             }
-            public func makeIterator() -> IndexingIterator<[CasePaths.PartialCaseKeyPath<Foo>]> {
+            public func makeIterator() -> Swift.IndexingIterator<[CasePaths.PartialCaseKeyPath<Foo>]> {
               var allCasePaths: [CasePaths.PartialCaseKeyPath<Foo>] = []
               allCasePaths.append(\.bar)
               allCasePaths.append(\.baz)
@@ -236,7 +236,7 @@
         public enum Foo {
           case bar(Int)
 
-          public struct AllCasePaths: CasePaths.CasePathReflectable, Sendable, Sequence {
+          public struct AllCasePaths: CasePaths.CasePathReflectable, Swift.Sendable, Swift.Sequence {
             public subscript(root: Foo) -> CasePaths.PartialCaseKeyPath<Foo> {
               if root.is(\.bar) {
                 return \.bar
@@ -251,7 +251,7 @@
                 return v0
               }
             }
-            public func makeIterator() -> IndexingIterator<[CasePaths.PartialCaseKeyPath<Foo>]> {
+            public func makeIterator() -> Swift.IndexingIterator<[CasePaths.PartialCaseKeyPath<Foo>]> {
               var allCasePaths: [CasePaths.PartialCaseKeyPath<Foo>] = []
               allCasePaths.append(\.bar)
               return allCasePaths.makeIterator()
@@ -275,7 +275,7 @@
         package enum Foo {
           case bar(Int)
 
-          public struct AllCasePaths: CasePaths.CasePathReflectable, Sendable, Sequence {
+          public struct AllCasePaths: CasePaths.CasePathReflectable, Swift.Sendable, Swift.Sequence {
             public subscript(root: Foo) -> CasePaths.PartialCaseKeyPath<Foo> {
               if root.is(\.bar) {
                 return \.bar
@@ -290,7 +290,7 @@
                 return v0
               }
             }
-            public func makeIterator() -> IndexingIterator<[CasePaths.PartialCaseKeyPath<Foo>]> {
+            public func makeIterator() -> Swift.IndexingIterator<[CasePaths.PartialCaseKeyPath<Foo>]> {
               var allCasePaths: [CasePaths.PartialCaseKeyPath<Foo>] = []
               allCasePaths.append(\.bar)
               return allCasePaths.makeIterator()
@@ -314,7 +314,7 @@
         private enum Foo {
           case bar(Int)
 
-          public struct AllCasePaths: CasePaths.CasePathReflectable, Sendable, Sequence {
+          public struct AllCasePaths: CasePaths.CasePathReflectable, Swift.Sendable, Swift.Sequence {
             public subscript(root: Foo) -> CasePaths.PartialCaseKeyPath<Foo> {
               if root.is(\.bar) {
                 return \.bar
@@ -329,7 +329,7 @@
                 return v0
               }
             }
-            public func makeIterator() -> IndexingIterator<[CasePaths.PartialCaseKeyPath<Foo>]> {
+            public func makeIterator() -> Swift.IndexingIterator<[CasePaths.PartialCaseKeyPath<Foo>]> {
               var allCasePaths: [CasePaths.PartialCaseKeyPath<Foo>] = []
               allCasePaths.append(\.bar)
               return allCasePaths.makeIterator()
@@ -390,12 +390,12 @@
         #"""
         enum Foo: CasePathable {
 
-            public struct AllCasePaths: CasePaths.CasePathReflectable, Sendable, Sequence {
+            public struct AllCasePaths: CasePaths.CasePathReflectable, Swift.Sendable, Swift.Sequence {
                 public subscript(root: Foo) -> CasePaths.PartialCaseKeyPath<Foo> {
                     \.never
                 }
 
-                public func makeIterator() -> IndexingIterator<[CasePaths.PartialCaseKeyPath<Foo>]> {
+                public func makeIterator() -> Swift.IndexingIterator<[CasePaths.PartialCaseKeyPath<Foo>]> {
                     let allCasePaths: [CasePaths.PartialCaseKeyPath<Foo>] = []
                     return allCasePaths.makeIterator()
                 }
@@ -416,12 +416,12 @@
         #"""
         enum Foo: CasePaths.CasePathable {
 
-            public struct AllCasePaths: CasePaths.CasePathReflectable, Sendable, Sequence {
+            public struct AllCasePaths: CasePaths.CasePathReflectable, Swift.Sendable, Swift.Sequence {
                 public subscript(root: Foo) -> CasePaths.PartialCaseKeyPath<Foo> {
                     \.never
                 }
 
-                public func makeIterator() -> IndexingIterator<[CasePaths.PartialCaseKeyPath<Foo>]> {
+                public func makeIterator() -> Swift.IndexingIterator<[CasePaths.PartialCaseKeyPath<Foo>]> {
                     let allCasePaths: [CasePaths.PartialCaseKeyPath<Foo>] = []
                     return allCasePaths.makeIterator()
                 }
@@ -447,7 +447,7 @@
         enum Foo {
           case bar(_ int: Int, _ bool: Bool)
 
-          public struct AllCasePaths: CasePaths.CasePathReflectable, Sendable, Sequence {
+          public struct AllCasePaths: CasePaths.CasePathReflectable, Swift.Sendable, Swift.Sequence {
             public subscript(root: Foo) -> CasePaths.PartialCaseKeyPath<Foo> {
               if root.is(\.bar) {
                 return \.bar
@@ -462,7 +462,7 @@
                 return (v0, v1)
               }
             }
-            public func makeIterator() -> IndexingIterator<[CasePaths.PartialCaseKeyPath<Foo>]> {
+            public func makeIterator() -> Swift.IndexingIterator<[CasePaths.PartialCaseKeyPath<Foo>]> {
               var allCasePaths: [CasePaths.PartialCaseKeyPath<Foo>] = []
               allCasePaths.append(\.bar)
               return allCasePaths.makeIterator()
@@ -489,7 +489,7 @@
         enum Foo {
           case bar(Bar<Self>)
 
-          public struct AllCasePaths: CasePaths.CasePathReflectable, Sendable, Sequence {
+          public struct AllCasePaths: CasePaths.CasePathReflectable, Swift.Sendable, Swift.Sequence {
             public subscript(root: Foo) -> CasePaths.PartialCaseKeyPath<Foo> {
               if root.is(\.bar) {
                 return \.bar
@@ -504,7 +504,7 @@
                 return v0
               }
             }
-            public func makeIterator() -> IndexingIterator<[CasePaths.PartialCaseKeyPath<Foo>]> {
+            public func makeIterator() -> Swift.IndexingIterator<[CasePaths.PartialCaseKeyPath<Foo>]> {
               var allCasePaths: [CasePaths.PartialCaseKeyPath<Foo>] = []
               allCasePaths.append(\.bar)
               return allCasePaths.makeIterator()
@@ -531,7 +531,7 @@
         enum Foo {
           case bar(int: Int = 42, bool: Bool = true)
 
-          public struct AllCasePaths: CasePaths.CasePathReflectable, Sendable, Sequence {
+          public struct AllCasePaths: CasePaths.CasePathReflectable, Swift.Sendable, Swift.Sequence {
             public subscript(root: Foo) -> CasePaths.PartialCaseKeyPath<Foo> {
               if root.is(\.bar) {
                 return \.bar
@@ -546,7 +546,7 @@
                 return (v0, v1)
               }
             }
-            public func makeIterator() -> IndexingIterator<[CasePaths.PartialCaseKeyPath<Foo>]> {
+            public func makeIterator() -> Swift.IndexingIterator<[CasePaths.PartialCaseKeyPath<Foo>]> {
               var allCasePaths: [CasePaths.PartialCaseKeyPath<Foo>] = []
               allCasePaths.append(\.bar)
               return allCasePaths.makeIterator()
@@ -607,7 +607,7 @@
           #endif
           #endif
 
-          public struct AllCasePaths: CasePaths.CasePathReflectable, Sendable, Sequence {
+          public struct AllCasePaths: CasePaths.CasePathReflectable, Swift.Sendable, Swift.Sequence {
             public subscript(root: Foo) -> CasePaths.PartialCaseKeyPath<Foo> {
               if root.is(\.bar) {
                 return \.bar
@@ -725,7 +725,7 @@
             }
             #endif
             #endif
-            public func makeIterator() -> IndexingIterator<[CasePaths.PartialCaseKeyPath<Foo>]> {
+            public func makeIterator() -> Swift.IndexingIterator<[CasePaths.PartialCaseKeyPath<Foo>]> {
               var allCasePaths: [CasePaths.PartialCaseKeyPath<Foo>] = []
               allCasePaths.append(\.bar)
               #if os(macOS)
@@ -770,7 +770,7 @@
         enum Foo {
           case bar
 
-          public struct AllCasePaths: CasePaths.CasePathReflectable, Sendable, Sequence {
+          public struct AllCasePaths: CasePaths.CasePathReflectable, Swift.Sendable, Swift.Sequence {
             public subscript(root: Foo) -> CasePaths.PartialCaseKeyPath<Foo> {
               if root.is(\.bar) {
                 return \.bar
@@ -787,7 +787,7 @@
                 return ()
               }
             }
-            public func makeIterator() -> IndexingIterator<[CasePaths.PartialCaseKeyPath<Foo>]> {
+            public func makeIterator() -> Swift.IndexingIterator<[CasePaths.PartialCaseKeyPath<Foo>]> {
               var allCasePaths: [CasePaths.PartialCaseKeyPath<Foo>] = []
               allCasePaths.append(\.bar)
               return allCasePaths.makeIterator()
@@ -843,7 +843,7 @@
            */
           case fizz, buzz
 
-          public struct AllCasePaths: CasePaths.CasePathReflectable, Sendable, Sequence {
+          public struct AllCasePaths: CasePaths.CasePathReflectable, Swift.Sendable, Swift.Sequence {
             public subscript(root: Foo) -> CasePaths.PartialCaseKeyPath<Foo> {
               if root.is(\.bar) {
                 return \.bar
@@ -913,7 +913,7 @@
                 return ()
               }
             }
-            public func makeIterator() -> IndexingIterator<[CasePaths.PartialCaseKeyPath<Foo>]> {
+            public func makeIterator() -> Swift.IndexingIterator<[CasePaths.PartialCaseKeyPath<Foo>]> {
               var allCasePaths: [CasePaths.PartialCaseKeyPath<Foo>] = []
               allCasePaths.append(\.bar)
               allCasePaths.append(\.baz)
@@ -948,7 +948,7 @@
         // case foo
           case bar
 
-          public struct AllCasePaths: CasePaths.CasePathReflectable, Sendable, Sequence {
+          public struct AllCasePaths: CasePaths.CasePathReflectable, Swift.Sendable, Swift.Sequence {
             public subscript(root: Foo) -> CasePaths.PartialCaseKeyPath<Foo> {
               if root.is(\.bar) {
                 return \.bar
@@ -967,7 +967,7 @@
                 return ()
               }
             }
-            public func makeIterator() -> IndexingIterator<[CasePaths.PartialCaseKeyPath<Foo>]> {
+            public func makeIterator() -> Swift.IndexingIterator<[CasePaths.PartialCaseKeyPath<Foo>]> {
               var allCasePaths: [CasePaths.PartialCaseKeyPath<Foo>] = []
               allCasePaths.append(\.bar)
               return allCasePaths.makeIterator()
@@ -1004,7 +1004,7 @@
           case fizzier/*Comment in case*/(Int, buzzier: String)
           case fizziest // Comment without associated value
 
-          public struct AllCasePaths: CasePaths.CasePathReflectable, Sendable, Sequence {
+          public struct AllCasePaths: CasePaths.CasePathReflectable, Swift.Sendable, Swift.Sequence {
             public subscript(root: Foo) -> CasePaths.PartialCaseKeyPath<Foo> {
               if root.is(\.bar) {
                 return \.bar
@@ -1068,7 +1068,7 @@
                 return ()
               }
             }
-            public func makeIterator() -> IndexingIterator<[CasePaths.PartialCaseKeyPath<Foo>]> {
+            public func makeIterator() -> Swift.IndexingIterator<[CasePaths.PartialCaseKeyPath<Foo>]> {
               var allCasePaths: [CasePaths.PartialCaseKeyPath<Foo>] = []
               allCasePaths.append(\.bar)
               allCasePaths.append(\.baz)
@@ -1099,7 +1099,7 @@
         enum Action<Element> {
           case element(Element)
 
-          public struct AllCasePaths: CasePaths.CasePathReflectable, Sendable, Sequence {
+          public struct AllCasePaths: CasePaths.CasePathReflectable, Swift.Sendable, Swift.Sequence {
             public subscript(root: Action) -> CasePaths.PartialCaseKeyPath<Action> {
               if root.is(\.element) {
                 return \.element
@@ -1114,7 +1114,7 @@
                 return v0
               }
             }
-            public func makeIterator() -> IndexingIterator<[CasePaths.PartialCaseKeyPath<Action>]> {
+            public func makeIterator() -> Swift.IndexingIterator<[CasePaths.PartialCaseKeyPath<Action>]> {
               var allCasePaths: [CasePaths.PartialCaseKeyPath<Action>] = []
               allCasePaths.append(\.element)
               return allCasePaths.makeIterator()
@@ -1146,7 +1146,7 @@
           enum Action {
             case element(Element)
 
-            public struct AllCasePaths: CasePaths.CasePathReflectable, Sendable, Sequence {
+            public struct AllCasePaths: CasePaths.CasePathReflectable, Swift.Sendable, Swift.Sequence {
               public subscript(root: Action) -> CasePaths.PartialCaseKeyPath<Action> {
                 if root.is(\.element) {
                   return \.element
@@ -1161,7 +1161,7 @@
                   return v0
                 }
               }
-              public func makeIterator() -> IndexingIterator<[CasePaths.PartialCaseKeyPath<Action>]> {
+              public func makeIterator() -> Swift.IndexingIterator<[CasePaths.PartialCaseKeyPath<Action>]> {
                 var allCasePaths: [CasePaths.PartialCaseKeyPath<Action>] = []
                 allCasePaths.append(\.element)
                 return allCasePaths.makeIterator()
@@ -1191,7 +1191,7 @@
         enum Action<Element> {
           case element(Array<Element>)
 
-          public struct AllCasePaths: CasePaths.CasePathReflectable, Sendable, Sequence {
+          public struct AllCasePaths: CasePaths.CasePathReflectable, Swift.Sendable, Swift.Sequence {
             public subscript(root: Action) -> CasePaths.PartialCaseKeyPath<Action> {
               if root.is(\.element) {
                 return \.element
@@ -1206,7 +1206,7 @@
                 return v0
               }
             }
-            public func makeIterator() -> IndexingIterator<[CasePaths.PartialCaseKeyPath<Action>]> {
+            public func makeIterator() -> Swift.IndexingIterator<[CasePaths.PartialCaseKeyPath<Action>]> {
               var allCasePaths: [CasePaths.PartialCaseKeyPath<Action>] = []
               allCasePaths.append(\.element)
               return allCasePaths.makeIterator()
@@ -1239,7 +1239,7 @@
           case secondElement(Element)
           case thirdElement(Element, Element, Int)
 
-          public struct AllCasePaths: CasePaths.CasePathReflectable, Sendable, Sequence {
+          public struct AllCasePaths: CasePaths.CasePathReflectable, Swift.Sendable, Swift.Sequence {
             public subscript(root: Action) -> CasePaths.PartialCaseKeyPath<Action> {
               if root.is(\.element) {
                 return \.element
@@ -1276,7 +1276,7 @@
                 return (v0, v1, v2)
               }
             }
-            public func makeIterator() -> IndexingIterator<[CasePaths.PartialCaseKeyPath<Action>]> {
+            public func makeIterator() -> Swift.IndexingIterator<[CasePaths.PartialCaseKeyPath<Action>]> {
               var allCasePaths: [CasePaths.PartialCaseKeyPath<Action>] = []
               allCasePaths.append(\.element)
               allCasePaths.append(\.secondElement)
