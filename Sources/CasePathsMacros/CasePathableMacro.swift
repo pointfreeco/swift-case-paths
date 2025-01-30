@@ -103,12 +103,12 @@ extension CasePathableMacro: MemberMacro {
 
     var decls: [DeclSyntax] = [
       """
-      public struct AllCasePaths: CasePaths.CasePathReflectable, Sendable, Sequence {
+      public struct AllCasePaths: CasePaths.CasePathReflectable, Swift.Sendable, Swift.Sequence {
       public subscript(root: \(enumName)) -> CasePaths.PartialCaseKeyPath<\(enumName)> {
       \(raw: rootSubscriptCases.map { "\($0.description)\n" }.joined())\(raw: subscriptReturn)
       }
       \(raw: casePaths.map(\.description).joined(separator: "\n"))
-      public func makeIterator() -> IndexingIterator<[CasePaths.PartialCaseKeyPath<\(enumName)>]> {
+      public func makeIterator() -> Swift.IndexingIterator<[CasePaths.PartialCaseKeyPath<\(enumName)>]> {
       \(raw: allCases.isEmpty ? "let" : "var") allCasePaths: \
       [CasePaths.PartialCaseKeyPath<\(enumName)>] = []\
       \(raw: allCases.map { "\n\($0.description)" }.joined())
