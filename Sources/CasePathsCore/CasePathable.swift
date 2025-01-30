@@ -75,30 +75,30 @@ extension Case {
     let keyPath = keyPath.unsafeSendable()
     return Case<AppendedValue>(
       embed: {
-        embed(Value.allCasePaths[keyPath: keyPath].embed($0))
+        _embed(Value.allCasePaths[keyPath: keyPath].embed($0))
       },
       extract: {
-        extract(from: $0).flatMap(Value.allCasePaths[keyPath: keyPath].extract)
+        _extract(from: $0).flatMap(Value.allCasePaths[keyPath: keyPath].extract)
       }
     )
   }
 
-  public func embed(_ value: Value) -> Any {
+  public func _embed(_ value: Value) -> Any {
     self._embed(value)
   }
 
-  public func extract(from root: Any) -> Value? {
+  public func _extract(from root: Any) -> Value? {
     self._extract(root)
   }
 }
 
 private protocol _AnyCase {
-  func _extract(from root: Any) -> Any?
+  func extractAny(from root: Any) -> Any?
 }
 
 extension Case: _AnyCase {
-  fileprivate func _extract(from root: Any) -> Any? {
-    self.extract(from: root)
+  fileprivate func extractAny(from root: Any) -> Any? {
+    self._extract(from: root)
   }
 }
 
@@ -202,7 +202,7 @@ extension CaseKeyPath {
   /// - Returns: An enum for the case of this key path that holds the given value.
   public func callAsFunction<Enum, AssociatedValue>(_ value: AssociatedValue) -> Enum
   where Root == Case<Enum>, Value == Case<AssociatedValue> {
-    Case(self).embed(value) as! Enum
+    Case(self)._embed(value) as! Enum
   }
 
   /// Returns an enum for this case key path's case.
@@ -227,7 +227,7 @@ extension CaseKeyPath {
   /// - Returns: An enum for the case of this key path.
   public func callAsFunction<Enum>() -> Enum
   where Root == Case<Enum>, Value == Case<Void> {
-    Case(self).embed(()) as! Enum
+    Case(self)._embed(()) as! Enum
   }
 
   /// Whether an argument matches the case key path's case.
@@ -280,8 +280,8 @@ extension _AppendKeyPath {
   ) -> Enum?
   where Self == PartialCaseKeyPath<Enum> {
     func open<AnyAssociatedValue>(_ value: AnyAssociatedValue) -> Enum? {
-      (Case<Enum>()[keyPath: self] as? Case<AnyAssociatedValue>)?.embed(value) as? Enum
-        ?? (Case<Enum>()[keyPath: self] as? Case<AnyAssociatedValue?>)?.embed(value) as? Enum
+      (Case<Enum>()[keyPath: self] as? Case<AnyAssociatedValue>)?._embed(value) as? Enum
+        ?? (Case<Enum>()[keyPath: self] as? Case<AnyAssociatedValue?>)?._embed(value) as? Enum
     }
     return _openExistential(value, do: open)
   }
@@ -324,13 +324,13 @@ extension CasePathable {
   /// enum, and see ``Swift/KeyPath/callAsFunction(_:)`` for embedding an associated value in a
   /// brand new root enum.
   public subscript<Value>(case keyPath: CaseKeyPath<Self, Value>) -> Value? {
-    Case(keyPath).extract(from: self)
+    Case(keyPath)._extract(from: self)
   }
 
   /// Attempts to extract the associated value from a root enum using a partial case key path.
   @_disfavoredOverload
   public subscript(case keyPath: PartialCaseKeyPath<Self>) -> Any? {
-    (Case<Self>()[keyPath: keyPath] as? any _AnyCase)?._extract(from: self)
+    (Case<Self>()[keyPath: keyPath] as? any _AnyCase)?.extractAny(from: self)
   }
 
   /// Replaces the associated value of a root enum at a case key path when the case matches.
@@ -362,8 +362,8 @@ extension CasePathable {
     get { fatalError() }
     set {
       let `case` = Case(keyPath)
-      guard `case`.extract(from: self) != nil else { return }
-      self = `case`.embed(newValue) as! Self
+      guard `case`._extract(from: self) != nil else { return }
+      self = `case`._embed(newValue) as! Self
     }
   }
 
@@ -475,7 +475,7 @@ extension CasePathable {
     column: UInt = #column
   ) {
     let `case` = Case(keyPath)
-    guard var value = `case`.extract(from: self) else {
+    guard var value = `case`._extract(from: self) else {
       reportIssue(
         """
         Can't modify '\(String(describing: self))' via 'CaseKeyPath<\(Self.self), \(Value.self)>' \
@@ -489,7 +489,7 @@ extension CasePathable {
       return
     }
     yield(&value)
-    self = `case`.embed(value) as! Self
+    self = `case`._embed(value) as! Self
   }
 }
 
@@ -500,8 +500,8 @@ extension AnyCasePath {
   public init(_ keyPath: CaseKeyPath<Root, Value>) {
     let `case` = Case(keyPath)
     self.init(
-      embed: { `case`.embed($0) as! Root },
-      extract: { `case`.extract(from: $0) }
+      embed: { `case`._embed($0) as! Root },
+      extract: { `case`._extract(from: $0) }
     )
   }
 }
