@@ -83,11 +83,11 @@ extension Case {
     )
   }
 
-  public func embed(_ value: Value) -> Any {
+  func embed(_ value: Value) -> Any {
     self._embed(value)
   }
 
-  public func extract(from root: Any) -> Value? {
+  func extract(from root: Any) -> Value? {
     self._extract(root)
   }
 }

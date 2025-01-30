@@ -31,3 +31,36 @@ public macro CasePathable() =
   #externalMacro(
     module: "CasePathsMacros", type: "CasePathableMacro"
   )
+
+
+
+//@CasePathable
+private enum ExtractAction {
+  case extract
+  public struct AllCasePaths: CasePaths.CasePathReflectable, Swift.Sendable, Swift.Sequence {
+    public subscript(root: ExtractAction) -> CasePaths.PartialCaseKeyPath<ExtractAction> {
+      if root.is(\.extract) {
+        return \.extract
+      }
+      return \.never
+    }
+    public var extract: CasePaths.AnyCasePath<ExtractAction, Void> {
+      ._$embed({
+        ExtractAction.extract
+      }) {
+        guard case .extract = $0 else {
+          return nil
+        }
+        return ()
+      }
+    }
+    public func makeIterator() -> Swift.IndexingIterator<[CasePaths.PartialCaseKeyPath<ExtractAction>]> {
+      var allCasePaths: [CasePaths.PartialCaseKeyPath<ExtractAction>] = []
+      allCasePaths.append(\.extract)
+      return allCasePaths.makeIterator()
+    }
+  }
+  public static var allCasePaths: AllCasePaths { AllCasePaths() }
+}
+extension ExtractAction: CasePaths.CasePathable, CasePaths.CasePathIterable {
+}
