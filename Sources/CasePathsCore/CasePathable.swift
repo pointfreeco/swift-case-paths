@@ -93,11 +93,11 @@ extension Case {
 }
 
 private protocol _AnyCase {
-  func __extract(from root: Any) -> Any?
+  func extractAny(from root: Any) -> Any?
 }
 
 extension Case: _AnyCase {
-  fileprivate func __extract(from root: Any) -> Any? {
+  fileprivate func extractAny(from root: Any) -> Any? {
     self._extract(from: root)
   }
 }
@@ -330,7 +330,7 @@ extension CasePathable {
   /// Attempts to extract the associated value from a root enum using a partial case key path.
   @_disfavoredOverload
   public subscript(case keyPath: PartialCaseKeyPath<Self>) -> Any? {
-    (Case<Self>()[keyPath: keyPath] as? any _AnyCase)?.__extract(from: self)
+    (Case<Self>()[keyPath: keyPath] as? any _AnyCase)?.extractAny(from: self)
   }
 
   /// Replaces the associated value of a root enum at a case key path when the case matches.
