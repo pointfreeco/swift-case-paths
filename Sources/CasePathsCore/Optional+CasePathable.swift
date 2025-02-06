@@ -79,4 +79,24 @@ extension Optional where Wrapped: CasePathable {
   public func `is`(_ keyPath: PartialCaseKeyPath<Wrapped>) -> Bool {
     self?[case: keyPath] != nil
   }
+
+  @_disfavoredOverload
+  @_documentation(visibility: internal)
+  public mutating func modify<Value>(
+    _ keyPath: CaseKeyPath<Wrapped, Value>,
+    yield: (inout Value) -> Void,
+    fileID: StaticString = #fileID,
+    filePath: StaticString = #filePath,
+    line: UInt = #line,
+    column: UInt = #column
+  ) {
+    modify(
+      (\Cases.some).appending(path: keyPath),
+      yield: yield,
+      fileID: fileID,
+      filePath: filePath,
+      line: line,
+      column: column
+    )
+  }
 }
