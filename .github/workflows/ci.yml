@@ -118,9 +118,14 @@ jobs:
   #       run: swift build -c ${{ matrix.config }}
 
   android:
+    strategy:
+      matrix:
+        swift:
+          - "6.0.2"
     name: Android
-    runs-on: ubuntu-22.04
+    runs-on: ubuntu-latest
     env:
       OMIT_MACRO_TESTS: 1
     steps:
-      - uses: johankool/swift-android-test-action@v1
+      - uses: actions/checkout@v4
+      - uses: skiptools/swift-android-action@v2
