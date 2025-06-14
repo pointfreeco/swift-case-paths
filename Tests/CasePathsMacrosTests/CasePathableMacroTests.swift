@@ -1294,5 +1294,100 @@
         """#
       }
     }
+    
+    func testTrailingCommas() {
+      assertMacro {
+    """
+    @CasePathable enum Action {
+      case exampleAction(
+        param1: String,
+        param2: String,
+        param3: String,
+      )
+      case singleParam(
+        value: Int,
+      )
+      case multipleWithLabels(
+        first: String,
+        second: Bool,
+        third: Double,
+      )
+    }
+    """
+      } expansion: {
+    #"""
+    enum Action {
+      case exampleAction(
+        param1: String,
+        param2: String,
+        param3: String,
+      )
+      case singleParam(
+        value: Int,
+      )
+      case multipleWithLabels(
+        first: String,
+        second: Bool,
+        third: Double,
+      )
+    
+      public struct AllCasePaths: CasePaths.CasePathReflectable, Swift.Sendable, Swift.Sequence {
+        public subscript(root: Action) -> CasePaths.PartialCaseKeyPath<Action> {
+          if root.is(\.exampleAction) {
+            return \.exampleAction
+          }
+          if root.is(\.singleParam) {
+            return \.singleParam
+          }
+          if root.is(\.multipleWithLabels) {
+            return \.multipleWithLabels
+          }
+          return \.never
+        }
+        public var exampleAction: CasePaths.AnyCasePath<Action, (param1: String,
+            param2: String,
+            param3: String)> {
+          ._$embed(Action.exampleAction) {
+            guard case let .exampleAction(v0, v1, v2) = $0 else {
+              return nil
+            }
+            return (v0, v1, v2)
+          }
+        }
+        public var singleParam: CasePaths.AnyCasePath<Action, Int> {
+          ._$embed(Action.singleParam) {
+            guard case let .singleParam(v0) = $0 else {
+              return nil
+            }
+            return v0
+          }
+        }
+        public var multipleWithLabels: CasePaths.AnyCasePath<Action, (first: String,
+            second: Bool,
+            third: Double)> {
+          ._$embed(Action.multipleWithLabels) {
+            guard case let .multipleWithLabels(v0, v1, v2) = $0 else {
+              return nil
+            }
+            return (v0, v1, v2)
+          }
+        }
+        public func makeIterator() -> Swift.IndexingIterator<[CasePaths.PartialCaseKeyPath<Action>]> {
+          var allCasePaths: [CasePaths.PartialCaseKeyPath<Action>] = []
+          allCasePaths.append(\.exampleAction)
+          allCasePaths.append(\.singleParam)
+          allCasePaths.append(\.multipleWithLabels)
+          return allCasePaths.makeIterator()
+        }
+      }
+      public static var allCasePaths: AllCasePaths { AllCasePaths() }
+    }
+    
+    extension Action: CasePaths.CasePathable, CasePaths.CasePathIterable {
+    }
+    """#
+      }
+    }
+
   }
 #endif
