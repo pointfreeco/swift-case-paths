@@ -435,6 +435,13 @@ extension EnumCaseElementListSyntax.Element {
             associatedValue.parameters[index].secondName = nil
           }
         }
+        
+        // Remove trailing comma from the last parameter for tuple type generation
+        if let lastIndex = associatedValue.parameters.indices.last {
+          associatedValue.parameters[lastIndex] = associatedValue.parameters[lastIndex]
+            .with(\.trailingComma, nil)
+        }
+        
         return "(\(associatedValue.parameters.trimmed))"
       }
     } else {
