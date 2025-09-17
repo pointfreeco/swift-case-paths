@@ -1,13 +1,22 @@
 {
-  "originHash" : "75a28c180eaa852896a1e043cbbf340d2f28af3ec620072b1a1b7d9a6041d14e",
+  "originHash" : "59cc99159ed0e92e8d8f4c968aec66867f0cad74c08e37e6ff142f59cf8d8ff5",
   "pins" : [
+    {
+      "identity" : "swift-custom-dump",
+      "kind" : "remoteSourceControl",
+      "location" : "https://github.com/pointfreeco/swift-custom-dump",
+      "state" : {
+        "revision" : "82645ec760917961cfa08c9c0c7104a57a0fa4b1",
+        "version" : "1.3.3"
+      }
+    },
     {
       "identity" : "swift-docc-plugin",
       "kind" : "remoteSourceControl",
       "location" : "https://github.com/apple/swift-docc-plugin",
       "state" : {
-        "revision" : "85e4bb4e1cd62cec64a4b8e769dcefdf0c5b9d64",
-        "version" : "1.4.3"
+        "revision" : "3e4f133a77e644a5812911a0513aeb7288b07d06",
+        "version" : "1.4.5"
       }
     },
     {
@@ -24,8 +33,8 @@
       "kind" : "remoteSourceControl",
       "location" : "https://github.com/pointfreeco/swift-macro-testing",
       "state" : {
-        "revision" : "20c1a8f3b624fb5d1503eadcaa84743050c350f4",
-        "version" : "0.5.2"
+        "revision" : "9ab11325daa51c7c5c10fcf16c92bac906717c7e",
+        "version" : "0.6.4"
       }
     },
     {
@@ -33,8 +42,8 @@
       "kind" : "remoteSourceControl",
       "location" : "https://github.com/pointfreeco/swift-snapshot-testing",
       "state" : {
-        "revision" : "42a086182681cf661f5c47c9b7dc3931de18c6d7",
-        "version" : "1.17.6"
+        "revision" : "a8b7c5e0ed33d8ab8887d1654d9b59f2cbad529b",
+        "version" : "1.18.7"
       }
     },
     {
@@ -42,8 +51,8 @@
       "kind" : "remoteSourceControl",
       "location" : "https://github.com/swiftlang/swift-syntax",
       "state" : {
-        "revision" : "0687f71944021d616d34d922343dcef086855920",
-        "version" : "600.0.1"
+        "revision" : "4799286537280063c85a32f09884cfbca301b1a1",
+        "version" : "602.0.0"
       }
     },
     {
@@ -51,8 +60,8 @@
       "kind" : "remoteSourceControl",
       "location" : "https://github.com/pointfreeco/xctest-dynamic-overlay",
       "state" : {
-        "revision" : "a3f634d1a409c7979cabc0a71b3f26ffa9fc8af1",
-        "version" : "1.4.3"
+        "revision" : "b2ed9eabefe56202ee4939dd9fc46b6241c88317",
+        "version" : "1.6.1"
       }
     }
   ],

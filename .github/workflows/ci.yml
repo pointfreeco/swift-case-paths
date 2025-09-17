@@ -16,12 +16,11 @@ concurrency:
 jobs:
   macos:
     name: macOS (Xcode ${{ matrix.xcode }})
-    runs-on: macos-14
+    runs-on: macos-15
     strategy:
       matrix:
         xcode:
-          - '15.4'
-          - '16.2'
+          - '16.4'
     steps:
       - uses: actions/checkout@v4
       - name: Select Xcode ${{ matrix.xcode }}
@@ -33,12 +32,11 @@ jobs:
 
   macos-library-evolution:
     name: macOS Library Evolution (Xcode ${{ matrix.xcode }})
-    runs-on: macos-latest
+    runs-on: macos-15
     strategy:
       matrix:
         xcode:
-          - '15.4'
-          - '16.2'
+          - '16.4'
     steps:
       - uses: actions/checkout@v4
       - name: Select Xcode ${{ matrix.xcode }}
@@ -52,7 +50,7 @@ jobs:
     strategy:
       matrix:
         swift:
-          - '5.10'
+          - '6.1'
     name: Ubuntu (Swift ${{ matrix.swift }})
     runs-on: ubuntu-latest
     container: swift:${{ matrix.swift }}

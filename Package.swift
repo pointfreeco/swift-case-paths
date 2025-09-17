@@ -23,7 +23,7 @@ let package = Package(
     ),
   ],
   dependencies: [
-    .package(url: "https://github.com/swiftlang/swift-syntax", "509.0.0"..<"602.0.0"),
+    .package(url: "https://github.com/swiftlang/swift-syntax", "509.0.0"..<"603.0.0"),
     .package(url: "https://github.com/pointfreeco/xctest-dynamic-overlay", from: "1.2.2"),
   ],
   targets: [
