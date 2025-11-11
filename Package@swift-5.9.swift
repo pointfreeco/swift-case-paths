@@ -17,10 +17,6 @@ let package = Package(
       name: "CasePaths",
       targets: ["CasePaths"]
     ),
-    .library(
-      name: "CasePathsCore",
-      targets: ["CasePathsCore"]
-    ),
   ],
   dependencies: [
     .package(url: "https://github.com/swiftlang/swift-syntax", "509.0.0"..<"603.0.0"),
@@ -30,13 +26,7 @@ let package = Package(
     .target(
       name: "CasePaths",
       dependencies: [
-        "CasePathsCore",
         "CasePathsMacros",
-      ]
-    ),
-    .target(
-      name: "CasePathsCore",
-      dependencies: [
         .product(name: "IssueReporting", package: "xctest-dynamic-overlay"),
       ]
     ),
