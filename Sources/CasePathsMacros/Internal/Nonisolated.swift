@@ -1,11 +1,9 @@
-#if canImport(SwiftSyntax600)
-  import SwiftSyntax
-#else
-  @preconcurrency import SwiftSyntax
-#endif
+import SwiftSyntax
 
-#if compiler(>=6.1)
-  let nonisolated: TokenSyntax? = .keyword(.nonisolated, trailingTrivia: .space)
-#else
-  let nonisolated: TokenSyntax? = nil
-#endif
+var nonisolated: TokenSyntax? {
+  #if compiler(>=6.1)
+    .keyword(.nonisolated, trailingTrivia: .space)
+  #else
+    nil
+  #endif
+}

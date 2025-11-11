@@ -16,11 +16,11 @@ concurrency:
 jobs:
   macos:
     name: macOS (Xcode ${{ matrix.xcode }})
-    runs-on: macos-15
+    runs-on: macos-26
     strategy:
       matrix:
         xcode:
-          - '16.4'
+          - '26.1'
     steps:
       - uses: actions/checkout@v4
       - name: Select Xcode ${{ matrix.xcode }}
@@ -50,7 +50,7 @@ jobs:
     strategy:
       matrix:
         swift:
-          - '6.1'
+          - '6.2'
     name: Ubuntu (Swift ${{ matrix.swift }})
     runs-on: ubuntu-latest
     container: swift:${{ matrix.swift }}
