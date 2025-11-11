@@ -60,6 +60,16 @@ extension CasePathableMacro: MemberMacro {
   >(
     of node: AttributeSyntax,
     providingMembersOf declaration: Declaration,
+    in context: Context
+  ) throws -> [DeclSyntax] {
+    try expansion(of: node, providingMembersOf: declaration, conformingTo: [], in: context)
+  }
+
+  public static func expansion<
+    Declaration: DeclGroupSyntax, Context: MacroExpansionContext
+  >(
+    of node: AttributeSyntax,
+    providingMembersOf declaration: Declaration,
     conformingTo protocols: [TypeSyntax],
     in context: Context
   ) throws -> [DeclSyntax] {
