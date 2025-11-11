@@ -46,18 +46,18 @@ public protocol CasePathable {
 /// associated value types.
 @_documentation(visibility: internal)
 @dynamicMemberLookup
-public struct Case<Value>: Sendable {
-  fileprivate let _embed: @Sendable (Value) -> Any
-  fileprivate let _extract: @Sendable (Any) -> Value?
+public struct Case<Value> {
+  fileprivate let _embed: (Value) -> Any
+  fileprivate let _extract: (Any) -> Value?
 }
 
 extension Case {
   public init<Root>(
-    embed: @escaping @Sendable (Value) -> Root,
-    extract: @escaping @Sendable (Root) -> Value?
+    embed: @escaping (Value) -> Root,
+    extract: @escaping (Root) -> Value?
   ) {
     self._embed = embed
-    self._extract = { @Sendable in ($0 as? Root).flatMap(extract) }
+    self._extract = { ($0 as? Root).flatMap(extract) }
   }
 
   public init() {

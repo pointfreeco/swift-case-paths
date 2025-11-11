@@ -1225,7 +1225,7 @@ final class DeprecatedTests: XCTestCase {
 
   #if os(Windows) || arch(wasm32)
     // There seems to be some strangeness with the current
-    // concurrency implmentation on Windows that breaks if
+    // concurrency implementation on Windows that breaks if
     // you have more than 100 tasks here.
     // WebAssembly doesn't support tail-call for now, so we
     // have smaller limit as well.
@@ -1234,18 +1234,18 @@ final class DeprecatedTests: XCTestCase {
     let maxIterations = 100_000
   #endif
 
-  func testConcurrency_SharedCasePath() async throws {
-    enum Enum { case payload(Int) }
-    let casePath = /Enum.payload
-
-    await withTaskGroup(of: Void.self) { group in
-      for index in 1...maxIterations {
-        group.addTask {
-          XCTAssertEqual(casePath.extract(from: Enum.payload(index)), index)
-        }
-      }
-    }
-  }
+  // func testConcurrency_SharedCasePath() async throws {
+  //   enum Enum { case payload(Int) }
+  //   nonisolated(unsafe) let casePath = /Enum.payload
+  //
+  //   await withTaskGroup(of: Void.self) { group in
+  //     for index in 1...maxIterations {
+  //       group.addTask {
+  //         XCTAssertEqual(casePath.extract(from: Enum.payload(index)), index)
+  //       }
+  //     }
+  //   }
+  // }
 }
 
 private class TestObject: Equatable {

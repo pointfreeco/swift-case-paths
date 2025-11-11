@@ -30,11 +30,13 @@ extension CasePathableMacro: ExtensionMacro {
         if !inheritanceClause.inheritedTypes.contains(where: {
           [type, type.qualified].contains($0.type.trimmedDescription)
         }) {
-          conformances.append("\(moduleName).\(type)")
+          conformances.append("\(nonisolated?.description ?? "")\(moduleName).\(type)")
         }
       }
     } else {
-      conformances = ["CasePathable", "CasePathIterable"].qualified
+      conformances = ["CasePathable", "CasePathIterable"].qualified.map {
+        "\(nonisolated?.description ?? "")\($0)"
+      }
     }
     guard !conformances.isEmpty else { return [] }
     return [
@@ -55,6 +57,7 @@ extension CasePathableMacro: MemberMacro {
   >(
     of node: AttributeSyntax,
     providingMembersOf declaration: Declaration,
+    conformingTo protocols: [TypeSyntax],
     in context: Context
   ) throws -> [DeclSyntax] {
     guard let enumDecl = declaration.as(EnumDeclSyntax.self)
@@ -103,7 +106,8 @@ extension CasePathableMacro: MemberMacro {
 
     var decls: [DeclSyntax] = [
       """
-      public struct AllCasePaths: CasePaths.CasePathReflectable, Swift.Sendable, Swift.Sequence {
+      public \(nonisolated)struct AllCasePaths: \
+      CasePaths.CasePathReflectable, Swift.Sendable, Swift.Sequence {
       public subscript(root: \(enumName)) -> CasePaths.PartialCaseKeyPath<\(enumName)> {
       \(raw: rootSubscriptCases.map { "\($0.description)\n" }.joined())\(raw: subscriptReturn)
       }
@@ -115,7 +119,7 @@ extension CasePathableMacro: MemberMacro {
       return allCasePaths.makeIterator()
       }
       }
-      public static var allCasePaths: AllCasePaths { AllCasePaths() }
+      public \(nonisolated)static var allCasePaths: AllCasePaths { AllCasePaths() }
       """
     ]
 
@@ -210,7 +214,7 @@ extension CasePathableMacro: MemberMacro {
       return """
         \(raw: leadingTrivia)public var \(caseName): \
         \(raw: casePathTypeName.qualified)<\(enumName), \(raw: associatedValueName)> {
-        ._$embed(\(embed)) {
+        \(raw: casePathTypeName.qualified)(embed: \(embed)) {
         guard case\(raw: hasPayload ? " let" : "").\(caseName)\(raw: bindingNames) = $0 else { \
         return nil \
         }
