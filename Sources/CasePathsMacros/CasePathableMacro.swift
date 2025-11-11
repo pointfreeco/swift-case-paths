@@ -25,18 +25,21 @@ extension CasePathableMacro: ExtensionMacro {
       return []
     }
     var conformances: [String] = []
+    #if compiler(>=6.2)
+      let nonisolated = nonisolated?.description ?? ""
+    #else
+      let nonisolated = ""
+    #endif
     if let inheritanceClause = enumDecl.inheritanceClause {
       for type in ["CasePathable", "CasePathIterable"] {
         if !inheritanceClause.inheritedTypes.contains(where: {
           [type, type.qualified].contains($0.type.trimmedDescription)
         }) {
-          conformances.append("\(nonisolated?.description ?? "")\(moduleName).\(type)")
+          conformances.append("\(nonisolated)\(moduleName).\(type)")
         }
       }
     } else {
-      conformances = ["CasePathable", "CasePathIterable"].qualified.map {
-        "\(nonisolated?.description ?? "")\($0)"
-      }
+      conformances = ["CasePathable", "CasePathIterable"].qualified.map { "\(nonisolated)\($0)" }
     }
     guard !conformances.isEmpty else { return [] }
     return [
