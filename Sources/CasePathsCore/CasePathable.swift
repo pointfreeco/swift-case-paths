@@ -72,14 +72,9 @@ extension Case {
     dynamicMember keyPath: KeyPath<Value.AllCasePaths, AnyCasePath<Value, AppendedValue>>
   ) -> Case<AppendedValue>
   where Value: CasePathable {
-    let keyPath = keyPath.unsafeSendable()
-    return Case<AppendedValue>(
-      embed: {
-        _embed(Value.allCasePaths[keyPath: keyPath].embed($0))
-      },
-      extract: {
-        _extract(from: $0).flatMap(Value.allCasePaths[keyPath: keyPath].extract)
-      }
+    Case<AppendedValue>(
+      embed: { _embed(Value.allCasePaths[keyPath: keyPath].embed($0)) },
+      extract: { _extract(from: $0).flatMap(Value.allCasePaths[keyPath: keyPath].extract) }
     )
   }
 
@@ -516,16 +511,9 @@ extension AnyCasePath where Value: CasePathable {
   public subscript<AppendedValue>(
     dynamicMember keyPath: KeyPath<Value.AllCasePaths, AnyCasePath<Value, AppendedValue>>
   ) -> AnyCasePath<Root, AppendedValue> {
-    let keyPath = keyPath.unsafeSendable()
-    return AnyCasePath<Root, AppendedValue>(
-      embed: {
-        embed(Value.allCasePaths[keyPath: keyPath].embed($0))
-      },
-      extract: {
-        extract(from: $0).flatMap(
-          Value.allCasePaths[keyPath: keyPath].extract(from:)
-        )
-      }
+    AnyCasePath<Root, AppendedValue>(
+      embed: { embed(Value.allCasePaths[keyPath: keyPath].embed($0)) },
+      extract: { extract(from: $0).flatMap(Value.allCasePaths[keyPath: keyPath].extract(from:)) }
     )
   }
 }

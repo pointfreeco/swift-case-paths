@@ -81,15 +81,14 @@ extension Optional: _OptionalProtocol {
 extension AnyCasePath {
   @available(*, deprecated, message: "Use a 'CasePathable' case key path, instead")
   public init(_ embed: @escaping (Value) -> Root) {
-    @UncheckedSendable var embed = embed
-    self.init(unsafe: { [$embed] in $embed.wrappedValue($0) })
+    self.init(unsafe: embed)
   }
 }
 
 extension AnyCasePath where Value == Void {
   @available(*, deprecated, message: "Use a 'CasePathable' case key path, instead")
   @_disfavoredOverload
-  public init(_ root: @autoclosure @escaping @Sendable () -> Root) {
+  public init(_ root: @autoclosure @escaping () -> Root) {
     self.init(unsafe: root())
   }
 }
@@ -116,10 +115,9 @@ extension AnyCasePath {
 public prefix func / <Root, Value>(
   embed: @escaping (Value) -> Root
 ) -> AnyCasePath<Root, Value> {
-  @UncheckedSendable var embed = embed
-  return AnyCasePath(
-    embed: { [$embed] in $embed.wrappedValue($0) },
-    extract: { [$embed] in extractHelp { $embed.wrappedValue($0) }($0) }
+  AnyCasePath(
+    embed: embed,
+    extract: { extractHelp(embed)($0) }
   )
 }
 
@@ -128,27 +126,26 @@ public prefix func / <Root, Value>(
 public prefix func / <Root, Value>(
   embed: @escaping (Value) -> Root?
 ) -> AnyCasePath<Root?, Value> {
-  @UncheckedSendable var embed = embed
-  return AnyCasePath(
-    embed: { [$embed] in $embed.wrappedValue($0) },
-    extract: optionalPromotedExtractHelp { [$embed] in $embed.wrappedValue($0) }
+  AnyCasePath(
+    embed: embed,
+    extract: optionalPromotedExtractHelp(embed)
   )
 }
 
 @_documentation(visibility: internal)
 @available(*, deprecated, message: "Use a 'CasePathable' case key path, instead")
 public prefix func / <Root>(
-  root: @autoclosure @escaping @Sendable () -> Root
+  root: @autoclosure @escaping () -> Root
 ) -> AnyCasePath<Root, Void> {
-  .init(embed: root, extract: extractVoidHelp(root()))
+  AnyCasePath(embed: root, extract: extractVoidHelp(root()))
 }
 
 @_documentation(visibility: internal)
 @available(*, deprecated, message: "Use a 'CasePathable' case key path, instead")
 public prefix func / <Root>(
-  root: @autoclosure @escaping @Sendable () -> Root?
+  root: @autoclosure @escaping () -> Root?
 ) -> AnyCasePath<Root?, Void> {
-  .init(embed: root, extract: optionalPromotedExtractVoidHelp(root()))
+  AnyCasePath(embed: root, extract: optionalPromotedExtractVoidHelp(root()))
 }
 
 @_documentation(visibility: internal)
@@ -195,7 +192,7 @@ public prefix func / <Root, Value>(
   *, deprecated, message: "Use a 'CasePathable' case property via dynamic member lookup, instead"
 )
 public prefix func / <Root>(
-  root: @autoclosure @escaping @Sendable () -> Root
+  root: @autoclosure @escaping () -> Root
 ) -> (Root) -> Void? {
   (/root).extract(from:)
 }
@@ -206,7 +203,7 @@ public prefix func / <Root>(
   *, deprecated, message: "Use a 'CasePathable' case property via dynamic member lookup, instead"
 )
 public prefix func / <Root>(
-  root: @autoclosure @escaping @Sendable () -> Root
+  root: @autoclosure @escaping () -> Root
 ) -> (Root?) -> Void? {
   (/root).extract(from:)
 }
@@ -315,8 +312,8 @@ extension AnyCasePath where Root == Void {
   /// - Parameter value: A constant value.
   /// - Returns: A case path from `()` to `value`.
   @available(*, deprecated)
-  public static func constant(_ value: @autoclosure @escaping @Sendable () -> Value) -> Self {
-    .init(
+  public static func constant(_ value: @autoclosure @escaping () -> Value) -> Self {
+    AnyCasePath(
       embed: { _ in () },
       extract: { .some(value()) }
     )
@@ -328,8 +325,8 @@ extension AnyCasePath where Value == Never {
   /// uninhabited `Never` type.
   @available(*, deprecated)
   public static var never: Self {
-    @Sendable func absurd<A>(_ never: Never) -> A {}
-    return .init(
+    func absurd<A>(_ never: Never) -> A {}
+    return AnyCasePath(
       embed: absurd,
       extract: { _ in nil }
     )
@@ -370,7 +367,7 @@ extension AnyCasePath {
   /// - Parameter embed: An enum case initializer.
   /// - Returns: A case path that extracts associated values from enum cases.
   @available(*, deprecated, message: "Use a 'CasePathable' case key path, instead")
-  public static func `case`(_ embed: @escaping @Sendable (Value) -> Root) -> Self {
+  public static func `case`(_ embed: @escaping (Value) -> Root) -> Self {
     self.init(
       embed: embed,
       extract: { CasePaths.extract(embed)($0) }
@@ -387,7 +384,7 @@ extension AnyCasePath where Value == Void {
   /// - Parameter value: An enum case with no associated values.
   /// - Returns: A case path that extracts `()` if the case matches, otherwise `nil`.
   @available(*, deprecated, message: "Use a 'CasePathable' case key path, instead")
-  public static func `case`(_ value: @autoclosure @escaping @Sendable () -> Root) -> Self {
+  public static func `case`(_ value: @autoclosure @escaping () -> Root) -> Self {
     Self(
       embed: value,
       extract: extractVoidHelp(value())
@@ -413,7 +410,7 @@ extension AnyCasePath where Value == Void {
 ///   otherwise `nil`.
 @available(*, deprecated, message: "Use a '@CasePathable' case property, instead")
 public func extract<Root, Value>(
-  case embed: @escaping @Sendable (Value) -> Root,
+  case embed: @escaping (Value) -> Root,
   from root: Root
 ) -> Value? {
   CasePaths.extract(embed)(root)
@@ -437,7 +434,7 @@ public func extract<Root, Value>(
 ///   otherwise `nil`.
 @available(*, deprecated, message: "Use a '@CasePathable' case property, instead")
 public func extract<Root, Value>(
-  case embed: @escaping @Sendable (Value) -> Root?,
+  case embed: @escaping (Value) -> Root?,
   from root: Root?
 ) -> Value? {
   CasePaths.extract(embed)(root)
@@ -460,7 +457,7 @@ public func extract<Root, Value>(
 /// - Parameter embed: An enum case initializer.
 /// - Returns: A function that can attempt to extract associated values from an enum.
 @available(*, deprecated, message: "Use a '@CasePathable' case property, instead")
-public func extract<Root, Value>(_ embed: @escaping @Sendable (Value) -> Root) -> (Root) -> Value? {
+public func extract<Root, Value>(_ embed: @escaping (Value) -> Root) -> (Root) -> Value? {
   extractHelp(embed)
 }
 
@@ -482,7 +479,7 @@ public func extract<Root, Value>(_ embed: @escaping @Sendable (Value) -> Root) -
 /// - Returns: A function that can attempt to extract associated values from an enum.
 @available(*, deprecated, message: "Use a '@CasePathable' case property, instead")
 public func extract<Root, Value>(
-  _ embed: @escaping @Sendable (Value) -> Root?
-) -> @Sendable (Root?) -> Value? {
+  _ embed: @escaping (Value) -> Root?
+) -> (Root?) -> Value? {
   optionalPromotedExtractHelp(embed)
 }
