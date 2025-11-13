@@ -91,7 +91,10 @@
               return allCasePaths.makeIterator()
             }
           }
-          public nonisolated static var allCasePaths: AllCasePaths { AllCasePaths() }
+
+          public nonisolated static var allCasePaths: AllCasePaths {
+            AllCasePaths()
+          }
         }
 
         extension Foo: nonisolated CasePaths.CasePathable, nonisolated CasePaths.CasePathIterable {
@@ -119,7 +122,10 @@
                     return allCasePaths.makeIterator()
                 }
             }
-            public nonisolated static var allCasePaths: AllCasePaths { AllCasePaths() }
+
+            public nonisolated static var allCasePaths: AllCasePaths {
+                AllCasePaths()
+            }
         }
 
         extension EnumWithNoCases: nonisolated CasePaths.CasePathable, nonisolated CasePaths.CasePathIterable {
@@ -161,7 +167,10 @@
               return allCasePaths.makeIterator()
             }
           }
-          public nonisolated static var allCasePaths: AllCasePaths { AllCasePaths() }
+
+          public nonisolated static var allCasePaths: AllCasePaths {
+            AllCasePaths()
+          }
         }
 
         extension Foo: nonisolated CasePaths.CasePathable, nonisolated CasePaths.CasePathIterable {
@@ -215,7 +224,10 @@
               return allCasePaths.makeIterator()
             }
           }
-          public nonisolated static var allCasePaths: AllCasePaths { AllCasePaths() }
+
+          public nonisolated static var allCasePaths: AllCasePaths {
+            AllCasePaths()
+          }
         }
 
         extension Foo: nonisolated CasePaths.CasePathable, nonisolated CasePaths.CasePathIterable {
@@ -257,7 +269,10 @@
               return allCasePaths.makeIterator()
             }
           }
-          public nonisolated static var allCasePaths: AllCasePaths { AllCasePaths() }
+
+          public nonisolated static var allCasePaths: AllCasePaths {
+            AllCasePaths()
+          }
         }
 
         extension Foo: nonisolated CasePaths.CasePathable, nonisolated CasePaths.CasePathIterable {
@@ -296,7 +311,10 @@
               return allCasePaths.makeIterator()
             }
           }
-          public nonisolated static var allCasePaths: AllCasePaths { AllCasePaths() }
+
+          public nonisolated static var allCasePaths: AllCasePaths {
+            AllCasePaths()
+          }
         }
 
         extension Foo: nonisolated CasePaths.CasePathable, nonisolated CasePaths.CasePathIterable {
@@ -335,7 +353,10 @@
               return allCasePaths.makeIterator()
             }
           }
-          public nonisolated static var allCasePaths: AllCasePaths { AllCasePaths() }
+
+          public nonisolated static var allCasePaths: AllCasePaths {
+            AllCasePaths()
+          }
         }
 
         extension Foo: nonisolated CasePaths.CasePathable, nonisolated CasePaths.CasePathIterable {
@@ -400,7 +421,10 @@
                     return allCasePaths.makeIterator()
                 }
             }
-            public nonisolated static var allCasePaths: AllCasePaths { AllCasePaths() }
+
+            public nonisolated static var allCasePaths: AllCasePaths {
+                AllCasePaths()
+            }
         }
 
         extension Foo: nonisolated CasePaths.CasePathIterable {
@@ -426,7 +450,10 @@
                     return allCasePaths.makeIterator()
                 }
             }
-            public nonisolated static var allCasePaths: AllCasePaths { AllCasePaths() }
+
+            public nonisolated static var allCasePaths: AllCasePaths {
+                AllCasePaths()
+            }
         }
 
         extension Foo: nonisolated CasePaths.CasePathIterable {
@@ -468,7 +495,10 @@
               return allCasePaths.makeIterator()
             }
           }
-          public nonisolated static var allCasePaths: AllCasePaths { AllCasePaths() }
+
+          public nonisolated static var allCasePaths: AllCasePaths {
+            AllCasePaths()
+          }
         }
 
         extension Foo: nonisolated CasePaths.CasePathable, nonisolated CasePaths.CasePathIterable {
@@ -510,7 +540,10 @@
               return allCasePaths.makeIterator()
             }
           }
-          public nonisolated static var allCasePaths: AllCasePaths { AllCasePaths() }
+
+          public nonisolated static var allCasePaths: AllCasePaths {
+            AllCasePaths()
+          }
         }
 
         extension Foo: nonisolated CasePaths.CasePathable, nonisolated CasePaths.CasePathIterable {
@@ -552,7 +585,10 @@
               return allCasePaths.makeIterator()
             }
           }
-          public nonisolated static var allCasePaths: AllCasePaths { AllCasePaths() }
+
+          public nonisolated static var allCasePaths: AllCasePaths {
+            AllCasePaths()
+          }
         }
 
         extension Foo: nonisolated CasePaths.CasePathable, nonisolated CasePaths.CasePathIterable {
@@ -746,7 +782,10 @@
               return allCasePaths.makeIterator()
             }
           }
-          public nonisolated static var allCasePaths: AllCasePaths { AllCasePaths() }
+
+          public nonisolated static var allCasePaths: AllCasePaths {
+            AllCasePaths()
+          }
         }
 
         extension Foo: nonisolated CasePaths.CasePathable, nonisolated CasePaths.CasePathIterable {
@@ -793,7 +832,10 @@
               return allCasePaths.makeIterator()
             }
           }
-          public nonisolated static var allCasePaths: AllCasePaths { AllCasePaths() }
+
+          public nonisolated static var allCasePaths: AllCasePaths {
+            AllCasePaths()
+          }
         }
 
         @available(iOS, unavailable) extension Foo: nonisolated CasePaths.CasePathable, nonisolated CasePaths.CasePathIterable {
@@ -922,7 +964,10 @@
               return allCasePaths.makeIterator()
             }
           }
-          public nonisolated static var allCasePaths: AllCasePaths { AllCasePaths() }
+
+          public nonisolated static var allCasePaths: AllCasePaths {
+            AllCasePaths()
+          }
         }
 
         extension Foo: nonisolated CasePaths.CasePathable, nonisolated CasePaths.CasePathIterable {
@@ -973,7 +1018,10 @@
               return allCasePaths.makeIterator()
             }
           }
-          public nonisolated static var allCasePaths: AllCasePaths { AllCasePaths() }
+
+          public nonisolated static var allCasePaths: AllCasePaths {
+            AllCasePaths()
+          }
         }
 
         extension Foo: nonisolated CasePaths.CasePathable, nonisolated CasePaths.CasePathIterable {
@@ -1078,7 +1126,10 @@
               return allCasePaths.makeIterator()
             }
           }
-          public nonisolated static var allCasePaths: AllCasePaths { AllCasePaths() }
+
+          public nonisolated static var allCasePaths: AllCasePaths {
+            AllCasePaths()
+          }
         }
 
         extension Foo: nonisolated CasePaths.CasePathable, nonisolated CasePaths.CasePathIterable {
@@ -1120,7 +1171,10 @@
               return allCasePaths.makeIterator()
             }
           }
-          public nonisolated static var allCasePaths: AllCasePaths { AllCasePaths() }
+
+          public nonisolated static var allCasePaths: AllCasePaths {
+            AllCasePaths()
+          }
 
           public typealias _$Element = Element
         }
@@ -1167,7 +1221,10 @@
                 return allCasePaths.makeIterator()
               }
             }
-            public nonisolated static var allCasePaths: AllCasePaths { AllCasePaths() }
+
+            public nonisolated static var allCasePaths: AllCasePaths {
+              AllCasePaths()
+            }
 
             public typealias _$Element = Element
           }
@@ -1212,7 +1269,10 @@
               return allCasePaths.makeIterator()
             }
           }
-          public nonisolated static var allCasePaths: AllCasePaths { AllCasePaths() }
+
+          public nonisolated static var allCasePaths: AllCasePaths {
+            AllCasePaths()
+          }
 
           public typealias _$Element = Element
         }
@@ -1284,7 +1344,10 @@
               return allCasePaths.makeIterator()
             }
           }
-          public nonisolated static var allCasePaths: AllCasePaths { AllCasePaths() }
+
+          public nonisolated static var allCasePaths: AllCasePaths {
+            AllCasePaths()
+          }
 
           public typealias _$Element = Element
         }
@@ -1380,7 +1443,10 @@
               return allCasePaths.makeIterator()
             }
           }
-          public nonisolated static var allCasePaths: AllCasePaths { AllCasePaths() }
+
+          public nonisolated static var allCasePaths: AllCasePaths {
+            AllCasePaths()
+          }
         }
 
         extension Action: nonisolated CasePaths.CasePathable, nonisolated CasePaths.CasePathIterable {
