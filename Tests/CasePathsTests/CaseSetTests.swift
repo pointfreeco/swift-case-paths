@@ -10,20 +10,20 @@
 
     public init(_ elements: some Collection<Element>)
     where Element.AllCasePaths: CasePathReflectable<Element> {
-      self.storage = [PartialCaseKeyPath<Element> & Sendable: Element](
+      self.storage = [PartialCaseKeyPath<Element>: Element](
         uniqueKeysWithValues: elements.map { (Element.allCasePaths[$0], $0) }
       )
     }
 
     public subscript<Member>(
-      dynamicMember keyPath: CaseKeyPath<Element, Member>  // & Sendable
+      dynamicMember keyPath: CaseKeyPath<Element, Member>
     ) -> Member? {
       get { storage[keyPath].flatMap { $0[case: keyPath] } }
       set { storage[keyPath] = newValue.map(keyPath.callAsFunction) }
     }
 
     public subscript(
-      dynamicMember keyPath: CaseKeyPath<Element, Void>  // & Sendable
+      dynamicMember keyPath: CaseKeyPath<Element, Void>
     ) -> Bool {
       get { storage[keyPath].flatMap { $0[case: keyPath] } != nil }
       set { storage[keyPath] = newValue ? keyPath() : nil }
@@ -111,7 +111,6 @@
 
   extension CaseSet: Equatable where Element: Equatable {}
   extension CaseSet: Hashable where Element: Hashable {}
-  extension CaseSet: @unchecked Sendable where Element: Sendable {}
 
   extension CaseSet: Decodable
   where Element: Decodable, Element.AllCasePaths: CasePathReflectable<Element> {
@@ -153,7 +152,7 @@
   extension CaseSet {
     @_disfavoredOverload
     public subscript<Member>(
-      dynamicMember keyPath: CaseKeyPath<Element, Member>  // & Sendable
+      dynamicMember keyPath: CaseKeyPath<Element, Member>
     ) -> CaseSetBuilder<Element, Member> {
       CaseSetBuilder(set: self, keyPath: keyPath)
     }
@@ -178,7 +177,7 @@
 
   extension CaseSet {
     public func require<each Value>(
-      _ keyPath: repeat CaseKeyPath<Element, each Value> & Sendable
+      _ keyPath: repeat CaseKeyPath<Element, each Value>
     ) -> (repeat each Value)? {
       func unwrap<Wrapped>(_ wrapped: Wrapped?) throws -> Wrapped {
         guard let wrapped else { throw Nil() }

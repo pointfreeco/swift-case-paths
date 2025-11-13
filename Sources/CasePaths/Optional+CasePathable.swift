@@ -72,7 +72,10 @@ extension Case {
     dynamicMember keyPath: KeyPath<Value.AllCasePaths, AnyCasePath<Value, Member?>>
   ) -> Case<Member>
   where Value: CasePathable {
-    self[dynamicMember: keyPath].some
+    get {
+      self[dynamicMember: keyPath].some
+    }
+    set {}
   }
 }
 
@@ -100,7 +103,7 @@ extension Optional where Wrapped: CasePathable {
     column: UInt = #column
   ) {
     modify(
-      (\Cases.some).appending(path: keyPath),
+      (\Cases.some as WritableKeyPath).appending(path: keyPath),
       yield: yield,
       fileID: fileID,
       filePath: filePath,
