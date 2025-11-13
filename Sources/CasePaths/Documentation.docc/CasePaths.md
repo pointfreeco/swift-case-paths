@@ -420,6 +420,11 @@ Do you have a project that uses case paths that you'd like to share? Please
 - ``Swift/Result``
 - ``Swift/Never``
 
+### Optional paths
+
+- ``OptionalKeyPath``
+- ``AnyOptionalPath``
+
 ### Migration guides
 
 - <doc:MigrationGuides>
