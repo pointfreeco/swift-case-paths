@@ -1,4 +1,7 @@
 version: 1
 builder:
   configs:
-  - documentation_targets: [CasePathsCore, CasePaths]
+    - documentation_targets:
+        - CasePaths
+      custom_documentation_parameters:
+        - '--enable-experimental-overloaded-symbol-presentation'

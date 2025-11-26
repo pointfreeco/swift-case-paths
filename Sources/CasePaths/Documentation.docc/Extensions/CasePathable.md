@@ -1,4 +1,4 @@
-# ``CasePathsCore/CasePathable``
+# ``CasePaths/CasePathable``
 
 ## Topics
 
@@ -8,15 +8,15 @@
 
 ### Extracting, replacing, and modifying values
 
-- ``subscript(case:)-3yqx3``
-- ``subscript(case:)-2t4f8``
+- ``subscript(case:)->Value?``
+- ``subscript(case:)->Value``
 - ``modify(_:yield:fileID:filePath:line:column:)``
 
 ### Case properties
 
 - ``is(_:)``
-- ``subscript(dynamicMember:)-emck``
-- ``subscript(dynamicMember:)-dm5y``
+- ``subscript(dynamicMember:)->Value?``
+- ``subscript(dynamicMember:)->Value``
 
 ### Iteration and reflection
 

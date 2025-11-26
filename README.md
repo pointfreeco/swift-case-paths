@@ -358,7 +358,7 @@ struct ItemStatusView: View {
 
 > **Note**
 > The above is a simplified version of the subscript that ships in our
-> [SwiftUINavigation](https://github.com/pointfreeco/swiftui-navigation) library.
+> [Swift Navigation](https://github.com/pointfreeco/swift-navigation) library.
 
 #### Computed paths
 
@@ -397,15 +397,19 @@ extension Authentication.AllCasePaths {
 
 ## Case studies
 
-  * [**SwiftUINavigation**](https://github.com/pointfreeco/swiftui-navigation) uses case paths to
-    power SwiftUI bindings, including navigation, with enums.
-
   * [**The Composable Architecture**](https://github.com/pointfreeco/swift-composable-architecture)
     allows you to break large features down into smaller ones that can be glued together user key
     paths and case paths.
 
-  * [**Parsing**](https://github.com/pointfreeco/swift-parsing) uses case paths to turn unstructured
-    data into enums and back again.
+  * [**SwiftNavigation**](https://github.com/pointfreeco/swift-navigation) adds support for enum
+    bindings to SwiftUI (as well as UIKit and even AppKit), which can drive controls as well as
+    navigation.
+
+  * [**SQLiteData**](https://github.com/pointfreeco/sqlite-data) models "single table inheritance"
+    using enums.
+
+  * [**Parsing**](https://github.com/pointfreeco/swift-parsing) turns unstructured data into enums
+    and back again.
 
 Do you have a project that uses case paths that you'd like to share? Please
 [open a PR](https://github.com/pointfreeco/swift-case-paths/edit/main/README.md) with a link to it!
