@@ -38,7 +38,6 @@ let package = Package(
       name: "CasePathsCore",
       dependencies: [
         .product(name: "IssueReporting", package: "xctest-dynamic-overlay"),
-        .product(name: "XCTestDynamicOverlay", package: "xctest-dynamic-overlay"),
       ]
     ),
     .macro(
