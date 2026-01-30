@@ -27,7 +27,10 @@ public struct AnyOptionalPath<Root, Value> {
   ///   - get: A function that can optionally fail in extracting a value from a root.
   ///   - set: A function that always succeeds in updating a value in a root when present.
   public init(_ casePath: AnyCasePath<Root, Value>) {
-    self.init(get: casePath.extract) { $0 = casePath.embed($1) }
+    self.init(get: casePath.extract) {
+      guard casePath.extract(from: $0) != nil else { return }
+      $0 = casePath.embed($1)
+    }
   }
 
   /// Attempts to extract a value from a root.
