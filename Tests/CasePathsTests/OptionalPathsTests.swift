@@ -46,6 +46,24 @@
       #expect(c.d == D(count: 2))
     }
 
+    @CasePathable
+    enum E: Equatable {
+      case a(Int)
+      case b
+    }
+    @Test func anyOptionalPathFromCasePath() {
+      let casePath = AnyCasePath(\E.Cases.a)
+      let optionalPath = AnyOptionalPath(casePath)
+
+      var e = E.b
+      optionalPath.set(into: &e, 1)
+      #expect(e == .b)
+
+      e = .a(0)
+      optionalPath.set(into: &e, 2)
+      #expect(e == .a(2))
+    }
+
     struct A: Equatable {
       var b: B
     }
