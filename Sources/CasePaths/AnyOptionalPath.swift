@@ -1,5 +1,3 @@
-import Foundation
-
 /// A type-erased optional path that supports extracting an optional value from a root, and
 /// non-optionally updating a value when present.
 ///
