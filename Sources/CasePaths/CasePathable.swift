@@ -50,14 +50,18 @@ public struct Case<Value> {
   fileprivate let _get: (Any) -> Value?
   fileprivate let _set: Setter
 
+  // NB: Force ABI visibility to avoid aggressive downstream WMO pruning
+  @usableFromInline
   enum Setter {
     case _embed((Value) -> Any)
     case _set((inout Any, Value) -> Void)
 
+    @usableFromInline
     static func embed<Root>(_ embed: @escaping (Value) -> Root) -> Self {
       ._embed(embed)
     }
 
+    @usableFromInline
     static func set<Root>(_ set: @escaping (inout Root, Value) -> Void) -> Self {
       ._set {
         var root = $0 as! Root
