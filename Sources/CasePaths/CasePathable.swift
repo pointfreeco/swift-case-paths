@@ -50,7 +50,7 @@ public struct Case<Value> {
   fileprivate let _get: (Any) -> Value?
   fileprivate let _set: Setter
 
-  fileprivate enum Setter {
+  enum Setter {
     case _embed((Value) -> Any)
     case _set((inout Any, Value) -> Void)
 
