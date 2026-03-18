@@ -350,6 +350,7 @@ extension OptionalKeyPath {
   /// - Parameters:
   ///   - lhs: A case key path.
   ///   - rhs: An enum.
+  @_disfavoredOverload
   public static func ~= <Enum: CasePathable, AssociatedValue>(
     lhs: KeyPath,
     rhs: Enum
