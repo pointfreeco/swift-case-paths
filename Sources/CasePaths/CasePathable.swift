@@ -321,44 +321,6 @@ extension CaseKeyPath {
 }
 
 extension OptionalKeyPath {
-  /// Whether an argument matches the case key path's case.
-  ///
-  /// ```swift
-  /// @CasePathable enum UserAction {
-  ///   case settings(SettingsAction)
-  /// }
-  /// @CasePathable enum SettingsAction {
-  ///   case store(StoreAction)
-  /// }
-  /// @CasePathable enum StoreAction {
-  ///   case subscribeButtonTapped
-  /// }
-  ///
-  /// switch userAction {
-  /// case \.settings.store.subscribeButtonTapped:
-  /// // ...
-  /// }
-  ///
-  /// // Equivalent to:
-  ///
-  /// switch userAction {
-  /// case .settings(.store(.subscribeButtonTapped)):
-  /// // ...
-  /// }
-  /// ```
-  ///
-  /// - Parameters:
-  ///   - lhs: A case key path.
-  ///   - rhs: An enum.
-  @_disfavoredOverload
-  public static func ~= <Enum: CasePathable, AssociatedValue>(
-    lhs: KeyPath,
-    rhs: Enum
-  ) -> Bool
-  where Root == Case<Enum>, Value == Case<AssociatedValue> {
-    rhs[case: lhs] != nil
-  }
-
   public func extract<R, V>(from root: R) -> V? where Root == Case<R>, Value == Case<V> {
     Case(self)._extract(from: root)
   }
