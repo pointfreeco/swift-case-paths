@@ -3,7 +3,7 @@
 /// The `@CasePathable` macro automatically generates a conformance to this protocol on the enum's
 /// ``CasePathable/AllCasePaths`` type.
 ///
-/// You can look up an enum's case path by passing it to ``CasePathReflectable/subscript(_:)``:
+/// You can look up an enum's case path by passing it to ``CasePathReflectable/subscript(root:)``:
 ///
 /// ```swift
 /// @CasePathable

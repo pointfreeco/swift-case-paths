@@ -7,7 +7,7 @@
 /// ```swift
 /// @CasePathable enum Field {
 ///   case title(String)
-///   case body(String
+///   case body(String)
 ///   case isLive
 /// }
 ///

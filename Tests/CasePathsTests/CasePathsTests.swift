@@ -128,9 +128,9 @@ final class CasePathsTests: XCTestCase {
   #endif
 
   func testAppend() {
-    let fooToBar = \Foo.Cases.bar
-    let barToInt = \Bar.Cases.int
-    let fooToInt = fooToBar.appending(path: barToInt)
+    let fooToBar: WritableKeyPath = \Foo.Cases.bar
+    let barToInt: WritableKeyPath = \Bar.Cases.int
+    let fooToInt: WritableKeyPath = fooToBar.appending(path: barToInt)
 
     XCTAssertEqual(Foo.bar(.int(42))[case: fooToInt], 42)
     XCTAssertEqual(Foo.baz(.string("Hello"))[case: fooToInt], nil)

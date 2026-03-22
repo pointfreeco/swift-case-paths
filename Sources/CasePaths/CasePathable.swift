@@ -47,8 +47,29 @@ public protocol CasePathable {
 @_documentation(visibility: internal)
 @dynamicMemberLookup
 public struct Case<Value> {
-  fileprivate let _embed: (Value) -> Any
-  fileprivate let _extract: (Any) -> Value?
+  fileprivate let _get: (Any) -> Value?
+  fileprivate let _set: Setter
+
+  // NB: Force ABI visibility to avoid aggressive downstream WMO pruning
+  @usableFromInline
+  enum Setter {
+    case _embed((Value) -> Any)
+    case _set((inout Any, Value) -> Void)
+
+    @usableFromInline
+    static func embed<Root>(_ embed: @escaping (Value) -> Root) -> Self {
+      ._embed(embed)
+    }
+
+    @usableFromInline
+    static func set<Root>(_ set: @escaping (inout Root, Value) -> Void) -> Self {
+      ._set {
+        var root = $0 as! Root
+        set(&root, $1)
+        $0 = root
+      }
+    }
+  }
 }
 
 extension Case {
@@ -56,15 +77,29 @@ extension Case {
     embed: @escaping (Value) -> Root,
     extract: @escaping (Root) -> Value?
   ) {
-    self._embed = embed
-    self._extract = { ($0 as? Root).flatMap(extract) }
+    self.init(get: extract, set: .embed(embed))
+  }
+
+  public init<Root>(
+    get: @escaping (Root) -> Value?,
+    set: @escaping (inout Root, Value) -> Void
+  ) {
+    self.init(get: get, set: .set(set))
+  }
+
+  fileprivate init<Root>(
+    get: @escaping (Root) -> Value?,
+    set: Setter
+  ) {
+    _get = { ($0 as? Root).flatMap(get) }
+    _set = set
   }
 
   public init() {
     self.init(embed: { $0 }, extract: { $0 })
   }
 
-  public init<Root>(_ keyPath: CaseKeyPath<Root, Value>) {
+  public init<Root>(_ keyPath: OptionalKeyPath<Root, Value>) {
     self = Case<Root>()[keyPath: keyPath]
   }
 
@@ -72,19 +107,75 @@ extension Case {
     dynamicMember keyPath: KeyPath<Value.AllCasePaths, AnyCasePath<Value, AppendedValue>>
   ) -> Case<AppendedValue>
   where Value: CasePathable {
+    get {
+      let casePath = Value.allCasePaths[keyPath: keyPath]
+      var set: Case<AppendedValue>.Setter {
+        switch _set {
+        case ._embed(let embed):
+          return .embed { embed(Value.allCasePaths[keyPath: keyPath].embed($0)) }
+        case ._set(let set):
+          return .set { set(&$0, casePath.embed($1)) }
+        }
+      }
+      return Case<AppendedValue>(
+        get: { _extract(from: $0).flatMap(casePath.extract) },
+        set: set
+      )
+    }
+    set {}
+  }
+
+  @_disfavoredOverload
+  public subscript<AppendedValue>(
+    dynamicMember keyPath: WritableKeyPath<Value, AppendedValue>
+  ) -> Case<AppendedValue> {
     Case<AppendedValue>(
-      embed: { _embed(Value.allCasePaths[keyPath: keyPath].embed($0)) },
-      extract: { _extract(from: $0).flatMap(Value.allCasePaths[keyPath: keyPath].extract) }
+      get: { _extract(from: $0)?[keyPath: keyPath] },
+      set: {
+        guard var value = _extract(from: $0) else { return }
+        value[keyPath: keyPath] = $1
+        _set(into: &$0, value)
+      }
     )
   }
 
-  public func _embed(_ value: Value) -> Any {
-    self._embed(value)
+  @_disfavoredOverload
+  public subscript<AppendedValue>(
+    dynamicMember keyPath: WritableKeyPath<Value, AppendedValue?>
+  ) -> Case<AppendedValue> {
+    Case<AppendedValue>(
+      get: { _extract(from: $0)?[keyPath: keyPath] },
+      set: {
+        guard var value = _extract(from: $0) else { return }
+        value[keyPath: keyPath] = $1
+        _set(into: &$0, value)
+      }
+    )
+  }
+
+  public func _embed(_ value: Value) -> Any? {
+    switch _set {
+    case ._embed(let embed):
+      return embed(value)
+    case ._set:
+      return nil
+    }
   }
 
   public func _extract(from root: Any) -> Value? {
-    self._extract(root)
+    _get(root)
   }
+
+  public func _set(into root: inout Any, _ value: Value) {
+    switch _set {
+    case ._embed(let embed):
+      root = embed(value)
+    case ._set(let set):
+      set(&root, value)
+    }
+  }
+
+  private struct Unembeddable {}
 }
 
 private protocol _AnyCase {
@@ -171,7 +262,10 @@ extension Case: _AnyCase {
 /// identity case key path `\SomeEnum.Cases.self`. It refers to the whole enum and can be passed to
 /// a function that takes case key paths when you want to extract, change, or replace all of the
 /// data stored in an enum in a single step.
-public typealias CaseKeyPath<Root, Value> = KeyPath<Case<Root>, Case<Value>>
+public typealias CaseKeyPath<Root, Value> = WritableKeyPath<Case<Root>, Case<Value>>
+
+/// A key path to a writable, optional-chained value.
+public typealias OptionalKeyPath<Root, Value> = KeyPath<Case<Root>, Case<Value>>
 
 extension CaseKeyPath {
   /// Embeds a value in an enum at this case key path's case.
@@ -224,39 +318,27 @@ extension CaseKeyPath {
   where Root == Case<Enum>, Value == Case<Void> {
     Case(self)._embed(()) as! Enum
   }
+}
 
-  /// Whether an argument matches the case key path's case.
-  ///
-  /// ```swift
-  /// @CasePathable enum UserAction {
-  ///   case settings(SettingsAction)
-  /// }
-  /// @CasePathable enum SettingsAction {
-  ///   case store(StoreAction)
-  /// }
-  /// @CasePathable enum StoreAction {
-  ///   case subscribeButtonTapped
-  /// }
-  ///
-  /// switch userAction {
-  /// case \.settings.store.subscribeButtonTapped:
-  /// // ...
-  /// }
-  ///
-  /// // Equivalent to:
-  ///
-  /// switch userAction {
-  /// case .settings(.store(.subscribeButtonTapped)):
-  /// // ...
-  /// }
-  /// ```
-  ///
-  /// - Parameters:
-  ///   - lhs: A case key path.
-  ///   - rhs: An enum.
-  public static func ~= <Enum: CasePathable, AssociatedValue>(lhs: KeyPath, rhs: Enum) -> Bool
-  where Root == Case<Enum>, Value == Case<AssociatedValue> {
-    rhs[case: lhs] != nil
+extension OptionalKeyPath {
+  public func extract<R, V>(from root: R) -> V? where Root == Case<R>, Value == Case<V> {
+    Case(self)._extract(from: root)
+  }
+
+  public func set<R, V>(into root: inout R, _ value: V) where Root == Case<R>, Value == Case<V> {
+    var anyRoot = root as Any
+    Case(self)._set(into: &anyRoot, value)
+    root = anyRoot as! R
+  }
+
+  public func modify<R, V>(into root: inout R, yield: (inout V) -> Void)
+  where Root == Case<R>, Value == Case<V> {
+    var anyRoot = root as Any
+    let `case` = Case(self)
+    guard var value = `case`._extract(from: anyRoot) else { return }
+    yield(&value)
+    `case`._set(into: &anyRoot, value)
+    root = anyRoot as! R
   }
 }
 
@@ -270,7 +352,7 @@ extension _AppendKeyPath {
   ///   type, the operation will fail.
   /// - Returns: An enum for the case of this key path that holds the given value, or `nil`.
   @_disfavoredOverload
-  public func callAsFunction<Enum: CasePathable>(
+  public func callAsFunction<Enum>(
     _ value: Any
   ) -> Enum?
   where Self == PartialCaseKeyPath<Enum> {
@@ -279,6 +361,10 @@ extension _AppendKeyPath {
         ?? (Case<Enum>()[keyPath: self] as? Case<AnyAssociatedValue?>)?._embed(value) as? Enum
     }
     return _openExistential(value, do: open)
+  }
+
+  public func extract<R>(from root: R) -> Any? where Self == PartialCaseKeyPath<R> {
+    (Case<R>()[keyPath: self] as? any _AnyCase)?.extractAny(from: root)
   }
 }
 
@@ -462,7 +548,7 @@ extension CasePathable {
   ///   - line: The line where the modify occurs.
   ///   - column: The column where the modify occurs.
   public mutating func modify<Value>(
-    _ keyPath: CaseKeyPath<Self, Value>,
+    _ keyPath: OptionalKeyPath<Self, Value>,
     yield: (inout Value) -> Void,
     fileID: StaticString = #fileID,
     filePath: StaticString = #filePath,
@@ -484,12 +570,14 @@ extension CasePathable {
       return
     }
     yield(&value)
-    self = `case`._embed(value) as! Self
+    var anySelf = self as Any
+    `case`._set(into: &anySelf, value)
+    self = anySelf as! Self
   }
 }
 
 extension AnyCasePath {
-  /// Creates a type-erased case path for given case key path.
+  /// Creates a type-erased case path for a given case key path.
   ///
   /// - Parameter keyPath: A case key path.
   public init(_ keyPath: CaseKeyPath<Root, Value>) {
@@ -497,6 +585,23 @@ extension AnyCasePath {
     self.init(
       embed: { `case`._embed($0) as! Root },
       extract: { `case`._extract(from: $0) }
+    )
+  }
+}
+
+extension AnyOptionalPath {
+  /// Creates a type-erased optional path for a given optional key path.
+  ///
+  /// - Parameter keyPath: An optional key path.
+  public init(_ keyPath: OptionalKeyPath<Root, Value>) {
+    let `case` = Case(keyPath)
+    self.init(
+      get: { `case`._extract(from: $0) },
+      set: {
+        var anyRoot = $0 as Any
+        `case`._set(into: &anyRoot, $1)
+        $0 = anyRoot as! Root
+      }
     )
   }
 }
