@@ -106,6 +106,10 @@ extension CasePathableMacro: MemberMacro {
 
     let subscriptReturn = allCases.isEmpty ? #"\.never"# : #"return \.never"#
 
+    let caseNameCases = generateCases(from: memberBlock.members, enumName: enumName) {
+      #"if keyPath == \.\#($0.name.text) { return "\#($0.name.text)" }"#
+    }
+
     var decls: [DeclSyntax] = [
       """
       public \(nonisolated)struct AllCasePaths: \
@@ -124,6 +128,13 @@ extension CasePathableMacro: MemberMacro {
       """,
       """
       public \(nonisolated)static var allCasePaths: AllCasePaths { AllCasePaths() }
+      """,
+      """
+      public \(nonisolated)static func caseName(
+      for keyPath: CasePaths.PartialCaseKeyPath<\(enumName)>
+      ) -> Swift.String? {
+      \(raw: caseNameCases.map { "\($0.description)\n" }.joined())return nil
+      }
       """,
     ]
 

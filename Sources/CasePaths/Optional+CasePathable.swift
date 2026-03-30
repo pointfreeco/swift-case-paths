@@ -51,6 +51,14 @@ extension Optional: CasePathable, CasePathIterable {
   public static var allCasePaths: AllCasePaths {
     AllCasePaths()
   }
+
+  public static func caseName(for keyPath: PartialCaseKeyPath<Self>) -> String? {
+    switch keyPath {
+    case \.none: return "none"
+    case \.some: return "some"
+    default: return nil
+    }
+  }
 }
 
 extension Case {

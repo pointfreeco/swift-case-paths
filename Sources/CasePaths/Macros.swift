@@ -32,6 +32,7 @@
   CasePathIterable,
   names: named(AllCasePaths),
   named(allCasePaths),
+  named(caseName),
   named(_$Element)
 )
 public macro CasePathable() =

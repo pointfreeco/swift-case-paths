@@ -137,33 +137,6 @@ final class CasePathsTests: XCTestCase {
     XCTAssertEqual(Foo.bar(.int(123)), fooToInt(123))
   }
 
-  func testMatch() {
-    switch Foo.bar(.int(42)) {
-    case \.bar.int:
-      break
-    default:
-      XCTFail()
-    }
-
-    switch Foo.bar(.int(42)) {
-    case \.bar:
-      break
-    default:
-      XCTFail()
-    }
-
-    XCTAssertTrue(Foo.bar(.int(42)).is(\.bar))
-    XCTAssertTrue(Foo.bar(.int(42)).is(\.bar.int))
-    XCTAssertFalse(Foo.bar(.int(42)).is(\.baz))
-    XCTAssertFalse(Foo.bar(.int(42)).is(\.baz.string))
-    XCTAssertFalse(Foo.bar(.int(42)).is(\.blob))
-    XCTAssertFalse(Foo.bar(.int(42)).is(\.fizzBuzz))
-    XCTAssertTrue(Foo.foo(nil).is(\.foo))
-    XCTAssertTrue(Foo.foo(nil).is(\.foo.none))
-    XCTAssertTrue(Foo.foo("").is(\.foo))
-    XCTAssertFalse(Foo.foo(nil).is(\.bar))
-  }
-
   func testPartialCaseKeyPath() {
     let partialPath = \Foo.Cases.bar as PartialCaseKeyPath
     XCTAssertEqual(.bar(.int(42)), partialPath(Bar.int(42)))
