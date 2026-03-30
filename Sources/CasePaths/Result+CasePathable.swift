@@ -33,6 +33,14 @@ extension Result: CasePathable, CasePathIterable {
   public static var allCasePaths: AllCasePaths {
     AllCasePaths()
   }
+
+  public static func caseName(for keyPath: PartialCaseKeyPath<Self>) -> String? {
+    switch keyPath {
+    case \.success: return "success"
+    case \.failure: return "failure"
+    default: return nil
+    }
+  }
 }
 
 extension Result.AllCasePaths: Sequence {
