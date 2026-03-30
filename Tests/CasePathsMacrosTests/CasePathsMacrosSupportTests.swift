@@ -2,6 +2,7 @@
   import CasePathsMacrosSupport
   import MacroTesting
   import SwiftSyntax
+  import SwiftSyntaxBuilder
   import SwiftSyntaxMacroExpansion
   import SwiftSyntaxMacros
   import Testing
@@ -95,6 +96,21 @@
             AllCasePaths()
           }
 
+          public nonisolated static func caseName(
+            for keyPath: CasePaths.PartialCaseKeyPath<Foo>
+          ) -> Swift.String? {
+            if keyPath == \.bar {
+              return "bar"
+            }
+            if keyPath == \.baz {
+              return "baz"
+            }
+            if keyPath == \.fizz {
+              return "fizz"
+            }
+            return nil
+          }
+
           public enum BindingEnumeration {
             case bar
             case baz(SwiftUI.Binding<Int>)
@@ -181,6 +197,21 @@
           public nonisolated static var allCasePaths: AllCasePaths {
             AllCasePaths()
           }
+
+          public nonisolated static func caseName(
+            for keyPath: CasePaths.PartialCaseKeyPath<Foo>
+          ) -> Swift.String? {
+            if keyPath == \.bar {
+              return "bar"
+            }
+            if keyPath == \.baz {
+              return "baz"
+            }
+            if keyPath == \.fizz {
+              return "fizz"
+            }
+            return nil
+          }
         }
 
         extension Foo: nonisolated CasePathable, nonisolated CasePathIterable {
@@ -258,6 +289,21 @@
 
           public nonisolated static var allCasePaths: AllCasePaths {
             AllCasePaths()
+          }
+
+          public nonisolated static func caseName(
+            for keyPath: CasePaths.PartialCaseKeyPath<Foo>
+          ) -> Swift.String? {
+            if keyPath == \.bar {
+              return "bar"
+            }
+            if keyPath == \.baz {
+              return "baz"
+            }
+            if keyPath == \.fizz {
+              return "fizz"
+            }
+            return nil
           }
 
           public enum BindingEnumeration {
@@ -345,6 +391,21 @@
             AllCasePaths()
           }
 
+          public nonisolated static func caseName(
+            for keyPath: CasePaths.PartialCaseKeyPath<Foo>
+          ) -> Swift.String? {
+            if keyPath == \.bar {
+              return "bar"
+            }
+            if keyPath == \.baz {
+              return "baz"
+            }
+            if keyPath == \.fizz {
+              return "fizz"
+            }
+            return nil
+          }
+
           public enum BindingEnumeration {
             case bar
             case baz(SwiftUI.Binding<Int>)
@@ -395,6 +456,15 @@
 
           public nonisolated static var allCasePaths: AllCasePaths {
             AllCasePaths()
+          }
+
+          public nonisolated static func caseName(
+            for keyPath: CasePaths.PartialCaseKeyPath<Foo>
+          ) -> Swift.String? {
+            if keyPath == \.baz {
+              return "baz"
+            }
+            return nil
           }
         }
 
