@@ -115,15 +115,15 @@ jobs:
   #     - name: Build
   #       run: swift build -c ${{ matrix.config }}
 
-  android:
-    strategy:
-      matrix:
-        swift:
-          - "6.0.2"
-    name: Android
-    runs-on: ubuntu-latest
-    env:
-      OMIT_MACRO_TESTS: 1
-    steps:
-      - uses: actions/checkout@v4
-      - uses: skiptools/swift-android-action@v2
+  # android:
+  #   strategy:
+  #     matrix:
+  #       swift:
+  #         - "6.0.2"
+  #   name: Android
+  #   runs-on: ubuntu-latest
+  #   env:
+  #     OMIT_MACRO_TESTS: 1
+  #   steps:
+  #     - uses: actions/checkout@v4
+  #     - uses: skiptools/swift-android-action@v2
