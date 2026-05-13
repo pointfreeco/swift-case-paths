@@ -46,18 +46,18 @@ public protocol CasePathable {
 /// associated value types.
 @_documentation(visibility: internal)
 @dynamicMemberLookup
-public struct Case<Value>: Sendable {
-  fileprivate let _embed: @Sendable (Value) -> Any
-  fileprivate let _extract: @Sendable (Any) -> Value?
+public struct Case<Value> {
+  fileprivate let _embed: (Value) -> Any
+  fileprivate let _extract: (Any) -> Value?
 }
 
 extension Case {
   public init<Root>(
-    embed: @escaping @Sendable (Value) -> Root,
-    extract: @escaping @Sendable (Root) -> Value?
+    embed: @escaping (Value) -> Root,
+    extract: @escaping (Root) -> Value?
   ) {
     self._embed = embed
-    self._extract = { @Sendable in ($0 as? Root).flatMap(extract) }
+    self._extract = { ($0 as? Root).flatMap(extract) }
   }
 
   public init() {
@@ -72,14 +72,9 @@ extension Case {
     dynamicMember keyPath: KeyPath<Value.AllCasePaths, AnyCasePath<Value, AppendedValue>>
   ) -> Case<AppendedValue>
   where Value: CasePathable {
-    let keyPath = keyPath.unsafeSendable()
-    return Case<AppendedValue>(
-      embed: {
-        _embed(Value.allCasePaths[keyPath: keyPath].embed($0))
-      },
-      extract: {
-        _extract(from: $0).flatMap(Value.allCasePaths[keyPath: keyPath].extract)
-      }
+    Case<AppendedValue>(
+      embed: { _embed(Value.allCasePaths[keyPath: keyPath].embed($0)) },
+      extract: { _extract(from: $0).flatMap(Value.allCasePaths[keyPath: keyPath].extract) }
     )
   }
 
@@ -516,16 +511,9 @@ extension AnyCasePath where Value: CasePathable {
   public subscript<AppendedValue>(
     dynamicMember keyPath: KeyPath<Value.AllCasePaths, AnyCasePath<Value, AppendedValue>>
   ) -> AnyCasePath<Root, AppendedValue> {
-    let keyPath = keyPath.unsafeSendable()
-    return AnyCasePath<Root, AppendedValue>(
-      embed: {
-        embed(Value.allCasePaths[keyPath: keyPath].embed($0))
-      },
-      extract: {
-        extract(from: $0).flatMap(
-          Value.allCasePaths[keyPath: keyPath].extract(from:)
-        )
-      }
+    AnyCasePath<Root, AppendedValue>(
+      embed: { embed(Value.allCasePaths[keyPath: keyPath].embed($0)) },
+      extract: { extract(from: $0).flatMap(Value.allCasePaths[keyPath: keyPath].extract(from:)) }
     )
   }
 }

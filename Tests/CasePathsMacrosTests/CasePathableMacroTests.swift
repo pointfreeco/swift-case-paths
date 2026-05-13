@@ -1,4 +1,4 @@
-#if canImport(MacroTesting)
+#if canImport(MacroTesting) && swift(>=6.2)
   import CasePathsMacros
   import MacroTesting
   import SwiftSyntaxMacros
@@ -32,7 +32,7 @@
           case fizz(buzz: String)
           case fizzier(Int, buzzier: String)
 
-          public struct AllCasePaths: CasePaths.CasePathReflectable, Swift.Sendable, Swift.Sequence {
+          public nonisolated struct AllCasePaths: CasePaths.CasePathReflectable, Swift.Sendable, Swift.Sequence {
             public subscript(root: Foo) -> CasePaths.PartialCaseKeyPath<Foo> {
               if root.is(\.bar) {
                 return \.bar
@@ -49,7 +49,7 @@
               return \.never
             }
             public var bar: CasePaths.AnyCasePath<Foo, Void> {
-              ._$embed({
+              CasePaths.AnyCasePath(embed: {
                   Foo.bar
                 }) {
                 guard case .bar = $0 else {
@@ -59,7 +59,7 @@
               }
             }
             public var baz: CasePaths.AnyCasePath<Foo, Int> {
-              ._$embed(Foo.baz) {
+              CasePaths.AnyCasePath(embed: Foo.baz) {
                 guard case let .baz(v0) = $0 else {
                   return nil
                 }
@@ -67,7 +67,7 @@
               }
             }
             public var fizz: CasePaths.AnyCasePath<Foo, String> {
-              ._$embed(Foo.fizz) {
+              CasePaths.AnyCasePath(embed: Foo.fizz) {
                 guard case let .fizz(v0) = $0 else {
                   return nil
                 }
@@ -75,7 +75,7 @@
               }
             }
             public var fizzier: CasePaths.AnyCasePath<Foo, (Int, buzzier: String)> {
-              ._$embed(Foo.fizzier) {
+              CasePaths.AnyCasePath(embed: Foo.fizzier) {
                 guard case let .fizzier(v0, v1) = $0 else {
                   return nil
                 }
@@ -92,12 +92,12 @@
             }
           }
 
-          public static var allCasePaths: AllCasePaths {
+          public nonisolated static var allCasePaths: AllCasePaths {
             AllCasePaths()
           }
         }
 
-        extension Foo: CasePaths.CasePathable, CasePaths.CasePathIterable {
+        extension Foo: nonisolated CasePaths.CasePathable, nonisolated CasePaths.CasePathIterable {
         }
         """#
       }
@@ -112,7 +112,7 @@
         #"""
         enum EnumWithNoCases {
 
-            public struct AllCasePaths: CasePaths.CasePathReflectable, Swift.Sendable, Swift.Sequence {
+            public nonisolated struct AllCasePaths: CasePaths.CasePathReflectable, Swift.Sendable, Swift.Sequence {
                 public subscript(root: EnumWithNoCases) -> CasePaths.PartialCaseKeyPath<EnumWithNoCases> {
                     \.never
                 }
@@ -123,12 +123,12 @@
                 }
             }
 
-            public static var allCasePaths: AllCasePaths {
+            public nonisolated static var allCasePaths: AllCasePaths {
                 AllCasePaths()
             }
         }
 
-        extension EnumWithNoCases: CasePaths.CasePathable, CasePaths.CasePathIterable {
+        extension EnumWithNoCases: nonisolated CasePaths.CasePathable, nonisolated CasePaths.CasePathIterable {
         }
         """#
       }
@@ -146,7 +146,7 @@
         enum Foo {
           case bar(Never)
 
-          public struct AllCasePaths: CasePaths.CasePathReflectable, Swift.Sendable, Swift.Sequence {
+          public nonisolated struct AllCasePaths: CasePaths.CasePathReflectable, Swift.Sendable, Swift.Sequence {
             public subscript(root: Foo) -> CasePaths.PartialCaseKeyPath<Foo> {
               if root.is(\.bar) {
                 return \.bar
@@ -154,7 +154,7 @@
               return \.never
             }
             public var bar: CasePaths.AnyCasePath<Foo, Never> {
-              ._$embed(Foo.bar) {
+              CasePaths.AnyCasePath(embed: Foo.bar) {
                 guard case let .bar(v0) = $0 else {
                   return nil
                 }
@@ -168,12 +168,12 @@
             }
           }
 
-          public static var allCasePaths: AllCasePaths {
+          public nonisolated static var allCasePaths: AllCasePaths {
             AllCasePaths()
           }
         }
 
-        extension Foo: CasePaths.CasePathable, CasePaths.CasePathIterable {
+        extension Foo: nonisolated CasePaths.CasePathable, nonisolated CasePaths.CasePathIterable {
         }
         """#
       }
@@ -191,7 +191,7 @@
         public enum Foo {
           case bar(Int), baz(String)
 
-          public struct AllCasePaths: CasePaths.CasePathReflectable, Swift.Sendable, Swift.Sequence {
+          public nonisolated struct AllCasePaths: CasePaths.CasePathReflectable, Swift.Sendable, Swift.Sequence {
             public subscript(root: Foo) -> CasePaths.PartialCaseKeyPath<Foo> {
               if root.is(\.bar) {
                 return \.bar
@@ -202,7 +202,7 @@
               return \.never
             }
             public var bar: CasePaths.AnyCasePath<Foo, Int> {
-              ._$embed(Foo.bar) {
+              CasePaths.AnyCasePath(embed: Foo.bar) {
                 guard case let .bar(v0) = $0 else {
                   return nil
                 }
@@ -210,7 +210,7 @@
               }
             }
             public var baz: CasePaths.AnyCasePath<Foo, String> {
-              ._$embed(Foo.baz) {
+              CasePaths.AnyCasePath(embed: Foo.baz) {
                 guard case let .baz(v0) = $0 else {
                   return nil
                 }
@@ -225,12 +225,12 @@
             }
           }
 
-          public static var allCasePaths: AllCasePaths {
+          public nonisolated static var allCasePaths: AllCasePaths {
             AllCasePaths()
           }
         }
 
-        extension Foo: CasePaths.CasePathable, CasePaths.CasePathIterable {
+        extension Foo: nonisolated CasePaths.CasePathable, nonisolated CasePaths.CasePathIterable {
         }
         """#
       }
@@ -248,7 +248,7 @@
         public enum Foo {
           case bar(Int)
 
-          public struct AllCasePaths: CasePaths.CasePathReflectable, Swift.Sendable, Swift.Sequence {
+          public nonisolated struct AllCasePaths: CasePaths.CasePathReflectable, Swift.Sendable, Swift.Sequence {
             public subscript(root: Foo) -> CasePaths.PartialCaseKeyPath<Foo> {
               if root.is(\.bar) {
                 return \.bar
@@ -256,7 +256,7 @@
               return \.never
             }
             public var bar: CasePaths.AnyCasePath<Foo, Int> {
-              ._$embed(Foo.bar) {
+              CasePaths.AnyCasePath(embed: Foo.bar) {
                 guard case let .bar(v0) = $0 else {
                   return nil
                 }
@@ -270,12 +270,12 @@
             }
           }
 
-          public static var allCasePaths: AllCasePaths {
+          public nonisolated static var allCasePaths: AllCasePaths {
             AllCasePaths()
           }
         }
 
-        extension Foo: CasePaths.CasePathable, CasePaths.CasePathIterable {
+        extension Foo: nonisolated CasePaths.CasePathable, nonisolated CasePaths.CasePathIterable {
         }
         """#
       }
@@ -290,7 +290,7 @@
         package enum Foo {
           case bar(Int)
 
-          public struct AllCasePaths: CasePaths.CasePathReflectable, Swift.Sendable, Swift.Sequence {
+          public nonisolated struct AllCasePaths: CasePaths.CasePathReflectable, Swift.Sendable, Swift.Sequence {
             public subscript(root: Foo) -> CasePaths.PartialCaseKeyPath<Foo> {
               if root.is(\.bar) {
                 return \.bar
@@ -298,7 +298,7 @@
               return \.never
             }
             public var bar: CasePaths.AnyCasePath<Foo, Int> {
-              ._$embed(Foo.bar) {
+              CasePaths.AnyCasePath(embed: Foo.bar) {
                 guard case let .bar(v0) = $0 else {
                   return nil
                 }
@@ -312,12 +312,12 @@
             }
           }
 
-          public static var allCasePaths: AllCasePaths {
+          public nonisolated static var allCasePaths: AllCasePaths {
             AllCasePaths()
           }
         }
 
-        extension Foo: CasePaths.CasePathable, CasePaths.CasePathIterable {
+        extension Foo: nonisolated CasePaths.CasePathable, nonisolated CasePaths.CasePathIterable {
         }
         """#
       }
@@ -332,7 +332,7 @@
         private enum Foo {
           case bar(Int)
 
-          public struct AllCasePaths: CasePaths.CasePathReflectable, Swift.Sendable, Swift.Sequence {
+          public nonisolated struct AllCasePaths: CasePaths.CasePathReflectable, Swift.Sendable, Swift.Sequence {
             public subscript(root: Foo) -> CasePaths.PartialCaseKeyPath<Foo> {
               if root.is(\.bar) {
                 return \.bar
@@ -340,7 +340,7 @@
               return \.never
             }
             public var bar: CasePaths.AnyCasePath<Foo, Int> {
-              ._$embed(Foo.bar) {
+              CasePaths.AnyCasePath(embed: Foo.bar) {
                 guard case let .bar(v0) = $0 else {
                   return nil
                 }
@@ -354,12 +354,12 @@
             }
           }
 
-          public static var allCasePaths: AllCasePaths {
+          public nonisolated static var allCasePaths: AllCasePaths {
             AllCasePaths()
           }
         }
 
-        extension Foo: CasePaths.CasePathable, CasePaths.CasePathIterable {
+        extension Foo: nonisolated CasePaths.CasePathable, nonisolated CasePaths.CasePathIterable {
         }
         """#
       }
@@ -411,7 +411,7 @@
         #"""
         enum Foo: CasePathable {
 
-            public struct AllCasePaths: CasePaths.CasePathReflectable, Swift.Sendable, Swift.Sequence {
+            public nonisolated struct AllCasePaths: CasePaths.CasePathReflectable, Swift.Sendable, Swift.Sequence {
                 public subscript(root: Foo) -> CasePaths.PartialCaseKeyPath<Foo> {
                     \.never
                 }
@@ -422,12 +422,12 @@
                 }
             }
 
-            public static var allCasePaths: AllCasePaths {
+            public nonisolated static var allCasePaths: AllCasePaths {
                 AllCasePaths()
             }
         }
 
-        extension Foo: CasePaths.CasePathIterable {
+        extension Foo: nonisolated CasePaths.CasePathIterable {
         }
         """#
       }
@@ -440,7 +440,7 @@
         #"""
         enum Foo: CasePaths.CasePathable {
 
-            public struct AllCasePaths: CasePaths.CasePathReflectable, Swift.Sendable, Swift.Sequence {
+            public nonisolated struct AllCasePaths: CasePaths.CasePathReflectable, Swift.Sendable, Swift.Sequence {
                 public subscript(root: Foo) -> CasePaths.PartialCaseKeyPath<Foo> {
                     \.never
                 }
@@ -451,12 +451,12 @@
                 }
             }
 
-            public static var allCasePaths: AllCasePaths {
+            public nonisolated static var allCasePaths: AllCasePaths {
                 AllCasePaths()
             }
         }
 
-        extension Foo: CasePaths.CasePathIterable {
+        extension Foo: nonisolated CasePaths.CasePathIterable {
         }
         """#
       }
@@ -474,7 +474,7 @@
         enum Foo {
           case bar(_ int: Int, _ bool: Bool)
 
-          public struct AllCasePaths: CasePaths.CasePathReflectable, Swift.Sendable, Swift.Sequence {
+          public nonisolated struct AllCasePaths: CasePaths.CasePathReflectable, Swift.Sendable, Swift.Sequence {
             public subscript(root: Foo) -> CasePaths.PartialCaseKeyPath<Foo> {
               if root.is(\.bar) {
                 return \.bar
@@ -482,7 +482,7 @@
               return \.never
             }
             public var bar: CasePaths.AnyCasePath<Foo, (Int, Bool)> {
-              ._$embed(Foo.bar) {
+              CasePaths.AnyCasePath(embed: Foo.bar) {
                 guard case let .bar(v0, v1) = $0 else {
                   return nil
                 }
@@ -496,12 +496,12 @@
             }
           }
 
-          public static var allCasePaths: AllCasePaths {
+          public nonisolated static var allCasePaths: AllCasePaths {
             AllCasePaths()
           }
         }
 
-        extension Foo: CasePaths.CasePathable, CasePaths.CasePathIterable {
+        extension Foo: nonisolated CasePaths.CasePathable, nonisolated CasePaths.CasePathIterable {
         }
         """#
       }
@@ -519,7 +519,7 @@
         enum Foo {
           case bar(Bar<Self>)
 
-          public struct AllCasePaths: CasePaths.CasePathReflectable, Swift.Sendable, Swift.Sequence {
+          public nonisolated struct AllCasePaths: CasePaths.CasePathReflectable, Swift.Sendable, Swift.Sequence {
             public subscript(root: Foo) -> CasePaths.PartialCaseKeyPath<Foo> {
               if root.is(\.bar) {
                 return \.bar
@@ -527,7 +527,7 @@
               return \.never
             }
             public var bar: CasePaths.AnyCasePath<Foo, Bar<Foo>> {
-              ._$embed(Foo.bar) {
+              CasePaths.AnyCasePath(embed: Foo.bar) {
                 guard case let .bar(v0) = $0 else {
                   return nil
                 }
@@ -541,12 +541,12 @@
             }
           }
 
-          public static var allCasePaths: AllCasePaths {
+          public nonisolated static var allCasePaths: AllCasePaths {
             AllCasePaths()
           }
         }
 
-        extension Foo: CasePaths.CasePathable, CasePaths.CasePathIterable {
+        extension Foo: nonisolated CasePaths.CasePathable, nonisolated CasePaths.CasePathIterable {
         }
         """#
       }
@@ -564,7 +564,7 @@
         enum Foo {
           case bar(int: Int = 42, bool: Bool = true)
 
-          public struct AllCasePaths: CasePaths.CasePathReflectable, Swift.Sendable, Swift.Sequence {
+          public nonisolated struct AllCasePaths: CasePaths.CasePathReflectable, Swift.Sendable, Swift.Sequence {
             public subscript(root: Foo) -> CasePaths.PartialCaseKeyPath<Foo> {
               if root.is(\.bar) {
                 return \.bar
@@ -572,7 +572,7 @@
               return \.never
             }
             public var bar: CasePaths.AnyCasePath<Foo, (int: Int, bool: Bool)> {
-              ._$embed(Foo.bar) {
+              CasePaths.AnyCasePath(embed: Foo.bar) {
                 guard case let .bar(v0, v1) = $0 else {
                   return nil
                 }
@@ -586,12 +586,12 @@
             }
           }
 
-          public static var allCasePaths: AllCasePaths {
+          public nonisolated static var allCasePaths: AllCasePaths {
             AllCasePaths()
           }
         }
 
-        extension Foo: CasePaths.CasePathable, CasePaths.CasePathIterable {
+        extension Foo: nonisolated CasePaths.CasePathable, nonisolated CasePaths.CasePathIterable {
         }
         """#
       }
@@ -643,7 +643,7 @@
           #endif
           #endif
 
-          public struct AllCasePaths: CasePaths.CasePathReflectable, Swift.Sendable, Swift.Sequence {
+          public nonisolated struct AllCasePaths: CasePaths.CasePathReflectable, Swift.Sendable, Swift.Sequence {
             public subscript(root: Foo) -> CasePaths.PartialCaseKeyPath<Foo> {
               if root.is(\.bar) {
                 return \.bar
@@ -680,7 +680,7 @@
               return \.never
             }
             public var bar: CasePaths.AnyCasePath<Foo, Void> {
-              ._$embed({
+              CasePaths.AnyCasePath(embed: {
                   Foo.bar
                 }) {
                 guard case .bar = $0 else {
@@ -691,7 +691,7 @@
             }
             #if os(macOS)
             public var macCase: CasePaths.AnyCasePath<Foo, Void> {
-              ._$embed({
+              CasePaths.AnyCasePath(embed: {
                   Foo.macCase
                 }) {
                 guard case .macCase = $0 else {
@@ -701,7 +701,7 @@
               }
             }
             public var macSecond: CasePaths.AnyCasePath<Foo, Int> {
-              ._$embed(Foo.macSecond) {
+              CasePaths.AnyCasePath(embed: Foo.macSecond) {
                 guard case let .macSecond(v0) = $0 else {
                   return nil
                 }
@@ -710,7 +710,7 @@
             }
             #elseif os(iOS)
             public var iosCase: CasePaths.AnyCasePath<Foo, Void> {
-              ._$embed({
+              CasePaths.AnyCasePath(embed: {
                   Foo.iosCase
                 }) {
                 guard case .iosCase = $0 else {
@@ -721,7 +721,7 @@
             }
             #else
             public var elseCase: CasePaths.AnyCasePath<Foo, String> {
-              ._$embed(Foo.elseCase) {
+              CasePaths.AnyCasePath(embed: Foo.elseCase) {
                 guard case let .elseCase(v0) = $0 else {
                   return nil
                 }
@@ -729,7 +729,7 @@
               }
             }
             public var elseLast: CasePaths.AnyCasePath<Foo, Void> {
-              ._$embed({
+              CasePaths.AnyCasePath(embed: {
                   Foo.elseLast
                 }) {
                 guard case .elseLast = $0 else {
@@ -742,7 +742,7 @@
             #if DEBUG
             #if INNER
             public var twoLevelsDeep: CasePaths.AnyCasePath<Foo, Void> {
-              ._$embed({
+              CasePaths.AnyCasePath(embed: {
                   Foo.twoLevelsDeep
                 }) {
                 guard case .twoLevelsDeep = $0 else {
@@ -752,7 +752,7 @@
               }
             }
             public var twoLevels: CasePaths.AnyCasePath<Foo, Double> {
-              ._$embed(Foo.twoLevels) {
+              CasePaths.AnyCasePath(embed: Foo.twoLevels) {
                 guard case let .twoLevels(v0) = $0 else {
                   return nil
                 }
@@ -783,12 +783,12 @@
             }
           }
 
-          public static var allCasePaths: AllCasePaths {
+          public nonisolated static var allCasePaths: AllCasePaths {
             AllCasePaths()
           }
         }
 
-        extension Foo: CasePaths.CasePathable, CasePaths.CasePathIterable {
+        extension Foo: nonisolated CasePaths.CasePathable, nonisolated CasePaths.CasePathIterable {
         }
         """#
       }
@@ -809,7 +809,7 @@
         enum Foo {
           case bar
 
-          public struct AllCasePaths: CasePaths.CasePathReflectable, Swift.Sendable, Swift.Sequence {
+          public nonisolated struct AllCasePaths: CasePaths.CasePathReflectable, Swift.Sendable, Swift.Sequence {
             public subscript(root: Foo) -> CasePaths.PartialCaseKeyPath<Foo> {
               if root.is(\.bar) {
                 return \.bar
@@ -817,7 +817,7 @@
               return \.never
             }
             public var bar: CasePaths.AnyCasePath<Foo, Void> {
-              ._$embed({
+              CasePaths.AnyCasePath(embed: {
                   Foo.bar
                 }) {
                 guard case .bar = $0 else {
@@ -833,12 +833,12 @@
             }
           }
 
-          public static var allCasePaths: AllCasePaths {
+          public nonisolated static var allCasePaths: AllCasePaths {
             AllCasePaths()
           }
         }
 
-        @available(iOS, unavailable) extension Foo: CasePaths.CasePathable, CasePaths.CasePathIterable {
+        @available(iOS, unavailable) extension Foo: nonisolated CasePaths.CasePathable, nonisolated CasePaths.CasePathIterable {
         }
         """#
       }
@@ -885,7 +885,7 @@
            */
           case fizz, buzz
 
-          public struct AllCasePaths: CasePaths.CasePathReflectable, Swift.Sendable, Swift.Sequence {
+          public nonisolated struct AllCasePaths: CasePaths.CasePathReflectable, Swift.Sendable, Swift.Sequence {
             public subscript(root: Foo) -> CasePaths.PartialCaseKeyPath<Foo> {
               if root.is(\.bar) {
                 return \.bar
@@ -903,7 +903,7 @@
             }
             /// The bar case.
             public var bar: CasePaths.AnyCasePath<Foo, Void> {
-              ._$embed({
+              CasePaths.AnyCasePath(embed: {
                   Foo.bar
                 }) {
                 guard case .bar = $0 else {
@@ -916,7 +916,7 @@
             ///
             /// A case for baz.
             public var baz: CasePaths.AnyCasePath<Foo, Void> {
-              ._$embed({
+              CasePaths.AnyCasePath(embed: {
                   Foo.baz
                 }) {
                 guard case .baz = $0 else {
@@ -931,7 +931,7 @@
            A case for fizz and buzz.
            */
             public var fizz: CasePaths.AnyCasePath<Foo, Void> {
-              ._$embed({
+              CasePaths.AnyCasePath(embed: {
                   Foo.fizz
                 }) {
                 guard case .fizz = $0 else {
@@ -946,7 +946,7 @@
            A case for fizz and buzz.
            */
             public var buzz: CasePaths.AnyCasePath<Foo, Void> {
-              ._$embed({
+              CasePaths.AnyCasePath(embed: {
                   Foo.buzz
                 }) {
                 guard case .buzz = $0 else {
@@ -965,12 +965,12 @@
             }
           }
 
-          public static var allCasePaths: AllCasePaths {
+          public nonisolated static var allCasePaths: AllCasePaths {
             AllCasePaths()
           }
         }
 
-        extension Foo: CasePaths.CasePathable, CasePaths.CasePathIterable {
+        extension Foo: nonisolated CasePaths.CasePathable, nonisolated CasePaths.CasePathIterable {
         }
         """#
       }
@@ -993,7 +993,7 @@
         // case foo
           case bar
 
-          public struct AllCasePaths: CasePaths.CasePathReflectable, Swift.Sendable, Swift.Sequence {
+          public nonisolated struct AllCasePaths: CasePaths.CasePathReflectable, Swift.Sendable, Swift.Sequence {
             public subscript(root: Foo) -> CasePaths.PartialCaseKeyPath<Foo> {
               if root.is(\.bar) {
                 return \.bar
@@ -1003,7 +1003,7 @@
               // baz
             // case foo
             public var bar: CasePaths.AnyCasePath<Foo, Void> {
-              ._$embed({
+              CasePaths.AnyCasePath(embed: {
                   Foo.bar
                 }) {
                 guard case .bar = $0 else {
@@ -1019,12 +1019,12 @@
             }
           }
 
-          public static var allCasePaths: AllCasePaths {
+          public nonisolated static var allCasePaths: AllCasePaths {
             AllCasePaths()
           }
         }
 
-        extension Foo: CasePaths.CasePathable, CasePaths.CasePathIterable {
+        extension Foo: nonisolated CasePaths.CasePathable, nonisolated CasePaths.CasePathIterable {
         }
         """#
       }
@@ -1052,7 +1052,7 @@
           case fizzier/*Comment in case*/(Int, buzzier: String)
           case fizziest // Comment without associated value
 
-          public struct AllCasePaths: CasePaths.CasePathReflectable, Swift.Sendable, Swift.Sequence {
+          public nonisolated struct AllCasePaths: CasePaths.CasePathReflectable, Swift.Sendable, Swift.Sequence {
             public subscript(root: Foo) -> CasePaths.PartialCaseKeyPath<Foo> {
               if root.is(\.bar) {
                 return \.bar
@@ -1073,7 +1073,7 @@
             }
             // Comment above case
             public var bar: CasePaths.AnyCasePath<Foo, Void> {
-              ._$embed({
+              CasePaths.AnyCasePath(embed: {
                   Foo.bar
                 }) {
                 guard case .bar = $0 else {
@@ -1083,7 +1083,7 @@
               }
             }
             /*Comment before case*/public var baz: CasePaths.AnyCasePath<Foo, Int> {
-              ._$embed(Foo.baz) {
+              CasePaths.AnyCasePath(embed: Foo.baz) {
                 guard case let .baz(v0) = $0 else {
                   return nil
                 }
@@ -1091,7 +1091,7 @@
               }
             }
             public var fizz: CasePaths.AnyCasePath<Foo, String> {
-              ._$embed(Foo.fizz) {
+              CasePaths.AnyCasePath(embed: Foo.fizz) {
                 guard case let .fizz(v0) = $0 else {
                   return nil
                 }
@@ -1099,7 +1099,7 @@
               }
             }
             public var fizzier: CasePaths.AnyCasePath<Foo, (Int, buzzier: String)> {
-              ._$embed(Foo.fizzier) {
+              CasePaths.AnyCasePath(embed: Foo.fizzier) {
                 guard case let .fizzier(v0, v1) = $0 else {
                   return nil
                 }
@@ -1107,7 +1107,7 @@
               }
             }
             public var fizziest: CasePaths.AnyCasePath<Foo, Void> {
-              ._$embed({
+              CasePaths.AnyCasePath(embed: {
                   Foo.fizziest
                 }) {
                 guard case .fizziest = $0 else {
@@ -1127,12 +1127,12 @@
             }
           }
 
-          public static var allCasePaths: AllCasePaths {
+          public nonisolated static var allCasePaths: AllCasePaths {
             AllCasePaths()
           }
         }
 
-        extension Foo: CasePaths.CasePathable, CasePaths.CasePathIterable {
+        extension Foo: nonisolated CasePaths.CasePathable, nonisolated CasePaths.CasePathIterable {
         }
         """#
       }
@@ -1150,7 +1150,7 @@
         enum Action<Element> {
           case element(Element)
 
-          public struct AllCasePaths: CasePaths.CasePathReflectable, Swift.Sendable, Swift.Sequence {
+          public nonisolated struct AllCasePaths: CasePaths.CasePathReflectable, Swift.Sendable, Swift.Sequence {
             public subscript(root: Action) -> CasePaths.PartialCaseKeyPath<Action> {
               if root.is(\.element) {
                 return \.element
@@ -1158,7 +1158,7 @@
               return \.never
             }
             public var element: CasePaths.AnyCasePath<Action, _$Element> {
-              ._$embed(Action.element) {
+              CasePaths.AnyCasePath(embed: Action.element) {
                 guard case let .element(v0) = $0 else {
                   return nil
                 }
@@ -1172,14 +1172,14 @@
             }
           }
 
-          public static var allCasePaths: AllCasePaths {
+          public nonisolated static var allCasePaths: AllCasePaths {
             AllCasePaths()
           }
 
           public typealias _$Element = Element
         }
 
-        extension Action: CasePaths.CasePathable, CasePaths.CasePathIterable {
+        extension Action: nonisolated CasePaths.CasePathable, nonisolated CasePaths.CasePathIterable {
         }
         """#
       }
@@ -1200,7 +1200,7 @@
           enum Action {
             case element(Element)
 
-            public struct AllCasePaths: CasePaths.CasePathReflectable, Swift.Sendable, Swift.Sequence {
+            public nonisolated struct AllCasePaths: CasePaths.CasePathReflectable, Swift.Sendable, Swift.Sequence {
               public subscript(root: Action) -> CasePaths.PartialCaseKeyPath<Action> {
                 if root.is(\.element) {
                   return \.element
@@ -1208,7 +1208,7 @@
                 return \.never
               }
               public var element: CasePaths.AnyCasePath<Action, _$Element> {
-                ._$embed(Action.element) {
+                CasePaths.AnyCasePath(embed: Action.element) {
                   guard case let .element(v0) = $0 else {
                     return nil
                   }
@@ -1222,7 +1222,7 @@
               }
             }
 
-            public static var allCasePaths: AllCasePaths {
+            public nonisolated static var allCasePaths: AllCasePaths {
               AllCasePaths()
             }
 
@@ -1230,7 +1230,7 @@
           }
         }
 
-        extension Reducer.Action: CasePaths.CasePathable, CasePaths.CasePathIterable {
+        extension Reducer.Action: nonisolated CasePaths.CasePathable, nonisolated CasePaths.CasePathIterable {
         }
         """#
       }
@@ -1248,7 +1248,7 @@
         enum Action<Element> {
           case element(Array<Element>)
 
-          public struct AllCasePaths: CasePaths.CasePathReflectable, Swift.Sendable, Swift.Sequence {
+          public nonisolated struct AllCasePaths: CasePaths.CasePathReflectable, Swift.Sendable, Swift.Sequence {
             public subscript(root: Action) -> CasePaths.PartialCaseKeyPath<Action> {
               if root.is(\.element) {
                 return \.element
@@ -1256,7 +1256,7 @@
               return \.never
             }
             public var element: CasePaths.AnyCasePath<Action, Array<_$Element>> {
-              ._$embed(Action.element) {
+              CasePaths.AnyCasePath(embed: Action.element) {
                 guard case let .element(v0) = $0 else {
                   return nil
                 }
@@ -1270,14 +1270,14 @@
             }
           }
 
-          public static var allCasePaths: AllCasePaths {
+          public nonisolated static var allCasePaths: AllCasePaths {
             AllCasePaths()
           }
 
           public typealias _$Element = Element
         }
 
-        extension Action: CasePaths.CasePathable, CasePaths.CasePathIterable {
+        extension Action: nonisolated CasePaths.CasePathable, nonisolated CasePaths.CasePathIterable {
         }
         """#
       }
@@ -1299,7 +1299,7 @@
           case secondElement(Element)
           case thirdElement(Element, Element, Int)
 
-          public struct AllCasePaths: CasePaths.CasePathReflectable, Swift.Sendable, Swift.Sequence {
+          public nonisolated struct AllCasePaths: CasePaths.CasePathReflectable, Swift.Sendable, Swift.Sequence {
             public subscript(root: Action) -> CasePaths.PartialCaseKeyPath<Action> {
               if root.is(\.element) {
                 return \.element
@@ -1313,7 +1313,7 @@
               return \.never
             }
             public var element: CasePaths.AnyCasePath<Action, Array<_$Element>> {
-              ._$embed(Action.element) {
+              CasePaths.AnyCasePath(embed: Action.element) {
                 guard case let .element(v0) = $0 else {
                   return nil
                 }
@@ -1321,7 +1321,7 @@
               }
             }
             public var secondElement: CasePaths.AnyCasePath<Action, _$Element> {
-              ._$embed(Action.secondElement) {
+              CasePaths.AnyCasePath(embed: Action.secondElement) {
                 guard case let .secondElement(v0) = $0 else {
                   return nil
                 }
@@ -1329,7 +1329,7 @@
               }
             }
             public var thirdElement: CasePaths.AnyCasePath<Action, (_$Element, _$Element, Int)> {
-              ._$embed(Action.thirdElement) {
+              CasePaths.AnyCasePath(embed: Action.thirdElement) {
                 guard case let .thirdElement(v0, v1, v2) = $0 else {
                   return nil
                 }
@@ -1345,14 +1345,14 @@
             }
           }
 
-          public static var allCasePaths: AllCasePaths {
+          public nonisolated static var allCasePaths: AllCasePaths {
             AllCasePaths()
           }
 
           public typealias _$Element = Element
         }
 
-        extension Action: CasePaths.CasePathable, CasePaths.CasePathIterable {
+        extension Action: nonisolated CasePaths.CasePathable, nonisolated CasePaths.CasePathIterable {
         }
         """#
       }
@@ -1394,7 +1394,7 @@
             third: Double,
           )
 
-          public struct AllCasePaths: CasePaths.CasePathReflectable, Swift.Sendable, Swift.Sequence {
+          public nonisolated struct AllCasePaths: CasePaths.CasePathReflectable, Swift.Sendable, Swift.Sequence {
             public subscript(root: Action) -> CasePaths.PartialCaseKeyPath<Action> {
               if root.is(\.exampleAction) {
                 return \.exampleAction
@@ -1410,7 +1410,7 @@
             public var exampleAction: CasePaths.AnyCasePath<Action, (param1: String,
                 param2: String,
                 param3: String)> {
-              ._$embed(Action.exampleAction) {
+              CasePaths.AnyCasePath(embed: Action.exampleAction) {
                 guard case let .exampleAction(v0, v1, v2) = $0 else {
                   return nil
                 }
@@ -1418,7 +1418,7 @@
               }
             }
             public var singleParam: CasePaths.AnyCasePath<Action, Int> {
-              ._$embed(Action.singleParam) {
+              CasePaths.AnyCasePath(embed: Action.singleParam) {
                 guard case let .singleParam(v0) = $0 else {
                   return nil
                 }
@@ -1428,7 +1428,7 @@
             public var multipleWithLabels: CasePaths.AnyCasePath<Action, (first: String,
                 second: Bool,
                 third: Double)> {
-              ._$embed(Action.multipleWithLabels) {
+              CasePaths.AnyCasePath(embed: Action.multipleWithLabels) {
                 guard case let .multipleWithLabels(v0, v1, v2) = $0 else {
                   return nil
                 }
@@ -1444,12 +1444,12 @@
             }
           }
 
-          public static var allCasePaths: AllCasePaths {
+          public nonisolated static var allCasePaths: AllCasePaths {
             AllCasePaths()
           }
         }
 
-        extension Action: CasePaths.CasePathable, CasePaths.CasePathIterable {
+        extension Action: nonisolated CasePaths.CasePathable, nonisolated CasePaths.CasePathIterable {
         }
         """#
       }

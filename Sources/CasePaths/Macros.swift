@@ -26,7 +26,14 @@
 /// \UserAction.Cases.settings  // CasePath<UserAction, SettingsAction>
 /// ```
 @attached(extension, conformances: CasePathable, CasePathIterable)
-@attached(member, names: named(AllCasePaths), named(allCasePaths), named(_$Element))
+@attached(
+  member,
+  conformances: CasePathable,
+  CasePathIterable,
+  names: named(AllCasePaths),
+  named(allCasePaths),
+  named(_$Element)
+)
 public macro CasePathable() =
   #externalMacro(
     module: "CasePathsMacros", type: "CasePathableMacro"

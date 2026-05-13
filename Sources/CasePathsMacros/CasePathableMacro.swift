@@ -25,16 +25,21 @@ extension CasePathableMacro: ExtensionMacro {
       return []
     }
     var conformances: [String] = []
+    #if compiler(>=6.2)
+      let nonisolated = nonisolated?.description ?? ""
+    #else
+      let nonisolated = ""
+    #endif
     if let inheritanceClause = enumDecl.inheritanceClause {
       for type in ["CasePathable", "CasePathIterable"] {
         if !inheritanceClause.inheritedTypes.contains(where: {
           [type, type.qualified].contains($0.type.trimmedDescription)
         }) {
-          conformances.append("\(moduleName).\(type)")
+          conformances.append("\(nonisolated)\(moduleName).\(type)")
         }
       }
     } else {
-      conformances = ["CasePathable", "CasePathIterable"].qualified
+      conformances = ["CasePathable", "CasePathIterable"].qualified.map { "\(nonisolated)\($0)" }
     }
     guard !conformances.isEmpty else { return [] }
     return [
@@ -55,6 +60,17 @@ extension CasePathableMacro: MemberMacro {
   >(
     of node: AttributeSyntax,
     providingMembersOf declaration: Declaration,
+    in context: Context
+  ) throws -> [DeclSyntax] {
+    try expansion(of: node, providingMembersOf: declaration, conformingTo: [], in: context)
+  }
+
+  public static func expansion<
+    Declaration: DeclGroupSyntax, Context: MacroExpansionContext
+  >(
+    of node: AttributeSyntax,
+    providingMembersOf declaration: Declaration,
+    conformingTo protocols: [TypeSyntax],
     in context: Context
   ) throws -> [DeclSyntax] {
     guard let enumDecl = declaration.as(EnumDeclSyntax.self)
@@ -105,7 +121,8 @@ extension CasePathableMacro: MemberMacro {
 
     var decls: [DeclSyntax] = [
       """
-      public struct AllCasePaths: CasePaths.CasePathReflectable, Swift.Sendable, Swift.Sequence {
+      public \(nonisolated)struct AllCasePaths: \
+      CasePaths.CasePathReflectable, Swift.Sendable, Swift.Sequence {
       public subscript(root: \(enumName)) -> CasePaths.PartialCaseKeyPath<\(enumName)> {
       \(raw: rootSubscriptCases.map { "\($0.description)\n" }.joined())\(raw: subscriptReturn)
       }
@@ -119,7 +136,7 @@ extension CasePathableMacro: MemberMacro {
       }
       """,
       """
-      public static var allCasePaths: AllCasePaths { AllCasePaths() }
+      public \(nonisolated)static var allCasePaths: AllCasePaths { AllCasePaths() }
       """,
     ]
 
@@ -219,7 +236,7 @@ extension CasePathableMacro: MemberMacro {
       return """
         \(raw: leadingTrivia)public var \(caseName): \
         \(raw: casePathTypeName.qualified)<\(enumName), \(raw: associatedValueName)> {
-        ._$embed(\(raw: embed)) {
+        \(raw: casePathTypeName.qualified)(embed: \(raw: embed)) {
         guard case\(raw: hasPayload ? " let" : "").\(caseName)\(raw: bindingNames) = $0 else { \
         return nil \
         }

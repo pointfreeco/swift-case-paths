@@ -155,13 +155,13 @@
     public subscript<Member>(
       dynamicMember keyPath: CaseKeyPath<Element, Member>  // & Sendable
     ) -> CaseSetBuilder<Element, Member> {
-      CaseSetBuilder(set: self, keyPath: keyPath.unsafeSendable())
+      CaseSetBuilder(set: self, keyPath: keyPath)
     }
   }
 
   public struct CaseSetBuilder<Root: CasePathable, Value> {
     let set: CaseSet<Root>
-    let keyPath: CaseKeyPath<Root, Value> & Sendable
+    let keyPath: CaseKeyPath<Root, Value>
 
     public func callAsFunction(_ value: Value?) -> CaseSet<Root> {
       var set = set
