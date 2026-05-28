@@ -1,3 +1,5 @@
+import Foundation
+
 // NB: This is adapted from Custom Dump and should ideally be kept in sync.
 package func typeName(_ type: Any.Type) -> String {
   var name = _typeName(type, qualified: true)

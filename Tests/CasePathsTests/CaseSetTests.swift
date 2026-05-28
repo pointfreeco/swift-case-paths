@@ -1,5 +1,5 @@
 #if canImport(Testing) && swift(>=6)
-  import CasePaths
+  public import CasePaths
   import Testing
 
   @dynamicMemberLookup
