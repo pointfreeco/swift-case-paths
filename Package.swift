@@ -69,3 +69,20 @@ if ProcessInfo.processInfo.environment["OMIT_MACRO_TESTS"] == nil {
     )
   )
 }
+
+for target in package.targets {
+  target.swiftSettings = target.swiftSettings ?? []
+  target.swiftSettings?.append(contentsOf: [
+    .enableUpcomingFeature("ExistentialAny"),
+    .enableUpcomingFeature("ImmutableWeakCaptures"),
+    .enableUpcomingFeature("InferIsolatedConformances"),
+    .enableUpcomingFeature("InternalImportsByDefault"),
+    .enableUpcomingFeature("MemberImportVisibility"),
+    .enableUpcomingFeature("NonisolatedNonsendingByDefault"),
+  ])
+  #if compiler(>=6.4)
+    target.swiftSettings?.append(contentsOf: [
+      .treatAllWarnings(as: .error)
+    ])
+  #endif
+}
