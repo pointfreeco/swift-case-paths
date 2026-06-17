@@ -9,7 +9,7 @@ protocol TestClassProtocol: AnyObject {}
 final class DeprecatedTests: XCTestCase {
   func testSimplePayload() {
     enum Enum { case payload(Int) }
-    let path = /Enum.payload
+    let path: AnyCasePath<Enum, Int> = /Enum.payload
     for _ in 1...2 {
       XCTAssertEqual(path.extract(from: .payload(42)), 42)
       XCTAssertEqual(path.extract(from: .payload(42)), 42)
@@ -19,7 +19,7 @@ final class DeprecatedTests: XCTestCase {
 
   func testSimpleLabeledPayload() {
     enum Enum { case payload(label: Int) }
-    let path = /Enum.payload(label:)
+    let path: AnyCasePath<Enum, Int> = /Enum.payload(label:)
     for _ in 1...2 {
       XCTAssertEqual(path.extract(from: .payload(label: 42)), 42)
     }
@@ -31,8 +31,8 @@ final class DeprecatedTests: XCTestCase {
       case payload(a: Int)
       case payload(b: Int)
     }
-    let pathA = /Enum.payload(a:)
-    let pathB = /Enum.payload(b:)
+    let pathA: AnyCasePath<Enum, Int> = /Enum.payload(a:)
+    let pathB: AnyCasePath<Enum, Int> = /Enum.payload(b:)
     for _ in 1...2 {
       XCTAssertEqual(pathA.extract(from: .payload(a: 42)), 42)
       XCTAssertEqual(pathA.extract(from: .payload(b: 42)), nil)
@@ -80,8 +80,8 @@ final class DeprecatedTests: XCTestCase {
 
   func testNoPayload() {
     enum Enum { case a, b }
-    let pathA = /Enum.a
-    let pathB = /Enum.b
+    let pathA: AnyCasePath<Enum, Void> = /Enum.a
+    let pathB: AnyCasePath<Enum, Void> = /Enum.b
     for _ in 1...2 {
       XCTAssertNotNil(pathA.extract(from: .a))
       XCTAssertNotNil(pathB.extract(from: .b))
@@ -102,9 +102,9 @@ final class DeprecatedTests: XCTestCase {
       case unit1(Unit1)
       case unit2(Unit2)
     }
-    let path1 = /Enum.void
-    let path2 = /Enum.unit1
-    let path3 = /Enum.unit2
+    let path1: AnyCasePath<Enum, Void> = /Enum.void
+    let path2: AnyCasePath<Enum, Unit1> = /Enum.unit1
+    let path3: AnyCasePath<Enum, Unit2> = /Enum.unit2
     for _ in 1...2 {
       XCTAssertNotNil(path1.extract(from: .void(())))
       XCTAssertNotNil(path2.extract(from: .unit1(.init())))
@@ -134,8 +134,8 @@ final class DeprecatedTests: XCTestCase {
       case uninhabited(Uninhabited)
       case value
     }
-    let path1 = /Enum.never
-    let path2 = /Enum.uninhabited
+    let path1: AnyCasePath<Enum, Never> = /Enum.never
+    let path2: AnyCasePath<Enum, Uninhabited> = /Enum.uninhabited
     for _ in 1...2 {
       XCTAssertNil(path1.extract(from: .value))
       XCTAssertNil(path2.extract(from: .value))
@@ -162,7 +162,7 @@ final class DeprecatedTests: XCTestCase {
   #if !arch(wasm32)
     func testClosurePayload() throws {
       enum Enum { case closure(() -> Void) }
-      let path = /Enum.closure
+      let path: AnyCasePath<Enum, () -> Void> = /Enum.closure
       for _ in 1...2 {
         var invoked = false
         let closure = try unwrap(path.extract(from: .closure { invoked = true }))
@@ -181,8 +181,8 @@ final class DeprecatedTests: XCTestCase {
       case indirect(Enum)
       case direct
     }
-    let shallowPath = /Enum.indirect
-    let deepPath = /Enum.indirect
+    let shallowPath: AnyCasePath<Enum, Enum> = /Enum.indirect
+    let deepPath: AnyCasePath<Enum, Enum> = /Enum.indirect
     for _ in 1...2 {
       XCTAssertEqual(shallowPath.extract(from: .indirect(.direct)), .direct)
       XCTAssertEqual(
@@ -201,8 +201,8 @@ final class DeprecatedTests: XCTestCase {
       case direct(Int)
     }
 
-    let indirectPath = /Enum.indirect
-    let directPath = /Enum.direct
+    let indirectPath: AnyCasePath<Enum, Int> = /Enum.indirect
+    let directPath: AnyCasePath<Enum, Int> = /Enum.direct
 
     for _ in 1...2 {
       XCTAssertEqual(indirectPath.extract(from: .indirect(42)), 42)
@@ -271,7 +271,7 @@ final class DeprecatedTests: XCTestCase {
 
   func testOptionalPayload() {
     enum Enum { case int(Int?) }
-    let path = /Enum.int
+    let path: AnyCasePath<Enum, Int?> = /Enum.int
     for _ in 1...2 {
       XCTAssertEqual(path.extract(from: .int(.some(42))), .some(.some(42)))
       XCTAssertEqual(path.extract(from: .int(.none)), .some(.none))
@@ -282,7 +282,7 @@ final class DeprecatedTests: XCTestCase {
 
   func testAnyPayload() {
     enum Enum { case any(Any) }
-    let path = /Enum.any
+    let path: AnyCasePath<Enum, Any> = /Enum.any
     for _ in 1...2 {
       XCTAssertEqual(path.extract(from: .any(42)) as? Int, 42)
     }
@@ -294,7 +294,7 @@ final class DeprecatedTests: XCTestCase {
     enum Enum { case anyObject(AnyObject) }
     let object = Class()
     let nsObject = NSObject()
-    let path = /Enum.anyObject
+    let path: AnyCasePath<Enum, AnyObject> = /Enum.anyObject
     for _ in 1...2 {
       XCTAssert(try unwrap(path.extract(from: .anyObject(object))) === object)
       XCTAssert(try unwrap(path.extract(from: .anyObject(nsObject))) === nsObject)
@@ -307,7 +307,7 @@ final class DeprecatedTests: XCTestCase {
   func testProtocolPayload() {
     struct Error: Swift.Error, Equatable {}
     enum Enum { case error(Swift.Error) }
-    let path = /Enum.error
+    let path: AnyCasePath<Enum, Swift.Error> = /Enum.error
     for _ in 1...2 {
       XCTAssertEqual(path.extract(from: .error(Error())) as? Error, Error())
     }
@@ -323,8 +323,8 @@ final class DeprecatedTests: XCTestCase {
     }
     let superclass = Superclass()
     let subclass = Subclass()
-    let superclassPath = /Enum.superclass
-    let subclassPath = /Enum.subclass
+    let superclassPath: AnyCasePath<Enum, Superclass> = /Enum.superclass
+    let subclassPath: AnyCasePath<Enum, Subclass> = /Enum.subclass
     for _ in 1...2 {
       XCTAssert(
         try unwrap(superclassPath.extract(from: .superclass(superclass))) === superclass
@@ -370,11 +370,11 @@ final class DeprecatedTests: XCTestCase {
       case any(Any)
     }
 
-    let boolPath = /Enum.bool
-    let intPath = /Enum.int
-    let voidPath = /Enum.void
-    let structPath = /Enum.structure
-    let anyPath = /Enum.any
+    let boolPath: AnyCasePath<Enum, Bool> = /Enum.bool
+    let intPath: AnyCasePath<Enum, Int> = /Enum.int
+    let voidPath: AnyCasePath<Enum, Void> = /Enum.void
+    let structPath: AnyCasePath<Enum, Struct> = /Enum.structure
+    let anyPath: AnyCasePath<Enum, Any> = /Enum.any
     for _ in 1...2 {
       XCTAssertNil(boolPath.extract(from: .int(42)))
       XCTAssertNil(boolPath.extract(from: .void(())))
@@ -436,8 +436,8 @@ final class DeprecatedTests: XCTestCase {
       case int(Int)
     }
 
-    let protoPath = /Enum.proto
-    let intPath = /Enum.int
+    let protoPath: AnyCasePath<Enum, TestProtocol> = /Enum.proto
+    let intPath: AnyCasePath<Enum, Int> = /Enum.int
 
     for _ in 1...2 {
       XCTAssertNil(protoPath.extract(from: .int(100)))
@@ -459,8 +459,8 @@ final class DeprecatedTests: XCTestCase {
       case proto(TestClassProtocol)
       case int(Int)
     }
-    let protoPath = /Enum.proto
-    let intPath = /Enum.int
+    let protoPath: AnyCasePath<Enum, TestClassProtocol> = /Enum.proto
+    let intPath: AnyCasePath<Enum, Int> = /Enum.int
 
     let object = Class()
 
@@ -639,7 +639,7 @@ final class DeprecatedTests: XCTestCase {
   func testEmbed() {
     enum Foo: Equatable { case bar(Int) }
 
-    let fooBar = /Foo.bar
+    let fooBar: AnyCasePath<Foo, Int> = /Foo.bar
     XCTAssertEqual(.bar(42), fooBar.embed(42))
     XCTAssertEqual(.bar(42), (/Foo.self).embed(Foo.bar(42)))
     XCTAssertEqual(.bar(42), AnyCasePath(Foo.bar).embed(42))
@@ -658,13 +658,13 @@ final class DeprecatedTests: XCTestCase {
   func testVoidAnyCasePath() {
     enum Foo: Equatable { case bar }
 
-    let fooBar = /Foo.bar
+    let fooBar: AnyCasePath<Foo, Void> = /Foo.bar
     XCTAssertEqual(.bar, fooBar.embed(()))
     XCTAssertEqual(.bar, AnyCasePath(Foo.bar).embed(()))
   }
 
   func testCasePaths() {
-    let some = /String?.some
+    let some: AnyCasePath<String?, String> = /String?.some
     XCTAssertEqual(
       .some("Hello"),
       some.extract(from: "Hello")
@@ -681,10 +681,10 @@ final class DeprecatedTests: XCTestCase {
     )
 
     struct MyError: Equatable, Error {}
-    var success = /Result<String, Error>.success
-    var failure = /Result<String, Error>.failure
-    var mySuccess = /Result<String, MyError>.success
-    var myFailure = /Result<String, MyError>.failure
+    var success: AnyCasePath<Result<String, Error>, String> = /Result<String, Error>.success
+    var failure: AnyCasePath<Result<String, Error>, Error> = /Result<String, Error>.failure
+    var mySuccess: AnyCasePath<Result<String, MyError>, String> = /Result<String, MyError>.success
+    var myFailure: AnyCasePath<Result<String, MyError>, MyError> = /Result<String, MyError>.failure
 
     for _ in 1...2 {
       XCTAssertEqual(
@@ -739,7 +739,7 @@ final class DeprecatedTests: XCTestCase {
   }
 
   func testIdentity() {
-    let id = /Int.self
+    let id: AnyCasePath<Int, Int> = /Int.self
     XCTAssertEqual(
       .some(42),
       id.extract(from: 42)
@@ -774,7 +774,7 @@ final class DeprecatedTests: XCTestCase {
       case bar(none: Int)
     }
 
-    let fooBarSome = /Foo.bar(some:)
+    let fooBarSome: AnyCasePath<Foo, Int> = /Foo.bar(some:)
     XCTAssertEqual(
       .some(42),
       fooBarSome.extract(from: .bar(some: 42))
@@ -843,7 +843,7 @@ final class DeprecatedTests: XCTestCase {
       case baz
     }
 
-    let fooBar = /Foo.bar
+    let fooBar: AnyCasePath<Foo, Bar> = /Foo.bar
     XCTAssertEqual(
       .baz,
       fooBar.extract(from: .bar(.baz))
@@ -876,10 +876,10 @@ final class DeprecatedTests: XCTestCase {
       case baz(Never)
     }
 
-    let fooBar = /Foo.bar
+    let fooBar: AnyCasePath<Foo, Uninhabited> = /Foo.bar
     XCTAssertNil(fooBar.extract(from: Foo.foo))
 
-    let fooBaz = /Foo.baz
+    let fooBaz: AnyCasePath<Foo, Never> = /Foo.baz
     XCTAssertNil(fooBaz.extract(from: Foo.foo))
   }
 
@@ -917,7 +917,7 @@ final class DeprecatedTests: XCTestCase {
       }
 
       var didRun = false
-      let fooBar = /Foo.bar
+      let fooBar: AnyCasePath<Foo, () -> Void> = /Foo.bar
       guard let bar = fooBar.extract(from: .bar { didRun = true })
       else {
         XCTFail()
@@ -994,8 +994,8 @@ final class DeprecatedTests: XCTestCase {
   }
 
   func testAppending() {
-    let success = /Result<Int?, Error>.success
-    let int = /Int?.some
+    let success: AnyCasePath<Result<Int?, Error>, Int?> = /Result<Int?, Error>.success
+    let int: AnyCasePath<Int?, Int> = /Int?.some
     let success2int = success .. int
     XCTAssertEqual(
       .some(42),
@@ -1064,7 +1064,7 @@ final class DeprecatedTests: XCTestCase {
 
   func testCustomStringConvertible() {
     XCTAssertEqual(
-      "\(/Result<String, Error>.success)",
+      "\(/Result<String, Error>.success as AnyCasePath<Result<String, Error>, String>)",
       "AnyCasePath<Result<String, Error>, String>"
     )
   }
@@ -1079,9 +1079,9 @@ final class DeprecatedTests: XCTestCase {
 
     XCTAssertNil((/Result.failure).extract(from: result))
 
-    let success: (Result<String?, Error>) -> String? = /Result.success
+    let success: (Result<String?, Error>) -> String? = /Result<String?, Error>.success
     XCTAssertEqual(success(result), "hello, world")
-    let failure: (Result<String?, Error>) -> Error? = /Result.failure
+    let failure: (Result<String?, Error>) -> Error? = /Result<String?, Error>.failure
     XCTAssertNil(failure(result))
   }
 
@@ -1095,22 +1095,22 @@ final class DeprecatedTests: XCTestCase {
     var opt: Foo? = .foo("blob1")
     XCTAssertEqual("blob1", (/Foo.foo).extract(from: opt))
     XCTAssertNil((/Foo.bar).extract(from: opt))
-    XCTAssertNil((/Foo.baz).extract(from: opt))
+    XCTAssertNil((/Foo.baz as (Foo?) -> Void?)(opt))
 
     opt = .bar("blob2")
     XCTAssertNil((/Foo.foo).extract(from: opt))
     XCTAssertEqual("blob2", (/Foo.bar).extract(from: opt))
-    XCTAssertNil((/Foo.baz).extract(from: opt))
+    XCTAssertNil((/Foo.baz as (Foo?) -> Void?)(opt))
 
     opt = .baz
     XCTAssertNil((/Foo.foo).extract(from: opt))
     XCTAssertNil((/Foo.bar).extract(from: opt))
-    XCTAssertNotNil((/Foo.baz).extract(from: opt))
+    XCTAssertNotNil((/Foo.baz as (Foo?) -> Void?)(opt))
 
     opt = nil
     XCTAssertNil((/Foo.foo).extract(from: opt))
     XCTAssertNil((/Foo.bar).extract(from: opt))
-    XCTAssertNil((/Foo.baz).extract(from: opt))
+    XCTAssertNil((/Foo.baz as (Foo?) -> Void?)(opt))
 
     let extractExpression: (Foo?) -> String? = /Foo.foo
     XCTAssertNotNil(extractExpression(.some(.foo("blob1"))))
@@ -1151,7 +1151,7 @@ final class DeprecatedTests: XCTestCase {
   }
 
   func testExtractSuccessFromFailedResultWithErrorProtocolError() {
-    let path = /Result<String, Error>.success
+    let path: AnyCasePath<Result<String, Error>, String> = /Result<String, Error>.success
 
     func check(_ error: Error) {
       let result = Result<String, Error>.failure(error)
@@ -1236,7 +1236,7 @@ final class DeprecatedTests: XCTestCase {
 
   func testConcurrency_SharedCasePath() async throws {
     enum Enum { case payload(Int) }
-    let casePath = /Enum.payload
+    let casePath: AnyCasePath<Enum, Int> = /Enum.payload
 
     await withTaskGroup(of: Void.self) { group in
       for index in 1...maxIterations {
