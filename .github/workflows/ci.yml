@@ -36,7 +36,7 @@ jobs:
     strategy:
       matrix:
         xcode:
-          - '26.6'
+          - '26.5'
     steps:
       - uses: actions/checkout@v5
       - name: Select Xcode ${{ matrix.xcode }}
@@ -50,7 +50,7 @@ jobs:
     strategy:
       matrix:
         swift:
-          - '6.1'
+          - '6.3'
     name: Ubuntu (Swift ${{ matrix.swift }})
     runs-on: ubuntu-latest
     container: swift:${{ matrix.swift }}
