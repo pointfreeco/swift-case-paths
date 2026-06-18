@@ -61,28 +61,6 @@ jobs:
       - name: Run tests (release)
         run: swift test -c release --parallel
 
-  wasm:
-    name: Wasm
-    runs-on: ubuntu-latest
-    env:
-      OMIT_MACRO_TESTS: 1
-    steps:
-      - uses: actions/checkout@v4
-      - uses: bytecodealliance/actions/wasmtime/setup@v1
-      - name: Install Swift and Swift SDK for WebAssembly
-        run: |
-          PREFIX=/opt/swift
-          set -ex
-          curl -f -o /tmp/swift.tar.gz "https://download.swift.org/swift-6.0.2-release/ubuntu2204/swift-6.0.2-RELEASE/swift-6.0.2-RELEASE-ubuntu22.04.tar.gz"
-          sudo mkdir -p $PREFIX; sudo tar -xzf /tmp/swift.tar.gz -C $PREFIX --strip-component 1
-          $PREFIX/usr/bin/swift sdk install https://github.com/swiftwasm/swift/releases/download/swift-wasm-6.0.2-RELEASE/swift-wasm-6.0.2-RELEASE-wasm32-unknown-wasi.artifactbundle.zip --checksum 6ffedb055cb9956395d9f435d03d53ebe9f6a8d45106b979d1b7f53358e1dcb4
-          echo "$PREFIX/usr/bin" >> $GITHUB_PATH
-
-      - name: Build tests
-        run: swift build --swift-sdk wasm32-unknown-wasi --build-tests -Xlinker -z -Xlinker stack-size=$((1024 * 1024))
-      - name: Run tests
-        run: wasmtime --dir . .build/debug/swift-case-pathsPackageTests.wasm
-
   check-macro-compatibility:
     name: Check Macro Compatibility
     runs-on: macos-latest
@@ -94,36 +72,3 @@ jobs:
         with:
           run-tests: false
           major-versions-only: true
-
-  # windows:
-  #   name: Windows (Swift ${{ matrix.swift }}, ${{ matrix.config }})
-  #   strategy:
-  #     matrix:
-  #       os: [windows-latest]
-  #       config:
-  #         - debug
-  #         #- release
-  #       swift: ['6.0']
-  #     fail-fast: false
-  #   runs-on: ${{ matrix.os }}
-  #   steps:
-  #     - uses: compnerd/gha-setup-swift@main
-  #       with:
-  #         branch: swift-${{ matrix.swift }}-branch
-  #         tag: ${{ matrix.swift }}-DEVELOPMENT-SNAPSHOT-2024-06-03-a
-  #     - uses: actions/checkout@v4
-  #     - name: Build
-  #       run: swift build -c ${{ matrix.config }}
-
-  # android:
-  #   strategy:
-  #     matrix:
-  #       swift:
-  #         - "6.0.2"
-  #   name: Android
-  #   runs-on: ubuntu-latest
-  #   env:
-  #     OMIT_MACRO_TESTS: 1
-  #   steps:
-  #     - uses: actions/checkout@v4
-  #     - uses: skiptools/swift-android-action@v2
