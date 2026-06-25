@@ -493,6 +493,13 @@ extension CasePathable {
   }
 }
 
+extension CasePathable where AllCasePaths: CasePathReflectable<Self> {
+  /// A case key path to this enum's case.
+  public var `case`: PartialCaseKeyPath<Self> {
+    Self.allCasePaths[self]
+  }
+}
+
 extension AnyCasePath {
   /// Creates a type-erased case path for given case key path.
   ///
