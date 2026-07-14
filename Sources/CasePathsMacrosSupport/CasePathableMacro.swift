@@ -6,6 +6,11 @@ import SwiftSyntaxMacros
 public struct CasePathableMacro {
   static let moduleName = "CasePaths"
   static let casePathTypeName = "AnyCasePath"
+  static let casePathableExpandingMacroNames = [
+    "CaseBindable",
+    "Table",
+    "Selection"
+  ]
 
   private static func shouldGenerate(
     for node: AttributeSyntax,
@@ -15,11 +20,26 @@ public struct CasePathableMacro {
       type.as(IdentifierTypeSyntax.self)?.name.text == "CasePathable"
         || type.as(MemberTypeSyntax.self)?.name.text == "CasePathable"
     }
-    if isCasePathable(node.attributeName) { return true }
-    return !declaration.attributes.contains { element in
-      guard case let .attribute(attribute) = element else { return false }
-      return isCasePathable(attribute.attributeName)
+    guard !isCasePathable(node.attributeName)
+    else { return true }
+
+    let hasCasePathableApplied = declaration.attributes.contains {
+      $0.as(AttributeSyntax.self)?.attributeName.as(IdentifierTypeSyntax.self)?.name.text == "CasePathable"
     }
+    let firstCasePathableExpandableMacroIndex = casePathableExpandingMacroNames.compactMap { macroName in
+      declaration.attributes.firstIndex {
+        $0.as(AttributeSyntax.self)?.attributeName.as(IdentifierTypeSyntax.self)?.name.text ==
+        macroName
+      }
+    }
+      .sorted()
+      .first
+    let nodeIndex = declaration.attributes.firstIndex {
+      $0.as(AttributeSyntax.self)?.attributeName.as(IdentifierTypeSyntax.self)?.name.text ==
+      node.attributeName.as(IdentifierTypeSyntax.self)?.name.text ?? ""
+    }
+
+    return !hasCasePathableApplied && firstCasePathableExpandableMacroIndex == nodeIndex
   }
 }
 
