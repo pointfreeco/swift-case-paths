@@ -175,8 +175,93 @@
       }
     }
 
+
     @Test
-    func `multiple macros that expand @CasePathable`() {
+    func `multiple macros that expand @CasePathable without @CasePathable`() {
+      assertMacro {
+        """
+        @CaseBindable 
+        @Selection
+        enum Foo {
+          case bar
+          case baz(Int)
+          case fizz(buzz: String)
+        }
+        """
+      } expansion: {
+        #"""
+        enum Foo {
+          case bar
+          case baz(Int)
+          case fizz(buzz: String)
+
+          public struct AllCasePaths: CasePaths.CasePathReflectable, Swift.Sendable, Swift.Sequence {
+            public subscript(root: Foo) -> CasePaths.PartialCaseKeyPath<Foo> {
+              if root.is(\.bar) {
+                return \.bar
+              }
+              if root.is(\.baz) {
+                return \.baz
+              }
+              if root.is(\.fizz) {
+                return \.fizz
+              }
+              return \.never
+            }
+            public var bar: CasePaths.AnyCasePath<Foo, Void> {
+              ._$embed({
+                  Foo.bar
+                }) {
+                guard case .bar = $0 else {
+                  return nil
+                }
+                return ()
+              }
+            }
+            public var baz: CasePaths.AnyCasePath<Foo, Int> {
+              ._$embed(Foo.baz) {
+                guard case let .baz(v0) = $0 else {
+                  return nil
+                }
+                return v0
+              }
+            }
+            public var fizz: CasePaths.AnyCasePath<Foo, String> {
+              ._$embed(Foo.fizz) {
+                guard case let .fizz(v0) = $0 else {
+                  return nil
+                }
+                return v0
+              }
+            }
+            public func makeIterator() -> Swift.IndexingIterator<[CasePaths.PartialCaseKeyPath<Foo>]> {
+              var allCasePaths: [CasePaths.PartialCaseKeyPath<Foo>] = []
+              allCasePaths.append(\.bar)
+              allCasePaths.append(\.baz)
+              allCasePaths.append(\.fizz)
+              return allCasePaths.makeIterator()
+            }
+          }
+
+          public static var allCasePaths: AllCasePaths {
+            AllCasePaths()
+          }
+
+          public enum BindingEnumeration {
+            case bar
+            case baz(SwiftUI.Binding<Int>)
+            case fizz(SwiftUI.Binding<String>)
+          }
+        }
+
+        extension Foo: CasePaths.CasePathable, CasePaths.CasePathIterable {
+        }
+        """#
+      }
+    }
+
+    @Test
+    func `multiple macros that expand @CasePathable with @CasePathable`() {
       assertMacro {
         """
         @CasePathable
