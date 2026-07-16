@@ -27,8 +27,8 @@ let package = Package(
     ),
   ],
   dependencies: [
+    .package(url: "https://github.com/pointfreeco/swift-issue-reporting", from: "2.0.0"),
     .package(url: "https://github.com/swiftlang/swift-syntax", "509.0.0"..<"605.0.0"),
-    .package(url: "https://github.com/pointfreeco/xctest-dynamic-overlay", from: "1.2.2"),
   ],
   targets: [
     .target(
@@ -41,8 +41,7 @@ let package = Package(
     .target(
       name: "CasePathsCore",
       dependencies: [
-        .product(name: "IssueReporting", package: "xctest-dynamic-overlay"),
-        .product(name: "XCTestDynamicOverlay", package: "xctest-dynamic-overlay"),
+        .product(name: "IssueReporting", package: "swift-issue-reporting")
       ]
     ),
     .target(
