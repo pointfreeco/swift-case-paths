@@ -9,7 +9,7 @@ public struct CasePathableMacro {
   static let casePathableExpandingMacroNames = [
     "CaseBindable",
     "Table",
-    "Selection"
+    "Selection",
   ]
 
   private static func shouldGenerate(
@@ -24,22 +24,25 @@ public struct CasePathableMacro {
     else { return true }
 
     let hasCasePathableApplied = declaration.attributes.contains {
-      $0.as(AttributeSyntax.self)?.attributeName.as(IdentifierTypeSyntax.self)?.name.text == "CasePathable"
+      $0.as(AttributeSyntax.self)?.attributeName.as(IdentifierTypeSyntax.self)?.name.text
+        == "CasePathable"
     }
-    let firstCasePathableExpandableMacroIndex = casePathableExpandingMacroNames.compactMap { macroName in
+    let firstCasePathableExpandableMacroIndex = casePathableExpandingMacroNames.compactMap {
+      macroName in
       declaration.attributes.firstIndex {
-        $0.as(AttributeSyntax.self)?.attributeName.as(IdentifierTypeSyntax.self)?.name.text ==
-        macroName
+        $0.as(AttributeSyntax.self)?.attributeName.as(IdentifierTypeSyntax.self)?.name.text
+          == macroName
       }
     }
-      .sorted()
-      .first
+    .sorted()
+    .first
     let nodeIndex = declaration.attributes.firstIndex {
-      $0.as(AttributeSyntax.self)?.attributeName.as(IdentifierTypeSyntax.self)?.name.text ==
-      node.attributeName.as(IdentifierTypeSyntax.self)?.name.text ?? ""
+      $0.as(AttributeSyntax.self)?.attributeName.as(IdentifierTypeSyntax.self)?.name.text == node
+        .attributeName.as(IdentifierTypeSyntax.self)?.name.text ?? ""
     }
 
-    return !hasCasePathableApplied && firstCasePathableExpandableMacroIndex == nodeIndex
+    return !hasCasePathableApplied
+      && firstCasePathableExpandableMacroIndex.map { $0 == nodeIndex } ?? true
   }
 }
 
@@ -96,7 +99,8 @@ extension CasePathableMacro: MemberMacro {
   }
 
   public static func expansion<
-    Declaration: DeclGroupSyntax, Context: MacroExpansionContext
+    Declaration: DeclGroupSyntax,
+    Context: MacroExpansionContext
   >(
     of node: AttributeSyntax,
     providingMembersOf declaration: Declaration,
@@ -125,7 +129,8 @@ extension CasePathableMacro: MemberMacro {
         throw DiagnosticsError(
           diagnostics: [
             CasePathableMacroDiagnostic.overloadedCaseName(name).diagnose(
-              at: Syntax(enumCaseDecl.name))
+              at: Syntax(enumCaseDecl.name)
+            )
           ]
         )
       }
@@ -219,7 +224,9 @@ extension CasePathableMacro: MemberMacro {
           let title = "\(decl.poundKeyword.text) \(decl.condition?.description ?? "")"
           return [title]
             + generateDeclSyntax(
-              from: elements, enumName: enumName, elementRewriter: elementRewriter
+              from: elements,
+              enumName: enumName,
+              elementRewriter: elementRewriter
             )
         }
         return ifClauses + ["#endif"]
@@ -311,13 +318,13 @@ enum CasePathableMacroDiagnostic {
 extension CasePathableMacroDiagnostic: DiagnosticMessage {
   var message: String {
     switch self {
-    case let .notAnEnum(decl):
+    case .notAnEnum(let decl):
       return """
         '@CasePathable' cannot be applied to\
         \(decl.keywordDescription.map { " \($0)" } ?? "") type\
         \(decl.nameDescription.map { " '\($0)'" } ?? "")
         """
-    case let .overloadedCaseName(name):
+    case .overloadedCaseName(let name):
       return """
         '@CasePathable' cannot be applied to overloaded case name '\(name)'
         """
