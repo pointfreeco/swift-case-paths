@@ -10,6 +10,7 @@
       CaseBindableMacro.self,
       CasePathableMacro.self,
       SelectionMacro.self,
+      ThirdPartyMacro.self,
     ])
   )
   struct CasePathsMacrosSupportTests {
@@ -174,7 +175,6 @@
         """#
       }
     }
-
 
     @Test
     func `multiple macros that expand @CasePathable without @CasePathable`() {
@@ -344,6 +344,52 @@
         """#
       }
     }
+
+    @Test func `3rd party macros are allowed to expand case paths`() {
+      assertMacro {
+        """
+        @ThirdParty
+        enum Foo {
+          case baz(Int)
+        }
+        """
+      } expansion: {
+        #"""
+        enum Foo {
+          case baz(Int)
+
+          public struct AllCasePaths: CasePaths.CasePathReflectable, Swift.Sendable, Swift.Sequence {
+            public subscript(root: Foo) -> CasePaths.PartialCaseKeyPath<Foo> {
+              if root.is(\.baz) {
+                return \.baz
+              }
+              return \.never
+            }
+            public var baz: CasePaths.AnyCasePath<Foo, Int> {
+              ._$embed(Foo.baz) {
+                guard case let .baz(v0) = $0 else {
+                  return nil
+                }
+                return v0
+              }
+            }
+            public func makeIterator() -> Swift.IndexingIterator<[CasePaths.PartialCaseKeyPath<Foo>]> {
+              var allCasePaths: [CasePaths.PartialCaseKeyPath<Foo>] = []
+              allCasePaths.append(\.baz)
+              return allCasePaths.makeIterator()
+            }
+          }
+
+          public static var allCasePaths: AllCasePaths {
+            AllCasePaths()
+          }
+        }
+
+        extension Foo: CasePaths.CasePathable, CasePaths.CasePathIterable {
+        }
+        """#
+      }
+    }
   }
 
   private enum SelectionMacro: ExtensionMacro, MemberMacro {
@@ -421,6 +467,36 @@
         """
       )
       return decls
+    }
+  }
+
+  private enum ThirdPartyMacro: ExtensionMacro, MemberMacro {
+    static func expansion(
+      of node: AttributeSyntax,
+      attachedTo declaration: some DeclGroupSyntax,
+      providingExtensionsOf type: some TypeSyntaxProtocol,
+      conformingTo protocols: [TypeSyntax],
+      in context: some MacroExpansionContext
+    ) throws -> [ExtensionDeclSyntax] {
+      try CasePathableMacro.expansion(
+        of: node,
+        attachedTo: declaration,
+        providingExtensionsOf: type,
+        conformingTo: protocols,
+        in: context
+      )
+    }
+    static func expansion(
+      of node: AttributeSyntax,
+      providingMembersOf declaration: some DeclGroupSyntax,
+      conformingTo protocols: [TypeSyntax],
+      in context: some MacroExpansionContext
+    ) throws -> [DeclSyntax] {
+      try CasePathableMacro.expansion(
+        of: node,
+        providingMembersOf: declaration,
+        in: context
+      )
     }
   }
 #endif
