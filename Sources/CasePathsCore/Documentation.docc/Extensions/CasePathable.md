@@ -14,6 +14,7 @@
 
 ### Case properties
 
+- ``case``
 - ``is(_:)``
 - ``subscript(dynamicMember:)-emck``
 - ``subscript(dynamicMember:)-dm5y``

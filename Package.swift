@@ -21,9 +21,13 @@ let package = Package(
       name: "CasePathsCore",
       targets: ["CasePathsCore"]
     ),
+    .library(
+      name: "CasePathsMacrosSupport",
+      targets: ["CasePathsMacrosSupport"]
+    ),
   ],
   dependencies: [
-    .package(url: "https://github.com/swiftlang/swift-syntax", "509.0.0"..<"603.0.0"),
+    .package(url: "https://github.com/swiftlang/swift-syntax", "509.0.0"..<"605.0.0"),
     .package(url: "https://github.com/pointfreeco/xctest-dynamic-overlay", from: "1.2.2"),
   ],
   targets: [
@@ -40,8 +44,8 @@ let package = Package(
         .product(name: "IssueReporting", package: "xctest-dynamic-overlay"),
       ]
     ),
-    .macro(
-      name: "CasePathsMacros",
+    .target(
+      name: "CasePathsMacrosSupport",
       dependencies: [
         .product(name: "SwiftSyntaxMacros", package: "swift-syntax"),
         .product(name: "SwiftCompilerPlugin", package: "swift-syntax"),
@@ -50,9 +54,21 @@ let package = Package(
         .product(name: "SwiftSyntaxBuilder", package: "swift-syntax"),
       ]
     ),
+    .macro(
+      name: "CasePathsMacros",
+      dependencies: [
+        "CasePathsMacrosSupport",
+        .product(name: "SwiftSyntaxMacros", package: "swift-syntax"),
+        .product(name: "SwiftCompilerPlugin", package: "swift-syntax"),
+        .product(name: "SwiftSyntax", package: "swift-syntax"),
+      ]
+    ),
     .testTarget(
       name: "CasePathsTests",
-      dependencies: ["CasePaths"]
+      dependencies: [
+        "CasePaths",
+        "CasePathsMacrosSupport",
+      ]
     ),
   ],
   swiftLanguageModes: [.v6]
@@ -74,6 +90,7 @@ if ProcessInfo.processInfo.environment["OMIT_MACRO_TESTS"] == nil {
       name: "CasePathsMacrosTests",
       dependencies: [
         "CasePathsMacros",
+        "CasePathsMacrosSupport",
         .product(
           name: "MacroTesting",
           package: "swift-macro-testing"
