@@ -14,6 +14,7 @@
 
 ### Case properties
 
+- ``case``
 - ``is(_:)``
 - ``subscript(dynamicMember:)->Value?``
 - ``subscript(dynamicMember:)->Value``

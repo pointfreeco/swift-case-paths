@@ -32,6 +32,7 @@ extension Optional: CasePathable, CasePathIterable {
 
     /// A case path to an optional-chained value.
     @_disfavoredOverload
+    @available(*, deprecated, message: "This subscript will be removed in CasePaths 2.0")
     public subscript<Member>(
       dynamicMember keyPath: KeyPath<Wrapped.AllCasePaths, AnyCasePath<Wrapped, Member>>
     ) -> AnyCasePath<Optional, Member?>
