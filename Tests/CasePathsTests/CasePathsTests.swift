@@ -60,6 +60,8 @@ final class CasePathsTests: XCTestCase {
   func testCaseKeyPaths() {
     var foo: Foo = .bar(.int(1))
 
+    XCTAssertEqual(foo.case, \.bar)
+
     XCTAssertEqual(foo.bar, .int(1))
     // NB: Due to a Swift bug, this is only possible to do outside the library:
     // XCTAssertEqual(foo.bar?.int, 1)
