@@ -58,11 +58,11 @@ case in the enum.
 ## Using case paths in libraries
 
 By far the most common use of case paths is as a tool inside a library that is distributed to other
-developers. Case paths are used in the [Composable Architecture][tca-gh],
-[SwiftUI Navigation][sui-nav-gh], [Parsing][parsers-gh], and many other libraries.
+developers. Case paths are used in the [ComposableArchitecture][tca-gh],
+[SwiftNavigation][swift-nav-gh], [Parsing][parsers-gh], and many other libraries.
 
 [tca-gh]: http://github.com/pointfreeco/swift-composable-architecture
-[sui-nav-gh]: http://github.com/pointfreeco/swiftui-navigation
+[swift-nav-gh]: http://github.com/pointfreeco/swift-navigation
 [parsers-gh]: http://github.com/pointfreeco/swift-parsing
 
 If you maintain a library where you expect your users to model their domains with enums, then
@@ -359,7 +359,7 @@ struct ItemStatusView: View {
 
 > **Note**
 > The above is a simplified version of the subscript that ships in our
-> [SwiftUINavigation](https://github.com/pointfreeco/swiftui-navigation) library.
+> [SwiftNavigation](https://github.com/pointfreeco/swift-navigation) library.
 
 #### Computed paths
 
@@ -398,10 +398,10 @@ extension Authentication.AllCasePaths {
 
 ## Case studies
 
-  * [**SwiftUINavigation**](https://github.com/pointfreeco/swiftui-navigation) uses case paths to
+  * [**SwiftNavigation**](https://github.com/pointfreeco/swift-navigation) uses case paths to
     power SwiftUI bindings, including navigation, with enums.
 
-  * [**The Composable Architecture**](https://github.com/pointfreeco/swift-composable-architecture)
+  * [**ComposableArchitecture**](https://github.com/pointfreeco/swift-composable-architecture)
     allows you to break large features down into smaller ones that can be glued together user key
     paths and case paths.
 
