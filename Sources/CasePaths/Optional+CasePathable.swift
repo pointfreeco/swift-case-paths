@@ -52,6 +52,14 @@ extension Optional: CasePathable, CasePathIterable {
   public static var allCasePaths: AllCasePaths {
     AllCasePaths()
   }
+
+  public static func caseName(for keyPath: PartialCaseKeyPath<Self>) -> String? {
+    switch keyPath {
+    case \.none: return "none"
+    case \.some: return "some"
+    default: return nil
+    }
+  }
 }
 
 extension Case {
@@ -64,7 +72,10 @@ extension Case {
     dynamicMember keyPath: KeyPath<Value.AllCasePaths, AnyCasePath<Value, Member?>>
   ) -> Case<Member>
   where Value: CasePathable {
-    self[dynamicMember: keyPath].some
+    get {
+      self[dynamicMember: keyPath].some
+    }
+    set {}
   }
 }
 
@@ -92,7 +103,7 @@ extension Optional where Wrapped: CasePathable {
     column: UInt = #column
   ) {
     modify(
-      (\Cases.some).appending(path: keyPath),
+      (\Cases.some as WritableKeyPath).appending(path: keyPath),
       yield: yield,
       fileID: fileID,
       filePath: filePath,
