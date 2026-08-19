@@ -1,10 +1,6 @@
 // NB: This is adapted from Custom Dump and should ideally be kept in sync.
-package func typeName(
-  _ type: Any.Type,
-  qualified: Bool = true,
-  genericsAbbreviated: Bool = false  // NB: This defaults to `true` in Custom Dump
-) -> String {
-  var name = _typeName(type, qualified: qualified)
+package func typeName(_ type: Any.Type) -> String {
+  var name = _typeName(type, qualified: true)
     .replacingOccurrences(
       of: #"\(unknown context at \$[[:xdigit:]]+\)\."#,
       with: "",
@@ -36,12 +32,5 @@ package func typeName(
     with: "$1",
     options: .regularExpression
   )
-  if genericsAbbreviated {
-    name = name.replacingOccurrences(
-      of: #"<.+>"#,
-      with: "",
-      options: .regularExpression
-    )
-  }
   return name
 }

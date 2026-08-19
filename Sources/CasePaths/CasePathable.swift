@@ -496,7 +496,7 @@ extension CasePathable where AllCasePaths: CasePathReflectable<Self> {
 }
 
 extension AnyCasePath {
-  /// Creates a type-erased case path for given case key path.
+  /// Creates a type-erased case path for a given case key path.
   ///
   /// - Parameter keyPath: A case key path.
   public init(_ keyPath: CaseKeyPath<Root, Value>) {

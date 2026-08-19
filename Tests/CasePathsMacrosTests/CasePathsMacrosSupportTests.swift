@@ -2,15 +2,28 @@
   import CasePathsMacrosSupport
   import MacroTesting
   import SwiftSyntax
+  import SwiftSyntaxMacroExpansion
   import SwiftSyntaxMacros
   import Testing
 
   @Suite(
     .macros([
-      CaseBindableMacro.self,
-      CasePathableMacro.self,
-      SelectionMacro.self,
-      ThirdPartyMacro.self,
+      "CaseBindable": MacroSpec(
+        type: CaseBindableMacro.self,
+        conformances: ["CasePathable", "CasePathIterable"]
+      ),
+      "CasePathable": MacroSpec(
+        type: CasePathableMacro.self,
+        conformances: ["CasePathable", "CasePathIterable"]
+      ),
+      "Selection": MacroSpec(
+        type: SelectionMacro.self,
+        conformances: ["CasePathable", "CasePathIterable"]
+      ),
+      "ThirdParty": MacroSpec(
+        type: ThirdPartyMacro.self,
+        conformances: ["CasePathable", "CasePathIterable"]
+      ),
     ])
   )
   struct CasePathsMacrosSupportTests {
@@ -89,7 +102,7 @@
           }
         }
 
-        extension Foo: nonisolated CasePaths.CasePathable, nonisolated CasePaths.CasePathIterable {
+        extension Foo: nonisolated CasePathable, nonisolated CasePathIterable {
         }
         """#
       }
@@ -170,7 +183,7 @@
           }
         }
 
-        extension Foo: nonisolated CasePaths.CasePathable, nonisolated CasePaths.CasePathIterable {
+        extension Foo: nonisolated CasePathable, nonisolated CasePathIterable {
         }
         """#
       }
@@ -254,7 +267,7 @@
           }
         }
 
-        extension Foo: nonisolated CasePaths.CasePathable, nonisolated CasePaths.CasePathIterable {
+        extension Foo: nonisolated CasePathable, nonisolated CasePathIterable {
         }
         """#
       }
@@ -339,7 +352,7 @@
           }
         }
 
-        extension Foo: nonisolated CasePaths.CasePathable, nonisolated CasePaths.CasePathIterable {
+        extension Foo: nonisolated CasePathable, nonisolated CasePathIterable {
         }
         """#
       }
@@ -385,7 +398,7 @@
           }
         }
 
-        extension Foo: nonisolated CasePaths.CasePathable, nonisolated CasePaths.CasePathIterable {
+        extension Foo: nonisolated CasePathable, nonisolated CasePathIterable {
         }
         """#
       }

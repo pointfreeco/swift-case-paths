@@ -1,6 +1,7 @@
-#if canImport(MacroTesting) && swift(>=6.2)
+#if os(macOS) && canImport(MacroTesting) && swift(>=6.2)
   import CasePathsMacros
   import MacroTesting
+  import SwiftSyntaxMacroExpansion
   import SwiftSyntaxMacros
   import XCTest
 
@@ -8,7 +9,12 @@
     override func invokeTest() {
       withMacroTesting(
         // record: .failed,
-        macros: [CasePathableMacro.self]
+        macros: [
+          "CasePathable": MacroSpec(
+            type: CasePathableMacro.self,
+            conformances: ["CasePathable", "CasePathIterable"]
+          )
+        ]
       ) {
         super.invokeTest()
       }
@@ -97,7 +103,7 @@
           }
         }
 
-        extension Foo: nonisolated CasePaths.CasePathable, nonisolated CasePaths.CasePathIterable {
+        extension Foo: nonisolated CasePathable, nonisolated CasePathIterable {
         }
         """#
       }
@@ -128,7 +134,7 @@
             }
         }
 
-        extension EnumWithNoCases: nonisolated CasePaths.CasePathable, nonisolated CasePaths.CasePathIterable {
+        extension EnumWithNoCases: nonisolated CasePathable, nonisolated CasePathIterable {
         }
         """#
       }
@@ -173,7 +179,7 @@
           }
         }
 
-        extension Foo: nonisolated CasePaths.CasePathable, nonisolated CasePaths.CasePathIterable {
+        extension Foo: nonisolated CasePathable, nonisolated CasePathIterable {
         }
         """#
       }
@@ -230,7 +236,7 @@
           }
         }
 
-        extension Foo: nonisolated CasePaths.CasePathable, nonisolated CasePaths.CasePathIterable {
+        extension Foo: nonisolated CasePathable, nonisolated CasePathIterable {
         }
         """#
       }
@@ -275,7 +281,7 @@
           }
         }
 
-        extension Foo: nonisolated CasePaths.CasePathable, nonisolated CasePaths.CasePathIterable {
+        extension Foo: nonisolated CasePathable, nonisolated CasePathIterable {
         }
         """#
       }
@@ -317,7 +323,7 @@
           }
         }
 
-        extension Foo: nonisolated CasePaths.CasePathable, nonisolated CasePaths.CasePathIterable {
+        extension Foo: nonisolated CasePathable, nonisolated CasePathIterable {
         }
         """#
       }
@@ -359,7 +365,7 @@
           }
         }
 
-        extension Foo: nonisolated CasePaths.CasePathable, nonisolated CasePaths.CasePathIterable {
+        extension Foo: nonisolated CasePathable, nonisolated CasePathIterable {
         }
         """#
       }
@@ -402,6 +408,75 @@
     }
 
     func testRedundantConformances() {
+      let macros = [
+        "CasePathable": MacroSpec(
+          type: CasePathableMacro.self,
+          conformances: ["CasePathIterable"]
+        )
+      ]
+      assertMacro([
+        "CasePathable": MacroSpec(
+          type: CasePathableMacro.self,
+          conformances: ["CasePathIterable"]
+        )
+      ]) {
+        """
+        @CasePathable enum Foo: CasePathable {
+        }
+        """
+      } expansion: {
+        #"""
+        enum Foo: CasePathable {
+
+            public nonisolated struct AllCasePaths: CasePaths.CasePathReflectable, Swift.Sendable, Swift.Sequence {
+                public subscript(root: Foo) -> CasePaths.PartialCaseKeyPath<Foo> {
+                    \.never
+                }
+
+                public func makeIterator() -> Swift.IndexingIterator<[CasePaths.PartialCaseKeyPath<Foo>]> {
+                    let allCasePaths: [CasePaths.PartialCaseKeyPath<Foo>] = []
+                    return allCasePaths.makeIterator()
+                }
+            }
+
+            public nonisolated static var allCasePaths: AllCasePaths {
+                AllCasePaths()
+            }
+        }
+
+        extension Foo: nonisolated CasePathIterable {
+        }
+        """#
+      }
+      assertMacro(macros) {
+        """
+        @CasePathable enum Foo: CasePaths.CasePathable {
+        }
+        """
+      } expansion: {
+        #"""
+        enum Foo: CasePaths.CasePathable {
+
+            public nonisolated struct AllCasePaths: CasePaths.CasePathReflectable, Swift.Sendable, Swift.Sequence {
+                public subscript(root: Foo) -> CasePaths.PartialCaseKeyPath<Foo> {
+                    \.never
+                }
+
+                public func makeIterator() -> Swift.IndexingIterator<[CasePaths.PartialCaseKeyPath<Foo>]> {
+                    let allCasePaths: [CasePaths.PartialCaseKeyPath<Foo>] = []
+                    return allCasePaths.makeIterator()
+                }
+            }
+
+            public nonisolated static var allCasePaths: AllCasePaths {
+                AllCasePaths()
+            }
+        }
+
+        extension Foo: nonisolated CasePathIterable {
+        }
+        """#
+      }
       assertMacro {
         """
         @CasePathable enum Foo: CasePathable {
@@ -427,36 +502,7 @@
             }
         }
 
-        extension Foo: nonisolated CasePaths.CasePathIterable {
-        }
-        """#
-      }
-      assertMacro {
-        """
-        @CasePathable enum Foo: CasePaths.CasePathable {
-        }
-        """
-      } expansion: {
-        #"""
-        enum Foo: CasePaths.CasePathable {
-
-            public nonisolated struct AllCasePaths: CasePaths.CasePathReflectable, Swift.Sendable, Swift.Sequence {
-                public subscript(root: Foo) -> CasePaths.PartialCaseKeyPath<Foo> {
-                    \.never
-                }
-
-                public func makeIterator() -> Swift.IndexingIterator<[CasePaths.PartialCaseKeyPath<Foo>]> {
-                    let allCasePaths: [CasePaths.PartialCaseKeyPath<Foo>] = []
-                    return allCasePaths.makeIterator()
-                }
-            }
-
-            public nonisolated static var allCasePaths: AllCasePaths {
-                AllCasePaths()
-            }
-        }
-
-        extension Foo: nonisolated CasePaths.CasePathIterable {
+        extension Foo: nonisolated CasePathable, nonisolated CasePathIterable {
         }
         """#
       }
@@ -501,7 +547,7 @@
           }
         }
 
-        extension Foo: nonisolated CasePaths.CasePathable, nonisolated CasePaths.CasePathIterable {
+        extension Foo: nonisolated CasePathable, nonisolated CasePathIterable {
         }
         """#
       }
@@ -546,7 +592,7 @@
           }
         }
 
-        extension Foo: nonisolated CasePaths.CasePathable, nonisolated CasePaths.CasePathIterable {
+        extension Foo: nonisolated CasePathable, nonisolated CasePathIterable {
         }
         """#
       }
@@ -591,7 +637,7 @@
           }
         }
 
-        extension Foo: nonisolated CasePaths.CasePathable, nonisolated CasePaths.CasePathIterable {
+        extension Foo: nonisolated CasePathable, nonisolated CasePathIterable {
         }
         """#
       }
@@ -788,7 +834,7 @@
           }
         }
 
-        extension Foo: nonisolated CasePaths.CasePathable, nonisolated CasePaths.CasePathIterable {
+        extension Foo: nonisolated CasePathable, nonisolated CasePathIterable {
         }
         """#
       }
@@ -838,7 +884,7 @@
           }
         }
 
-        @available(iOS, unavailable) extension Foo: nonisolated CasePaths.CasePathable, nonisolated CasePaths.CasePathIterable {
+        @available(iOS, unavailable) extension Foo: nonisolated CasePathable, nonisolated CasePathIterable {
         }
         """#
       }
@@ -970,7 +1016,7 @@
           }
         }
 
-        extension Foo: nonisolated CasePaths.CasePathable, nonisolated CasePaths.CasePathIterable {
+        extension Foo: nonisolated CasePathable, nonisolated CasePathIterable {
         }
         """#
       }
@@ -1024,7 +1070,7 @@
           }
         }
 
-        extension Foo: nonisolated CasePaths.CasePathable, nonisolated CasePaths.CasePathIterable {
+        extension Foo: nonisolated CasePathable, nonisolated CasePathIterable {
         }
         """#
       }
@@ -1132,7 +1178,7 @@
           }
         }
 
-        extension Foo: nonisolated CasePaths.CasePathable, nonisolated CasePaths.CasePathIterable {
+        extension Foo: nonisolated CasePathable, nonisolated CasePathIterable {
         }
         """#
       }
@@ -1179,7 +1225,7 @@
           public typealias _$Element = Element
         }
 
-        extension Action: nonisolated CasePaths.CasePathable, nonisolated CasePaths.CasePathIterable {
+        extension Action: nonisolated CasePathable, nonisolated CasePathIterable {
         }
         """#
       }
@@ -1230,7 +1276,7 @@
           }
         }
 
-        extension Reducer.Action: nonisolated CasePaths.CasePathable, nonisolated CasePaths.CasePathIterable {
+        extension Reducer.Action: nonisolated CasePathable, nonisolated CasePathIterable {
         }
         """#
       }
@@ -1277,7 +1323,7 @@
           public typealias _$Element = Element
         }
 
-        extension Action: nonisolated CasePaths.CasePathable, nonisolated CasePaths.CasePathIterable {
+        extension Action: nonisolated CasePathable, nonisolated CasePathIterable {
         }
         """#
       }
@@ -1352,7 +1398,7 @@
           public typealias _$Element = Element
         }
 
-        extension Action: nonisolated CasePaths.CasePathable, nonisolated CasePaths.CasePathIterable {
+        extension Action: nonisolated CasePathable, nonisolated CasePathIterable {
         }
         """#
       }
@@ -1449,7 +1495,7 @@
           }
         }
 
-        extension Action: nonisolated CasePaths.CasePathable, nonisolated CasePaths.CasePathIterable {
+        extension Action: nonisolated CasePathable, nonisolated CasePathIterable {
         }
         """#
       }
