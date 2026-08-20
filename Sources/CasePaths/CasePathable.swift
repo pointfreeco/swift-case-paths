@@ -78,7 +78,7 @@ extension CasePathable {
 /// ```
 ///
 /// To extract an associated value from an enum using a case key path, pass the key path to the
-/// ``CasePathable/subscript(case:)->Path.Value?``. For example:
+/// ``CasePathable/subscript(case:)``. For example:
 ///
 /// ```swift
 /// @CasePathable
@@ -97,7 +97,7 @@ extension CasePathable {
 /// // anotherValue is nil
 /// ```
 ///
-/// To replace an associated value, assign it through ``CasePathable/subscript(case:)->Path.Value``. If
+/// To replace an associated value, assign it through ``CasePathable/subscript(case:)``. If
 /// the given path does not match the given enum case, the replacement will fail. For
 /// example:
 ///
@@ -302,9 +302,8 @@ extension CasePathable {
   /// e[case: \.anotherCase]  // nil
   /// ```
   ///
-  /// See ``CasePathable/subscript(case:)->Path.Value`` for replacing an associated value in a root
-  /// enum, and see ``Swift/KeyPath/callAsFunction(_:)`` for embedding an associated value in a
-  /// brand new root enum.
+  /// See ``Swift/KeyPath/callAsFunction(_:)`` for embedding an associated value in a brand new
+  /// root enum.
   @inlinable
   public subscript<Path>(case keyPath: CaseKeyPath<Self, Path>) -> Path.Value? {
     Self.allCasePaths[keyPath: keyPath].extract(from: self)
@@ -343,9 +342,8 @@ extension CasePathable {
   /// // e is still SomeEnum.someCase(24)
   /// ```
   ///
-  /// See ``CasePathable/subscript(case:)->Path.Value?`` for extracting an associated value from a root
-  /// enum, and see ``Swift/KeyPath/callAsFunction(_:)`` for embedding an associated value in a
-  /// brand new root enum.
+  /// See ``Swift/KeyPath/callAsFunction(_:)`` for embedding an associated value in a brand new
+  /// root enum.
   @_disfavoredOverload
   public subscript<Path>(case keyPath: CaseKeyPath<Self, Path>) -> Path.Value {
     @available(*, unavailable)

@@ -15,4 +15,4 @@
 
 - ``PartialCaseKeyPath``
 - ``Swift/PartialKeyPath/callAsFunction(_:)``
-- ``CasePathable/subscript(case:)->Any?``
+- ``CasePathable/subscript(case:)``
