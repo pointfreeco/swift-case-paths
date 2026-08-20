@@ -55,8 +55,7 @@ public protocol CasePathable {
   ///
   /// Array(Field.allCasePaths)  // [\.title, \.body, \.isLive]
   /// ```
-  associatedtype AllCasePaths: CasePathReflectable<Self> & Sequence
-  where AllCasePaths.Element == PartialKeyPath<AllCasePaths>
+  associatedtype AllCasePaths: CasePathReflectable<Self>
 
   /// A collection of all case paths of this type.
   static var allCasePaths: AllCasePaths { get }

@@ -15,7 +15,8 @@
 ///
 /// Field.allCasePaths[.title("Hello, Blob!")]  // \.title
 /// ```
-public protocol CasePathReflectable<Root>: CasePath where Root == Value {
+public protocol CasePathReflectable<Root>: CasePath, Sequence
+where Root == Value, Element == PartialKeyPath<Self> {
   /// Returns the case key path for a given root value.
   ///
   /// - Parameter root: A root value.

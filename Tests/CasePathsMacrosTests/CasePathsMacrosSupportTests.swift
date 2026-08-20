@@ -44,7 +44,7 @@
           case baz(Int)
           case fizz(buzz: String)
 
-          public nonisolated struct AllCasePaths: CasePaths.CasePathReflectable, Swift.Hashable, Swift.Sendable, Swift.Sequence {
+          public nonisolated struct AllCasePaths: CasePaths.CasePathReflectable, Swift.Hashable, Swift.Sendable {
             public func embed(_ value: Foo) -> Foo {
               value
             }
@@ -168,7 +168,7 @@
             case fizz(SwiftUI.Binding<String>)
           }
 
-          public nonisolated struct AllCasePaths: CasePaths.CasePathReflectable, Swift.Hashable, Swift.Sendable, Swift.Sequence {
+          public nonisolated struct AllCasePaths: CasePaths.CasePathReflectable, Swift.Hashable, Swift.Sendable {
             public func embed(_ value: Foo) -> Foo {
               value
             }
@@ -283,7 +283,7 @@
           case baz(Int)
           case fizz(buzz: String)
 
-          public nonisolated struct AllCasePaths: CasePaths.CasePathReflectable, Swift.Hashable, Swift.Sendable, Swift.Sequence {
+          public nonisolated struct AllCasePaths: CasePaths.CasePathReflectable, Swift.Hashable, Swift.Sendable {
             public func embed(_ value: Foo) -> Foo {
               value
             }
@@ -405,7 +405,7 @@
           case baz(Int)
           case fizz(buzz: String)
 
-          public nonisolated struct AllCasePaths: CasePaths.CasePathReflectable, Swift.Hashable, Swift.Sendable, Swift.Sequence {
+          public nonisolated struct AllCasePaths: CasePaths.CasePathReflectable, Swift.Hashable, Swift.Sendable {
             public func embed(_ value: Foo) -> Foo {
               value
             }
@@ -520,7 +520,7 @@
         enum Foo {
           case baz(Int)
 
-          public nonisolated struct AllCasePaths: CasePaths.CasePathReflectable, Swift.Hashable, Swift.Sendable, Swift.Sequence {
+          public nonisolated struct AllCasePaths: CasePaths.CasePathReflectable, Swift.Hashable, Swift.Sendable {
             public func embed(_ value: Foo) -> Foo {
               value
             }

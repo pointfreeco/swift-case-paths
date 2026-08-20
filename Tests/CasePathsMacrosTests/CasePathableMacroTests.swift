@@ -39,7 +39,7 @@
           case fizz(buzz: String)
           case fizzier(Int, buzzier: String)
 
-          public nonisolated struct AllCasePaths: CasePaths.CasePathReflectable, Swift.Hashable, Swift.Sendable, Swift.Sequence {
+          public nonisolated struct AllCasePaths: CasePaths.CasePathReflectable, Swift.Hashable, Swift.Sendable {
             public func embed(_ value: Foo) -> Foo {
               value
             }
@@ -165,7 +165,7 @@
         #"""
         enum EnumWithNoCases {
 
-            public nonisolated struct AllCasePaths: CasePaths.CasePathReflectable, Swift.Hashable, Swift.Sendable, Swift.Sequence {
+            public nonisolated struct AllCasePaths: CasePaths.CasePathReflectable, Swift.Hashable, Swift.Sendable {
                 public func embed(_ value: EnumWithNoCases) -> EnumWithNoCases {
                     value
                 }
@@ -211,7 +211,7 @@
         enum Foo {
           case bar(Never)
 
-          public nonisolated struct AllCasePaths: CasePaths.CasePathReflectable, Swift.Hashable, Swift.Sendable, Swift.Sequence {
+          public nonisolated struct AllCasePaths: CasePaths.CasePathReflectable, Swift.Hashable, Swift.Sendable {
             public func embed(_ value: Foo) -> Foo {
               value
             }
@@ -277,7 +277,7 @@
         public enum Foo {
           case bar(Int), baz(String)
 
-          public nonisolated struct AllCasePaths: CasePaths.CasePathReflectable, Swift.Hashable, Swift.Sendable, Swift.Sequence {
+          public nonisolated struct AllCasePaths: CasePaths.CasePathReflectable, Swift.Hashable, Swift.Sendable {
             public func embed(_ value: Foo) -> Foo {
               value
             }
@@ -364,7 +364,7 @@
         public enum Foo {
           case bar(Int)
 
-          public nonisolated struct AllCasePaths: CasePaths.CasePathReflectable, Swift.Hashable, Swift.Sendable, Swift.Sequence {
+          public nonisolated struct AllCasePaths: CasePaths.CasePathReflectable, Swift.Hashable, Swift.Sendable {
             public func embed(_ value: Foo) -> Foo {
               value
             }
@@ -427,7 +427,7 @@
         package enum Foo {
           case bar(Int)
 
-          public nonisolated struct AllCasePaths: CasePaths.CasePathReflectable, Swift.Hashable, Swift.Sendable, Swift.Sequence {
+          public nonisolated struct AllCasePaths: CasePaths.CasePathReflectable, Swift.Hashable, Swift.Sendable {
             public func embed(_ value: Foo) -> Foo {
               value
             }
@@ -490,7 +490,7 @@
         private enum Foo {
           case bar(Int)
 
-          public nonisolated struct AllCasePaths: CasePaths.CasePathReflectable, Swift.Hashable, Swift.Sendable, Swift.Sequence {
+          public nonisolated struct AllCasePaths: CasePaths.CasePathReflectable, Swift.Hashable, Swift.Sendable {
             public func embed(_ value: Foo) -> Foo {
               value
             }
@@ -595,7 +595,7 @@
         #"""
         enum Foo: CasePathable {
 
-            public nonisolated struct AllCasePaths: CasePaths.CasePathReflectable, Swift.Hashable, Swift.Sendable, Swift.Sequence {
+            public nonisolated struct AllCasePaths: CasePaths.CasePathReflectable, Swift.Hashable, Swift.Sendable {
                 public func embed(_ value: Foo) -> Foo {
                     value
                 }
@@ -633,7 +633,7 @@
         #"""
         enum Foo: CasePaths.CasePathable {
 
-            public nonisolated struct AllCasePaths: CasePaths.CasePathReflectable, Swift.Hashable, Swift.Sendable, Swift.Sequence {
+            public nonisolated struct AllCasePaths: CasePaths.CasePathReflectable, Swift.Hashable, Swift.Sendable {
                 public func embed(_ value: Foo) -> Foo {
                     value
                 }
@@ -671,7 +671,7 @@
         #"""
         enum Foo: CasePathable {
 
-            public nonisolated struct AllCasePaths: CasePaths.CasePathReflectable, Swift.Hashable, Swift.Sendable, Swift.Sequence {
+            public nonisolated struct AllCasePaths: CasePaths.CasePathReflectable, Swift.Hashable, Swift.Sendable {
                 public func embed(_ value: Foo) -> Foo {
                     value
                 }
@@ -717,7 +717,7 @@
         enum Foo {
           case bar(_ int: Int, _ bool: Bool)
 
-          public nonisolated struct AllCasePaths: CasePaths.CasePathReflectable, Swift.Hashable, Swift.Sendable, Swift.Sequence {
+          public nonisolated struct AllCasePaths: CasePaths.CasePathReflectable, Swift.Hashable, Swift.Sendable {
             public func embed(_ value: Foo) -> Foo {
               value
             }
@@ -783,7 +783,7 @@
         enum Foo {
           case bar(Bar<Self>)
 
-          public nonisolated struct AllCasePaths: CasePaths.CasePathReflectable, Swift.Hashable, Swift.Sendable, Swift.Sequence {
+          public nonisolated struct AllCasePaths: CasePaths.CasePathReflectable, Swift.Hashable, Swift.Sendable {
             public func embed(_ value: Foo) -> Foo {
               value
             }
@@ -849,7 +849,7 @@
         enum Foo {
           case bar(int: Int = 42, bool: Bool = true)
 
-          public nonisolated struct AllCasePaths: CasePaths.CasePathReflectable, Swift.Hashable, Swift.Sendable, Swift.Sequence {
+          public nonisolated struct AllCasePaths: CasePaths.CasePathReflectable, Swift.Hashable, Swift.Sendable {
             public func embed(_ value: Foo) -> Foo {
               value
             }
@@ -949,7 +949,7 @@
           #endif
           #endif
 
-          public nonisolated struct AllCasePaths: CasePaths.CasePathReflectable, Swift.Hashable, Swift.Sendable, Swift.Sequence {
+          public nonisolated struct AllCasePaths: CasePaths.CasePathReflectable, Swift.Hashable, Swift.Sendable {
             public func embed(_ value: Foo) -> Foo {
               value
             }
@@ -1197,7 +1197,7 @@
         enum Foo {
           case bar
 
-          public nonisolated struct AllCasePaths: CasePaths.CasePathReflectable, Swift.Hashable, Swift.Sendable, Swift.Sequence {
+          public nonisolated struct AllCasePaths: CasePaths.CasePathReflectable, Swift.Hashable, Swift.Sendable {
             public func embed(_ value: Foo) -> Foo {
               value
             }
@@ -1292,7 +1292,7 @@
            */
           case fizz, buzz
 
-          public nonisolated struct AllCasePaths: CasePaths.CasePathReflectable, Swift.Hashable, Swift.Sendable, Swift.Sequence {
+          public nonisolated struct AllCasePaths: CasePaths.CasePathReflectable, Swift.Hashable, Swift.Sendable {
             public func embed(_ value: Foo) -> Foo {
               value
             }
@@ -1440,7 +1440,7 @@
         // case foo
           case bar
 
-          public nonisolated struct AllCasePaths: CasePaths.CasePathReflectable, Swift.Hashable, Swift.Sendable, Swift.Sequence {
+          public nonisolated struct AllCasePaths: CasePaths.CasePathReflectable, Swift.Hashable, Swift.Sendable {
             public func embed(_ value: Foo) -> Foo {
               value
             }
@@ -1518,7 +1518,7 @@
           case fizzier/*Comment in case*/(Int, buzzier: String)
           case fizziest // Comment without associated value
 
-          public nonisolated struct AllCasePaths: CasePaths.CasePathReflectable, Swift.Hashable, Swift.Sendable, Swift.Sequence {
+          public nonisolated struct AllCasePaths: CasePaths.CasePathReflectable, Swift.Hashable, Swift.Sendable {
             public func embed(_ value: Foo) -> Foo {
               value
             }
@@ -1669,7 +1669,7 @@
         enum Action<Element> {
           case element(Element)
 
-          public nonisolated struct AllCasePaths: CasePaths.CasePathReflectable, Swift.Hashable, Swift.Sendable, Swift.Sequence {
+          public nonisolated struct AllCasePaths: CasePaths.CasePathReflectable, Swift.Hashable, Swift.Sendable {
             public func embed(_ value: Action) -> Action {
               value
             }
@@ -1740,7 +1740,7 @@
           enum Action {
             case element(Element)
 
-            public nonisolated struct AllCasePaths: CasePaths.CasePathReflectable, Swift.Hashable, Swift.Sendable, Swift.Sequence {
+            public nonisolated struct AllCasePaths: CasePaths.CasePathReflectable, Swift.Hashable, Swift.Sendable {
               public func embed(_ value: Action) -> Action {
                 value
               }
@@ -1809,7 +1809,7 @@
         enum Action<Element> {
           case element(Array<Element>)
 
-          public nonisolated struct AllCasePaths: CasePaths.CasePathReflectable, Swift.Hashable, Swift.Sendable, Swift.Sequence {
+          public nonisolated struct AllCasePaths: CasePaths.CasePathReflectable, Swift.Hashable, Swift.Sendable {
             public func embed(_ value: Action) -> Action {
               value
             }
@@ -1881,7 +1881,7 @@
           case secondElement(Element)
           case thirdElement(Element, Element, Int)
 
-          public nonisolated struct AllCasePaths: CasePaths.CasePathReflectable, Swift.Hashable, Swift.Sendable, Swift.Sequence {
+          public nonisolated struct AllCasePaths: CasePaths.CasePathReflectable, Swift.Hashable, Swift.Sendable {
             public func embed(_ value: Action) -> Action {
               value
             }
@@ -2015,7 +2015,7 @@
             third: Double,
           )
 
-          public nonisolated struct AllCasePaths: CasePaths.CasePathReflectable, Swift.Hashable, Swift.Sendable, Swift.Sequence {
+          public nonisolated struct AllCasePaths: CasePaths.CasePathReflectable, Swift.Hashable, Swift.Sendable {
             public func embed(_ value: Action) -> Action {
               value
             }

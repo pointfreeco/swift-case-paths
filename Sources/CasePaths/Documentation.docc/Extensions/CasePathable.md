@@ -19,7 +19,6 @@
 
 ### Iteration and reflection
 
-- ``CasePathIterable``
 - ``CasePathReflectable``
 
 ### Manual conformances
