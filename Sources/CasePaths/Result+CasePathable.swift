@@ -1,5 +1,5 @@
-extension Result: CasePathable, CasePathIterable {
-  public struct AllCasePaths: CasePath, CasePathReflectable, Hashable, Sendable {
+extension Result: CasePathable {
+  public struct AllCasePaths: CasePathReflectable, Hashable, Sendable {
     public func embed(_ value: Result) -> Result { value }
 
     public func extract(from root: Result) -> Result? { root }

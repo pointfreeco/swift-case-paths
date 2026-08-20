@@ -25,11 +25,10 @@
 /// \UserAction.Cases.home      // CasePath<UserAction, HomeAction>
 /// \UserAction.Cases.settings  // CasePath<UserAction, SettingsAction>
 /// ```
-@attached(extension, conformances: CasePathable, CasePathIterable)
+@attached(extension, conformances: CasePathable)
 @attached(
   member,
   conformances: CasePathable,
-  CasePathIterable,
   names: named(AllCasePaths),
   named(allCasePaths),
   named(caseName),

@@ -152,8 +152,7 @@ extension CasePathableMacro: MemberMacro {
     var decls: [DeclSyntax] = [
       """
       public \(nonisolated)struct AllCasePaths: \
-      CasePaths.CasePath, CasePaths.CasePathReflectable, Swift.Hashable, Swift.Sendable, \
-      Swift.Sequence {
+      CasePaths.CasePathReflectable, Swift.Hashable, Swift.Sendable, Swift.Sequence {
       public func embed(_ value: \(enumName)) -> \(enumName) {
       value
       }

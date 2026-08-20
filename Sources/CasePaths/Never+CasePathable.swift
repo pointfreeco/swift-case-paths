@@ -1,5 +1,5 @@
-extension Never: CasePathable, CasePathIterable {
-  public struct AllCasePaths: CasePath, CasePathReflectable, Hashable, Sendable {
+extension Never: CasePathable {
+  public struct AllCasePaths: CasePathReflectable, Hashable, Sendable {
     public func embed(_ value: Never) -> Never {}
 
     public func extract(from root: Never) -> Never? {}

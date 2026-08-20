@@ -1,7 +1,7 @@
 import IssueReporting
 
-extension Optional: CasePathable, CasePathIterable {
-  public struct AllCasePaths: CasePath, CasePathReflectable, Hashable, Sendable {
+extension Optional: CasePathable {
+  public struct AllCasePaths: CasePathReflectable, Hashable, Sendable {
     public func embed(_ value: Optional) -> Optional { value }
 
     public func extract(from root: Optional) -> Optional? { root }

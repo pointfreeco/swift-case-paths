@@ -8,8 +8,7 @@
 
     public init() {}
 
-    public init(_ elements: some Collection<Element>)
-    where Element.AllCasePaths: CasePathReflectable<Element> {
+    public init(_ elements: some Collection<Element>) {
       self.storage = [PartialCaseKeyPath<Element> & Sendable: Element](
         uniqueKeysWithValues: elements.map { (Element.allCasePaths[$0], $0) }
       )
@@ -45,8 +44,7 @@
     public subscript(position: Index) -> Element { storage[position.rawValue].value }
   }
 
-  extension CaseSet: SetAlgebra
-  where Element: Equatable, Element.AllCasePaths: CasePathReflectable<Element> {
+  extension CaseSet: SetAlgebra where Element: Equatable {
     public var isEmpty: Bool { storage.isEmpty }
 
     public func union(_ other: CaseSet<Element>) -> CaseSet<Element> {
@@ -113,8 +111,7 @@
   extension CaseSet: Hashable where Element: Hashable {}
   extension CaseSet: @unchecked Sendable where Element: Sendable {}
 
-  extension CaseSet: Decodable
-  where Element: Decodable, Element.AllCasePaths: CasePathReflectable<Element> {
+  extension CaseSet: Decodable where Element: Decodable {
     public init(from decoder: any Decoder) throws {
       var container = try decoder.unkeyedContainer()
       if let count = container.count {
@@ -143,8 +140,7 @@
     }
   }
 
-  extension CaseSet: ExpressibleByArrayLiteral
-  where Element.AllCasePaths: CasePathReflectable<Element> {
+  extension CaseSet: ExpressibleByArrayLiteral {
     public init(arrayLiteral elements: Element...) {
       self.init(elements)
     }

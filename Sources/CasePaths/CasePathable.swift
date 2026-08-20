@@ -43,7 +43,20 @@ public protocol CasePathable {
   ///
   /// This type conforms to ``CasePath`` as the identity case path of the enum, which gives the
   /// identity case key path `\SomeEnum.Cases.self` the same currency as any other case key path.
-  associatedtype AllCasePaths: CasePath<Self, Self>
+  /// It can also reflect the case of a given value (via ``CasePathReflectable``), and is a
+  /// `Sequence` of all of the enum's case key paths:
+  ///
+  /// ```swift
+  /// @CasePathable enum Field {
+  ///   case title(String)
+  ///   case body(String)
+  ///   case isLive
+  /// }
+  ///
+  /// Array(Field.allCasePaths)  // [\.title, \.body, \.isLive]
+  /// ```
+  associatedtype AllCasePaths: CasePathReflectable<Self> & Sequence
+  where AllCasePaths.Element == PartialKeyPath<AllCasePaths>
 
   /// A collection of all case paths of this type.
   static var allCasePaths: AllCasePaths { get }
@@ -483,7 +496,7 @@ extension CasePathable {
   }
 }
 
-extension CasePathable where AllCasePaths: CasePathReflectable<Self> {
+extension CasePathable {
   /// A case key path to this enum's case.
   public var `case`: PartialCaseKeyPath<Self> {
     Self.allCasePaths[self]

@@ -1,4 +1,4 @@
-/// A type that can reflect a case path from a given case.
+/// An identity case path that can also reflect the case path of a given root value.
 ///
 /// The `@CasePathable` macro automatically generates a conformance to this protocol on the enum's
 /// ``CasePathable/AllCasePaths`` type.
@@ -15,13 +15,10 @@
 ///
 /// Field.allCasePaths[.title("Hello, Blob!")]  // \.title
 /// ```
-public protocol CasePathReflectable<Root> {
-  /// The enum type that can be reflected.
-  associatedtype Root: CasePathable
-
+public protocol CasePathReflectable<Root>: CasePath where Root == Value {
   /// Returns the case key path for a given root value.
   ///
-  /// - Parameter root: An root value.
+  /// - Parameter root: A root value.
   /// - Returns: A case path to the root value.
-  subscript(root: Root) -> PartialCaseKeyPath<Root> { get }
+  subscript(root: Root) -> PartialKeyPath<Self> { get }
 }

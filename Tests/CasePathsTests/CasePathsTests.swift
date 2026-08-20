@@ -280,9 +280,20 @@ private enum Legacy: CasePathable, Equatable {
   case wrapped(Foo)
   case count(Int)
 
-  struct AllCasePaths: CasePath {
+  struct AllCasePaths: CasePathReflectable, Sequence {
     func embed(_ value: Legacy) -> Legacy { value }
     func extract(from root: Legacy) -> Legacy? { root }
+
+    subscript(root: Legacy) -> PartialCaseKeyPath<Legacy> {
+      switch root {
+      case .wrapped: return \.wrapped
+      case .count: return \.count
+      }
+    }
+
+    func makeIterator() -> IndexingIterator<[PartialCaseKeyPath<Legacy>]> {
+      [\.wrapped, \.count].makeIterator()
+    }
 
     var wrapped: AnyCasePath<Legacy, Foo> {
       AnyCasePath(
