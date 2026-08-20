@@ -9,20 +9,20 @@ final class CasePathsTests: XCTestCase {
     XCTAssertNotNil(Int?.none[case: \.none])
     XCTAssertEqual((\Int?.Cases.some)(42), 42)
     XCTAssertEqual((\Int?.Cases.none)(), nil)
-    XCTAssertEqual(Fizz.buzz(.fizzBuzz(.int(42)))[case: \.buzz.fizzBuzz.int], 42)
-    let buzzPath1: CaseKeyPath<Fizz, Buzz?> = \Fizz.Cases.buzz
-    let buzzPath2: CaseKeyPath<Fizz, Buzz> = \Fizz.Cases.buzz
+    XCTAssertEqual(Fizz.buzz(.fizzBuzz(.int(42)))[case: \.buzz.some.fizzBuzz.some.int], 42)
+    let buzzPath1: CaseKeyPath<Fizz, Fizz.AllCasePaths._$buzz> = \Fizz.Cases.buzz
+    let buzzPath2 = \Fizz.Cases.buzz.some
     XCTAssertEqual(buzzPath1, \.buzz)
-    XCTAssertEqual(buzzPath2, \.buzz)
+    XCTAssertEqual(buzzPath2, \.buzz.some)
     let buzzPath3 = \Fizz.Cases.buzz
     XCTAssertEqual(buzzPath1, buzzPath3)
-    XCTAssertNotEqual(buzzPath2, buzzPath3)
+    XCTAssertNotEqual(buzzPath2 as PartialCaseKeyPath<Fizz>, buzzPath3)
     XCTAssertEqual(ifLet(state: \Fizz.buzz, action: \Fizz.Cases.buzz), 42)
     XCTAssertEqual(ifLet(state: \Fizz.buzz, action: \Foo.Cases.bar), nil)
-    let fizzBuzzPath1: CaseKeyPath<Fizz, Int?> = \Fizz.Cases.buzz.fizzBuzz.int
-    let fizzBuzzPath2: CaseKeyPath<Fizz, Int> = \Fizz.Cases.buzz.fizzBuzz.int
-    let fizzBuzzPath3 = \Fizz.Cases.buzz.fizzBuzz.int
-    XCTAssertNotEqual(fizzBuzzPath1, fizzBuzzPath3)
+    let fizzBuzzPath1 = \Fizz.Cases.buzz.some.fizzBuzz
+    let fizzBuzzPath2 = \Fizz.Cases.buzz.some.fizzBuzz.some.int
+    let fizzBuzzPath3 = \Fizz.Cases.buzz.some.fizzBuzz.some.int
+    XCTAssertNotEqual(fizzBuzzPath1 as PartialCaseKeyPath<Fizz>, fizzBuzzPath3)
     XCTAssertEqual(fizzBuzzPath2, fizzBuzzPath3)
     XCTAssertEqual(Optional.allCasePaths[Int?.some(42)], \.some)
     XCTAssertNotEqual(Optional.allCasePaths[Int?.some(42)], \.none)
@@ -45,15 +45,10 @@ final class CasePathsTests: XCTestCase {
   }
 
   func testSelfCaseKeyPathCallAsFunction() {
-    enum Loadable: Equatable {
-      case isLoading(progress: Float)
-      case isLoaded
-    }
-
     var loadable = Loadable.isLoading(progress: 0)
-    loadable = (\.self as CaseKeyPath<Loadable, Loadable>)(.isLoading(progress: 0.5))
+    loadable = (\.self as CaseKeyPath<Loadable, Loadable.AllCasePaths>)(.isLoading(progress: 0.5))
     XCTAssertEqual(loadable, .isLoading(progress: 0.5))
-    loadable = (\.self as CaseKeyPath<Loadable, Loadable>)(.isLoaded)
+    loadable = (\.self as CaseKeyPath<Loadable, Loadable.AllCasePaths>)(.isLoaded)
     XCTAssertEqual(loadable, .isLoaded)
   }
 
@@ -129,6 +124,64 @@ final class CasePathsTests: XCTestCase {
     }
   #endif
 
+  func testManualAnyCasePathConformance() {
+    // A hand-written conformance in the documented 1.x style, vending
+    // 'AnyCasePath' properties, still supplies working case key paths.
+    XCTAssertEqual(Legacy.wrapped(.bar(.int(42)))[case: \.wrapped], .bar(.int(42)))
+    XCTAssertEqual(Legacy.wrapped(.bar(.int(42)))[case: \.wrapped.bar.int], 42)
+    XCTAssertNil(Legacy.count(1)[case: \.wrapped])
+    XCTAssertEqual((\Legacy.Cases.wrapped.bar.int)(1), .wrapped(.bar(.int(1))))
+    var legacy = Legacy.count(1)
+    legacy.modify(\.count) { $0 += 1 }
+    XCTAssertEqual(legacy, .count(2))
+  }
+
+  func testDeepPartialIs() {
+    XCTAssertTrue(Foo.bar(.int(42)).is(\.bar.int))
+    XCTAssertFalse(Foo.baz(.string("")).is(\.bar.int))
+    XCTAssertTrue(Foo.bar(.int(42)).is(\.self))
+  }
+
+  func testAnyCasePathFromKeyPath() {
+    let path = AnyCasePath(\Foo.Cases.bar.int)
+    XCTAssertEqual(path.extract(from: .bar(.int(42))), 42)
+    XCTAssertNil(path.extract(from: .fizzBuzz))
+    XCTAssertEqual(path.embed(1), .bar(.int(1)))
+  }
+
+  func testPathHashable() {
+    // Value-level path identity: equal iff the same case chain, however composed.
+    let spelled = Foo.allCasePaths[keyPath: \.bar.int]
+    let appended = Foo.allCasePaths[keyPath: (\Foo.Cases.bar).appending(path: \.int)]
+    XCTAssertEqual(spelled, appended)
+
+    // Paths as dictionary keys, across enums, without key path hashing:
+    var registry: [AnyHashable: String] = [:]
+    registry[AnyHashable(Foo.allCasePaths.bar)] = "bar"
+    registry[AnyHashable(Foo.allCasePaths[keyPath: \.bar.int])] = "bar.int"
+    registry[AnyHashable(Bar.allCasePaths.int)] = "int"
+    XCTAssertEqual(registry[AnyHashable(Foo.allCasePaths[keyPath: \.bar])], "bar")
+    XCTAssertEqual(registry[AnyHashable(spelled)], "bar.int")
+    XCTAssertEqual(registry.count, 3)
+  }
+
+  func testCasePathRecovery() {
+    let keyPath = \Foo.Cases.bar.int
+    let path = Foo.allCasePaths[keyPath: keyPath]
+    XCTAssertEqual(path.extract(from: .bar(.int(42))), 42)
+    XCTAssertNil(path.extract(from: .fizzBuzz))
+    XCTAssertEqual(path.embed(1), .bar(.int(1)))
+    XCTAssertEqual(MemoryLayout.size(ofValue: path), 0)
+  }
+
+  func testAppendIdentity() {
+    let appended = (\Foo.Cases.bar).appending(path: \.int)
+    XCTAssertEqual(appended, \Foo.Cases.bar.int)
+    XCTAssertEqual(appended.hashValue, (\Foo.Cases.bar.int).hashValue)
+    let set: Set<PartialCaseKeyPath<Foo>> = [\Foo.Cases.bar.int, \Foo.Cases.baz]
+    XCTAssertTrue(set.contains(appended))
+  }
+
   func testAppend() {
     let fooToBar = \Foo.Cases.bar
     let barToInt = \Bar.Cases.int
@@ -140,7 +193,7 @@ final class CasePathsTests: XCTestCase {
   }
 
   func testPartialCaseKeyPath() {
-    let partialPath = \Foo.Cases.bar as PartialCaseKeyPath
+    let partialPath = \Foo.Cases.bar as PartialCaseKeyPath<Foo>
     XCTAssertEqual(.bar(.int(42)), partialPath(Bar.int(42)))
     XCTAssertNil(partialPath(42))
 
@@ -209,6 +262,48 @@ enum B: Equatable {
   case int(Int)
 }
 
-func ifLet<A, B, C, D>(state: KeyPath<A, B?>, action: CaseKeyPath<C, D?>) -> Int? { 42 }
+@CasePathable
+private enum Loadable: Equatable {
+  case isLoading(progress: Float)
+  case isLoaded
+}
+
+func ifLet<A, B, C, Path, D>(
+  state: KeyPath<A, B?>, action: CaseKeyPath<C, Path>
+) -> Int? where Path.Value == D? { 42 }
 @_disfavoredOverload
-func ifLet<A, B, C, D>(state: KeyPath<A, B?>, action: CaseKeyPath<C, D>) -> Int? { nil }
+func ifLet<A, B, C, Path>(
+  state: KeyPath<A, B?>, action: CaseKeyPath<C, Path>
+) -> Int? { nil }
+
+private enum Legacy: CasePathable, Equatable {
+  case wrapped(Foo)
+  case count(Int)
+
+  struct AllCasePaths: CasePath {
+    func embed(_ value: Legacy) -> Legacy { value }
+    func extract(from root: Legacy) -> Legacy? { root }
+
+    var wrapped: AnyCasePath<Legacy, Foo> {
+      AnyCasePath(
+        embed: { .wrapped($0) },
+        extract: {
+          guard case .wrapped(let value) = $0 else { return nil }
+          return value
+        }
+      )
+    }
+
+    var count: AnyCasePath<Legacy, Int> {
+      AnyCasePath(
+        embed: { .count($0) },
+        extract: {
+          guard case .count(let value) = $0 else { return nil }
+          return value
+        }
+      )
+    }
+  }
+
+  static var allCasePaths: AllCasePaths { AllCasePaths() }
+}

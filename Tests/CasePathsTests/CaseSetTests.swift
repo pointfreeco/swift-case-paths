@@ -15,16 +15,16 @@
       )
     }
 
-    public subscript<Member>(
-      dynamicMember keyPath: CaseKeyPath<Element, Member>  // & Sendable
-    ) -> Member? {
+    public subscript<Path>(
+      dynamicMember keyPath: CaseKeyPath<Element, Path>
+    ) -> Path.Value? {
       get { storage[keyPath].flatMap { $0[case: keyPath] } }
-      set { storage[keyPath] = newValue.map(keyPath.callAsFunction) }
+      set { storage[keyPath] = newValue.map { keyPath($0) } }
     }
 
-    public subscript(
-      dynamicMember keyPath: CaseKeyPath<Element, Void>  // & Sendable
-    ) -> Bool {
+    public subscript<Path>(
+      dynamicMember keyPath: CaseKeyPath<Element, Path>
+    ) -> Bool where Path.Value == Void {
       get { storage[keyPath].flatMap { $0[case: keyPath] } != nil }
       set { storage[keyPath] = newValue ? keyPath() : nil }
     }
@@ -152,24 +152,24 @@
 
   extension CaseSet {
     @_disfavoredOverload
-    public subscript<Member>(
-      dynamicMember keyPath: CaseKeyPath<Element, Member>  // & Sendable
-    ) -> CaseSetBuilder<Element, Member> {
+    public subscript<Path>(
+      dynamicMember keyPath: CaseKeyPath<Element, Path>
+    ) -> CaseSetBuilder<Element, Path> {
       CaseSetBuilder(set: self, keyPath: keyPath)
     }
   }
 
-  public struct CaseSetBuilder<Root: CasePathable, Value> {
+  public struct CaseSetBuilder<Root: CasePathable, Path: CasePath> where Path.Root == Root {
     let set: CaseSet<Root>
-    let keyPath: CaseKeyPath<Root, Value>
+    let keyPath: CaseKeyPath<Root, Path>
 
-    public func callAsFunction(_ value: Value?) -> CaseSet<Root> {
+    public func callAsFunction(_ value: Path.Value?) -> CaseSet<Root> {
       var set = set
       set[dynamicMember: keyPath] = value
       return set
     }
 
-    public func callAsFunction(_ value: Bool = true) -> CaseSet<Root> where Value == Void {
+    public func callAsFunction(_ value: Bool = true) -> CaseSet<Root> where Path.Value == Void {
       var set = set
       set[dynamicMember: keyPath] = value ? () : nil
       return set
@@ -177,14 +177,19 @@
   }
 
   extension CaseSet {
-    public func require<each Value>(
-      _ keyPath: repeat CaseKeyPath<Element, each Value> & Sendable
-    ) -> (repeat each Value)? {
-      func unwrap<Wrapped>(_ wrapped: Wrapped?) throws -> Wrapped {
-        guard let wrapped else { throw Nil() }
-        return wrapped
+    // NB: Parameter packs cannot yet express '(each Path).Root == Element', so this spells
+    // the key path type out rather than using the constrained 'CaseKeyPath' alias.
+    public func require<each Path: CasePath>(
+      _ keyPath: repeat KeyPath<Element.AllCasePaths, each Path> & Sendable
+    ) -> (repeat (each Path).Value)? {
+      func value<P: CasePath>(at keyPath: KeyPath<Element.AllCasePaths, P>) throws -> P.Value {
+        guard
+          let element = storage[keyPath],
+          let value = element[case: keyPath as PartialCaseKeyPath<Element>] as? P.Value
+        else { throw Nil() }
+        return value
       }
-      return try? (repeat unwrap(self[dynamicMember: each keyPath]))
+      return try? (repeat value(at: each keyPath))
     }
 
     private struct Nil: Error {}

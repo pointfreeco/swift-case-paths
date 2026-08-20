@@ -1,5 +1,9 @@
 extension Never: CasePathable, CasePathIterable {
-  public struct AllCasePaths: CasePathReflectable, Sendable {
+  public struct AllCasePaths: CasePath, CasePathReflectable, Hashable, Sendable {
+    public func embed(_ value: Never) -> Never {}
+
+    public func extract(from root: Never) -> Never? {}
+
     public subscript(root: Never) -> PartialCaseKeyPath<Never> {
       \.never
     }
@@ -10,22 +14,18 @@ extension Never: CasePathable, CasePathIterable {
   }
 }
 
-extension Case where Value: CasePathable {
+public struct _NeverCasePath<Root>: CasePath, Hashable, Sendable {
+  public func embed(_ value: Never) -> Root {}
+  public func extract(from root: Root) -> Never? { nil }
+}
+
+extension CasePath where Value: CasePathable {
   /// A case path that can never embed or extract a value.
   ///
   /// This property can chain any case path into a `Never` value, which, as an uninhabited type,
   /// cannot be embedded nor extracted from an enum.
-  public var never: Case<Never> {
-    func absurd<T>(_: Never) -> T {}
-    return Case<Never>(embed: absurd, extract: { (_: Value) in nil })
-  }
-}
-
-extension Case {
-  @available(*, deprecated, message: "This enum must be '@CasePathable' to enable key path syntax")
-  public var never: Case<Never> {
-    func absurd<T>(_: Never) -> T {}
-    return Case<Never>(embed: absurd, extract: { (_: Value) in nil })
+  public var never: _AppendCasePath<Self, _NeverCasePath<Value>> {
+    _AppendCasePath(_base: self, _appended: _NeverCasePath())
   }
 }
 

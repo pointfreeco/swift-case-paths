@@ -39,55 +39,83 @@
           case fizz(buzz: String)
           case fizzier(Int, buzzier: String)
 
-          public nonisolated struct AllCasePaths: CasePaths.CasePathReflectable, Swift.Sendable, Swift.Sequence {
+          public nonisolated struct AllCasePaths: CasePaths.CasePath, CasePaths.CasePathReflectable, Swift.Hashable, Swift.Sendable, Swift.Sequence {
+            public func embed(_ value: Foo) -> Foo {
+              value
+            }
+            public func extract(from root: Foo) -> Foo? {
+              root
+            }
             public subscript(root: Foo) -> CasePaths.PartialCaseKeyPath<Foo> {
-              if root.is(\.bar) {
+              if case .bar = root {
                 return \.bar
               }
-              if root.is(\.baz) {
+              if case .baz = root {
                 return \.baz
               }
-              if root.is(\.fizz) {
+              if case .fizz = root {
                 return \.fizz
               }
-              if root.is(\.fizzier) {
+              if case .fizzier = root {
                 return \.fizzier
               }
               return \.never
             }
-            public var bar: CasePaths.AnyCasePath<Foo, Void> {
-              CasePaths.AnyCasePath(embed: {
-                  Foo.bar
-                }) {
-                guard case .bar = $0 else {
+            public struct _$bar: CasePaths.CasePath, Swift.Hashable, Swift.Sendable {
+              public func embed(_ value: Void) -> Foo {
+                Foo.bar
+              }
+              public func extract(from root: Foo) -> Void? {
+                guard case .bar = root else {
                   return nil
                 }
                 return ()
               }
             }
-            public var baz: CasePaths.AnyCasePath<Foo, Int> {
-              CasePaths.AnyCasePath(embed: Foo.baz) {
-                guard case let .baz(v0) = $0 else {
+            public var bar: _$bar {
+              _$bar()
+            }
+            public struct _$baz: CasePaths.CasePath, Swift.Hashable, Swift.Sendable {
+              public func embed(_ value: Int) -> Foo {
+                Foo.baz(value)
+              }
+              public func extract(from root: Foo) -> Int? {
+                guard case let .baz(v0) = root else {
                   return nil
                 }
                 return v0
               }
             }
-            public var fizz: CasePaths.AnyCasePath<Foo, String> {
-              CasePaths.AnyCasePath(embed: Foo.fizz) {
-                guard case let .fizz(v0) = $0 else {
+            public var baz: _$baz {
+              _$baz()
+            }
+            public struct _$fizz: CasePaths.CasePath, Swift.Hashable, Swift.Sendable {
+              public func embed(_ value: String) -> Foo {
+                Foo.fizz(buzz: value)
+              }
+              public func extract(from root: Foo) -> String? {
+                guard case let .fizz(v0) = root else {
                   return nil
                 }
                 return v0
               }
             }
-            public var fizzier: CasePaths.AnyCasePath<Foo, (Int, buzzier: String)> {
-              CasePaths.AnyCasePath(embed: Foo.fizzier) {
-                guard case let .fizzier(v0, v1) = $0 else {
+            public var fizz: _$fizz {
+              _$fizz()
+            }
+            public struct _$fizzier: CasePaths.CasePath, Swift.Hashable, Swift.Sendable {
+              public func embed(_ value: (Int, buzzier: String)) -> Foo {
+                Foo.fizzier(value.0, buzzier: value.1)
+              }
+              public func extract(from root: Foo) -> (Int, buzzier: String)? {
+                guard case let .fizzier(v0, v1) = root else {
                   return nil
                 }
                 return (v0, v1)
               }
+            }
+            public var fizzier: _$fizzier {
+              _$fizzier()
             }
             public func makeIterator() -> Swift.IndexingIterator<[CasePaths.PartialCaseKeyPath<Foo>]> {
               var allCasePaths: [CasePaths.PartialCaseKeyPath<Foo>] = []
@@ -137,7 +165,13 @@
         #"""
         enum EnumWithNoCases {
 
-            public nonisolated struct AllCasePaths: CasePaths.CasePathReflectable, Swift.Sendable, Swift.Sequence {
+            public nonisolated struct AllCasePaths: CasePaths.CasePath, CasePaths.CasePathReflectable, Swift.Hashable, Swift.Sendable, Swift.Sequence {
+                public func embed(_ value: EnumWithNoCases) -> EnumWithNoCases {
+                    value
+                }
+                public func extract(from root: EnumWithNoCases) -> EnumWithNoCases? {
+                    root
+                }
                 public subscript(root: EnumWithNoCases) -> CasePaths.PartialCaseKeyPath<EnumWithNoCases> {
                     \.never
                 }
@@ -177,20 +211,32 @@
         enum Foo {
           case bar(Never)
 
-          public nonisolated struct AllCasePaths: CasePaths.CasePathReflectable, Swift.Sendable, Swift.Sequence {
+          public nonisolated struct AllCasePaths: CasePaths.CasePath, CasePaths.CasePathReflectable, Swift.Hashable, Swift.Sendable, Swift.Sequence {
+            public func embed(_ value: Foo) -> Foo {
+              value
+            }
+            public func extract(from root: Foo) -> Foo? {
+              root
+            }
             public subscript(root: Foo) -> CasePaths.PartialCaseKeyPath<Foo> {
-              if root.is(\.bar) {
+              if case .bar = root {
                 return \.bar
               }
               return \.never
             }
-            public var bar: CasePaths.AnyCasePath<Foo, Never> {
-              CasePaths.AnyCasePath(embed: Foo.bar) {
-                guard case let .bar(v0) = $0 else {
+            public struct _$bar: CasePaths.CasePath, Swift.Hashable, Swift.Sendable {
+              public func embed(_ value: Never) -> Foo {
+                Foo.bar(value)
+              }
+              public func extract(from root: Foo) -> Never? {
+                guard case let .bar(v0) = root else {
                   return nil
                 }
                 return v0
               }
+            }
+            public var bar: _$bar {
+              _$bar()
             }
             public func makeIterator() -> Swift.IndexingIterator<[CasePaths.PartialCaseKeyPath<Foo>]> {
               var allCasePaths: [CasePaths.PartialCaseKeyPath<Foo>] = []
@@ -231,31 +277,49 @@
         public enum Foo {
           case bar(Int), baz(String)
 
-          public nonisolated struct AllCasePaths: CasePaths.CasePathReflectable, Swift.Sendable, Swift.Sequence {
+          public nonisolated struct AllCasePaths: CasePaths.CasePath, CasePaths.CasePathReflectable, Swift.Hashable, Swift.Sendable, Swift.Sequence {
+            public func embed(_ value: Foo) -> Foo {
+              value
+            }
+            public func extract(from root: Foo) -> Foo? {
+              root
+            }
             public subscript(root: Foo) -> CasePaths.PartialCaseKeyPath<Foo> {
-              if root.is(\.bar) {
+              if case .bar = root {
                 return \.bar
               }
-              if root.is(\.baz) {
+              if case .baz = root {
                 return \.baz
               }
               return \.never
             }
-            public var bar: CasePaths.AnyCasePath<Foo, Int> {
-              CasePaths.AnyCasePath(embed: Foo.bar) {
-                guard case let .bar(v0) = $0 else {
+            public struct _$bar: CasePaths.CasePath, Swift.Hashable, Swift.Sendable {
+              public func embed(_ value: Int) -> Foo {
+                Foo.bar(value)
+              }
+              public func extract(from root: Foo) -> Int? {
+                guard case let .bar(v0) = root else {
                   return nil
                 }
                 return v0
               }
             }
-            public var baz: CasePaths.AnyCasePath<Foo, String> {
-              CasePaths.AnyCasePath(embed: Foo.baz) {
-                guard case let .baz(v0) = $0 else {
+            public var bar: _$bar {
+              _$bar()
+            }
+            public struct _$baz: CasePaths.CasePath, Swift.Hashable, Swift.Sendable {
+              public func embed(_ value: String) -> Foo {
+                Foo.baz(value)
+              }
+              public func extract(from root: Foo) -> String? {
+                guard case let .baz(v0) = root else {
                   return nil
                 }
                 return v0
               }
+            }
+            public var baz: _$baz {
+              _$baz()
             }
             public func makeIterator() -> Swift.IndexingIterator<[CasePaths.PartialCaseKeyPath<Foo>]> {
               var allCasePaths: [CasePaths.PartialCaseKeyPath<Foo>] = []
@@ -300,20 +364,32 @@
         public enum Foo {
           case bar(Int)
 
-          public nonisolated struct AllCasePaths: CasePaths.CasePathReflectable, Swift.Sendable, Swift.Sequence {
+          public nonisolated struct AllCasePaths: CasePaths.CasePath, CasePaths.CasePathReflectable, Swift.Hashable, Swift.Sendable, Swift.Sequence {
+            public func embed(_ value: Foo) -> Foo {
+              value
+            }
+            public func extract(from root: Foo) -> Foo? {
+              root
+            }
             public subscript(root: Foo) -> CasePaths.PartialCaseKeyPath<Foo> {
-              if root.is(\.bar) {
+              if case .bar = root {
                 return \.bar
               }
               return \.never
             }
-            public var bar: CasePaths.AnyCasePath<Foo, Int> {
-              CasePaths.AnyCasePath(embed: Foo.bar) {
-                guard case let .bar(v0) = $0 else {
+            public struct _$bar: CasePaths.CasePath, Swift.Hashable, Swift.Sendable {
+              public func embed(_ value: Int) -> Foo {
+                Foo.bar(value)
+              }
+              public func extract(from root: Foo) -> Int? {
+                guard case let .bar(v0) = root else {
                   return nil
                 }
                 return v0
               }
+            }
+            public var bar: _$bar {
+              _$bar()
             }
             public func makeIterator() -> Swift.IndexingIterator<[CasePaths.PartialCaseKeyPath<Foo>]> {
               var allCasePaths: [CasePaths.PartialCaseKeyPath<Foo>] = []
@@ -351,20 +427,32 @@
         package enum Foo {
           case bar(Int)
 
-          public nonisolated struct AllCasePaths: CasePaths.CasePathReflectable, Swift.Sendable, Swift.Sequence {
+          public nonisolated struct AllCasePaths: CasePaths.CasePath, CasePaths.CasePathReflectable, Swift.Hashable, Swift.Sendable, Swift.Sequence {
+            public func embed(_ value: Foo) -> Foo {
+              value
+            }
+            public func extract(from root: Foo) -> Foo? {
+              root
+            }
             public subscript(root: Foo) -> CasePaths.PartialCaseKeyPath<Foo> {
-              if root.is(\.bar) {
+              if case .bar = root {
                 return \.bar
               }
               return \.never
             }
-            public var bar: CasePaths.AnyCasePath<Foo, Int> {
-              CasePaths.AnyCasePath(embed: Foo.bar) {
-                guard case let .bar(v0) = $0 else {
+            public struct _$bar: CasePaths.CasePath, Swift.Hashable, Swift.Sendable {
+              public func embed(_ value: Int) -> Foo {
+                Foo.bar(value)
+              }
+              public func extract(from root: Foo) -> Int? {
+                guard case let .bar(v0) = root else {
                   return nil
                 }
                 return v0
               }
+            }
+            public var bar: _$bar {
+              _$bar()
             }
             public func makeIterator() -> Swift.IndexingIterator<[CasePaths.PartialCaseKeyPath<Foo>]> {
               var allCasePaths: [CasePaths.PartialCaseKeyPath<Foo>] = []
@@ -402,20 +490,32 @@
         private enum Foo {
           case bar(Int)
 
-          public nonisolated struct AllCasePaths: CasePaths.CasePathReflectable, Swift.Sendable, Swift.Sequence {
+          public nonisolated struct AllCasePaths: CasePaths.CasePath, CasePaths.CasePathReflectable, Swift.Hashable, Swift.Sendable, Swift.Sequence {
+            public func embed(_ value: Foo) -> Foo {
+              value
+            }
+            public func extract(from root: Foo) -> Foo? {
+              root
+            }
             public subscript(root: Foo) -> CasePaths.PartialCaseKeyPath<Foo> {
-              if root.is(\.bar) {
+              if case .bar = root {
                 return \.bar
               }
               return \.never
             }
-            public var bar: CasePaths.AnyCasePath<Foo, Int> {
-              CasePaths.AnyCasePath(embed: Foo.bar) {
-                guard case let .bar(v0) = $0 else {
+            public struct _$bar: CasePaths.CasePath, Swift.Hashable, Swift.Sendable {
+              public func embed(_ value: Int) -> Foo {
+                Foo.bar(value)
+              }
+              public func extract(from root: Foo) -> Int? {
+                guard case let .bar(v0) = root else {
                   return nil
                 }
                 return v0
               }
+            }
+            public var bar: _$bar {
+              _$bar()
             }
             public func makeIterator() -> Swift.IndexingIterator<[CasePaths.PartialCaseKeyPath<Foo>]> {
               var allCasePaths: [CasePaths.PartialCaseKeyPath<Foo>] = []
@@ -501,7 +601,13 @@
         #"""
         enum Foo: CasePathable {
 
-            public nonisolated struct AllCasePaths: CasePaths.CasePathReflectable, Swift.Sendable, Swift.Sequence {
+            public nonisolated struct AllCasePaths: CasePaths.CasePath, CasePaths.CasePathReflectable, Swift.Hashable, Swift.Sendable, Swift.Sequence {
+                public func embed(_ value: Foo) -> Foo {
+                    value
+                }
+                public func extract(from root: Foo) -> Foo? {
+                    root
+                }
                 public subscript(root: Foo) -> CasePaths.PartialCaseKeyPath<Foo> {
                     \.never
                 }
@@ -536,7 +642,13 @@
         #"""
         enum Foo: CasePaths.CasePathable {
 
-            public nonisolated struct AllCasePaths: CasePaths.CasePathReflectable, Swift.Sendable, Swift.Sequence {
+            public nonisolated struct AllCasePaths: CasePaths.CasePath, CasePaths.CasePathReflectable, Swift.Hashable, Swift.Sendable, Swift.Sequence {
+                public func embed(_ value: Foo) -> Foo {
+                    value
+                }
+                public func extract(from root: Foo) -> Foo? {
+                    root
+                }
                 public subscript(root: Foo) -> CasePaths.PartialCaseKeyPath<Foo> {
                     \.never
                 }
@@ -571,7 +683,13 @@
         #"""
         enum Foo: CasePathable {
 
-            public nonisolated struct AllCasePaths: CasePaths.CasePathReflectable, Swift.Sendable, Swift.Sequence {
+            public nonisolated struct AllCasePaths: CasePaths.CasePath, CasePaths.CasePathReflectable, Swift.Hashable, Swift.Sendable, Swift.Sequence {
+                public func embed(_ value: Foo) -> Foo {
+                    value
+                }
+                public func extract(from root: Foo) -> Foo? {
+                    root
+                }
                 public subscript(root: Foo) -> CasePaths.PartialCaseKeyPath<Foo> {
                     \.never
                 }
@@ -611,20 +729,32 @@
         enum Foo {
           case bar(_ int: Int, _ bool: Bool)
 
-          public nonisolated struct AllCasePaths: CasePaths.CasePathReflectable, Swift.Sendable, Swift.Sequence {
+          public nonisolated struct AllCasePaths: CasePaths.CasePath, CasePaths.CasePathReflectable, Swift.Hashable, Swift.Sendable, Swift.Sequence {
+            public func embed(_ value: Foo) -> Foo {
+              value
+            }
+            public func extract(from root: Foo) -> Foo? {
+              root
+            }
             public subscript(root: Foo) -> CasePaths.PartialCaseKeyPath<Foo> {
-              if root.is(\.bar) {
+              if case .bar = root {
                 return \.bar
               }
               return \.never
             }
-            public var bar: CasePaths.AnyCasePath<Foo, (Int, Bool)> {
-              CasePaths.AnyCasePath(embed: Foo.bar) {
-                guard case let .bar(v0, v1) = $0 else {
+            public struct _$bar: CasePaths.CasePath, Swift.Hashable, Swift.Sendable {
+              public func embed(_ value: (Int, Bool)) -> Foo {
+                Foo.bar(value.0, value.1)
+              }
+              public func extract(from root: Foo) -> (Int, Bool)? {
+                guard case let .bar(v0, v1) = root else {
                   return nil
                 }
                 return (v0, v1)
               }
+            }
+            public var bar: _$bar {
+              _$bar()
             }
             public func makeIterator() -> Swift.IndexingIterator<[CasePaths.PartialCaseKeyPath<Foo>]> {
               var allCasePaths: [CasePaths.PartialCaseKeyPath<Foo>] = []
@@ -665,20 +795,32 @@
         enum Foo {
           case bar(Bar<Self>)
 
-          public nonisolated struct AllCasePaths: CasePaths.CasePathReflectable, Swift.Sendable, Swift.Sequence {
+          public nonisolated struct AllCasePaths: CasePaths.CasePath, CasePaths.CasePathReflectable, Swift.Hashable, Swift.Sendable, Swift.Sequence {
+            public func embed(_ value: Foo) -> Foo {
+              value
+            }
+            public func extract(from root: Foo) -> Foo? {
+              root
+            }
             public subscript(root: Foo) -> CasePaths.PartialCaseKeyPath<Foo> {
-              if root.is(\.bar) {
+              if case .bar = root {
                 return \.bar
               }
               return \.never
             }
-            public var bar: CasePaths.AnyCasePath<Foo, Bar<Foo>> {
-              CasePaths.AnyCasePath(embed: Foo.bar) {
-                guard case let .bar(v0) = $0 else {
+            public struct _$bar: CasePaths.CasePath, Swift.Hashable, Swift.Sendable {
+              public func embed(_ value: Bar<Foo>) -> Foo {
+                Foo.bar(value)
+              }
+              public func extract(from root: Foo) -> Bar<Foo>? {
+                guard case let .bar(v0) = root else {
                   return nil
                 }
                 return v0
               }
+            }
+            public var bar: _$bar {
+              _$bar()
             }
             public func makeIterator() -> Swift.IndexingIterator<[CasePaths.PartialCaseKeyPath<Foo>]> {
               var allCasePaths: [CasePaths.PartialCaseKeyPath<Foo>] = []
@@ -719,20 +861,32 @@
         enum Foo {
           case bar(int: Int = 42, bool: Bool = true)
 
-          public nonisolated struct AllCasePaths: CasePaths.CasePathReflectable, Swift.Sendable, Swift.Sequence {
+          public nonisolated struct AllCasePaths: CasePaths.CasePath, CasePaths.CasePathReflectable, Swift.Hashable, Swift.Sendable, Swift.Sequence {
+            public func embed(_ value: Foo) -> Foo {
+              value
+            }
+            public func extract(from root: Foo) -> Foo? {
+              root
+            }
             public subscript(root: Foo) -> CasePaths.PartialCaseKeyPath<Foo> {
-              if root.is(\.bar) {
+              if case .bar = root {
                 return \.bar
               }
               return \.never
             }
-            public var bar: CasePaths.AnyCasePath<Foo, (int: Int, bool: Bool)> {
-              CasePaths.AnyCasePath(embed: Foo.bar) {
-                guard case let .bar(v0, v1) = $0 else {
+            public struct _$bar: CasePaths.CasePath, Swift.Hashable, Swift.Sendable {
+              public func embed(_ value: (int: Int, bool: Bool)) -> Foo {
+                Foo.bar(int: value.0, bool: value.1)
+              }
+              public func extract(from root: Foo) -> (int: Int, bool: Bool)? {
+                guard case let .bar(v0, v1) = root else {
                   return nil
                 }
                 return (v0, v1)
               }
+            }
+            public var bar: _$bar {
+              _$bar()
             }
             public func makeIterator() -> Swift.IndexingIterator<[CasePaths.PartialCaseKeyPath<Foo>]> {
               var allCasePaths: [CasePaths.PartialCaseKeyPath<Foo>] = []
@@ -807,121 +961,165 @@
           #endif
           #endif
 
-          public nonisolated struct AllCasePaths: CasePaths.CasePathReflectable, Swift.Sendable, Swift.Sequence {
+          public nonisolated struct AllCasePaths: CasePaths.CasePath, CasePaths.CasePathReflectable, Swift.Hashable, Swift.Sendable, Swift.Sequence {
+            public func embed(_ value: Foo) -> Foo {
+              value
+            }
+            public func extract(from root: Foo) -> Foo? {
+              root
+            }
             public subscript(root: Foo) -> CasePaths.PartialCaseKeyPath<Foo> {
-              if root.is(\.bar) {
+              if case .bar = root {
                 return \.bar
               }
               #if os(macOS)
-              if root.is(\.macCase) {
+              if case .macCase = root {
                 return \.macCase
               }
-              if root.is(\.macSecond) {
+              if case .macSecond = root {
                 return \.macSecond
               }
               #elseif os(iOS)
-              if root.is(\.iosCase) {
+              if case .iosCase = root {
                 return \.iosCase
               }
               #else
-              if root.is(\.elseCase) {
+              if case .elseCase = root {
                 return \.elseCase
               }
-              if root.is(\.elseLast) {
+              if case .elseLast = root {
                 return \.elseLast
               }
               #endif
               #if DEBUG
               #if INNER
-              if root.is(\.twoLevelsDeep) {
+              if case .twoLevelsDeep = root {
                 return \.twoLevelsDeep
               }
-              if root.is(\.twoLevels) {
+              if case .twoLevels = root {
                 return \.twoLevels
               }
               #endif
               #endif
               return \.never
             }
-            public var bar: CasePaths.AnyCasePath<Foo, Void> {
-              CasePaths.AnyCasePath(embed: {
-                  Foo.bar
-                }) {
-                guard case .bar = $0 else {
+            public struct _$bar: CasePaths.CasePath, Swift.Hashable, Swift.Sendable {
+              public func embed(_ value: Void) -> Foo {
+                Foo.bar
+              }
+              public func extract(from root: Foo) -> Void? {
+                guard case .bar = root else {
                   return nil
                 }
                 return ()
               }
+            }
+            public var bar: _$bar {
+              _$bar()
             }
             #if os(macOS)
-            public var macCase: CasePaths.AnyCasePath<Foo, Void> {
-              CasePaths.AnyCasePath(embed: {
-                  Foo.macCase
-                }) {
-                guard case .macCase = $0 else {
+            public struct _$macCase: CasePaths.CasePath, Swift.Hashable, Swift.Sendable {
+              public func embed(_ value: Void) -> Foo {
+                Foo.macCase
+              }
+              public func extract(from root: Foo) -> Void? {
+                guard case .macCase = root else {
                   return nil
                 }
                 return ()
               }
             }
-            public var macSecond: CasePaths.AnyCasePath<Foo, Int> {
-              CasePaths.AnyCasePath(embed: Foo.macSecond) {
-                guard case let .macSecond(v0) = $0 else {
+            public var macCase: _$macCase {
+              _$macCase()
+            }
+            public struct _$macSecond: CasePaths.CasePath, Swift.Hashable, Swift.Sendable {
+              public func embed(_ value: Int) -> Foo {
+                Foo.macSecond(value)
+              }
+              public func extract(from root: Foo) -> Int? {
+                guard case let .macSecond(v0) = root else {
                   return nil
                 }
                 return v0
               }
+            }
+            public var macSecond: _$macSecond {
+              _$macSecond()
             }
             #elseif os(iOS)
-            public var iosCase: CasePaths.AnyCasePath<Foo, Void> {
-              CasePaths.AnyCasePath(embed: {
-                  Foo.iosCase
-                }) {
-                guard case .iosCase = $0 else {
+            public struct _$iosCase: CasePaths.CasePath, Swift.Hashable, Swift.Sendable {
+              public func embed(_ value: Void) -> Foo {
+                Foo.iosCase
+              }
+              public func extract(from root: Foo) -> Void? {
+                guard case .iosCase = root else {
                   return nil
                 }
                 return ()
               }
             }
+            public var iosCase: _$iosCase {
+              _$iosCase()
+            }
             #else
-            public var elseCase: CasePaths.AnyCasePath<Foo, String> {
-              CasePaths.AnyCasePath(embed: Foo.elseCase) {
-                guard case let .elseCase(v0) = $0 else {
+            public struct _$elseCase: CasePaths.CasePath, Swift.Hashable, Swift.Sendable {
+              public func embed(_ value: String) -> Foo {
+                Foo.elseCase(value)
+              }
+              public func extract(from root: Foo) -> String? {
+                guard case let .elseCase(v0) = root else {
                   return nil
                 }
                 return v0
               }
             }
-            public var elseLast: CasePaths.AnyCasePath<Foo, Void> {
-              CasePaths.AnyCasePath(embed: {
-                  Foo.elseLast
-                }) {
-                guard case .elseLast = $0 else {
+            public var elseCase: _$elseCase {
+              _$elseCase()
+            }
+            public struct _$elseLast: CasePaths.CasePath, Swift.Hashable, Swift.Sendable {
+              public func embed(_ value: Void) -> Foo {
+                Foo.elseLast
+              }
+              public func extract(from root: Foo) -> Void? {
+                guard case .elseLast = root else {
                   return nil
                 }
                 return ()
               }
+            }
+            public var elseLast: _$elseLast {
+              _$elseLast()
             }
             #endif
             #if DEBUG
             #if INNER
-            public var twoLevelsDeep: CasePaths.AnyCasePath<Foo, Void> {
-              CasePaths.AnyCasePath(embed: {
-                  Foo.twoLevelsDeep
-                }) {
-                guard case .twoLevelsDeep = $0 else {
+            public struct _$twoLevelsDeep: CasePaths.CasePath, Swift.Hashable, Swift.Sendable {
+              public func embed(_ value: Void) -> Foo {
+                Foo.twoLevelsDeep
+              }
+              public func extract(from root: Foo) -> Void? {
+                guard case .twoLevelsDeep = root else {
                   return nil
                 }
                 return ()
               }
             }
-            public var twoLevels: CasePaths.AnyCasePath<Foo, Double> {
-              CasePaths.AnyCasePath(embed: Foo.twoLevels) {
-                guard case let .twoLevels(v0) = $0 else {
+            public var twoLevelsDeep: _$twoLevelsDeep {
+              _$twoLevelsDeep()
+            }
+            public struct _$twoLevels: CasePaths.CasePath, Swift.Hashable, Swift.Sendable {
+              public func embed(_ value: Double) -> Foo {
+                Foo.twoLevels(value)
+              }
+              public func extract(from root: Foo) -> Double? {
+                guard case let .twoLevels(v0) = root else {
                   return nil
                 }
                 return v0
               }
+            }
+            public var twoLevels: _$twoLevels {
+              _$twoLevels()
             }
             #endif
             #endif
@@ -1011,22 +1209,32 @@
         enum Foo {
           case bar
 
-          public nonisolated struct AllCasePaths: CasePaths.CasePathReflectable, Swift.Sendable, Swift.Sequence {
+          public nonisolated struct AllCasePaths: CasePaths.CasePath, CasePaths.CasePathReflectable, Swift.Hashable, Swift.Sendable, Swift.Sequence {
+            public func embed(_ value: Foo) -> Foo {
+              value
+            }
+            public func extract(from root: Foo) -> Foo? {
+              root
+            }
             public subscript(root: Foo) -> CasePaths.PartialCaseKeyPath<Foo> {
-              if root.is(\.bar) {
+              if case .bar = root {
                 return \.bar
               }
               return \.never
             }
-            public var bar: CasePaths.AnyCasePath<Foo, Void> {
-              CasePaths.AnyCasePath(embed: {
-                  Foo.bar
-                }) {
-                guard case .bar = $0 else {
+            public struct _$bar: CasePaths.CasePath, Swift.Hashable, Swift.Sendable {
+              public func embed(_ value: Void) -> Foo {
+                Foo.bar
+              }
+              public func extract(from root: Foo) -> Void? {
+                guard case .bar = root else {
                   return nil
                 }
                 return ()
               }
+            }
+            public var bar: _$bar {
+              _$bar()
             }
             public func makeIterator() -> Swift.IndexingIterator<[CasePaths.PartialCaseKeyPath<Foo>]> {
               var allCasePaths: [CasePaths.PartialCaseKeyPath<Foo>] = []
@@ -1096,28 +1304,49 @@
            */
           case fizz, buzz
 
-          public nonisolated struct AllCasePaths: CasePaths.CasePathReflectable, Swift.Sendable, Swift.Sequence {
+          public nonisolated struct AllCasePaths: CasePaths.CasePath, CasePaths.CasePathReflectable, Swift.Hashable, Swift.Sendable, Swift.Sequence {
+            public func embed(_ value: Foo) -> Foo {
+              value
+            }
+            public func extract(from root: Foo) -> Foo? {
+              root
+            }
             public subscript(root: Foo) -> CasePaths.PartialCaseKeyPath<Foo> {
-              if root.is(\.bar) {
+              if case .bar = root {
                 return \.bar
               }
-              if root.is(\.baz) {
+              if case .baz = root {
                 return \.baz
               }
-              if root.is(\.fizz) {
+              if case .fizz = root {
                 return \.fizz
               }
-              if root.is(\.buzz) {
+              if case .buzz = root {
                 return \.buzz
               }
               return \.never
             }
+            public struct _$bar: CasePaths.CasePath, Swift.Hashable, Swift.Sendable {
+              public func embed(_ value: Void) -> Foo {
+                Foo.bar
+              }
+              public func extract(from root: Foo) -> Void? {
+                guard case .bar = root else {
+                  return nil
+                }
+                return ()
+              }
+            }
             /// The bar case.
-            public var bar: CasePaths.AnyCasePath<Foo, Void> {
-              CasePaths.AnyCasePath(embed: {
-                  Foo.bar
-                }) {
-                guard case .bar = $0 else {
+            public var bar: _$bar {
+              _$bar()
+            }
+            public struct _$baz: CasePaths.CasePath, Swift.Hashable, Swift.Sendable {
+              public func embed(_ value: Void) -> Foo {
+                Foo.baz
+              }
+              public func extract(from root: Foo) -> Void? {
+                guard case .baz = root else {
                   return nil
                 }
                 return ()
@@ -1126,11 +1355,15 @@
             /// The baz case.
             ///
             /// A case for baz.
-            public var baz: CasePaths.AnyCasePath<Foo, Void> {
-              CasePaths.AnyCasePath(embed: {
-                  Foo.baz
-                }) {
-                guard case .baz = $0 else {
+            public var baz: _$baz {
+              _$baz()
+            }
+            public struct _$fizz: CasePaths.CasePath, Swift.Hashable, Swift.Sendable {
+              public func embed(_ value: Void) -> Foo {
+                Foo.fizz
+              }
+              public func extract(from root: Foo) -> Void? {
+                guard case .fizz = root else {
                   return nil
                 }
                 return ()
@@ -1141,11 +1374,15 @@
 
            A case for fizz and buzz.
            */
-            public var fizz: CasePaths.AnyCasePath<Foo, Void> {
-              CasePaths.AnyCasePath(embed: {
-                  Foo.fizz
-                }) {
-                guard case .fizz = $0 else {
+            public var fizz: _$fizz {
+              _$fizz()
+            }
+            public struct _$buzz: CasePaths.CasePath, Swift.Hashable, Swift.Sendable {
+              public func embed(_ value: Void) -> Foo {
+                Foo.buzz
+              }
+              public func extract(from root: Foo) -> Void? {
+                guard case .buzz = root else {
                   return nil
                 }
                 return ()
@@ -1156,15 +1393,8 @@
 
            A case for fizz and buzz.
            */
-            public var buzz: CasePaths.AnyCasePath<Foo, Void> {
-              CasePaths.AnyCasePath(embed: {
-                  Foo.buzz
-                }) {
-                guard case .buzz = $0 else {
-                  return nil
-                }
-                return ()
-              }
+            public var buzz: _$buzz {
+              _$buzz()
             }
             public func makeIterator() -> Swift.IndexingIterator<[CasePaths.PartialCaseKeyPath<Foo>]> {
               var allCasePaths: [CasePaths.PartialCaseKeyPath<Foo>] = []
@@ -1222,24 +1452,34 @@
         // case foo
           case bar
 
-          public nonisolated struct AllCasePaths: CasePaths.CasePathReflectable, Swift.Sendable, Swift.Sequence {
+          public nonisolated struct AllCasePaths: CasePaths.CasePath, CasePaths.CasePathReflectable, Swift.Hashable, Swift.Sendable, Swift.Sequence {
+            public func embed(_ value: Foo) -> Foo {
+              value
+            }
+            public func extract(from root: Foo) -> Foo? {
+              root
+            }
             public subscript(root: Foo) -> CasePaths.PartialCaseKeyPath<Foo> {
-              if root.is(\.bar) {
+              if case .bar = root {
                 return \.bar
               }
               return \.never
             }
-              // baz
-            // case foo
-            public var bar: CasePaths.AnyCasePath<Foo, Void> {
-              CasePaths.AnyCasePath(embed: {
-                  Foo.bar
-                }) {
-                guard case .bar = $0 else {
+            public struct _$bar: CasePaths.CasePath, Swift.Hashable, Swift.Sendable {
+              public func embed(_ value: Void) -> Foo {
+                Foo.bar
+              }
+              public func extract(from root: Foo) -> Void? {
+                guard case .bar = root else {
                   return nil
                 }
                 return ()
               }
+            }
+              // baz
+            // case foo
+            public var bar: _$bar {
+              _$bar()
             }
             public func makeIterator() -> Swift.IndexingIterator<[CasePaths.PartialCaseKeyPath<Foo>]> {
               var allCasePaths: [CasePaths.PartialCaseKeyPath<Foo>] = []
@@ -1290,69 +1530,101 @@
           case fizzier/*Comment in case*/(Int, buzzier: String)
           case fizziest // Comment without associated value
 
-          public nonisolated struct AllCasePaths: CasePaths.CasePathReflectable, Swift.Sendable, Swift.Sequence {
+          public nonisolated struct AllCasePaths: CasePaths.CasePath, CasePaths.CasePathReflectable, Swift.Hashable, Swift.Sendable, Swift.Sequence {
+            public func embed(_ value: Foo) -> Foo {
+              value
+            }
+            public func extract(from root: Foo) -> Foo? {
+              root
+            }
             public subscript(root: Foo) -> CasePaths.PartialCaseKeyPath<Foo> {
-              if root.is(\.bar) {
+              if case .bar = root {
                 return \.bar
               }
-              if root.is(\.baz) {
+              if case .baz = root {
                 return \.baz
               }
-              if root.is(\.fizz) {
+              if case .fizz = root {
                 return \.fizz
               }
-              if root.is(\.fizzier) {
+              if case .fizzier = root {
                 return \.fizzier
               }
-              if root.is(\.fizziest) {
+              if case .fizziest = root {
                 return \.fizziest
               }
               return \.never
             }
-            // Comment above case
-            public var bar: CasePaths.AnyCasePath<Foo, Void> {
-              CasePaths.AnyCasePath(embed: {
-                  Foo.bar
-                }) {
-                guard case .bar = $0 else {
+            public struct _$bar: CasePaths.CasePath, Swift.Hashable, Swift.Sendable {
+              public func embed(_ value: Void) -> Foo {
+                Foo.bar
+              }
+              public func extract(from root: Foo) -> Void? {
+                guard case .bar = root else {
                   return nil
                 }
                 return ()
               }
             }
-            /*Comment before case*/public var baz: CasePaths.AnyCasePath<Foo, Int> {
-              CasePaths.AnyCasePath(embed: Foo.baz) {
-                guard case let .baz(v0) = $0 else {
+            // Comment above case
+            public var bar: _$bar {
+              _$bar()
+            }
+            public struct _$baz: CasePaths.CasePath, Swift.Hashable, Swift.Sendable {
+              public func embed(_ value: Int) -> Foo {
+                Foo.baz(value)
+              }
+              public func extract(from root: Foo) -> Int? {
+                guard case let .baz(v0) = root else {
                   return nil
                 }
                 return v0
               }
             }
-            public var fizz: CasePaths.AnyCasePath<Foo, String> {
-              CasePaths.AnyCasePath(embed: Foo.fizz) {
-                guard case let .fizz(v0) = $0 else {
+            /*Comment before case*/public var baz: _$baz {
+              _$baz()
+            }
+            public struct _$fizz: CasePaths.CasePath, Swift.Hashable, Swift.Sendable {
+              public func embed(_ value: String) -> Foo {
+                Foo.fizz(buzz: value)
+              }
+              public func extract(from root: Foo) -> String? {
+                guard case let .fizz(v0) = root else {
                   return nil
                 }
                 return v0
               }
             }
-            public var fizzier: CasePaths.AnyCasePath<Foo, (Int, buzzier: String)> {
-              CasePaths.AnyCasePath(embed: Foo.fizzier) {
-                guard case let .fizzier(v0, v1) = $0 else {
+            public var fizz: _$fizz {
+              _$fizz()
+            }
+            public struct _$fizzier: CasePaths.CasePath, Swift.Hashable, Swift.Sendable {
+              public func embed(_ value: (Int, buzzier: String)) -> Foo {
+                Foo.fizzier(value.0, buzzier: value.1)
+              }
+              public func extract(from root: Foo) -> (Int, buzzier: String)? {
+                guard case let .fizzier(v0, v1) = root else {
                   return nil
                 }
                 return (v0, v1)
               }
             }
-            public var fizziest: CasePaths.AnyCasePath<Foo, Void> {
-              CasePaths.AnyCasePath(embed: {
-                  Foo.fizziest
-                }) {
-                guard case .fizziest = $0 else {
+            public var fizzier: _$fizzier {
+              _$fizzier()
+            }
+            public struct _$fizziest: CasePaths.CasePath, Swift.Hashable, Swift.Sendable {
+              public func embed(_ value: Void) -> Foo {
+                Foo.fizziest
+              }
+              public func extract(from root: Foo) -> Void? {
+                guard case .fizziest = root else {
                   return nil
                 }
                 return ()
               }
+            }
+            public var fizziest: _$fizziest {
+              _$fizziest()
             }
             public func makeIterator() -> Swift.IndexingIterator<[CasePaths.PartialCaseKeyPath<Foo>]> {
               var allCasePaths: [CasePaths.PartialCaseKeyPath<Foo>] = []
@@ -1409,20 +1681,32 @@
         enum Action<Element> {
           case element(Element)
 
-          public nonisolated struct AllCasePaths: CasePaths.CasePathReflectable, Swift.Sendable, Swift.Sequence {
+          public nonisolated struct AllCasePaths: CasePaths.CasePath, CasePaths.CasePathReflectable, Swift.Hashable, Swift.Sendable, Swift.Sequence {
+            public func embed(_ value: Action) -> Action {
+              value
+            }
+            public func extract(from root: Action) -> Action? {
+              root
+            }
             public subscript(root: Action) -> CasePaths.PartialCaseKeyPath<Action> {
-              if root.is(\.element) {
+              if case .element = root {
                 return \.element
               }
               return \.never
             }
-            public var element: CasePaths.AnyCasePath<Action, _$Element> {
-              CasePaths.AnyCasePath(embed: Action.element) {
-                guard case let .element(v0) = $0 else {
+            public struct _$element: CasePaths.CasePath, Swift.Hashable, Swift.Sendable {
+              public func embed(_ value: _$Element) -> Action {
+                Action.element(value)
+              }
+              public func extract(from root: Action) -> _$Element? {
+                guard case let .element(v0) = root else {
                   return nil
                 }
                 return v0
               }
+            }
+            public var element: _$element {
+              _$element()
             }
             public func makeIterator() -> Swift.IndexingIterator<[CasePaths.PartialCaseKeyPath<Action>]> {
               var allCasePaths: [CasePaths.PartialCaseKeyPath<Action>] = []
@@ -1468,20 +1752,32 @@
           enum Action {
             case element(Element)
 
-            public nonisolated struct AllCasePaths: CasePaths.CasePathReflectable, Swift.Sendable, Swift.Sequence {
+            public nonisolated struct AllCasePaths: CasePaths.CasePath, CasePaths.CasePathReflectable, Swift.Hashable, Swift.Sendable, Swift.Sequence {
+              public func embed(_ value: Action) -> Action {
+                value
+              }
+              public func extract(from root: Action) -> Action? {
+                root
+              }
               public subscript(root: Action) -> CasePaths.PartialCaseKeyPath<Action> {
-                if root.is(\.element) {
+                if case .element = root {
                   return \.element
                 }
                 return \.never
               }
-              public var element: CasePaths.AnyCasePath<Action, _$Element> {
-                CasePaths.AnyCasePath(embed: Action.element) {
-                  guard case let .element(v0) = $0 else {
+              public struct _$element: CasePaths.CasePath, Swift.Hashable, Swift.Sendable {
+                public func embed(_ value: _$Element) -> Action {
+                  Action.element(value)
+                }
+                public func extract(from root: Action) -> _$Element? {
+                  guard case let .element(v0) = root else {
                     return nil
                   }
                   return v0
                 }
+              }
+              public var element: _$element {
+                _$element()
               }
               public func makeIterator() -> Swift.IndexingIterator<[CasePaths.PartialCaseKeyPath<Action>]> {
                 var allCasePaths: [CasePaths.PartialCaseKeyPath<Action>] = []
@@ -1525,20 +1821,32 @@
         enum Action<Element> {
           case element(Array<Element>)
 
-          public nonisolated struct AllCasePaths: CasePaths.CasePathReflectable, Swift.Sendable, Swift.Sequence {
+          public nonisolated struct AllCasePaths: CasePaths.CasePath, CasePaths.CasePathReflectable, Swift.Hashable, Swift.Sendable, Swift.Sequence {
+            public func embed(_ value: Action) -> Action {
+              value
+            }
+            public func extract(from root: Action) -> Action? {
+              root
+            }
             public subscript(root: Action) -> CasePaths.PartialCaseKeyPath<Action> {
-              if root.is(\.element) {
+              if case .element = root {
                 return \.element
               }
               return \.never
             }
-            public var element: CasePaths.AnyCasePath<Action, Array<_$Element>> {
-              CasePaths.AnyCasePath(embed: Action.element) {
-                guard case let .element(v0) = $0 else {
+            public struct _$element: CasePaths.CasePath, Swift.Hashable, Swift.Sendable {
+              public func embed(_ value: Array<_$Element>) -> Action {
+                Action.element(value)
+              }
+              public func extract(from root: Action) -> Array<_$Element>? {
+                guard case let .element(v0) = root else {
                   return nil
                 }
                 return v0
               }
+            }
+            public var element: _$element {
+              _$element()
             }
             public func makeIterator() -> Swift.IndexingIterator<[CasePaths.PartialCaseKeyPath<Action>]> {
               var allCasePaths: [CasePaths.PartialCaseKeyPath<Action>] = []
@@ -1585,42 +1893,66 @@
           case secondElement(Element)
           case thirdElement(Element, Element, Int)
 
-          public nonisolated struct AllCasePaths: CasePaths.CasePathReflectable, Swift.Sendable, Swift.Sequence {
+          public nonisolated struct AllCasePaths: CasePaths.CasePath, CasePaths.CasePathReflectable, Swift.Hashable, Swift.Sendable, Swift.Sequence {
+            public func embed(_ value: Action) -> Action {
+              value
+            }
+            public func extract(from root: Action) -> Action? {
+              root
+            }
             public subscript(root: Action) -> CasePaths.PartialCaseKeyPath<Action> {
-              if root.is(\.element) {
+              if case .element = root {
                 return \.element
               }
-              if root.is(\.secondElement) {
+              if case .secondElement = root {
                 return \.secondElement
               }
-              if root.is(\.thirdElement) {
+              if case .thirdElement = root {
                 return \.thirdElement
               }
               return \.never
             }
-            public var element: CasePaths.AnyCasePath<Action, Array<_$Element>> {
-              CasePaths.AnyCasePath(embed: Action.element) {
-                guard case let .element(v0) = $0 else {
+            public struct _$element: CasePaths.CasePath, Swift.Hashable, Swift.Sendable {
+              public func embed(_ value: Array<_$Element>) -> Action {
+                Action.element(value)
+              }
+              public func extract(from root: Action) -> Array<_$Element>? {
+                guard case let .element(v0) = root else {
                   return nil
                 }
                 return v0
               }
             }
-            public var secondElement: CasePaths.AnyCasePath<Action, _$Element> {
-              CasePaths.AnyCasePath(embed: Action.secondElement) {
-                guard case let .secondElement(v0) = $0 else {
+            public var element: _$element {
+              _$element()
+            }
+            public struct _$secondElement: CasePaths.CasePath, Swift.Hashable, Swift.Sendable {
+              public func embed(_ value: _$Element) -> Action {
+                Action.secondElement(value)
+              }
+              public func extract(from root: Action) -> _$Element? {
+                guard case let .secondElement(v0) = root else {
                   return nil
                 }
                 return v0
               }
             }
-            public var thirdElement: CasePaths.AnyCasePath<Action, (_$Element, _$Element, Int)> {
-              CasePaths.AnyCasePath(embed: Action.thirdElement) {
-                guard case let .thirdElement(v0, v1, v2) = $0 else {
+            public var secondElement: _$secondElement {
+              _$secondElement()
+            }
+            public struct _$thirdElement: CasePaths.CasePath, Swift.Hashable, Swift.Sendable {
+              public func embed(_ value: (_$Element, _$Element, Int)) -> Action {
+                Action.thirdElement(value.0, value.1, value.2)
+              }
+              public func extract(from root: Action) -> (_$Element, _$Element, Int)? {
+                guard case let .thirdElement(v0, v1, v2) = root else {
                   return nil
                 }
                 return (v0, v1, v2)
               }
+            }
+            public var thirdElement: _$thirdElement {
+              _$thirdElement()
             }
             public func makeIterator() -> Swift.IndexingIterator<[CasePaths.PartialCaseKeyPath<Action>]> {
               var allCasePaths: [CasePaths.PartialCaseKeyPath<Action>] = []
@@ -1695,46 +2027,74 @@
             third: Double,
           )
 
-          public nonisolated struct AllCasePaths: CasePaths.CasePathReflectable, Swift.Sendable, Swift.Sequence {
+          public nonisolated struct AllCasePaths: CasePaths.CasePath, CasePaths.CasePathReflectable, Swift.Hashable, Swift.Sendable, Swift.Sequence {
+            public func embed(_ value: Action) -> Action {
+              value
+            }
+            public func extract(from root: Action) -> Action? {
+              root
+            }
             public subscript(root: Action) -> CasePaths.PartialCaseKeyPath<Action> {
-              if root.is(\.exampleAction) {
+              if case .exampleAction = root {
                 return \.exampleAction
               }
-              if root.is(\.singleParam) {
+              if case .singleParam = root {
                 return \.singleParam
               }
-              if root.is(\.multipleWithLabels) {
+              if case .multipleWithLabels = root {
                 return \.multipleWithLabels
               }
               return \.never
             }
-            public var exampleAction: CasePaths.AnyCasePath<Action, (param1: String,
-                param2: String,
-                param3: String)> {
-              CasePaths.AnyCasePath(embed: Action.exampleAction) {
-                guard case let .exampleAction(v0, v1, v2) = $0 else {
+            public struct _$exampleAction: CasePaths.CasePath, Swift.Hashable, Swift.Sendable {
+              public func embed(_ value: (param1: String,
+                  param2: String,
+                  param3: String)) -> Action {
+                Action.exampleAction(param1: value.0, param2: value.1, param3: value.2)
+              }
+              public func extract(from root: Action) -> (param1: String,
+                  param2: String,
+                  param3: String)? {
+                guard case let .exampleAction(v0, v1, v2) = root else {
                   return nil
                 }
                 return (v0, v1, v2)
               }
             }
-            public var singleParam: CasePaths.AnyCasePath<Action, Int> {
-              CasePaths.AnyCasePath(embed: Action.singleParam) {
-                guard case let .singleParam(v0) = $0 else {
+            public var exampleAction: _$exampleAction {
+              _$exampleAction()
+            }
+            public struct _$singleParam: CasePaths.CasePath, Swift.Hashable, Swift.Sendable {
+              public func embed(_ value: Int) -> Action {
+                Action.singleParam(value: value)
+              }
+              public func extract(from root: Action) -> Int? {
+                guard case let .singleParam(v0) = root else {
                   return nil
                 }
                 return v0
               }
             }
-            public var multipleWithLabels: CasePaths.AnyCasePath<Action, (first: String,
-                second: Bool,
-                third: Double)> {
-              CasePaths.AnyCasePath(embed: Action.multipleWithLabels) {
-                guard case let .multipleWithLabels(v0, v1, v2) = $0 else {
+            public var singleParam: _$singleParam {
+              _$singleParam()
+            }
+            public struct _$multipleWithLabels: CasePaths.CasePath, Swift.Hashable, Swift.Sendable {
+              public func embed(_ value: (first: String,
+                  second: Bool,
+                  third: Double)) -> Action {
+                Action.multipleWithLabels(first: value.0, second: value.1, third: value.2)
+              }
+              public func extract(from root: Action) -> (first: String,
+                  second: Bool,
+                  third: Double)? {
+                guard case let .multipleWithLabels(v0, v1, v2) = root else {
                   return nil
                 }
                 return (v0, v1, v2)
               }
+            }
+            public var multipleWithLabels: _$multipleWithLabels {
+              _$multipleWithLabels()
             }
             public func makeIterator() -> Swift.IndexingIterator<[CasePaths.PartialCaseKeyPath<Action>]> {
               var allCasePaths: [CasePaths.PartialCaseKeyPath<Action>] = []

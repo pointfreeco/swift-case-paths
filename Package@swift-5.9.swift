@@ -16,7 +16,7 @@ let package = Package(
     .library(
       name: "CasePaths",
       targets: ["CasePaths"]
-    ),
+    )
   ],
   dependencies: [
     .package(url: "https://github.com/swiftlang/swift-syntax", "509.0.0"..<"605.0.0"),
