@@ -163,12 +163,6 @@ public typealias CaseKeyPath<Root: CasePathable, Path: CasePath> =
 /// A partially type-erased key path, from a concrete root enum to any resulting value type.
 public typealias PartialCaseKeyPath<Root: CasePathable> = PartialKeyPath<Root.AllCasePaths>
 
-func f(_ kp: CaseKeyPath<Result<String, Never>, some CasePath<Result<String, Never>, String>>) {}
-
-func g() {
-  f(\.success)
-}
-
 extension KeyPath {
   /// Embeds a value in an enum at this case key path's case.
   ///
