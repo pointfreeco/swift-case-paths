@@ -1,12 +1,8 @@
 extension Never: CasePathable {
   public struct AllCasePaths: CasePathReflectable, Hashable, Sendable {
     public func embed(_ value: Never) -> Never {}
-
     public func extract(from root: Never) -> Never? {}
-
-    public subscript(root: Never) -> PartialCaseKeyPath<Never> {
-      \.never
-    }
+    public subscript(root: Never) -> PartialCaseKeyPath<Never> { \.never }
   }
 
   public static var allCasePaths: AllCasePaths {
