@@ -1,4 +1,4 @@
-#if canImport(MacroTesting)
+#if os(macOS) && canImport(MacroTesting) && swift(>=6.2)
   import CasePathsMacrosSupport
   import MacroTesting
   import SwiftSyntax

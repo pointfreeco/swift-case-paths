@@ -4,24 +4,18 @@
   import SwiftSyntaxBuilder
   import SwiftSyntaxMacroExpansion
   import SwiftSyntaxMacros
-  import XCTest
+  import Testing
 
-  final class CasePathableMacroTests: XCTestCase {
-    override func invokeTest() {
-      withMacroTesting(
-        // record: .failed,
-        macros: [
-          "CasePathable": MacroSpec(
-            type: CasePathableMacro.self,
-            conformances: ["CasePathable"]
-          )
-        ]
-      ) {
-        super.invokeTest()
-      }
-    }
-
-    func testCasePathable() {
+  @Suite(
+    .macros([
+      "CasePathable": MacroSpec(
+        type: CasePathableMacro.self,
+        conformances: ["CasePathable"]
+      )
+    ])
+  )
+  struct CasePathableMacroTests {
+    @Test func basics() {
       assertMacro {
         """
         @CasePathable enum Foo {
@@ -156,7 +150,7 @@
       }
     }
 
-    func testCasePathable_NoCases() {
+    @Test func `uninhabited enum`() {
       assertMacro {
         """
         @CasePathable enum EnumWithNoCases {}
@@ -199,7 +193,7 @@
       }
     }
 
-    func testCasePathable_NeverCase() {
+    @Test func `uninhabited case`() {
       assertMacro {
         """
         @CasePathable enum Foo {
@@ -265,7 +259,7 @@
       }
     }
 
-    func testCasePathable_ElementList() {
+    @Test func `element list`() {
       assertMacro {
         """
         @CasePathable public enum Foo {
@@ -352,7 +346,7 @@
       }
     }
 
-    func testCasePathable_AccessControl() {
+    @Test func `access control`() {
       assertMacro {
         """
         @CasePathable public enum Foo {
@@ -544,7 +538,7 @@
       }
     }
 
-    func testOverloadedCaseName() {
+    @Test func `overloaded case name`() {
       assertMacro {
         """
         @CasePathable enum Foo {
@@ -564,7 +558,7 @@
       }
     }
 
-    func testRequiresEnum() {
+    @Test func `struct`() {
       assertMacro {
         """
         @CasePathable struct Foo {
@@ -580,7 +574,7 @@
       }
     }
 
-    func testRedundantConformances() {
+    @Test func `redundant conformances`() {
       let macros = [
         "CasePathable": MacroSpec(type: CasePathableMacro.self)
       ]
@@ -705,7 +699,7 @@
       }
     }
 
-    func testWildcard() {
+    @Test func wildcard() {
       assertMacro {
         """
         @CasePathable enum Foo {
@@ -771,7 +765,7 @@
       }
     }
 
-    func testSelf() {
+    @Test func `capital 'Self'`() {
       assertMacro {
         """
         @CasePathable enum Foo {
@@ -837,7 +831,7 @@
       }
     }
 
-    func testDefaults() {
+    @Test func defaults() {
       assertMacro {
         """
         @CasePathable enum Foo {
@@ -903,7 +897,7 @@
       }
     }
 
-    func testConditionalCompilation() {
+    @Test func `conditional compilation`() {
       assertMacro {
         """
         @CasePathable enum Foo {
@@ -1182,7 +1176,7 @@
       }
     }
 
-    func testAvailability() {
+    @Test func `availability`() {
       assertMacro {
         """
         @available(iOS, unavailable)
@@ -1251,7 +1245,7 @@
       }
     }
 
-    func testDocumentation() {
+    @Test func `documentation comments`() {
       assertMacro {
         """
         @CasePathable
@@ -1423,7 +1417,7 @@
       }
     }
 
-    func testDocumentationIndentationTrimming() {
+    @Test func `documentation indentation trimming`() {
       assertMacro {
         """
         @CasePathable
@@ -1496,7 +1490,7 @@
       }
     }
 
-    func testComments() {
+    @Test func comments() {
       assertMacro {
         """
         @CasePathable enum Foo {
@@ -1657,7 +1651,7 @@
       }
     }
 
-    func testElementGeneric() {
+    @Test func generics() {
       assertMacro {
         """
         @CasePathable enum Action<Element> {
@@ -1725,7 +1719,7 @@
       }
     }
 
-    func testParentElementGeneric() {
+    @Test func `parent generic`() {
       assertMacro {
         """
         struct Reducer<Element> {
@@ -1797,7 +1791,7 @@
       }
     }
 
-    func testAssociatedValueElementArray() {
+    @Test func `generic element`() {
       assertMacro {
         """
         @CasePathable enum Action<Element> {
@@ -1865,7 +1859,7 @@
       }
     }
 
-    func testMultipleAssociatedValueElement() {
+    @Test func `many generic cases`() {
       assertMacro {
         """
         @CasePathable enum Action<Element> {
@@ -1979,7 +1973,7 @@
       }
     }
 
-    func testTrailingCommas() {
+    @Test func `trailing commas`() {
       assertMacro {
         """
         @CasePathable enum Action {
