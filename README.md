@@ -1,7 +1,7 @@
 # 🧰 CasePaths
 
 [![](https://img.shields.io/badge/documentation-gray?logo=swift&logoColor=white)](https://swiftpackageindex.com/pointfreeco/swift-case-paths/main/documentation/casepaths)
-[![CI](https://github.com/pointfreeco/swift-case-paths/workflows/CI/badge.svg)](https://actions-badge.atrox.dev/pointfreeco/swift-case-paths/goto)
+[![CI](https://github.com/pointfreeco/swift-case-paths/actions/workflows/ci.yml/badge.svg)](https://github.com/pointfreeco/swift-case-paths/actions/workflows/ci.yml)
 [![Slack](https://img.shields.io/badge/slack-chat-informational.svg?label=Slack&logo=slack)](http://pointfree.co/slack-invite)
 [![](https://img.shields.io/endpoint?url=https%3A%2F%2Fswiftpackageindex.com%2Fapi%2Fpackages%2Fpointfreeco%2Fswift-case-paths%2Fbadge%3Ftype%3Dswift-versions)](https://swiftpackageindex.com/pointfreeco/swift-case-paths)
 [![](https://img.shields.io/endpoint?url=https%3A%2F%2Fswiftpackageindex.com%2Fapi%2Fpackages%2Fpointfreeco%2Fswift-case-paths%2Fbadge%3Ftype%3Dplatforms)](https://swiftpackageindex.com/pointfreeco/swift-case-paths)
@@ -58,11 +58,11 @@ case in the enum.
 ## Using case paths in libraries
 
 By far the most common use of case paths is as a tool inside a library that is distributed to other
-developers. Case paths are used in the [Composable Architecture][tca-gh],
-[SwiftUI Navigation][sui-nav-gh], [Parsing][parsers-gh], and many other libraries.
+developers. Case paths are used in the [ComposableArchitecture][tca-gh],
+[SwiftNavigation][swift-nav-gh], [Parsing][parsers-gh], and many other libraries.
 
 [tca-gh]: http://github.com/pointfreeco/swift-composable-architecture
-[sui-nav-gh]: http://github.com/pointfreeco/swiftui-navigation
+[swift-nav-gh]: http://github.com/pointfreeco/swift-navigation
 [parsers-gh]: http://github.com/pointfreeco/swift-parsing
 
 If you maintain a library where you expect your users to model their domains with enums, then
@@ -359,7 +359,7 @@ struct ItemStatusView: View {
 
 > **Note**
 > The above is a simplified version of the subscript that ships in our
-> [Swift Navigation](https://github.com/pointfreeco/swift-navigation) library.
+> [SwiftNavigation](https://github.com/pointfreeco/swift-navigation) library.
 
 #### Computed paths
 
@@ -398,7 +398,10 @@ extension Authentication.AllCasePaths {
 
 ## Case studies
 
-  * [**The Composable Architecture**](https://github.com/pointfreeco/swift-composable-architecture)
+  * [**SwiftNavigation**](https://github.com/pointfreeco/swift-navigation) uses case paths to
+    power SwiftUI bindings, including navigation, with enums.
+
+  * [**ComposableArchitecture**](https://github.com/pointfreeco/swift-composable-architecture)
     allows you to break large features down into smaller ones that can be glued together user key
     paths and case paths.
 
