@@ -260,12 +260,12 @@ final class DeprecatedTests: XCTestCase {
   #if RELEASE
     func testNonEnumExtract() {
       // This is a bogus CasePath, intended to verify that it just returns nil.
-      let path: CasePath<Int, Int> = /{ $0 }
+      let path: AnyCasePath<Int, Int> = /{ $0 }
 
       for _ in 1...2 {
         XCTAssertNil(path.extract(from: 42))
       }
-      XCTAssertNil(CasePath { $0 }.extract(from: 42))
+      XCTAssertNil(AnyCasePath<Int, Int>({ $0 }).extract(from: 42))
     }
   #endif
 
