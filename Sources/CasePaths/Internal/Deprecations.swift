@@ -1,4 +1,4 @@
-@_spi(CurrentTestCase) import XCTestDynamicOverlay
+import IssueReporting
 
 #if canImport(ObjectiveC)
   import ObjectiveC
@@ -259,11 +259,8 @@ public func XCTUnwrap<Enum, Case>(
   let `enum` = try `enum`()
   guard let value = extract(`enum`)
   else {
-    #if canImport(ObjectiveC)
-      _ = XCTCurrentTestCase?.perform(Selector(("setContinueAfterFailure:")), with: false)
-    #endif
     let message = message()
-    XCTFail(
+    reportIssue(
       """
       XCTUnwrap: Expected to extract value of type "\(typeName(Case.self))" from \
       "\(typeName(Enum.self))"\
@@ -272,7 +269,7 @@ public func XCTUnwrap<Enum, Case>(
         Actual:
           \(String(describing: `enum`))
       """,
-      file: file,
+      filePath: file,
       line: line
     )
     throw UnwrappingCase()

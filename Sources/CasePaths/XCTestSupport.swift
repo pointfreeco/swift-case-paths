@@ -1,5 +1,5 @@
 import Foundation
-@_spi(CurrentTestCase) import XCTestDynamicOverlay
+import IssueReporting
 
 /// Asserts that an enum value matches a particular case and modifies the associated value in place.
 @available(*, deprecated, message: "Use 'CasePathable.modify' to mutate an expected case, instead.")
@@ -31,16 +31,13 @@ func _XCTModify<Enum, Case>(
   case casePath: AnyCasePath<Enum, Case>,
   _ message: @autoclosure () -> String = "",
   _ body: (inout Case) throws -> Void,
-  file: StaticString = #filePath,
-  line: UInt = #line
+  file: StaticString,
+  line: UInt
 ) {
   guard var value = casePath.extract(from: `enum`)
   else {
-    #if canImport(ObjectiveC)
-      _ = XCTCurrentTestCase?.perform(Selector(("setContinueAfterFailure:")), with: false)
-    #endif
     let message = message()
-    XCTFail(
+    reportIssue(
       """
       XCTModify: Expected to extract value of type "\(typeName(Case.self))" from \
       "\(typeName(Enum.self))"\
@@ -49,7 +46,7 @@ func _XCTModify<Enum, Case>(
         Actual:
           \(`enum`)
       """,
-      file: file,
+      filePath: file,
       line: line
     )
     return
@@ -58,7 +55,7 @@ func _XCTModify<Enum, Case>(
   do {
     try body(&value)
   } catch {
-    XCTFail("Threw error: \(error)", file: file, line: line)
+    reportIssue("Threw error: \(error)", filePath: file, line: line)
     return
   }
 
@@ -66,10 +63,12 @@ func _XCTModify<Enum, Case>(
     let isEqual = _isEqual(before, value),
     isEqual
   {
-    XCTFail(
+    reportIssue(
       """
       XCTModify: Expected "\(typeName(Case.self))" value to be modified but it was unchanged.
-      """
+      """,
+      filePath: file,
+      line: line
     )
   }
 
