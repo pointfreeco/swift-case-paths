@@ -1,5 +1,5 @@
 {
-  "originHash" : "554047fdf95319c47fc997977c4a6a4828cefd919ce227259d0bd6daf4672dcd",
+  "originHash" : "8d6271412714f48787bd8556c13df3f1ace0d326c620186d4d0bef4c90ed3284",
   "pins" : [
     {
       "identity" : "swift-custom-dump",
@@ -26,6 +26,15 @@
       "state" : {
         "revision" : "b45d1f2ed151d057b54504d653e0da5552844e34",
         "version" : "1.0.0"
+      }
+    },
+    {
+      "identity" : "swift-issue-reporting",
+      "kind" : "remoteSourceControl",
+      "location" : "https://github.com/pointfreeco/swift-issue-reporting",
+      "state" : {
+        "revision" : "71c7c9a761d1ca6ed4ccb6ced040fe1c1a39e8e7",
+        "version" : "2.1.0"
       }
     },
     {
@@ -60,8 +69,8 @@
       "kind" : "remoteSourceControl",
       "location" : "https://github.com/pointfreeco/xctest-dynamic-overlay",
       "state" : {
-        "revision" : "cb281f343fd953280336dcbd3822cdf47c182f5b",
-        "version" : "1.10.0"
+        "revision" : "7bbd97af585672a3dcdf6575ad37b339ad41b579",
+        "version" : "1.13.0"
       }
     }
   ],
