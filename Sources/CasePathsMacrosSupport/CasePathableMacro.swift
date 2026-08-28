@@ -54,28 +54,15 @@ extension CasePathableMacro: ExtensionMacro {
     conformingTo protocols: [TypeSyntax],
     in context: C
   ) throws -> [ExtensionDeclSyntax] {
-    // if protocols.isEmpty {
-    //   return []
-    // }
-    guard let enumDecl = declaration.as(EnumDeclSyntax.self)
+    if protocols.isEmpty {
+      return []
+    }
+    guard declaration.is(EnumDeclSyntax.self)
     else {
-      // TODO: Diagnostic?
       return []
     }
     guard shouldGenerate(for: node, attachedTo: declaration) else { return [] }
-    var conformances: [String] = []
-    if let inheritanceClause = enumDecl.inheritanceClause {
-      for type in ["CasePathable", "CasePathIterable"] {
-        if !inheritanceClause.inheritedTypes.contains(where: {
-          [type, type.qualified].contains($0.type.trimmedDescription)
-        }) {
-          conformances.append("\(moduleName).\(type)")
-        }
-      }
-    } else {
-      conformances = ["CasePathable", "CasePathIterable"].qualified
-    }
-    guard !conformances.isEmpty else { return [] }
+    let conformances = protocols.map(\.trimmedDescription)
     return [
       DeclSyntax(
         """
