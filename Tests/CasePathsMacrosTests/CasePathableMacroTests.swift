@@ -1,4 +1,4 @@
-#if os(macOS) && canImport(MacroTesting) && swift(>=6.2)
+#if canImport(MacroTesting)
   import CasePathsMacros
   import MacroTesting
   import SwiftSyntaxBuilder
@@ -481,87 +481,6 @@
     }
 
     func testRedundantConformances() {
-      let macros = [
-        "CasePathable": MacroSpec(
-          type: CasePathableMacro.self,
-          conformances: ["CasePathIterable"]
-        )
-      ]
-      assertMacro([
-        "CasePathable": MacroSpec(
-          type: CasePathableMacro.self,
-          conformances: ["CasePathIterable"]
-        )
-      ]) {
-        """
-        @CasePathable enum Foo: CasePathable {
-        }
-        """
-      } expansion: {
-        #"""
-        enum Foo: CasePathable {
-
-            public nonisolated struct AllCasePaths: CasePaths.CasePathReflectable, Swift.Sendable, Swift.Sequence {
-                public subscript(root: Foo) -> CasePaths.PartialCaseKeyPath<Foo> {
-                    \.never
-                }
-
-                public func makeIterator() -> Swift.IndexingIterator<[CasePaths.PartialCaseKeyPath<Foo>]> {
-                    let allCasePaths: [CasePaths.PartialCaseKeyPath<Foo>] = []
-                    return allCasePaths.makeIterator()
-                }
-            }
-
-            public nonisolated static var allCasePaths: AllCasePaths {
-                AllCasePaths()
-            }
-
-            public nonisolated static func caseName(
-                for keyPath: CasePaths.PartialCaseKeyPath<Foo>
-            ) -> Swift.String? {
-                return nil
-            }
-        }
-
-        extension Foo: nonisolated CasePathIterable {
-        }
-        """#
-      }
-      assertMacro(macros) {
-        """
-        @CasePathable enum Foo: CasePaths.CasePathable {
-        }
-        """
-      } expansion: {
-        #"""
-        enum Foo: CasePaths.CasePathable {
-
-            public nonisolated struct AllCasePaths: CasePaths.CasePathReflectable, Swift.Sendable, Swift.Sequence {
-                public subscript(root: Foo) -> CasePaths.PartialCaseKeyPath<Foo> {
-                    \.never
-                }
-
-                public func makeIterator() -> Swift.IndexingIterator<[CasePaths.PartialCaseKeyPath<Foo>]> {
-                    let allCasePaths: [CasePaths.PartialCaseKeyPath<Foo>] = []
-                    return allCasePaths.makeIterator()
-                }
-            }
-
-            public nonisolated static var allCasePaths: AllCasePaths {
-                AllCasePaths()
-            }
-
-            public nonisolated static func caseName(
-                for keyPath: CasePaths.PartialCaseKeyPath<Foo>
-            ) -> Swift.String? {
-                return nil
-            }
-        }
-
-        extension Foo: nonisolated CasePathIterable {
-        }
-        """#
-      }
       assertMacro {
         """
         @CasePathable enum Foo: CasePathable {
@@ -570,6 +489,41 @@
       } expansion: {
         #"""
         enum Foo: CasePathable {
+
+            public nonisolated struct AllCasePaths: CasePaths.CasePathReflectable, Swift.Sendable, Swift.Sequence {
+                public subscript(root: Foo) -> CasePaths.PartialCaseKeyPath<Foo> {
+                    \.never
+                }
+
+                public func makeIterator() -> Swift.IndexingIterator<[CasePaths.PartialCaseKeyPath<Foo>]> {
+                    let allCasePaths: [CasePaths.PartialCaseKeyPath<Foo>] = []
+                    return allCasePaths.makeIterator()
+                }
+            }
+
+            public nonisolated static var allCasePaths: AllCasePaths {
+                AllCasePaths()
+            }
+
+            public nonisolated static func caseName(
+                for keyPath: CasePaths.PartialCaseKeyPath<Foo>
+            ) -> Swift.String? {
+                return nil
+            }
+        }
+
+        extension Foo: nonisolated CasePathable, nonisolated CasePathIterable {
+        }
+        """#
+      }
+      assertMacro {
+        """
+        @CasePathable enum Foo: CasePaths.CasePathable {
+        }
+        """
+      } expansion: {
+        #"""
+        enum Foo: CasePaths.CasePathable {
 
             public nonisolated struct AllCasePaths: CasePaths.CasePathReflectable, Swift.Sendable, Swift.Sequence {
                 public subscript(root: Foo) -> CasePaths.PartialCaseKeyPath<Foo> {

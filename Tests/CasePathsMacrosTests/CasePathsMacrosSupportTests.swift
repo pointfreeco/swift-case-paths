@@ -11,7 +11,7 @@
     .macros([
       "CaseBindable": MacroSpec(
         type: CaseBindableMacro.self,
-        conformances: ["CasePathable", "CasePathIterable"]
+        conformances: ["CasePathable", "CasePathIterable", "CaseBindable"]
       ),
       "CasePathable": MacroSpec(
         type: CasePathableMacro.self,
@@ -118,7 +118,7 @@
           }
         }
 
-        extension Foo: nonisolated CasePathable, nonisolated CasePathIterable {
+        extension Foo: nonisolated CasePathable, nonisolated CasePathIterable, nonisolated CaseBindable {
         }
         """#
       }
@@ -313,7 +313,7 @@
           }
         }
 
-        extension Foo: nonisolated CasePathable, nonisolated CasePathIterable {
+        extension Foo: nonisolated CasePathable, nonisolated CasePathIterable, nonisolated CaseBindable {
         }
         """#
       }
