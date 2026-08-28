@@ -1,6 +1,6 @@
 /// A type that can embed a value in a root, and attempt to extract a value from a root.
 ///
-/// The `@CasePathable` macro generates conformances to this protocol for each of an num's cases,
+/// The `@CasePathable` macro generates conformances to this protocol for each of an enum's cases,
 /// nested in the enum's ``CasePathable/AllCasePaths`` type.
 @dynamicMemberLookup
 public protocol CasePath<Root, Value> {
