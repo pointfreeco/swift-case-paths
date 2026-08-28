@@ -1,4 +1,4 @@
-// swift-tools-version: 6.4
+// swift-tools-version: 6.0
 
 import CompilerPluginSupport
 import Foundation
@@ -7,10 +7,10 @@ import PackageDescription
 let package = Package(
   name: "swift-case-paths",
   platforms: [
-    .iOS(.v15),
-    .macOS(.v12),
-    .tvOS(.v15),
-    .watchOS(.v9),
+    .iOS(.v13),
+    .macOS(.v10_15),
+    .tvOS(.v13),
+    .watchOS(.v6),
   ],
   products: [
     .library(
@@ -27,7 +27,7 @@ let package = Package(
     ),
   ],
   dependencies: [
-    .package(url: "https://github.com/pointfreeco/swift-issue-reporting", from: "2.1.0"),
+    .package(url: "https://github.com/pointfreeco/xctest-dynamic-overlay", from: "1.13.0"),
     .package(url: "https://github.com/swiftlang/swift-syntax", "509.0.0"..<"605.0.0"),
   ],
   targets: [
@@ -41,7 +41,7 @@ let package = Package(
     .target(
       name: "CasePathsCore",
       dependencies: [
-        .product(name: "IssueReporting", package: "swift-issue-reporting")
+        .product(name: "IssueReporting", package: "xctest-dynamic-overlay")
       ]
     ),
     .target(
@@ -83,7 +83,7 @@ let package = Package(
 
 if ProcessInfo.processInfo.environment["OMIT_MACRO_TESTS"] == nil {
   package.dependencies.append(
-    .package(url: "https://github.com/pointfreeco/swift-macro-testing", from: "0.7.0")
+    .package(url: "https://github.com/pointfreeco/swift-macro-testing", from: "0.2.0")
   )
   package.targets.append(
     .testTarget(

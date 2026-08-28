@@ -22,8 +22,8 @@
 /// _: CaseKeyPath<UserAction, SettingsAction> = \.settings
 ///
 /// // Or they can be fully qualified under the type's `Cases`:
-/// \UserAction.Cases.home      // CasePath<UserAction, HomeAction>
-/// \UserAction.Cases.settings  // CasePath<UserAction, SettingsAction>
+/// \UserAction.Cases.home      // AnyCasePath<UserAction, HomeAction>
+/// \UserAction.Cases.settings  // AnyCasePath<UserAction, SettingsAction>
 /// ```
 @attached(extension, conformances: CasePathable, CasePathIterable)
 @attached(
