@@ -153,12 +153,8 @@ extension CasePathableMacro: MemberMacro {
       """
       public \(nonisolated)struct AllCasePaths: \
       CasePaths.CasePathReflectable, Swift.Hashable, Swift.Sendable {
-      public func embed(_ value: \(enumName)) -> \(enumName) {
-      value
-      }
-      public func extract(from root: \(enumName)) -> \(enumName)? {
-      root
-      }
+      public func embed(_ value: \(enumName)) -> \(enumName) {\(raw: allCases.isEmpty ? "" : "\nvalue\n")}
+      public func extract(from root: \(enumName)) -> \(enumName)? {\(raw: allCases.isEmpty ? "" : "\nroot\n")}
       public subscript(root: \(enumName)) -> CasePaths.PartialCaseKeyPath<\(enumName)> {
       \(raw: rootSubscriptCases.map { "\($0.description)\n" }.joined())\(raw: subscriptReturn)
       }

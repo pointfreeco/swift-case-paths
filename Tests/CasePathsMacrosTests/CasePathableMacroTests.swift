@@ -161,10 +161,8 @@
 
             public nonisolated struct AllCasePaths: CasePaths.CasePathReflectable, Swift.Hashable, Swift.Sendable {
                 public func embed(_ value: EnumWithNoCases) -> EnumWithNoCases {
-                    value
                 }
                 public func extract(from root: EnumWithNoCases) -> EnumWithNoCases? {
-                    root
                 }
                 public subscript(root: EnumWithNoCases) -> CasePaths.PartialCaseKeyPath<EnumWithNoCases> {
                     \.never
@@ -591,10 +589,8 @@
 
             public nonisolated struct AllCasePaths: CasePaths.CasePathReflectable, Swift.Hashable, Swift.Sendable {
                 public func embed(_ value: Foo) -> Foo {
-                    value
                 }
                 public func extract(from root: Foo) -> Foo? {
-                    root
                 }
                 public subscript(root: Foo) -> CasePaths.PartialCaseKeyPath<Foo> {
                     \.never
@@ -629,10 +625,8 @@
 
             public nonisolated struct AllCasePaths: CasePaths.CasePathReflectable, Swift.Hashable, Swift.Sendable {
                 public func embed(_ value: Foo) -> Foo {
-                    value
                 }
                 public func extract(from root: Foo) -> Foo? {
-                    root
                 }
                 public subscript(root: Foo) -> CasePaths.PartialCaseKeyPath<Foo> {
                     \.never
@@ -667,10 +661,8 @@
 
             public nonisolated struct AllCasePaths: CasePaths.CasePathReflectable, Swift.Hashable, Swift.Sendable {
                 public func embed(_ value: Foo) -> Foo {
-                    value
                 }
                 public func extract(from root: Foo) -> Foo? {
-                    root
                 }
                 public subscript(root: Foo) -> CasePaths.PartialCaseKeyPath<Foo> {
                     \.never
