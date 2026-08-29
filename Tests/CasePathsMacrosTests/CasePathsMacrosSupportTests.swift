@@ -79,7 +79,10 @@
             }
             public struct _$baz: CasePaths.CasePath, Swift.Hashable, Swift.Sendable {
               public func embed(_ value: Int) -> Foo {
-                Foo.baz(value)
+                switch value {
+                case _:
+                  Foo.baz(value)
+                }
               }
               public func extract(from root: Foo) -> Int? {
                 guard case let .baz(v0) = root else {
@@ -93,7 +96,10 @@
             }
             public struct _$fizz: CasePaths.CasePath, Swift.Hashable, Swift.Sendable {
               public func embed(_ value: String) -> Foo {
-                Foo.fizz(buzz: value)
+                switch value {
+                case _:
+                  Foo.fizz(buzz: value)
+                }
               }
               public func extract(from root: Foo) -> String? {
                 guard case let .fizz(v0) = root else {
@@ -203,7 +209,10 @@
             }
             public struct _$baz: CasePaths.CasePath, Swift.Hashable, Swift.Sendable {
               public func embed(_ value: Int) -> Foo {
-                Foo.baz(value)
+                switch value {
+                case _:
+                  Foo.baz(value)
+                }
               }
               public func extract(from root: Foo) -> Int? {
                 guard case let .baz(v0) = root else {
@@ -217,7 +226,10 @@
             }
             public struct _$fizz: CasePaths.CasePath, Swift.Hashable, Swift.Sendable {
               public func embed(_ value: String) -> Foo {
-                Foo.fizz(buzz: value)
+                switch value {
+                case _:
+                  Foo.fizz(buzz: value)
+                }
               }
               public func extract(from root: Foo) -> String? {
                 guard case let .fizz(v0) = root else {
@@ -318,7 +330,10 @@
             }
             public struct _$baz: CasePaths.CasePath, Swift.Hashable, Swift.Sendable {
               public func embed(_ value: Int) -> Foo {
-                Foo.baz(value)
+                switch value {
+                case _:
+                  Foo.baz(value)
+                }
               }
               public func extract(from root: Foo) -> Int? {
                 guard case let .baz(v0) = root else {
@@ -332,7 +347,10 @@
             }
             public struct _$fizz: CasePaths.CasePath, Swift.Hashable, Swift.Sendable {
               public func embed(_ value: String) -> Foo {
-                Foo.fizz(buzz: value)
+                switch value {
+                case _:
+                  Foo.fizz(buzz: value)
+                }
               }
               public func extract(from root: Foo) -> String? {
                 guard case let .fizz(v0) = root else {
@@ -440,7 +458,10 @@
             }
             public struct _$baz: CasePaths.CasePath, Swift.Hashable, Swift.Sendable {
               public func embed(_ value: Int) -> Foo {
-                Foo.baz(value)
+                switch value {
+                case _:
+                  Foo.baz(value)
+                }
               }
               public func extract(from root: Foo) -> Int? {
                 guard case let .baz(v0) = root else {
@@ -454,7 +475,10 @@
             }
             public struct _$fizz: CasePaths.CasePath, Swift.Hashable, Swift.Sendable {
               public func embed(_ value: String) -> Foo {
-                Foo.fizz(buzz: value)
+                switch value {
+                case _:
+                  Foo.fizz(buzz: value)
+                }
               }
               public func extract(from root: Foo) -> String? {
                 guard case let .fizz(v0) = root else {
@@ -535,7 +559,10 @@
             }
             public struct _$baz: CasePaths.CasePath, Swift.Hashable, Swift.Sendable {
               public func embed(_ value: Int) -> Foo {
-                Foo.baz(value)
+                switch value {
+                case _:
+                  Foo.baz(value)
+                }
               }
               public func extract(from root: Foo) -> Int? {
                 guard case let .baz(v0) = root else {

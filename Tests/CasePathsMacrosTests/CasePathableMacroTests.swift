@@ -71,7 +71,10 @@
             }
             public struct _$baz: CasePaths.CasePath, Swift.Hashable, Swift.Sendable {
               public func embed(_ value: Int) -> Foo {
-                Foo.baz(value)
+                switch value {
+                case _:
+                  Foo.baz(value)
+                }
               }
               public func extract(from root: Foo) -> Int? {
                 guard case let .baz(v0) = root else {
@@ -85,7 +88,10 @@
             }
             public struct _$fizz: CasePaths.CasePath, Swift.Hashable, Swift.Sendable {
               public func embed(_ value: String) -> Foo {
-                Foo.fizz(buzz: value)
+                switch value {
+                case _:
+                  Foo.fizz(buzz: value)
+                }
               }
               public func extract(from root: Foo) -> String? {
                 guard case let .fizz(v0) = root else {
@@ -99,7 +105,10 @@
             }
             public struct _$fizzier: CasePaths.CasePath, Swift.Hashable, Swift.Sendable {
               public func embed(_ value: (Int, buzzier: String)) -> Foo {
-                Foo.fizzier(value.0, buzzier: value.1)
+                switch value {
+                case (_, _):
+                  Foo.fizzier(value.0, buzzier: value.1)
+                }
               }
               public func extract(from root: Foo) -> (Int, buzzier: String)? {
                 guard case let .fizzier(v0, v1) = root else {
@@ -218,7 +227,10 @@
             }
             public struct _$bar: CasePaths.CasePath, Swift.Hashable, Swift.Sendable {
               public func embed(_ value: Never) -> Foo {
-                Foo.bar(value)
+                switch value {
+                case _:
+                  Foo.bar(value)
+                }
               }
               public func extract(from root: Foo) -> Never? {
                 guard case let .bar(v0) = root else {
@@ -287,7 +299,10 @@
             }
             public struct _$bar: CasePaths.CasePath, Swift.Hashable, Swift.Sendable {
               public func embed(_ value: Int) -> Foo {
-                Foo.bar(value)
+                switch value {
+                case _:
+                  Foo.bar(value)
+                }
               }
               public func extract(from root: Foo) -> Int? {
                 guard case let .bar(v0) = root else {
@@ -301,7 +316,10 @@
             }
             public struct _$baz: CasePaths.CasePath, Swift.Hashable, Swift.Sendable {
               public func embed(_ value: String) -> Foo {
-                Foo.baz(value)
+                switch value {
+                case _:
+                  Foo.baz(value)
+                }
               }
               public func extract(from root: Foo) -> String? {
                 guard case let .baz(v0) = root else {
@@ -371,7 +389,10 @@
             }
             public struct _$bar: CasePaths.CasePath, Swift.Hashable, Swift.Sendable {
               public func embed(_ value: Int) -> Foo {
-                Foo.bar(value)
+                switch value {
+                case _:
+                  Foo.bar(value)
+                }
               }
               public func extract(from root: Foo) -> Int? {
                 guard case let .bar(v0) = root else {
@@ -434,7 +455,10 @@
             }
             public struct _$bar: CasePaths.CasePath, Swift.Hashable, Swift.Sendable {
               public func embed(_ value: Int) -> Foo {
-                Foo.bar(value)
+                switch value {
+                case _:
+                  Foo.bar(value)
+                }
               }
               public func extract(from root: Foo) -> Int? {
                 guard case let .bar(v0) = root else {
@@ -497,7 +521,10 @@
             }
             public struct _$bar: CasePaths.CasePath, Swift.Hashable, Swift.Sendable {
               public func embed(_ value: Int) -> Foo {
-                Foo.bar(value)
+                switch value {
+                case _:
+                  Foo.bar(value)
+                }
               }
               public func extract(from root: Foo) -> Int? {
                 guard case let .bar(v0) = root else {
@@ -718,7 +745,10 @@
             }
             public struct _$bar: CasePaths.CasePath, Swift.Hashable, Swift.Sendable {
               public func embed(_ value: (Int, Bool)) -> Foo {
-                Foo.bar(value.0, value.1)
+                switch value {
+                case (_, _):
+                  Foo.bar(value.0, value.1)
+                }
               }
               public func extract(from root: Foo) -> (Int, Bool)? {
                 guard case let .bar(v0, v1) = root else {
@@ -784,7 +814,10 @@
             }
             public struct _$bar: CasePaths.CasePath, Swift.Hashable, Swift.Sendable {
               public func embed(_ value: Bar<Foo>) -> Foo {
-                Foo.bar(value)
+                switch value {
+                case _:
+                  Foo.bar(value)
+                }
               }
               public func extract(from root: Foo) -> Bar<Foo>? {
                 guard case let .bar(v0) = root else {
@@ -850,7 +883,10 @@
             }
             public struct _$bar: CasePaths.CasePath, Swift.Hashable, Swift.Sendable {
               public func embed(_ value: (int: Int, bool: Bool)) -> Foo {
-                Foo.bar(int: value.0, bool: value.1)
+                switch value {
+                case (_, _):
+                  Foo.bar(int: value.0, bool: value.1)
+                }
               }
               public func extract(from root: Foo) -> (int: Int, bool: Bool)? {
                 guard case let .bar(v0, v1) = root else {
@@ -1008,7 +1044,10 @@
             }
             public struct _$macSecond: CasePaths.CasePath, Swift.Hashable, Swift.Sendable {
               public func embed(_ value: Int) -> Foo {
-                Foo.macSecond(value)
+                switch value {
+                case _:
+                  Foo.macSecond(value)
+                }
               }
               public func extract(from root: Foo) -> Int? {
                 guard case let .macSecond(v0) = root else {
@@ -1038,7 +1077,10 @@
             #else
             public struct _$elseCase: CasePaths.CasePath, Swift.Hashable, Swift.Sendable {
               public func embed(_ value: String) -> Foo {
-                Foo.elseCase(value)
+                switch value {
+                case _:
+                  Foo.elseCase(value)
+                }
               }
               public func extract(from root: Foo) -> String? {
                 guard case let .elseCase(v0) = root else {
@@ -1083,7 +1125,10 @@
             }
             public struct _$twoLevels: CasePaths.CasePath, Swift.Hashable, Swift.Sendable {
               public func embed(_ value: Double) -> Foo {
-                Foo.twoLevels(value)
+                switch value {
+                case _:
+                  Foo.twoLevels(value)
+                }
               }
               public func extract(from root: Foo) -> Double? {
                 guard case let .twoLevels(v0) = root else {
@@ -1546,7 +1591,10 @@
             }
             public struct _$baz: CasePaths.CasePath, Swift.Hashable, Swift.Sendable {
               public func embed(_ value: Int) -> Foo {
-                Foo.baz(value)
+                switch value {
+                case _:
+                  Foo.baz(value)
+                }
               }
               public func extract(from root: Foo) -> Int? {
                 guard case let .baz(v0) = root else {
@@ -1560,7 +1608,10 @@
             }
             public struct _$fizz: CasePaths.CasePath, Swift.Hashable, Swift.Sendable {
               public func embed(_ value: String) -> Foo {
-                Foo.fizz(buzz: value)
+                switch value {
+                case _:
+                  Foo.fizz(buzz: value)
+                }
               }
               public func extract(from root: Foo) -> String? {
                 guard case let .fizz(v0) = root else {
@@ -1574,7 +1625,10 @@
             }
             public struct _$fizzier: CasePaths.CasePath, Swift.Hashable, Swift.Sendable {
               public func embed(_ value: (Int, buzzier: String)) -> Foo {
-                Foo.fizzier(value.0, buzzier: value.1)
+                switch value {
+                case (_, _):
+                  Foo.fizzier(value.0, buzzier: value.1)
+                }
               }
               public func extract(from root: Foo) -> (Int, buzzier: String)? {
                 guard case let .fizzier(v0, v1) = root else {
@@ -1670,7 +1724,10 @@
             }
             public struct _$element: CasePaths.CasePath, Swift.Hashable, Swift.Sendable {
               public func embed(_ value: _$Element) -> Action {
-                Action.element(value)
+                switch value {
+                case _:
+                  Action.element(value)
+                }
               }
               public func extract(from root: Action) -> _$Element? {
                 guard case let .element(v0) = root else {
@@ -1741,7 +1798,10 @@
               }
               public struct _$element: CasePaths.CasePath, Swift.Hashable, Swift.Sendable {
                 public func embed(_ value: _$Element) -> Action {
-                  Action.element(value)
+                  switch value {
+                  case _:
+                    Action.element(value)
+                  }
                 }
                 public func extract(from root: Action) -> _$Element? {
                   guard case let .element(v0) = root else {
@@ -1810,7 +1870,10 @@
             }
             public struct _$element: CasePaths.CasePath, Swift.Hashable, Swift.Sendable {
               public func embed(_ value: Array<_$Element>) -> Action {
-                Action.element(value)
+                switch value {
+                case _:
+                  Action.element(value)
+                }
               }
               public func extract(from root: Action) -> Array<_$Element>? {
                 guard case let .element(v0) = root else {
@@ -1888,7 +1951,10 @@
             }
             public struct _$element: CasePaths.CasePath, Swift.Hashable, Swift.Sendable {
               public func embed(_ value: Array<_$Element>) -> Action {
-                Action.element(value)
+                switch value {
+                case _:
+                  Action.element(value)
+                }
               }
               public func extract(from root: Action) -> Array<_$Element>? {
                 guard case let .element(v0) = root else {
@@ -1902,7 +1968,10 @@
             }
             public struct _$secondElement: CasePaths.CasePath, Swift.Hashable, Swift.Sendable {
               public func embed(_ value: _$Element) -> Action {
-                Action.secondElement(value)
+                switch value {
+                case _:
+                  Action.secondElement(value)
+                }
               }
               public func extract(from root: Action) -> _$Element? {
                 guard case let .secondElement(v0) = root else {
@@ -1916,7 +1985,10 @@
             }
             public struct _$thirdElement: CasePaths.CasePath, Swift.Hashable, Swift.Sendable {
               public func embed(_ value: (_$Element, _$Element, Int)) -> Action {
-                Action.thirdElement(value.0, value.1, value.2)
+                switch value {
+                case (_, _, _):
+                  Action.thirdElement(value.0, value.1, value.2)
+                }
               }
               public func extract(from root: Action) -> (_$Element, _$Element, Int)? {
                 guard case let .thirdElement(v0, v1, v2) = root else {
@@ -2024,7 +2096,10 @@
               public func embed(_ value: (param1: String,
                   param2: String,
                   param3: String)) -> Action {
-                Action.exampleAction(param1: value.0, param2: value.1, param3: value.2)
+                switch value {
+                case (_, _, _):
+                  Action.exampleAction(param1: value.0, param2: value.1, param3: value.2)
+                }
               }
               public func extract(from root: Action) -> (param1: String,
                   param2: String,
@@ -2040,7 +2115,10 @@
             }
             public struct _$singleParam: CasePaths.CasePath, Swift.Hashable, Swift.Sendable {
               public func embed(_ value: Int) -> Action {
-                Action.singleParam(value: value)
+                switch value {
+                case _:
+                  Action.singleParam(value: value)
+                }
               }
               public func extract(from root: Action) -> Int? {
                 guard case let .singleParam(v0) = root else {
@@ -2056,7 +2134,10 @@
               public func embed(_ value: (first: String,
                   second: Bool,
                   third: Double)) -> Action {
-                Action.multipleWithLabels(first: value.0, second: value.1, third: value.2)
+                switch value {
+                case (_, _, _):
+                  Action.multipleWithLabels(first: value.0, second: value.1, third: value.2)
+                }
               }
               public func extract(from root: Action) -> (first: String,
                   second: Bool,

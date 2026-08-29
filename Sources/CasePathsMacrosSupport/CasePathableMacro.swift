@@ -264,7 +264,15 @@ extension CasePathableMacro: MemberMacro {
             return "\(label)\(access)"
           }
           .joined(separator: ", ")
-        embedBody = "\(enumName).\(caseName)(\(arguments))"
+        let pattern = associatedValue.parameters.count == 1
+          ? "_"
+          : "(\(Array(repeating: "_", count: associatedValue.parameters.count).joined(separator: ", ")))"
+        embedBody = """
+          switch value {
+          case \(pattern):
+          \(enumName).\(caseName)(\(arguments))
+          }
+          """
         let parameterNames = (0..<associatedValue.parameters.count)
           .map { "v\($0)" }
           .joined(separator: ", ")
