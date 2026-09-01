@@ -140,7 +140,7 @@ extension CasePathableMacro: MemberMacro {
     let selfRewriter = SelfRewriter(selfEquivalent: enumName)
     let memberBlock = selfRewriter.rewrite(enumDecl.memberBlock).cast(MemberBlockSyntax.self)
     let rootSubscriptCases = generateCases(from: memberBlock.members, enumName: enumName) {
-      "if root.is(\\.\($0.name.text)) { return \\.\($0.name.text) }"
+      "if case .\($0.name.text) = root { return \\.\($0.name.text) }"
     }
     let elementRewriter = ElementRewriter()
     let casePaths = generateDeclSyntax(
@@ -157,15 +157,15 @@ extension CasePathableMacro: MemberMacro {
     var decls: [DeclSyntax] = [
       """
       public struct AllCasePaths: CasePaths.CasePathReflectable, Swift.Sendable, Swift.Sequence {
-      public subscript(root: \(enumName)) -> CasePaths.PartialCaseKeyPath<\(enumName)> {
+      public static func _case(for root: \(enumName)) -> CasePaths.PartialCaseKeyPath<\(enumName)> {
       \(raw: rootSubscriptCases.map { "\($0.description)\n" }.joined())\(raw: subscriptReturn)
       }
       \(raw: casePaths.map(\.description).joined(separator: "\n"))
-      public func makeIterator() -> Swift.IndexingIterator<[CasePaths.PartialCaseKeyPath<\(enumName)>]> {
+      public static var _allCaseKeyPaths: [CasePaths.PartialCaseKeyPath<\(enumName)>] {
       \(raw: allCases.isEmpty ? "let" : "var") allCasePaths: \
       [CasePaths.PartialCaseKeyPath<\(enumName)>] = []\
       \(raw: allCases.map { "\n\($0.description)" }.joined())
-      return allCasePaths.makeIterator()
+      return allCasePaths
       }
       }
       """,

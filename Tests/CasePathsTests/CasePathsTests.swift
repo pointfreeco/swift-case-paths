@@ -24,10 +24,10 @@ final class CasePathsTests: XCTestCase {
     let fizzBuzzPath3 = \Fizz.Cases.buzz.fizzBuzz.int
     XCTAssertNotEqual(fizzBuzzPath1, fizzBuzzPath3)
     XCTAssertEqual(fizzBuzzPath2, fizzBuzzPath3)
-    XCTAssertEqual(Optional.allCasePaths[Int?.some(42)], \.some)
-    XCTAssertNotEqual(Optional.allCasePaths[Int?.some(42)], \.none)
-    XCTAssertEqual(Optional.allCasePaths[Int?.none], \.none)
-    XCTAssertNotEqual(Optional.allCasePaths[Int?.none], \.some)
+    XCTAssertEqual(Int?.some(42).case, \.some)
+    XCTAssertNotEqual(Int?.some(42).case, \.none)
+    XCTAssertEqual(Int?.none.case, \.none)
+    XCTAssertNotEqual(Int?.none.case, \.some)
   }
 
   func testResult() {
@@ -38,10 +38,10 @@ final class CasePathsTests: XCTestCase {
     XCTAssertNotNil(Result<Int, Error>.failure(SomeError())[case: \.failure])
     XCTAssertEqual((\Result<Int, SomeError>.Cases.success)(42), .success(42))
     XCTAssertEqual((\Result<Int, SomeError>.Cases.failure)(SomeError()), .failure(SomeError()))
-    XCTAssertEqual(Result.allCasePaths[Result<Int, Error>.success(42)], \.success)
-    XCTAssertNotEqual(Result.allCasePaths[Result<Int, Error>.success(42)], \.failure)
-    XCTAssertEqual(Result.allCasePaths[Result<Int, Error>.failure(SomeError())], \.failure)
-    XCTAssertNotEqual(Result.allCasePaths[Result<Int, Error>.failure(SomeError())], \.success)
+    XCTAssertEqual(Result<Int, Error>.success(42).case, \.success)
+    XCTAssertNotEqual(Result<Int, Error>.success(42).case, \.failure)
+    XCTAssertEqual(Result<Int, Error>.failure(SomeError()).case, \.failure)
+    XCTAssertNotEqual(Result<Int, Error>.failure(SomeError()).case, \.success)
   }
 
   func testSelfCaseKeyPathCallAsFunction() {
@@ -95,10 +95,10 @@ final class CasePathsTests: XCTestCase {
     XCTAssertEqual((\Foo.Cases.bar.int)(1), .bar(.int(1)))
     XCTAssertEqual((\Foo.Cases.fizzBuzz)(), .fizzBuzz)
 
-    XCTAssertEqual(Foo.allCasePaths[.bar(.int(1))], \.bar)
-    XCTAssertEqual(Foo.allCasePaths[.baz(.string(""))], \.baz)
-    XCTAssertEqual(Foo.allCasePaths[.fizzBuzz], \.fizzBuzz)
-    XCTAssertEqual(Foo.allCasePaths[.foo(nil)], \.foo)
+    XCTAssertEqual(Foo.bar(.int(1)).case, \.bar)
+    XCTAssertEqual(Foo.baz(.string("")).case, \.baz)
+    XCTAssertEqual(Foo.fizzBuzz.case, \.fizzBuzz)
+    XCTAssertEqual(Foo.foo(nil).case, \.foo)
 
     XCTAssertEqual(
       Array(Foo.allCasePaths),
