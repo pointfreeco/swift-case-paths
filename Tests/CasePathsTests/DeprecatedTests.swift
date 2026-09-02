@@ -5,8 +5,36 @@ protocol TestProtocol: Sendable {}
 extension Int: TestProtocol {}
 protocol TestClassProtocol: AnyObject {}
 
+@CasePathable
+private enum ReflectableEnum: Equatable {
+  case bar(Int)
+  case baz
+}
+
 @available(*, deprecated)
 final class DeprecatedTests: XCTestCase {
+  func testInstanceReflection() {
+    struct SomeError: Error {}
+    XCTAssertEqual(ReflectableEnum.allCasePaths[.bar(1)], \.bar)
+    XCTAssertEqual(ReflectableEnum.allCasePaths[.baz], \.baz)
+    XCTAssertEqual(Optional.allCasePaths[Int?.some(42)], \.some)
+    XCTAssertEqual(Optional.allCasePaths[Int?.none], \.none)
+    XCTAssertEqual(Result<Int, Error>.allCasePaths[.success(42)], \.success)
+    XCTAssertEqual(Result<Int, Error>.allCasePaths[.failure(SomeError())], \.failure)
+  }
+
+  func testIteration() {
+    var casePaths: [PartialCaseKeyPath<ReflectableEnum>] = []
+    for casePath in ReflectableEnum.allCasePaths {
+      casePaths.append(casePath)
+    }
+    XCTAssertEqual(casePaths, [\.bar, \.baz])
+    XCTAssertEqual(ReflectableEnum.allCasePaths.map { $0 }, [\.bar, \.baz])
+    XCTAssertEqual(Optional<Int>.allCasePaths.map { $0 }, [\.none, \.some])
+    XCTAssertEqual(Result<Int, Error>.allCasePaths.map { $0 }, [\.success, \.failure])
+    XCTAssertEqual(Never.allCasePaths.map { $0 }, [])
+  }
+
   func testSimplePayload() {
     enum Enum { case payload(Int) }
     let path: AnyCasePath<Enum, Int> = /Enum.payload
