@@ -17,9 +17,6 @@
 - ``is(_:)``
 - ``subscript(dynamicMember:)``
 
-### Iteration and reflection
-
-- ``CasePathReflectable``
 
 ### Manual conformances
 

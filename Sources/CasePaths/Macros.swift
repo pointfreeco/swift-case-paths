@@ -31,6 +31,8 @@
   conformances: CasePathable,
   names: named(AllCasePaths),
   named(allCasePaths),
+  named(`case`),
+  named(_allCaseKeyPaths),
   named(caseName),
   named(_$Element)
 )

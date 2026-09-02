@@ -9,7 +9,7 @@ public struct CaseSet<Element: CasePathable> {
 
   public init(_ elements: some Collection<Element>) {
     self.storage = [any PartialCaseKeyPath<Element> & Sendable: Element](
-      uniqueKeysWithValues: elements.map { (Element.allCasePaths[$0], $0) }
+      uniqueKeysWithValues: elements.map { ($0.case, $0) }
     )
   }
 
@@ -68,18 +68,18 @@ extension CaseSet: SetAlgebra where Element: Equatable {
   public mutating func insert(
     _ newMember: Element
   ) -> (inserted: Bool, memberAfterInsert: Element) {
-    let inserted = storage.updateValue(newMember, forKey: Element.allCasePaths[newMember]) == nil
+    let inserted = storage.updateValue(newMember, forKey: newMember.case) == nil
     return (inserted, newMember)
   }
 
   @discardableResult
   public mutating func remove(_ member: Element) -> Element? {
-    storage.removeValue(forKey: Element.allCasePaths[member])
+    storage.removeValue(forKey: member.case)
   }
 
   @discardableResult
   public mutating func update(with newMember: Element) -> Element? {
-    let inserted = storage.updateValue(newMember, forKey: Element.allCasePaths[newMember]) == nil
+    let inserted = storage.updateValue(newMember, forKey: newMember.case) == nil
     return inserted ? nil : newMember
   }
 
@@ -118,7 +118,7 @@ extension CaseSet: Decodable where Element: Decodable {
     }
     while !container.isAtEnd {
       let element = try container.decode(Element.self)
-      if let original = storage.updateValue(element, forKey: Element.allCasePaths[element]) {
+      if let original = storage.updateValue(element, forKey: element.case) {
         throw DecodingError.dataCorrupted(
           DecodingError.Context(
             codingPath: container.codingPath,
@@ -181,7 +181,7 @@ extension CaseSet {
       guard
         let element = storage[keyPath],
         let value = element[case: keyPath as PartialCaseKeyPath<Element>] as? P.Value
-          else { throw Nil() }
+      else { throw Nil() }
       return value
     }
     return try? (repeat value(at: each keyPath))

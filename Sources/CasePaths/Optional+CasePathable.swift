@@ -1,17 +1,10 @@
 import IssueReporting
 
 extension Optional: CasePathable {
-  public struct AllCasePaths: CasePathReflectable, Hashable, Sendable {
+  public struct AllCasePaths: CasePath, Hashable, Sendable {
     public func embed(_ value: Optional) -> Optional { value }
 
     public func extract(from root: Optional) -> Optional? { root }
-
-    public subscript(root: Optional) -> PartialCaseKeyPath<Optional> {
-      switch root {
-      case .none: return \.none
-      case .some: return \.some
-      }
-    }
 
     @frozen
     public struct _$none: CasePath, Hashable, Sendable {
@@ -52,6 +45,17 @@ extension Optional: CasePathable {
 
   public static var allCasePaths: AllCasePaths {
     AllCasePaths()
+  }
+
+  public var `case`: PartialCaseKeyPath<Optional> {
+    switch self {
+    case .none: return \.none
+    case .some: return \.some
+    }
+  }
+
+  public static var _allCaseKeyPaths: [PartialCaseKeyPath<Optional>] {
+    [\.none, \.some]
   }
 
   public static func caseName(for keyPath: PartialCaseKeyPath<Self>) -> String? {

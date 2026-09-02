@@ -130,8 +130,8 @@ extension CasePathableMacro: MemberMacro {
 
     let selfRewriter = SelfRewriter(selfEquivalent: enumName)
     let memberBlock = selfRewriter.rewrite(enumDecl.memberBlock).cast(MemberBlockSyntax.self)
-    let rootSubscriptCases = generateCases(from: memberBlock.members, enumName: enumName) {
-      "if case .\($0.name.text) = root { return \\.\($0.name.text) }"
+    let caseKeyPathCases = generateCases(from: memberBlock.members, enumName: enumName) {
+      "if case .\($0.name.text) = self { return \\.\($0.name.text) }"
     }
     let elementRewriter = ElementRewriter()
     let casePaths = generateDeclSyntax(
@@ -143,7 +143,7 @@ extension CasePathableMacro: MemberMacro {
       "allCasePaths.append(\\.\($0.name.text))"
     }
 
-    let subscriptReturn = allCases.isEmpty ? #"\.never"# : #"return \.never"#
+    let caseKeyPathReturn = allCases.isEmpty ? #"\.never"# : #"return \.never"#
 
     let caseNameCases = generateCases(from: memberBlock.members, enumName: enumName) {
       #"if keyPath == \.\#($0.name.text) { return "\#($0.name.text)" }"#
@@ -152,23 +152,27 @@ extension CasePathableMacro: MemberMacro {
     var decls: [DeclSyntax] = [
       """
       public \(nonisolated)struct AllCasePaths: \
-      CasePaths.CasePathReflectable, Swift.Hashable, Swift.Sendable {
+      CasePaths.CasePath, Swift.Hashable, Swift.Sendable {
       public func embed(_ value: \(enumName)) -> \(enumName) {\(raw: allCases.isEmpty ? "" : "\nvalue\n")}
       public func extract(from root: \(enumName)) -> \(enumName)? {\(raw: allCases.isEmpty ? "" : "\nroot\n")}
-      public subscript(root: \(enumName)) -> CasePaths.PartialCaseKeyPath<\(enumName)> {
-      \(raw: rootSubscriptCases.map { "\($0.description)\n" }.joined())\(raw: subscriptReturn)
-      }
       \(raw: casePaths.map(\.description).joined(separator: "\n"))
-      public func makeIterator() -> Swift.IndexingIterator<[CasePaths.PartialCaseKeyPath<\(enumName)>]> {
-      \(raw: allCases.isEmpty ? "let" : "var") allCasePaths: \
-      [CasePaths.PartialCaseKeyPath<\(enumName)>] = []\
-      \(raw: allCases.map { "\n\($0.description)" }.joined())
-      return allCasePaths.makeIterator()
-      }
       }
       """,
       """
       public \(nonisolated)static var allCasePaths: AllCasePaths { AllCasePaths() }
+      """,
+      """
+      public \(nonisolated)var `case`: CasePaths.PartialCaseKeyPath<\(enumName)> {
+      \(raw: caseKeyPathCases.map { "\($0.description)\n" }.joined())\(raw: caseKeyPathReturn)
+      }
+      """,
+      """
+      public \(nonisolated)static var _allCaseKeyPaths: [CasePaths.PartialCaseKeyPath<\(enumName)>] {
+      \(raw: allCases.isEmpty ? "let" : "var") allCasePaths: \
+      [CasePaths.PartialCaseKeyPath<\(enumName)>] = []\
+      \(raw: allCases.map { "\n\($0.description)" }.joined())
+      return allCasePaths
+      }
       """,
       """
       public \(nonisolated)static func caseName(

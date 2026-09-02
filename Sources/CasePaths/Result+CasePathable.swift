@@ -1,15 +1,8 @@
 extension Result: CasePathable {
-  public struct AllCasePaths: CasePathReflectable, Hashable, Sendable {
+  public struct AllCasePaths: CasePath, Hashable, Sendable {
     public func embed(_ value: Result) -> Result { value }
 
     public func extract(from root: Result) -> Result? { root }
-
-    public subscript(root: Result) -> PartialCaseKeyPath<Result> {
-      switch root {
-      case .success: return \.success
-      case .failure: return \.failure
-      }
-    }
 
     @frozen
     public struct _$success: CasePath, Hashable, Sendable {
@@ -50,6 +43,17 @@ extension Result: CasePathable {
 
   public static var allCasePaths: AllCasePaths {
     AllCasePaths()
+  }
+
+  public var `case`: PartialCaseKeyPath<Result> {
+    switch self {
+    case .success: return \.success
+    case .failure: return \.failure
+    }
+  }
+
+  public static var _allCaseKeyPaths: [PartialCaseKeyPath<Result>] {
+    [\.success, \.failure]
   }
 
   public static func caseName(for keyPath: PartialCaseKeyPath<Self>) -> String? {

@@ -43,8 +43,7 @@ public protocol CasePathable {
   ///
   /// This type conforms to ``CasePath`` as the identity case path of the enum, which gives the
   /// identity case key path `\SomeEnum.Cases.self` the same currency as any other case key path.
-  /// It can also reflect the case of a given value (via ``CasePathReflectable``), and is a
-  /// `Sequence` of all of the enum's case key paths:
+  /// All of the enum's case key paths can be collected from it:
   ///
   /// ```swift
   /// @CasePathable enum Field {
@@ -55,10 +54,26 @@ public protocol CasePathable {
   ///
   /// Array(Field.allCasePaths)  // [\.title, \.body, \.isLive]
   /// ```
-  associatedtype AllCasePaths: CasePathReflectable<Self>
+  associatedtype AllCasePaths: CasePath where AllCasePaths.Root == Self, AllCasePaths.Value == Self
 
   /// A collection of all case paths of this type.
   static var allCasePaths: AllCasePaths { get }
+
+  /// A case key path to this enum's case.
+  ///
+  /// ```swift
+  /// @CasePathable
+  /// enum Field {
+  ///   case title(String)
+  ///   case body(String)
+  ///   case isLive
+  /// }
+  ///
+  /// Field.title("Hello, Blob!").case  // \.title
+  /// ```
+  var `case`: PartialCaseKeyPath<Self> { get }
+
+  static var _allCaseKeyPaths: [PartialCaseKeyPath<Self>] { get }
 
   /// Returns the case name for a given case key path, if available.
   ///
@@ -499,13 +514,6 @@ extension CasePathable {
     }
     yield(&value)
     self = path.embed(value)
-  }
-}
-
-extension CasePathable {
-  /// A case key path to this enum's case.
-  public var `case`: PartialCaseKeyPath<Self> {
-    Self.allCasePaths[self]
   }
 }
 

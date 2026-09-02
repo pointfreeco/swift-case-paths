@@ -25,10 +25,10 @@ struct CasePathsTests {
     let fizzBuzzPath3 = \Fizz.Cases.buzz.some.fizzBuzz.some.int
     #expect(fizzBuzzPath1 as PartialCaseKeyPath<Fizz> != fizzBuzzPath3)
     #expect(fizzBuzzPath2 == fizzBuzzPath3)
-    #expect(Optional.allCasePaths[Int?.some(42)] == \.some)
-    #expect(Optional.allCasePaths[Int?.some(42)] != \.none)
-    #expect(Optional.allCasePaths[Int?.none] == \.none)
-    #expect(Optional.allCasePaths[Int?.none] != \.some)
+    #expect(Int?.some(42).case == \.some)
+    #expect(Int?.some(42).case != \.none)
+    #expect(Int?.none.case == \.none)
+    #expect(Int?.none.case != \.some)
   }
 
   @Test func result() {
@@ -39,10 +39,10 @@ struct CasePathsTests {
     #expect(Result<Int, any Error>.failure(SomeError())[case: \.failure] != nil)
     #expect((\Result<Int, SomeError>.Cases.success)(42) == .success(42))
     #expect((\Result<Int, SomeError>.Cases.failure)(SomeError()) == .failure(SomeError()))
-    #expect(Result.allCasePaths[Result<Int, any Error>.success(42)] == \.success)
-    #expect(Result.allCasePaths[Result<Int, any Error>.success(42)] != \.failure)
-    #expect(Result.allCasePaths[Result<Int, any Error>.failure(SomeError())] == \.failure)
-    #expect(Result.allCasePaths[Result<Int, any Error>.failure(SomeError())] != \.success)
+    #expect(Result<Int, any Error>.success(42).case == \.success)
+    #expect(Result<Int, any Error>.success(42).case != \.failure)
+    #expect(Result<Int, any Error>.failure(SomeError()).case == \.failure)
+    #expect(Result<Int, any Error>.failure(SomeError()).case != \.success)
   }
 
   @Test func callAsFunction() {
@@ -90,10 +90,10 @@ struct CasePathsTests {
     #expect((\Foo.Cases.bar.int)(1) == .bar(.int(1)))
     #expect((\Foo.Cases.fizzBuzz)() == .fizzBuzz)
 
-    #expect(Foo.allCasePaths[.bar(.int(1))] == \.bar)
-    #expect(Foo.allCasePaths[.baz(.string(""))] == \.baz)
-    #expect(Foo.allCasePaths[.fizzBuzz] == \.fizzBuzz)
-    #expect(Foo.allCasePaths[.foo(nil)] == \.foo)
+    #expect(Foo.bar(.int(1)).case == \.bar)
+    #expect(Foo.baz(.string("")).case == \.baz)
+    #expect(Foo.fizzBuzz.case == \.fizzBuzz)
+    #expect(Foo.foo(nil).case == \.foo)
 
     #expect(
       Array(Foo.allCasePaths) == [
@@ -104,6 +104,7 @@ struct CasePathsTests {
         \.foo,
       ]
     )
+    #expect(Set(Foo.allCasePaths) == [\.bar, \.baz, \.fizzBuzz, \.blob, \.foo])
   }
 
   @Test func modify() {
@@ -298,20 +299,20 @@ private enum Legacy: CasePathable, Equatable {
   case wrapped(Foo)
   case count(Int)
 
-  struct AllCasePaths: CasePathReflectable, Sequence {
+  var `case`: PartialCaseKeyPath<Legacy> {
+    switch self {
+    case .wrapped: return \.wrapped
+    case .count: return \.count
+    }
+  }
+
+  static var _allCaseKeyPaths: [PartialCaseKeyPath<Legacy>] {
+    [\.wrapped, \.count]
+  }
+
+  struct AllCasePaths: CasePath {
     func embed(_ value: Legacy) -> Legacy { value }
     func extract(from root: Legacy) -> Legacy? { root }
-
-    subscript(root: Legacy) -> PartialCaseKeyPath<Legacy> {
-      switch root {
-      case .wrapped: return \.wrapped
-      case .count: return \.count
-      }
-    }
-
-    func makeIterator() -> IndexingIterator<[PartialCaseKeyPath<Legacy>]> {
-      [\.wrapped, \.count].makeIterator()
-    }
 
     var wrapped: AnyCasePath<Legacy, Foo> {
       AnyCasePath(
