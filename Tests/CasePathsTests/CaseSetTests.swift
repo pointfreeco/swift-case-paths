@@ -8,10 +8,9 @@
 
     public init() {}
 
-    public init(_ elements: some Collection<Element>)
-    where Element.AllCasePaths: CasePathReflectable<Element> {
+    public init(_ elements: some Collection<Element>) {
       self.storage = [PartialCaseKeyPath<Element> & Sendable: Element](
-        uniqueKeysWithValues: elements.map { (Element.allCasePaths[$0], $0) }
+        uniqueKeysWithValues: elements.map { ($0.case, $0) }
       )
     }
 
@@ -46,7 +45,7 @@
   }
 
   extension CaseSet: SetAlgebra
-  where Element: Equatable, Element.AllCasePaths: CasePathReflectable<Element> {
+  where Element: Equatable {
     public var isEmpty: Bool { storage.isEmpty }
 
     public func union(_ other: CaseSet<Element>) -> CaseSet<Element> {
@@ -71,18 +70,18 @@
     public mutating func insert(
       _ newMember: Element
     ) -> (inserted: Bool, memberAfterInsert: Element) {
-      let inserted = storage.updateValue(newMember, forKey: Element.allCasePaths[newMember]) == nil
+      let inserted = storage.updateValue(newMember, forKey: newMember.case) == nil
       return (inserted, newMember)
     }
 
     @discardableResult
     public mutating func remove(_ member: Element) -> Element? {
-      storage.removeValue(forKey: Element.allCasePaths[member])
+      storage.removeValue(forKey: member.case)
     }
 
     @discardableResult
     public mutating func update(with newMember: Element) -> Element? {
-      let inserted = storage.updateValue(newMember, forKey: Element.allCasePaths[newMember]) == nil
+      let inserted = storage.updateValue(newMember, forKey: newMember.case) == nil
       return inserted ? nil : newMember
     }
 
@@ -114,7 +113,7 @@
   extension CaseSet: @unchecked Sendable where Element: Sendable {}
 
   extension CaseSet: Decodable
-  where Element: Decodable, Element.AllCasePaths: CasePathReflectable<Element> {
+  where Element: Decodable {
     public init(from decoder: any Decoder) throws {
       var container = try decoder.unkeyedContainer()
       if let count = container.count {
@@ -122,7 +121,7 @@
       }
       while !container.isAtEnd {
         let element = try container.decode(Element.self)
-        if let original = storage.updateValue(element, forKey: Element.allCasePaths[element]) {
+        if let original = storage.updateValue(element, forKey: element.case) {
           throw DecodingError.dataCorrupted(
             DecodingError.Context(
               codingPath: container.codingPath,
@@ -143,8 +142,7 @@
     }
   }
 
-  extension CaseSet: ExpressibleByArrayLiteral
-  where Element.AllCasePaths: CasePathReflectable<Element> {
+  extension CaseSet: ExpressibleByArrayLiteral {
     public init(arrayLiteral elements: Element...) {
       self.init(elements)
     }
