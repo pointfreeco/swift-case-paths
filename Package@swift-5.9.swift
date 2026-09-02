@@ -17,10 +17,6 @@ let package = Package(
       name: "CasePaths",
       targets: ["CasePaths"]
     ),
-    .library(
-      name: "CasePathsCore",
-      targets: ["CasePathsCore"]
-    ),
   ],
   dependencies: [
     .package(url: "https://github.com/pointfreeco/xctest-dynamic-overlay", from: "1.13.0"),
@@ -30,14 +26,8 @@ let package = Package(
     .target(
       name: "CasePaths",
       dependencies: [
-        "CasePathsCore",
         "CasePathsMacros",
-      ]
-    ),
-    .target(
-      name: "CasePathsCore",
-      dependencies: [
-        .product(name: "IssueReporting", package: "xctest-dynamic-overlay")
+        .product(name: "IssueReporting", package: "xctest-dynamic-overlay"),
       ]
     ),
     .macro(

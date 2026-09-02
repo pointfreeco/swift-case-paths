@@ -18,10 +18,6 @@ let package = Package(
       targets: ["CasePaths"]
     ),
     .library(
-      name: "CasePathsCore",
-      targets: ["CasePathsCore"]
-    ),
-    .library(
       name: "CasePathsMacrosSupport",
       targets: ["CasePathsMacrosSupport"]
     ),
@@ -34,14 +30,8 @@ let package = Package(
     .target(
       name: "CasePaths",
       dependencies: [
-        "CasePathsCore",
         "CasePathsMacros",
-      ]
-    ),
-    .target(
-      name: "CasePathsCore",
-      dependencies: [
-        .product(name: "IssueReporting", package: "xctest-dynamic-overlay")
+        .product(name: "IssueReporting", package: "xctest-dynamic-overlay"),
       ]
     ),
     .target(

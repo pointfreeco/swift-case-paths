@@ -1,5 +1,3 @@
-import Foundation
-
 /// A type-erased case path that supports embedding a value in a root and attempting to extract a
 /// root's embedded value.
 ///

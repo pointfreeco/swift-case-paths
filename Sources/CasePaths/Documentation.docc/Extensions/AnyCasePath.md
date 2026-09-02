@@ -1,4 +1,4 @@
-# ``CasePathsCore/AnyCasePath``
+# ``CasePaths/AnyCasePath``
 
 ## Topics
 
