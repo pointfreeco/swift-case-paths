@@ -1,7 +1,7 @@
 import SwiftDiagnostics
-import SwiftSyntax
+public import SwiftSyntax
 import SwiftSyntaxBuilder
-import SwiftSyntaxMacros
+public import SwiftSyntaxMacros
 
 public struct CasePathableMacro {
   static let moduleName = "CasePaths"
@@ -304,7 +304,7 @@ extension CasePathableMacro {
 }
 
 enum CasePathableMacroDiagnostic {
-  case notAnEnum(DeclGroupSyntax)
+  case notAnEnum(any DeclGroupSyntax)
   case overloadedCaseName(String)
 }
 

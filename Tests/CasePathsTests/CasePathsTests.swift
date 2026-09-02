@@ -32,16 +32,16 @@ final class CasePathsTests: XCTestCase {
 
   func testResult() {
     struct SomeError: Error, Equatable {}
-    XCTAssertEqual(Result<Int, Error>.success(42)[case: \.success], 42)
-    XCTAssertNil(Result<Int, Error>.failure(SomeError())[case: \.success])
-    XCTAssertNil(Result<Int, Error>.success(42)[case: \.failure])
-    XCTAssertNotNil(Result<Int, Error>.failure(SomeError())[case: \.failure])
+    XCTAssertEqual(Result<Int, any Error>.success(42)[case: \.success], 42)
+    XCTAssertNil(Result<Int, any Error>.failure(SomeError())[case: \.success])
+    XCTAssertNil(Result<Int, any Error>.success(42)[case: \.failure])
+    XCTAssertNotNil(Result<Int, any Error>.failure(SomeError())[case: \.failure])
     XCTAssertEqual((\Result<Int, SomeError>.Cases.success)(42), .success(42))
     XCTAssertEqual((\Result<Int, SomeError>.Cases.failure)(SomeError()), .failure(SomeError()))
-    XCTAssertEqual(Result<Int, Error>.success(42).case, \.success)
-    XCTAssertNotEqual(Result<Int, Error>.success(42).case, \.failure)
-    XCTAssertEqual(Result<Int, Error>.failure(SomeError()).case, \.failure)
-    XCTAssertNotEqual(Result<Int, Error>.failure(SomeError()).case, \.success)
+    XCTAssertEqual(Result<Int, any Error>.success(42).case, \.success)
+    XCTAssertNotEqual(Result<Int, any Error>.success(42).case, \.failure)
+    XCTAssertEqual(Result<Int, any Error>.failure(SomeError()).case, \.failure)
+    XCTAssertNotEqual(Result<Int, any Error>.failure(SomeError()).case, \.success)
   }
 
   func testSelfCaseKeyPathCallAsFunction() {

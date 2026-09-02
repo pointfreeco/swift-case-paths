@@ -1,6 +1,7 @@
 #if canImport(MacroTesting)
   import CasePathsMacros
   import MacroTesting
+  import SwiftSyntaxBuilder
   import SwiftSyntaxMacroExpansion
   import SwiftSyntaxMacros
   import XCTest

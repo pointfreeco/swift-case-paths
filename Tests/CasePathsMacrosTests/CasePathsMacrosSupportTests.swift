@@ -2,6 +2,7 @@
   import CasePathsMacrosSupport
   import MacroTesting
   import SwiftSyntax
+  import SwiftSyntaxBuilder
   import SwiftSyntaxMacroExpansion
   import SwiftSyntaxMacros
   import Testing
