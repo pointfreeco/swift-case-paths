@@ -264,7 +264,8 @@ extension CasePathableMacro: MemberMacro {
             return "\(label)\(access)"
           }
           .joined(separator: ", ")
-        let pattern = associatedValue.parameters.count == 1
+        let pattern =
+          associatedValue.parameters.count == 1
           ? "_"
           : "(\(Array(repeating: "_", count: associatedValue.parameters.count).joined(separator: ", ")))"
         embedBody = """
@@ -442,7 +443,13 @@ extension IfConfigClauseSyntax {
   }
 
   var clonedAsIf: IfConfigClauseSyntax {
-    detached.with(\.poundKeyword, .poundIfToken())
+    detached.with(
+      \.poundKeyword,
+      .poundIfToken(
+        leadingTrivia: poundKeyword.leadingTrivia,
+        trailingTrivia: poundKeyword.trailingTrivia
+      )
+    )
   }
 }
 
@@ -476,7 +483,9 @@ extension IfConfigDeclSyntax {
     if elements.isEmpty {
       return nil
     } else {
-      return with(\.clauses, IfConfigClauseListSyntax(elements))
+      return
+        with(\.clauses, IfConfigClauseListSyntax(elements))
+        .with(\.poundEndif, poundEndif.with(\.trailingTrivia, .newline))
     }
   }
 }
