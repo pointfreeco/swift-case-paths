@@ -10,8 +10,7 @@
     .macros([
       "CaseBindable": MacroSpec(
         type: CaseBindableMacro.self,
-        conformances: ["CasePathable", "CasePathIterable", "CaseBindable"]
-      ),
+        conformances: ["CasePathable", "CasePathIterable", "CaseBindable"]),
       "CasePathable": MacroSpec(
         type: CasePathableMacro.self,
         conformances: ["CasePathable", "CasePathIterable"]
@@ -43,7 +42,7 @@
           case baz(Int)
           case fizz(buzz: String)
 
-          public struct AllCasePaths: CasePaths.CasePathReflectable, Swift.Sendable, Swift.Sequence {
+          public nonisolated struct AllCasePaths: CasePaths.CasePathReflectable, Swift.Sendable, Swift.Sequence {
             public static func _case(for root: Foo) -> CasePaths.PartialCaseKeyPath<Foo> {
               if case .bar = root {
                 return \.bar
@@ -57,7 +56,7 @@
               return \.never
             }
             public var bar: CasePaths.AnyCasePath<Foo, Void> {
-              ._$embed({
+              CasePaths.AnyCasePath(embed: {
                   Foo.bar
                 }) {
                 guard case .bar = $0 else {
@@ -67,7 +66,7 @@
               }
             }
             public var baz: CasePaths.AnyCasePath<Foo, Int> {
-              ._$embed(Foo.baz) {
+              CasePaths.AnyCasePath(embed: Foo.baz) {
                 guard case let .baz(v0) = $0 else {
                   return nil
                 }
@@ -75,7 +74,7 @@
               }
             }
             public var fizz: CasePaths.AnyCasePath<Foo, String> {
-              ._$embed(Foo.fizz) {
+              CasePaths.AnyCasePath(embed: Foo.fizz) {
                 guard case let .fizz(v0) = $0 else {
                   return nil
                 }
@@ -91,7 +90,7 @@
             }
           }
 
-          public static var allCasePaths: AllCasePaths {
+          public nonisolated static var allCasePaths: AllCasePaths {
             AllCasePaths()
           }
 
@@ -102,7 +101,7 @@
           }
         }
 
-        extension Foo: CasePathable, CasePathIterable, CaseBindable {
+        extension Foo: nonisolated CasePathable, nonisolated CasePathIterable, nonisolated CaseBindable {
         }
         """#
       }
@@ -130,7 +129,7 @@
             case fizz(SwiftUI.Binding<String>)
           }
 
-          public struct AllCasePaths: CasePaths.CasePathReflectable, Swift.Sendable, Swift.Sequence {
+          public nonisolated struct AllCasePaths: CasePaths.CasePathReflectable, Swift.Sendable, Swift.Sequence {
             public static func _case(for root: Foo) -> CasePaths.PartialCaseKeyPath<Foo> {
               if case .bar = root {
                 return \.bar
@@ -144,7 +143,7 @@
               return \.never
             }
             public var bar: CasePaths.AnyCasePath<Foo, Void> {
-              ._$embed({
+              CasePaths.AnyCasePath(embed: {
                   Foo.bar
                 }) {
                 guard case .bar = $0 else {
@@ -154,7 +153,7 @@
               }
             }
             public var baz: CasePaths.AnyCasePath<Foo, Int> {
-              ._$embed(Foo.baz) {
+              CasePaths.AnyCasePath(embed: Foo.baz) {
                 guard case let .baz(v0) = $0 else {
                   return nil
                 }
@@ -162,7 +161,7 @@
               }
             }
             public var fizz: CasePaths.AnyCasePath<Foo, String> {
-              ._$embed(Foo.fizz) {
+              CasePaths.AnyCasePath(embed: Foo.fizz) {
                 guard case let .fizz(v0) = $0 else {
                   return nil
                 }
@@ -178,12 +177,12 @@
             }
           }
 
-          public static var allCasePaths: AllCasePaths {
+          public nonisolated static var allCasePaths: AllCasePaths {
             AllCasePaths()
           }
         }
 
-        extension Foo: CasePathable, CasePathIterable {
+        extension Foo: nonisolated CasePathable, nonisolated CasePathIterable {
         }
         """#
       }
@@ -208,7 +207,7 @@
           case baz(Int)
           case fizz(buzz: String)
 
-          public struct AllCasePaths: CasePaths.CasePathReflectable, Swift.Sendable, Swift.Sequence {
+          public nonisolated struct AllCasePaths: CasePaths.CasePathReflectable, Swift.Sendable, Swift.Sequence {
             public static func _case(for root: Foo) -> CasePaths.PartialCaseKeyPath<Foo> {
               if case .bar = root {
                 return \.bar
@@ -222,7 +221,7 @@
               return \.never
             }
             public var bar: CasePaths.AnyCasePath<Foo, Void> {
-              ._$embed({
+              CasePaths.AnyCasePath(embed: {
                   Foo.bar
                 }) {
                 guard case .bar = $0 else {
@@ -232,7 +231,7 @@
               }
             }
             public var baz: CasePaths.AnyCasePath<Foo, Int> {
-              ._$embed(Foo.baz) {
+              CasePaths.AnyCasePath(embed: Foo.baz) {
                 guard case let .baz(v0) = $0 else {
                   return nil
                 }
@@ -240,7 +239,7 @@
               }
             }
             public var fizz: CasePaths.AnyCasePath<Foo, String> {
-              ._$embed(Foo.fizz) {
+              CasePaths.AnyCasePath(embed: Foo.fizz) {
                 guard case let .fizz(v0) = $0 else {
                   return nil
                 }
@@ -256,7 +255,7 @@
             }
           }
 
-          public static var allCasePaths: AllCasePaths {
+          public nonisolated static var allCasePaths: AllCasePaths {
             AllCasePaths()
           }
 
@@ -267,7 +266,7 @@
           }
         }
 
-        extension Foo: CasePathable, CasePathIterable, CaseBindable {
+        extension Foo: nonisolated CasePathable, nonisolated CasePathIterable, nonisolated CaseBindable {
         }
         """#
       }
@@ -293,7 +292,7 @@
           case baz(Int)
           case fizz(buzz: String)
 
-          public struct AllCasePaths: CasePaths.CasePathReflectable, Swift.Sendable, Swift.Sequence {
+          public nonisolated struct AllCasePaths: CasePaths.CasePathReflectable, Swift.Sendable, Swift.Sequence {
             public static func _case(for root: Foo) -> CasePaths.PartialCaseKeyPath<Foo> {
               if case .bar = root {
                 return \.bar
@@ -307,7 +306,7 @@
               return \.never
             }
             public var bar: CasePaths.AnyCasePath<Foo, Void> {
-              ._$embed({
+              CasePaths.AnyCasePath(embed: {
                   Foo.bar
                 }) {
                 guard case .bar = $0 else {
@@ -317,7 +316,7 @@
               }
             }
             public var baz: CasePaths.AnyCasePath<Foo, Int> {
-              ._$embed(Foo.baz) {
+              CasePaths.AnyCasePath(embed: Foo.baz) {
                 guard case let .baz(v0) = $0 else {
                   return nil
                 }
@@ -325,7 +324,7 @@
               }
             }
             public var fizz: CasePaths.AnyCasePath<Foo, String> {
-              ._$embed(Foo.fizz) {
+              CasePaths.AnyCasePath(embed: Foo.fizz) {
                 guard case let .fizz(v0) = $0 else {
                   return nil
                 }
@@ -341,7 +340,7 @@
             }
           }
 
-          public static var allCasePaths: AllCasePaths {
+          public nonisolated static var allCasePaths: AllCasePaths {
             AllCasePaths()
           }
 
@@ -352,7 +351,7 @@
           }
         }
 
-        extension Foo: CasePathable, CasePathIterable {
+        extension Foo: nonisolated CasePathable, nonisolated CasePathIterable {
         }
         """#
       }
@@ -371,7 +370,7 @@
         enum Foo {
           case baz(Int)
 
-          public struct AllCasePaths: CasePaths.CasePathReflectable, Swift.Sendable, Swift.Sequence {
+          public nonisolated struct AllCasePaths: CasePaths.CasePathReflectable, Swift.Sendable, Swift.Sequence {
             public static func _case(for root: Foo) -> CasePaths.PartialCaseKeyPath<Foo> {
               if case .baz = root {
                 return \.baz
@@ -379,7 +378,7 @@
               return \.never
             }
             public var baz: CasePaths.AnyCasePath<Foo, Int> {
-              ._$embed(Foo.baz) {
+              CasePaths.AnyCasePath(embed: Foo.baz) {
                 guard case let .baz(v0) = $0 else {
                   return nil
                 }
@@ -393,12 +392,12 @@
             }
           }
 
-          public static var allCasePaths: AllCasePaths {
+          public nonisolated static var allCasePaths: AllCasePaths {
             AllCasePaths()
           }
         }
 
-        extension Foo: CasePathable, CasePathIterable {
+        extension Foo: nonisolated CasePathable, nonisolated CasePathIterable {
         }
         """#
       }

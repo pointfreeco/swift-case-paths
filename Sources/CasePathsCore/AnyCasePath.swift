@@ -6,9 +6,9 @@ import Foundation
 /// This type defines key path-like semantics for enum cases, and is used to derive ``CaseKeyPath``s
 /// from types that conform to ``CasePathable``.
 @dynamicMemberLookup
-public struct AnyCasePath<Root, Value>: Sendable {
-  private let _embed: @Sendable (Value) -> Root
-  private let _extract: @Sendable (Root) -> Value?
+public struct AnyCasePath<Root, Value> {
+  private let _embed: (Value) -> Root
+  private let _extract: (Root) -> Value?
 
   /// Creates a type-erased case path from a pair of functions.
   ///
@@ -16,24 +16,11 @@ public struct AnyCasePath<Root, Value>: Sendable {
   ///   - embed: A function that always succeeds in embedding a value in a root.
   ///   - extract: A function that can optionally fail in extracting a value from a root.
   public init(
-    embed: @escaping @Sendable (Value) -> Root,
-    extract: @escaping @Sendable (Root) -> Value?
+    embed: @escaping (Value) -> Root,
+    extract: @escaping (Root) -> Value?
   ) {
     self._embed = embed
     self._extract = extract
-  }
-
-  public static func _$embed(
-    _ embed: @escaping (Value) -> Root,
-    extract: @escaping @Sendable (Root) -> Value?
-  ) -> Self {
-    #if swift(>=5.10)
-      nonisolated(unsafe) let embed = embed
-      return Self(embed: { embed($0) }, extract: extract)
-    #else
-      @UncheckedSendable var embed = embed
-      return Self(embed: { [$embed] in $embed.wrappedValue($0) }, extract: extract)
-    #endif
   }
 
   /// Returns a root by embedding a value.

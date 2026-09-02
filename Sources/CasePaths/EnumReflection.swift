@@ -14,18 +14,17 @@ extension AnyCasePath {
   @available(macOS, deprecated: 9999, message: "Use a 'CasePathable' case key path, instead")
   @available(tvOS, deprecated: 9999, message: "Use a 'CasePathable' case key path, instead")
   @available(watchOS, deprecated: 9999, message: "Use a 'CasePathable' case key path, instead")
-  public init(unsafe embed: @escaping @Sendable (Value) -> Root) {
-    func open<Wrapped>(_: Wrapped.Type) -> @Sendable (Root) -> Value? {
-      optionalPromotedExtractHelp(unsafeBitCast(embed, to: (@Sendable (Value) -> Wrapped?).self))
-        as! @Sendable (Root) -> Value?
+  public init(unsafe embed: @escaping (Value) -> Root) {
+    func open<Wrapped>(_: Wrapped.Type) -> (Root) -> Value? {
+      optionalPromotedExtractHelp(unsafeBitCast(embed, to: ((Value) -> Wrapped?).self))
+        as! (Root) -> Value?
     }
-    @UncheckedSendable var embed = embed
     let extract =
       ((_Witness<Root>.self as? _AnyOptional.Type)?.wrappedType)
       .map { _openExistential($0, do: open) }
-      ?? extractHelp { [$embed] in $embed.wrappedValue($0) }
+      ?? extractHelp(embed)
     self.init(
-      embed: { [$embed] in $embed.wrappedValue($0) },
+      embed: embed,
       extract: extract
     )
   }
@@ -39,11 +38,11 @@ extension AnyCasePath {
   @available(tvOS, deprecated: 9999, message: "Use a 'CasePathable' case key path, instead")
   @available(watchOS, deprecated: 9999, message: "Use a 'CasePathable' case key path, instead")
   @_disfavoredOverload
-  public init(unsafe root: @autoclosure @escaping @Sendable () -> Root) where Value == Void {
-    func open<Wrapped>(_: Wrapped.Type) -> @Sendable (Root) -> Void? {
+  public init(unsafe root: @autoclosure @escaping () -> Root) where Value == Void {
+    func open<Wrapped>(_: Wrapped.Type) -> (Root) -> Void? {
       optionalPromotedExtractVoidHelp(
         unsafeBitCast(root, to: Wrapped?.self)
-      ) as! @Sendable (Root) -> Void?
+      ) as! (Root) -> Void?
     }
     let extract =
       ((_Witness<Root>.self as? _AnyOptional.Type)?.wrappedType)
@@ -61,8 +60,8 @@ private struct Cache: Sendable {
 }
 
 func extractHelp<Root, Value>(
-  _ embed: @escaping @Sendable (Value) -> Root
-) -> @Sendable (Root) -> Value? {
+  _ embed: @escaping (Value) -> Root
+) -> (Root) -> Value? {
   guard
     let metadata = EnumMetadata(Root.self),
     metadata.typeDescriptor.fieldDescriptor != nil
@@ -106,8 +105,8 @@ func extractHelp<Root, Value>(
 }
 
 func optionalPromotedExtractHelp<Root, Value>(
-  _ embed: @escaping @Sendable (Value) -> Root?
-) -> @Sendable (Root?) -> Value? {
+  _ embed: @escaping (Value) -> Root?
+) -> (Root?) -> Value? {
   guard Root.self != Value.self else { return { $0 as! Value? } }
   guard
     let metadata = EnumMetadata(Root.self),
@@ -138,7 +137,7 @@ func optionalPromotedExtractHelp<Root, Value>(
   }
 }
 
-func extractVoidHelp<Root>(_ root: Root) -> @Sendable (Root) -> Void? {
+func extractVoidHelp<Root>(_ root: Root) -> (Root) -> Void? {
   guard
     let metadata = EnumMetadata(Root.self),
     metadata.typeDescriptor.fieldDescriptor != nil
@@ -151,7 +150,7 @@ func extractVoidHelp<Root>(_ root: Root) -> @Sendable (Root) -> Void? {
   return { root in metadata.tag(of: root) == cachedTag ? () : nil }
 }
 
-func optionalPromotedExtractVoidHelp<Root>(_ root: Root?) -> @Sendable (Root?) -> Void? {
+func optionalPromotedExtractVoidHelp<Root>(_ root: Root?) -> (Root?) -> Void? {
   guard
     let root = root,
     let metadata = EnumMetadata(Root.self),

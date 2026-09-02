@@ -34,4 +34,18 @@ extension CasePathableMacro: MemberMacro {
       in: context
     )
   }
+
+  public static func expansion(
+    of node: AttributeSyntax,
+    providingMembersOf declaration: some DeclGroupSyntax,
+    conformingTo protocols: [TypeSyntax],
+    in context: some MacroExpansionContext
+  ) throws -> [DeclSyntax] {
+    try CasePathsMacrosSupport.CasePathableMacro.expansion(
+      of: node,
+      providingMembersOf: declaration,
+      conformingTo: protocols,
+      in: context
+    )
+  }
 }

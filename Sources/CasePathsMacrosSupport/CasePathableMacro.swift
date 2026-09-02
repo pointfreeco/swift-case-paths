@@ -62,7 +62,12 @@ extension CasePathableMacro: ExtensionMacro {
       return []
     }
     guard shouldGenerate(for: node, attachedTo: declaration) else { return [] }
-    let conformances = protocols.map(\.trimmedDescription)
+    #if compiler(>=6.2)
+      let nonisolated = nonisolated?.description ?? ""
+    #else
+      let nonisolated = ""
+    #endif
+    let conformances = protocols.map { "\(nonisolated)\($0.trimmedDescription)" }
     return [
       DeclSyntax(
         """
@@ -143,7 +148,8 @@ extension CasePathableMacro: MemberMacro {
 
     var decls: [DeclSyntax] = [
       """
-      public struct AllCasePaths: CasePaths.CasePathReflectable, Swift.Sendable, Swift.Sequence {
+      public \(nonisolated)struct AllCasePaths: \
+      CasePaths.CasePathReflectable, Swift.Sendable, Swift.Sequence {
       public static func _case(for root: \(enumName)) -> CasePaths.PartialCaseKeyPath<\(enumName)> {
       \(raw: rootSubscriptCases.map { "\($0.description)\n" }.joined())\(raw: subscriptReturn)
       }
@@ -157,7 +163,7 @@ extension CasePathableMacro: MemberMacro {
       }
       """,
       """
-      public static var allCasePaths: AllCasePaths { AllCasePaths() }
+      public \(nonisolated)static var allCasePaths: AllCasePaths { AllCasePaths() }
       """,
     ]
 
@@ -259,7 +265,7 @@ extension CasePathableMacro: MemberMacro {
       return """
         \(raw: leadingTrivia)public var \(caseName): \
         \(raw: casePathTypeName.qualified)<\(enumName), \(associatedValueType)> {
-        ._$embed(\(raw: embed)) {
+        \(raw: casePathTypeName.qualified)(embed: \(raw: embed)) {
         guard case\(raw: hasPayload ? " let" : "").\(caseName)\(raw: bindingNames) = $0 else { \
         return nil \
         }
