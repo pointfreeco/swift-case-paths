@@ -535,6 +535,24 @@ extension CasePathable where AllCasePaths: CasePathReflectable<Self> {
   }
 }
 
+extension CasePathable {
+  @available(*, deprecated, message: "Implement 'case' instead")
+  public var `case`: PartialCaseKeyPath<Self> {
+    reportIssue(
+      """
+      '\(Self.self)' does not implement 'case' and cannot reflect a case key path from a value. \
+      Implement 'var case: PartialCaseKeyPath<Self>' in its 'CasePathable' conformance.
+      """
+    )
+    return \.self
+  }
+
+  @available(*, deprecated, message: "Implement 'static _allCaseKeyPaths' instead")
+  public static var _allCaseKeyPaths: [PartialCaseKeyPath<Self>] {
+    []
+  }
+}
+
 extension AnyCasePath {
   /// Creates a type-erased case path for a given case key path.
   ///
