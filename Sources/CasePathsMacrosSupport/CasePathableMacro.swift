@@ -393,7 +393,13 @@ extension IfConfigClauseSyntax {
   }
 
   var clonedAsIf: IfConfigClauseSyntax {
-    detached.with(\.poundKeyword, .poundIfToken())
+    detached.with(
+      \.poundKeyword,
+      .poundIfToken(
+        leadingTrivia: poundKeyword.leadingTrivia,
+        trailingTrivia: poundKeyword.trailingTrivia
+      )
+    )
   }
 }
 
@@ -427,7 +433,9 @@ extension IfConfigDeclSyntax {
     if elements.isEmpty {
       return nil
     } else {
-      return with(\.clauses, IfConfigClauseListSyntax(elements))
+      return
+        with(\.clauses, IfConfigClauseListSyntax(elements))
+        .with(\.poundEndif, poundEndif.with(\.trailingTrivia, .newline))
     }
   }
 }
