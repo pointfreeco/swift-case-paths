@@ -67,6 +67,16 @@ public protocol CasePathable {
   var `case`: PartialCaseKeyPath<Self> { get }
 
   static var _allCaseKeyPaths: [PartialCaseKeyPath<Self>] { get }
+
+  /// Returns the case name for a given case key path, if available.
+  ///
+  /// - Parameter keyPath: A partial case key path.
+  /// - Returns: The name of the case, or `nil` if the key path doesn't match a known case.
+  static func caseName(for keyPath: PartialCaseKeyPath<Self>) -> String?
+}
+
+extension CasePathable {
+  public static func caseName(for keyPath: PartialCaseKeyPath<Self>) -> String? { nil }
 }
 
 /// A type that is used to distinguish case key paths from key paths by wrapping the enum and

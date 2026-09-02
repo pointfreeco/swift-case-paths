@@ -102,6 +102,24 @@
           public nonisolated static var allCasePaths: AllCasePaths {
             AllCasePaths()
           }
+
+          public nonisolated static func caseName(
+            for keyPath: CasePaths.PartialCaseKeyPath<Foo>
+          ) -> Swift.String? {
+            if keyPath == \.bar {
+              return "bar"
+            }
+            if keyPath == \.baz {
+              return "baz"
+            }
+            if keyPath == \.fizz {
+              return "fizz"
+            }
+            if keyPath == \.fizzier {
+              return "fizzier"
+            }
+            return nil
+          }
         }
 
         extension Foo: nonisolated CasePathable, nonisolated CasePathIterable {
@@ -132,6 +150,12 @@
 
             public nonisolated static var allCasePaths: AllCasePaths {
                 AllCasePaths()
+            }
+
+            public nonisolated static func caseName(
+                for keyPath: CasePaths.PartialCaseKeyPath<EnumWithNoCases>
+            ) -> Swift.String? {
+                return nil
             }
         }
 
@@ -177,6 +201,15 @@
 
           public nonisolated static var allCasePaths: AllCasePaths {
             AllCasePaths()
+          }
+
+          public nonisolated static func caseName(
+            for keyPath: CasePaths.PartialCaseKeyPath<Foo>
+          ) -> Swift.String? {
+            if keyPath == \.bar {
+              return "bar"
+            }
+            return nil
           }
         }
 
@@ -235,6 +268,18 @@
           public nonisolated static var allCasePaths: AllCasePaths {
             AllCasePaths()
           }
+
+          public nonisolated static func caseName(
+            for keyPath: CasePaths.PartialCaseKeyPath<Foo>
+          ) -> Swift.String? {
+            if keyPath == \.bar {
+              return "bar"
+            }
+            if keyPath == \.baz {
+              return "baz"
+            }
+            return nil
+          }
         }
 
         extension Foo: nonisolated CasePathable, nonisolated CasePathIterable {
@@ -280,6 +325,15 @@
           public nonisolated static var allCasePaths: AllCasePaths {
             AllCasePaths()
           }
+
+          public nonisolated static func caseName(
+            for keyPath: CasePaths.PartialCaseKeyPath<Foo>
+          ) -> Swift.String? {
+            if keyPath == \.bar {
+              return "bar"
+            }
+            return nil
+          }
         }
 
         extension Foo: nonisolated CasePathable, nonisolated CasePathIterable {
@@ -322,6 +376,15 @@
           public nonisolated static var allCasePaths: AllCasePaths {
             AllCasePaths()
           }
+
+          public nonisolated static func caseName(
+            for keyPath: CasePaths.PartialCaseKeyPath<Foo>
+          ) -> Swift.String? {
+            if keyPath == \.bar {
+              return "bar"
+            }
+            return nil
+          }
         }
 
         extension Foo: nonisolated CasePathable, nonisolated CasePathIterable {
@@ -363,6 +426,15 @@
 
           public nonisolated static var allCasePaths: AllCasePaths {
             AllCasePaths()
+          }
+
+          public nonisolated static func caseName(
+            for keyPath: CasePaths.PartialCaseKeyPath<Foo>
+          ) -> Swift.String? {
+            if keyPath == \.bar {
+              return "bar"
+            }
+            return nil
           }
         }
 
@@ -432,6 +504,12 @@
             public nonisolated static var allCasePaths: AllCasePaths {
                 AllCasePaths()
             }
+
+            public nonisolated static func caseName(
+                for keyPath: CasePaths.PartialCaseKeyPath<Foo>
+            ) -> Swift.String? {
+                return nil
+            }
         }
 
         extension Foo: nonisolated CasePathable, nonisolated CasePathIterable {
@@ -460,6 +538,12 @@
 
             public nonisolated static var allCasePaths: AllCasePaths {
                 AllCasePaths()
+            }
+
+            public nonisolated static func caseName(
+                for keyPath: CasePaths.PartialCaseKeyPath<Foo>
+            ) -> Swift.String? {
+                return nil
             }
         }
 
@@ -506,6 +590,15 @@
           public nonisolated static var allCasePaths: AllCasePaths {
             AllCasePaths()
           }
+
+          public nonisolated static func caseName(
+            for keyPath: CasePaths.PartialCaseKeyPath<Foo>
+          ) -> Swift.String? {
+            if keyPath == \.bar {
+              return "bar"
+            }
+            return nil
+          }
         }
 
         extension Foo: nonisolated CasePathable, nonisolated CasePathIterable {
@@ -551,6 +644,15 @@
           public nonisolated static var allCasePaths: AllCasePaths {
             AllCasePaths()
           }
+
+          public nonisolated static func caseName(
+            for keyPath: CasePaths.PartialCaseKeyPath<Foo>
+          ) -> Swift.String? {
+            if keyPath == \.bar {
+              return "bar"
+            }
+            return nil
+          }
         }
 
         extension Foo: nonisolated CasePathable, nonisolated CasePathIterable {
@@ -595,6 +697,15 @@
 
           public nonisolated static var allCasePaths: AllCasePaths {
             AllCasePaths()
+          }
+
+          public nonisolated static func caseName(
+            for keyPath: CasePaths.PartialCaseKeyPath<Foo>
+          ) -> Swift.String? {
+            if keyPath == \.bar {
+              return "bar"
+            }
+            return nil
           }
         }
 
@@ -793,6 +904,44 @@
           public nonisolated static var allCasePaths: AllCasePaths {
             AllCasePaths()
           }
+
+          public nonisolated static func caseName(
+            for keyPath: CasePaths.PartialCaseKeyPath<Foo>
+          ) -> Swift.String? {
+            if keyPath == \.bar {
+              return "bar"
+            }
+            #if os(macOS)
+            if keyPath == \.macCase {
+              return "macCase"
+            }
+            if keyPath == \.macSecond {
+              return "macSecond"
+            }
+            #elseif os(iOS)
+            if keyPath == \.iosCase {
+              return "iosCase"
+            }
+            #else
+            if keyPath == \.elseCase {
+              return "elseCase"
+            }
+            if keyPath == \.elseLast {
+              return "elseLast"
+            }
+            #endif
+            #if DEBUG
+            #if INNER
+            if keyPath == \.twoLevelsDeep {
+              return "twoLevelsDeep"
+            }
+            if keyPath == \.twoLevels {
+              return "twoLevels"
+            }
+            #endif
+            #endif
+            return nil
+          }
         }
 
         extension Foo: nonisolated CasePathable, nonisolated CasePathIterable {
@@ -842,6 +991,15 @@
 
           public nonisolated static var allCasePaths: AllCasePaths {
             AllCasePaths()
+          }
+
+          public nonisolated static func caseName(
+            for keyPath: CasePaths.PartialCaseKeyPath<Foo>
+          ) -> Swift.String? {
+            if keyPath == \.bar {
+              return "bar"
+            }
+            return nil
           }
         }
 
@@ -975,6 +1133,24 @@
           public nonisolated static var allCasePaths: AllCasePaths {
             AllCasePaths()
           }
+
+          public nonisolated static func caseName(
+            for keyPath: CasePaths.PartialCaseKeyPath<Foo>
+          ) -> Swift.String? {
+            if keyPath == \.bar {
+              return "bar"
+            }
+            if keyPath == \.baz {
+              return "baz"
+            }
+            if keyPath == \.fizz {
+              return "fizz"
+            }
+            if keyPath == \.buzz {
+              return "buzz"
+            }
+            return nil
+          }
         }
 
         extension Foo: nonisolated CasePathable, nonisolated CasePathIterable {
@@ -1028,6 +1204,15 @@
 
           public nonisolated static var allCasePaths: AllCasePaths {
             AllCasePaths()
+          }
+
+          public nonisolated static func caseName(
+            for keyPath: CasePaths.PartialCaseKeyPath<Foo>
+          ) -> Swift.String? {
+            if keyPath == \.bar {
+              return "bar"
+            }
+            return nil
           }
         }
 
@@ -1137,6 +1322,27 @@
           public nonisolated static var allCasePaths: AllCasePaths {
             AllCasePaths()
           }
+
+          public nonisolated static func caseName(
+            for keyPath: CasePaths.PartialCaseKeyPath<Foo>
+          ) -> Swift.String? {
+            if keyPath == \.bar {
+              return "bar"
+            }
+            if keyPath == \.baz {
+              return "baz"
+            }
+            if keyPath == \.fizz {
+              return "fizz"
+            }
+            if keyPath == \.fizzier {
+              return "fizzier"
+            }
+            if keyPath == \.fizziest {
+              return "fizziest"
+            }
+            return nil
+          }
         }
 
         extension Foo: nonisolated CasePathable, nonisolated CasePathIterable {
@@ -1181,6 +1387,15 @@
 
           public nonisolated static var allCasePaths: AllCasePaths {
             AllCasePaths()
+          }
+
+          public nonisolated static func caseName(
+            for keyPath: CasePaths.PartialCaseKeyPath<Action>
+          ) -> Swift.String? {
+            if keyPath == \.element {
+              return "element"
+            }
+            return nil
           }
 
           public typealias _$Element = Element
@@ -1233,6 +1448,15 @@
               AllCasePaths()
             }
 
+            public nonisolated static func caseName(
+              for keyPath: CasePaths.PartialCaseKeyPath<Action>
+            ) -> Swift.String? {
+              if keyPath == \.element {
+                return "element"
+              }
+              return nil
+            }
+
             public typealias _$Element = Element
           }
         }
@@ -1279,6 +1503,15 @@
 
           public nonisolated static var allCasePaths: AllCasePaths {
             AllCasePaths()
+          }
+
+          public nonisolated static func caseName(
+            for keyPath: CasePaths.PartialCaseKeyPath<Action>
+          ) -> Swift.String? {
+            if keyPath == \.element {
+              return "element"
+            }
+            return nil
           }
 
           public typealias _$Element = Element
@@ -1354,6 +1587,21 @@
 
           public nonisolated static var allCasePaths: AllCasePaths {
             AllCasePaths()
+          }
+
+          public nonisolated static func caseName(
+            for keyPath: CasePaths.PartialCaseKeyPath<Action>
+          ) -> Swift.String? {
+            if keyPath == \.element {
+              return "element"
+            }
+            if keyPath == \.secondElement {
+              return "secondElement"
+            }
+            if keyPath == \.thirdElement {
+              return "thirdElement"
+            }
+            return nil
           }
 
           public typealias _$Element = Element
@@ -1453,6 +1701,21 @@
 
           public nonisolated static var allCasePaths: AllCasePaths {
             AllCasePaths()
+          }
+
+          public nonisolated static func caseName(
+            for keyPath: CasePaths.PartialCaseKeyPath<Action>
+          ) -> Swift.String? {
+            if keyPath == \.exampleAction {
+              return "exampleAction"
+            }
+            if keyPath == \.singleParam {
+              return "singleParam"
+            }
+            if keyPath == \.multipleWithLabels {
+              return "multipleWithLabels"
+            }
+            return nil
           }
         }
 
