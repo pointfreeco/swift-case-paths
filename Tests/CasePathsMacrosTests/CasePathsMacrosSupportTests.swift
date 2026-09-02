@@ -44,14 +44,14 @@
           case fizz(buzz: String)
 
           public struct AllCasePaths: CasePaths.CasePathReflectable, Swift.Sendable, Swift.Sequence {
-            public subscript(root: Foo) -> CasePaths.PartialCaseKeyPath<Foo> {
-              if root.is(\.bar) {
+            public static func _case(for root: Foo) -> CasePaths.PartialCaseKeyPath<Foo> {
+              if case .bar = root {
                 return \.bar
               }
-              if root.is(\.baz) {
+              if case .baz = root {
                 return \.baz
               }
-              if root.is(\.fizz) {
+              if case .fizz = root {
                 return \.fizz
               }
               return \.never
@@ -82,12 +82,12 @@
                 return v0
               }
             }
-            public func makeIterator() -> Swift.IndexingIterator<[CasePaths.PartialCaseKeyPath<Foo>]> {
+            public static var _allCaseKeyPaths: [CasePaths.PartialCaseKeyPath<Foo>] {
               var allCasePaths: [CasePaths.PartialCaseKeyPath<Foo>] = []
               allCasePaths.append(\.bar)
               allCasePaths.append(\.baz)
               allCasePaths.append(\.fizz)
-              return allCasePaths.makeIterator()
+              return allCasePaths
             }
           }
 
@@ -131,14 +131,14 @@
           }
 
           public struct AllCasePaths: CasePaths.CasePathReflectable, Swift.Sendable, Swift.Sequence {
-            public subscript(root: Foo) -> CasePaths.PartialCaseKeyPath<Foo> {
-              if root.is(\.bar) {
+            public static func _case(for root: Foo) -> CasePaths.PartialCaseKeyPath<Foo> {
+              if case .bar = root {
                 return \.bar
               }
-              if root.is(\.baz) {
+              if case .baz = root {
                 return \.baz
               }
-              if root.is(\.fizz) {
+              if case .fizz = root {
                 return \.fizz
               }
               return \.never
@@ -169,12 +169,12 @@
                 return v0
               }
             }
-            public func makeIterator() -> Swift.IndexingIterator<[CasePaths.PartialCaseKeyPath<Foo>]> {
+            public static var _allCaseKeyPaths: [CasePaths.PartialCaseKeyPath<Foo>] {
               var allCasePaths: [CasePaths.PartialCaseKeyPath<Foo>] = []
               allCasePaths.append(\.bar)
               allCasePaths.append(\.baz)
               allCasePaths.append(\.fizz)
-              return allCasePaths.makeIterator()
+              return allCasePaths
             }
           }
 
@@ -209,14 +209,14 @@
           case fizz(buzz: String)
 
           public struct AllCasePaths: CasePaths.CasePathReflectable, Swift.Sendable, Swift.Sequence {
-            public subscript(root: Foo) -> CasePaths.PartialCaseKeyPath<Foo> {
-              if root.is(\.bar) {
+            public static func _case(for root: Foo) -> CasePaths.PartialCaseKeyPath<Foo> {
+              if case .bar = root {
                 return \.bar
               }
-              if root.is(\.baz) {
+              if case .baz = root {
                 return \.baz
               }
-              if root.is(\.fizz) {
+              if case .fizz = root {
                 return \.fizz
               }
               return \.never
@@ -247,12 +247,12 @@
                 return v0
               }
             }
-            public func makeIterator() -> Swift.IndexingIterator<[CasePaths.PartialCaseKeyPath<Foo>]> {
+            public static var _allCaseKeyPaths: [CasePaths.PartialCaseKeyPath<Foo>] {
               var allCasePaths: [CasePaths.PartialCaseKeyPath<Foo>] = []
               allCasePaths.append(\.bar)
               allCasePaths.append(\.baz)
               allCasePaths.append(\.fizz)
-              return allCasePaths.makeIterator()
+              return allCasePaths
             }
           }
 
@@ -294,14 +294,14 @@
           case fizz(buzz: String)
 
           public struct AllCasePaths: CasePaths.CasePathReflectable, Swift.Sendable, Swift.Sequence {
-            public subscript(root: Foo) -> CasePaths.PartialCaseKeyPath<Foo> {
-              if root.is(\.bar) {
+            public static func _case(for root: Foo) -> CasePaths.PartialCaseKeyPath<Foo> {
+              if case .bar = root {
                 return \.bar
               }
-              if root.is(\.baz) {
+              if case .baz = root {
                 return \.baz
               }
-              if root.is(\.fizz) {
+              if case .fizz = root {
                 return \.fizz
               }
               return \.never
@@ -332,12 +332,12 @@
                 return v0
               }
             }
-            public func makeIterator() -> Swift.IndexingIterator<[CasePaths.PartialCaseKeyPath<Foo>]> {
+            public static var _allCaseKeyPaths: [CasePaths.PartialCaseKeyPath<Foo>] {
               var allCasePaths: [CasePaths.PartialCaseKeyPath<Foo>] = []
               allCasePaths.append(\.bar)
               allCasePaths.append(\.baz)
               allCasePaths.append(\.fizz)
-              return allCasePaths.makeIterator()
+              return allCasePaths
             }
           }
 
@@ -372,8 +372,8 @@
           case baz(Int)
 
           public struct AllCasePaths: CasePaths.CasePathReflectable, Swift.Sendable, Swift.Sequence {
-            public subscript(root: Foo) -> CasePaths.PartialCaseKeyPath<Foo> {
-              if root.is(\.baz) {
+            public static func _case(for root: Foo) -> CasePaths.PartialCaseKeyPath<Foo> {
+              if case .baz = root {
                 return \.baz
               }
               return \.never
@@ -386,10 +386,10 @@
                 return v0
               }
             }
-            public func makeIterator() -> Swift.IndexingIterator<[CasePaths.PartialCaseKeyPath<Foo>]> {
+            public static var _allCaseKeyPaths: [CasePaths.PartialCaseKeyPath<Foo>] {
               var allCasePaths: [CasePaths.PartialCaseKeyPath<Foo>] = []
               allCasePaths.append(\.baz)
-              return allCasePaths.makeIterator()
+              return allCasePaths
             }
           }
 
