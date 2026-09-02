@@ -32,6 +32,17 @@ import IssueReporting
 ///   }
 ///
 ///   public static var allCasePaths: AllCasePaths { AllCasePaths() }
+///
+///   public var `case`: PartialCaseKeyPath<Self> {
+///     switch self {
+///     case .success: return \.success
+///     case .failure: return \.failure
+///     }
+///   }
+///
+///   public static var _allCaseKeyPaths: [PartialCaseKeyPath<Self>] {
+///     [\.success, \.failure]
+///   }
 /// }
 /// ```
 public protocol CasePathable {
@@ -40,6 +51,22 @@ public protocol CasePathable {
 
   /// A collection of all case paths of this type.
   static var allCasePaths: AllCasePaths { get }
+
+  /// A case key path to this enum's case.
+  ///
+  /// ```swift
+  /// @CasePathable
+  /// enum Field {
+  ///   case title(String)
+  ///   case body(String)
+  ///   case isLive
+  /// }
+  ///
+  /// Field.title("Hello, Blob!").case  // \.title
+  /// ```
+  var `case`: PartialCaseKeyPath<Self> { get }
+
+  static var _allCaseKeyPaths: [PartialCaseKeyPath<Self>] { get }
 
   /// Returns the case name for a given case key path, if available.
   ///
@@ -499,9 +526,12 @@ extension CasePathable {
 }
 
 extension CasePathable where AllCasePaths: CasePathReflectable<Self> {
-  /// A case key path to this enum's case.
   public var `case`: PartialCaseKeyPath<Self> {
-    Self.allCasePaths[self]
+    AllCasePaths._case(for: self)
+  }
+
+  public static var _allCaseKeyPaths: [PartialCaseKeyPath<Self>] {
+    AllCasePaths._allCaseKeyPaths
   }
 }
 

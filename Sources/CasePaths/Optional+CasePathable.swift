@@ -1,11 +1,15 @@
 extension Optional: CasePathable, CasePathIterable {
   @dynamicMemberLookup
   public struct AllCasePaths: CasePathReflectable, Sendable {
-    public subscript(root: Optional) -> PartialCaseKeyPath<Optional> {
+    public static func _case(for root: Optional) -> PartialCaseKeyPath<Optional> {
       switch root {
       case .none: return \.none
       case .some: return \.some
       }
+    }
+
+    public static var _allCaseKeyPaths: [PartialCaseKeyPath<Optional>] {
+      [\.none, \.some]
     }
 
     /// A case path to the absence of a value.
@@ -77,8 +81,9 @@ extension Case {
 }
 
 extension Optional.AllCasePaths: Sequence {
-  public func makeIterator() -> some IteratorProtocol<PartialCaseKeyPath<Optional>> {
-    [\.none, \.some].makeIterator()
+  @available(*, deprecated, message: "Iterate over 'Array(Optional.allCasePaths)' instead")
+  public func makeIterator() -> IndexingIterator<[PartialCaseKeyPath<Optional>]> {
+    Self._allCaseKeyPaths.makeIterator()
   }
 }
 
