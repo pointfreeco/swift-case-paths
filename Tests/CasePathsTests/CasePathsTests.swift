@@ -223,6 +223,19 @@ struct CasePathsTests {
     #expect(foo("Blob") != nil)
   }
 
+  @Test func `typed and partial 'is'`() {
+    let typed = \Foo.Cases.bar.int
+    let partial = typed as PartialCaseKeyPath<Foo>
+    #expect(Foo.bar(.int(42)).is(typed))
+    #expect(Foo.bar(.int(42)).is(partial))
+    #expect(!Foo.fizzBuzz.is(typed))
+    #expect(!Foo.fizzBuzz.is(partial))
+    #expect(Optional(Foo.bar(.int(42))).is(typed))
+    #expect(Optional(Foo.bar(.int(42))).is(partial))
+    #expect(!Optional<Foo>.none.is(typed))
+    #expect(!Optional<Foo>.none.is(partial))
+  }
+
   @Test func `optional 'is'`() {
     #expect(Optional(Foo.fizzBuzz).is(\.fizzBuzz))
     #expect(!Optional(Foo.fizzBuzz).is(\.bar))

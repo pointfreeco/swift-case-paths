@@ -431,6 +431,19 @@ extension CasePathable {
   /// userActions.filter { $0.is(\.home) }      // [UserAction.home(.onAppear)]
   /// userActions.filter { $0.is(\.settings) }  // [UserAction.settings(.subscribeButtonTapped)]
   /// ```
+  @inlinable
+  public func `is`<Path>(_ keyPath: CaseKeyPath<Self, Path>) -> Bool {
+    Self.allCasePaths[keyPath: keyPath].extract(from: self) != nil
+  }
+
+  /// Tests the associated value of a case using a partial case key path.
+  ///
+  /// This overload is used when the case key path's type has been erased, for example when it
+  /// has been stored in a collection of ``PartialCaseKeyPath``s.
+  ///
+  /// - Parameter keyPath: A partial case key path.
+  /// - Returns: Whether or not this enum's case matches the given key path.
+  @_disfavoredOverload
   public func `is`(_ keyPath: PartialCaseKeyPath<Self>) -> Bool {
     self[case: keyPath] != nil
   }
