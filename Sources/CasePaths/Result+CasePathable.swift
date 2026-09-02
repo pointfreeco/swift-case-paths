@@ -1,10 +1,14 @@
 extension Result: CasePathable, CasePathIterable {
   public struct AllCasePaths: CasePathReflectable, Sendable {
-    public subscript(root: Result) -> PartialCaseKeyPath<Result> {
+    public static func _case(for root: Result) -> PartialCaseKeyPath<Result> {
       switch root {
       case .success: return \.success
       case .failure: return \.failure
       }
+    }
+
+    public static var _allCaseKeyPaths: [PartialCaseKeyPath<Result>] {
+      [\.success, \.failure]
     }
 
     /// A success case path, for embedding or extracting a `Success` value.
@@ -36,7 +40,8 @@ extension Result: CasePathable, CasePathIterable {
 }
 
 extension Result.AllCasePaths: Sequence {
-  public func makeIterator() -> some IteratorProtocol<PartialCaseKeyPath<Result>> {
-    [\.success, \.failure].makeIterator()
+  @available(*, deprecated, message: "Iterate over 'Array(Result.allCasePaths)' instead")
+  public func makeIterator() -> IndexingIterator<[PartialCaseKeyPath<Result>]> {
+    Self._allCaseKeyPaths.makeIterator()
   }
 }

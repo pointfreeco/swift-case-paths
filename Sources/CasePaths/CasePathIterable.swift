@@ -2,7 +2,7 @@
 ///
 /// The `@CasePathable` macro automatically generates a conformance to this protocol.
 ///
-/// You can iterate over ``CasePathable/allCasePaths`` to get access to each individual case path:
+/// You can collect ``CasePathable/allCasePaths`` into an array to get access to each case path:
 ///
 /// ```swift
 /// @CasePathable enum Field {

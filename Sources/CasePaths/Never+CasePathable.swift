@@ -1,7 +1,11 @@
 extension Never: CasePathable, CasePathIterable {
   public struct AllCasePaths: CasePathReflectable, Sendable {
-    public subscript(root: Never) -> PartialCaseKeyPath<Never> {
+    public static func _case(for root: Never) -> PartialCaseKeyPath<Never> {
       \.never
+    }
+
+    public static var _allCaseKeyPaths: [PartialCaseKeyPath<Never>] {
+      []
     }
   }
 
@@ -30,7 +34,8 @@ extension Case {
 }
 
 extension Never.AllCasePaths: Sequence {
-  public func makeIterator() -> some IteratorProtocol<PartialCaseKeyPath<Never>> {
-    [].makeIterator()
+  @available(*, deprecated, message: "Iterate over 'Array(Never.allCasePaths)' instead")
+  public func makeIterator() -> IndexingIterator<[PartialCaseKeyPath<Never>]> {
+    Self._allCaseKeyPaths.makeIterator()
   }
 }
