@@ -8,7 +8,7 @@ let package = Package(
   name: "swift-case-paths",
   platforms: [
     .iOS(.v15),
-    .macOS(.v12),
+    .macOS(.v10_15),
     .tvOS(.v15),
     .watchOS(.v9),
   ],
