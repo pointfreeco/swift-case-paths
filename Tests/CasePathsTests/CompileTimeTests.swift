@@ -6,6 +6,30 @@ private enum EnumWithExtractAndEmbedCase {
   case extract
 }
 
+@CasePathable
+private enum Comments {
+  // Comment above case
+  case bar
+  /*Comment before case*/ case baz(Int)
+  case fizz(buzz: String)  // Comment on case
+  case fizzier /*Comment in case*/(Int, buzzier: String)
+  case fizziest
+}
+
+@CasePathable
+enum Action {
+  case alert(Alert)
+}
+
+@CasePathable
+enum Alert {
+  case alert(Never)
+}
+
+@CasePathable enum EnumWithElementGeneric<Element> {
+  case element(Element)
+}
+
 #if DEBUG
   @available(*, deprecated, message: "Deprecated")
 #else
@@ -16,36 +40,4 @@ private enum EnumWithExtractAndEmbedCase {
 private enum EnumWithConditionalAvailability {
   case foo(Int)
   case bar
-}
-
-private enum HandWrittenConformance {
-  case foo(Int)
-  case bar
-}
-
-@available(*, deprecated)
-extension HandWrittenConformance: CasePathable {
-  struct AllCasePaths {
-    var foo: AnyCasePath<HandWrittenConformance, Int> {
-      AnyCasePath(
-        embed: { .foo($0) },
-        extract: {
-          guard case .foo(let value) = $0 else { return nil }
-          return value
-        }
-      )
-    }
-
-    var bar: AnyCasePath<HandWrittenConformance, Void> {
-      AnyCasePath(
-        embed: { .bar },
-        extract: {
-          guard case .bar = $0 else { return nil }
-          return ()
-        }
-      )
-    }
-  }
-
-  static var allCasePaths: AllCasePaths { AllCasePaths() }
 }

@@ -120,10 +120,10 @@ case of an enum:
 import CasePaths
 
 extension Binding {
-  public subscript<Case>(dynamicMember keyPath: CaseKeyPath<Value, Case>) -> Binding<Case>?
-  where Value: CasePathable {
-    Binding<Case>(
-      unwrapping: Binding<Case?>(
+  public subscript<Path: CasePath>(dynamicMember keyPath: CaseKeyPath<Value, Path>) -> Binding<Path.Value>?
+  where Value: CasePathable, Path.Root == Value {
+    Binding<Path.Value>(
+      unwrapping: Binding<Path.Value?>(
         get: { self.wrappedValue[case: keyPath] },
         set: { newValue, transaction in
           guard let newValue else { return }
@@ -412,7 +412,9 @@ Do you have a project that uses case paths that you'd like to share? Please
 
 - ``CasePathable()``
 - ``CasePathable``
+- ``CasePath``
 - ``CaseKeyPath``
+- ``AnyCasePath``
 
 ### Swift support
 

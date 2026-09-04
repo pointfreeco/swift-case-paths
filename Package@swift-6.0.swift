@@ -7,10 +7,10 @@ import PackageDescription
 let package = Package(
   name: "swift-case-paths",
   platforms: [
-    .iOS(.v13),
+    .iOS(.v15),
     .macOS(.v10_15),
-    .tvOS(.v13),
-    .watchOS(.v6),
+    .tvOS(.v15),
+    .watchOS(.v9),
   ],
   products: [
     .library(
@@ -23,13 +23,15 @@ let package = Package(
     ),
   ],
   dependencies: [
-    .package(url: "https://github.com/pointfreeco/xctest-dynamic-overlay", from: "1.13.0"),
     .package(url: "https://github.com/swiftlang/swift-syntax", "509.0.0"..<"605.0.0"),
+    .package(url: "https://github.com/pointfreeco/xctest-dynamic-overlay", from: "1.13.0"),
   ],
   targets: [
     .target(
       name: "CasePaths",
       dependencies: [
+        "CasePaths1",
+        "CasePaths2",
         "CasePathsMacros",
         .product(name: "IssueReporting", package: "xctest-dynamic-overlay"),
       ]
@@ -60,6 +62,14 @@ let package = Package(
         "CasePathsMacrosSupport",
       ]
     ),
+    .target(
+      name: "CasePaths1",
+      path: "Sources/VersionMarkerModules/CasePaths1"
+    ),
+    .target(
+      name: "CasePaths2",
+      path: "Sources/VersionMarkerModules/CasePaths2"
+    ),
   ],
   swiftLanguageModes: [.v6]
 )
@@ -73,7 +83,7 @@ let package = Package(
 
 if ProcessInfo.processInfo.environment["OMIT_MACRO_TESTS"] == nil {
   package.dependencies.append(
-    .package(url: "https://github.com/pointfreeco/swift-macro-testing", from: "0.2.0")
+    .package(url: "https://github.com/pointfreeco/swift-macro-testing", from: "0.7.0")
   )
   package.targets.append(
     .testTarget(
@@ -88,4 +98,16 @@ if ProcessInfo.processInfo.environment["OMIT_MACRO_TESTS"] == nil {
       ]
     )
   )
+}
+
+for target in package.targets {
+  target.swiftSettings = target.swiftSettings ?? []
+  target.swiftSettings?.append(contentsOf: [
+    .enableUpcomingFeature("ExistentialAny"),
+    .enableUpcomingFeature("ImmutableWeakCaptures"),
+    .enableUpcomingFeature("InferIsolatedConformances"),
+    .enableUpcomingFeature("InternalImportsByDefault"),
+    .enableUpcomingFeature("MemberImportVisibility"),
+    .enableUpcomingFeature("NonisolatedNonsendingByDefault"),
+  ])
 }

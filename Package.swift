@@ -30,6 +30,8 @@ let package = Package(
     .target(
       name: "CasePaths",
       dependencies: [
+        "CasePaths1",
+        "CasePaths2",
         "CasePathsMacros",
         .product(name: "IssueReporting", package: "swift-issue-reporting"),
       ]
@@ -59,6 +61,14 @@ let package = Package(
         "CasePaths",
         "CasePathsMacrosSupport",
       ]
+    ),
+    .target(
+      name: "CasePaths1",
+      path: "Sources/VersionMarkerModules/CasePaths1"
+    ),
+    .target(
+      name: "CasePaths2",
+      path: "Sources/VersionMarkerModules/CasePaths2"
     ),
   ],
   swiftLanguageModes: [.v6]
