@@ -1,5 +1,3 @@
-import IssueReporting
-
 /// A type that provides a collection of all of its case paths.
 ///
 /// Use the `@CasePathable` macro to automatically add case paths, and this conformance, to an
@@ -465,9 +463,6 @@ extension CasePathable {
 
   /// Unwraps and yields a mutable associated value to a closure.
   ///
-  /// > Warning: If the enum's case does not match the given case key path, the mutation will not
-  /// > be applied, and a runtime warning will be logged. To suppress these warnings, limit calls
-  /// > to `modify` to instances in which you have already checked the enum case. For example:
   /// >
   /// > ```swift
   /// > switch e {
@@ -484,38 +479,21 @@ extension CasePathable {
   ///
   /// - Parameters:
   ///   - keyPath: A case key path to an associated value.
-  ///   - yield: A closure given mutable access to that associated value.
-  ///   - fileID: The fileID where the modify occurs.
-  ///   - filePath: The filePath where the modify occurs.
-  ///   - line: The line where the modify occurs.
-  ///   - column: The column where the modify occurs.
-  public mutating func modify<Path>(
+  ///   - body: A closure given mutable access to that associated value.
+  /// - Returns: The result returned by `body`.
+  public mutating func modify<Path, Result, Failure: Error>(
     _ keyPath: CaseKeyPath<Self, Path>,
-    yield: (inout Path.Value) -> Void,
-    fileID: StaticString = #fileID,
-    filePath: StaticString = #filePath,
-    line: UInt = #line,
-    column: UInt = #column
-  ) {
+    _ body: (inout Path.Value) throws(Failure) -> Result
+  ) throws(Failure) -> Result? {
     let path = Self.allCasePaths[keyPath: keyPath]
-    guard var value = path.extract(from: self) else {
-      reportIssue(
-        """
-        Can't modify '\(String(describing: self))' via \
-        'CaseKeyPath<\(Self.self), \(Path.Value.self)>' \
-        (aka '\(String(reflecting: keyPath))')
-        """,
-        fileID: fileID,
-        filePath: filePath,
-        line: line,
-        column: column
-      )
-      return
-    }
-    yield(&value)
+    guard var value = path.extract(from: self) else { return nil }
+    let result = try body(&value)
     self = path.embed(value)
+    return result
   }
 }
+
+struct CasePathMismatch: Error {}
 
 extension AnyCasePath where Root: CasePathable {
   /// Creates a type-erased case path for a given case key path.
