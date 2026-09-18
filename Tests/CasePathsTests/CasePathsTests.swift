@@ -107,24 +107,25 @@ struct CasePathsTests {
     #expect(Set(Foo.allCasePaths) == [\.bar, \.baz, \.fizzBuzz, \.blob, \.foo])
   }
 
-  @Test func modify() {
+  @Test func modify() throws {
     var foo = Foo.bar(.int(21))
-    foo.modify(\.bar.int) { $0 *= 2 }
+    let value = try foo.modify(\.bar.int) {
+      $0 *= 2
+      return $0
+    }
     #expect(foo == .bar(.int(42)))
+    #expect(value == 42)
   }
 
-  #if DEBUG && !os(Linux) && !os(Windows) && !os(WASI) && !os(Android)
-    @Test func `modify failure`() {
-      guard ProcessInfo.processInfo.environment["CI"] == nil else { return }
-      var foo = Foo.bar(.int(21))
-      withKnownIssue {
-        foo.modify(\.baz.string) { $0.append("!") }
-      }
-      #expect(foo == .bar(.int(21)))
+  @Test func `modify failure`() {
+    var foo = Foo.bar(.int(21))
+    #expect(throws: CasePathMismatch.self) {
+      try foo.modify(\.baz.string) { $0.append("!") }
     }
-  #endif
+    #expect(foo == .bar(.int(21)))
+  }
 
-  @Test func `manual conformance via 'AnyCasePath'`() {
+  @Test func `manual conformance via 'AnyCasePath'`() throws {
     // A hand-written conformance in the documented 1.x style, vending
     // 'AnyCasePath' properties, still supplies working case key paths.
     #expect(Legacy.wrapped(.bar(.int(42)))[case: \.wrapped] == .bar(.int(42)))
@@ -132,7 +133,7 @@ struct CasePathsTests {
     #expect(Legacy.count(1)[case: \.wrapped] == nil)
     #expect((\Legacy.Cases.wrapped.bar.int)(1) == .wrapped(.bar(.int(1))))
     var legacy = Legacy.count(1)
-    legacy.modify(\.count) { $0 += 1 }
+    try legacy.modify(\.count) { $0 += 1 }
     #expect(legacy == .count(2))
   }
 
