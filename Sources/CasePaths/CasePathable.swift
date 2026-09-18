@@ -481,14 +481,12 @@ extension CasePathable {
   ///   - keyPath: A case key path to an associated value.
   ///   - body: A closure given mutable access to that associated value.
   /// - Returns: The result returned by `body`.
-  public mutating func modify<Path, Result>(
+  public mutating func modify<Path, Result, Failure: Error>(
     _ keyPath: CaseKeyPath<Self, Path>,
-    _ body: (inout Path.Value) throws -> Result
-  ) throws -> Result {
+    _ body: (inout Path.Value) throws(Failure) -> Result
+  ) throws(Failure) -> Result? {
     let path = Self.allCasePaths[keyPath: keyPath]
-    guard var value = path.extract(from: self) else {
-      throw CasePathMismatch()
-    }
+    guard var value = path.extract(from: self) else { return nil }
     let result = try body(&value)
     self = path.embed(value)
     return result

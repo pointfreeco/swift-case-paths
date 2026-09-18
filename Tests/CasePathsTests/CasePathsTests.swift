@@ -109,7 +109,7 @@ struct CasePathsTests {
 
   @Test func modify() throws {
     var foo = Foo.bar(.int(21))
-    let value = try foo.modify(\.bar.int) {
+    let value = foo.modify(\.bar.int) {
       $0 *= 2
       return $0
     }
@@ -119,9 +119,7 @@ struct CasePathsTests {
 
   @Test func `modify failure`() {
     var foo = Foo.bar(.int(21))
-    #expect(throws: (any Error).self) {
-      try foo.modify(\.baz.string) { $0.append("!") }
-    }
+    #expect(foo.modify(\.baz.string) { $0.append("!") } == nil)
     #expect(foo == .bar(.int(21)))
   }
 
@@ -133,7 +131,7 @@ struct CasePathsTests {
     #expect(Legacy.count(1)[case: \.wrapped] == nil)
     #expect((\Legacy.Cases.wrapped.bar.int)(1) == .wrapped(.bar(.int(1))))
     var legacy = Legacy.count(1)
-    try legacy.modify(\.count) { $0 += 1 }
+    legacy.modify(\.count) { $0 += 1 }
     #expect(legacy == .count(2))
   }
 

@@ -78,15 +78,13 @@ extension Optional where Wrapped: CasePathable {
   }
 
   @_disfavoredOverload
-  public mutating func modify<Path, Result>(
+  public mutating func modify<Path, Result, Failure: Error>(
     _ keyPath: CaseKeyPath<Wrapped, Path>,
-    _ body: (inout Path.Value) throws -> Result
-  ) throws -> Result {
+    _ body: (inout Path.Value) throws(Failure) -> Result
+  ) throws(Failure) -> Result? {
     let path = Wrapped.allCasePaths[keyPath: keyPath]
-    guard case .some(var wrapped) = self, var value = path.extract(from: wrapped)
-    else {
-      throw CasePathMismatch()
-    }
+    guard case .some(let wrapped) = self, var value = path.extract(from: wrapped)
+    else { return nil }
     let result = try body(&value)
     self = .some(path.embed(value))
     return result
