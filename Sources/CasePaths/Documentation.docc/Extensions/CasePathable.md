@@ -9,7 +9,7 @@
 ### Extracting, replacing, and modifying values
 
 - ``subscript(case:)``
-- ``modify(_:yield:)``
+- ``modify(_:_:)``
 
 ### Case properties
 
