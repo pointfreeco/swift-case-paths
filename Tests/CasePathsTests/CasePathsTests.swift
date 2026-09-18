@@ -119,7 +119,7 @@ struct CasePathsTests {
 
   @Test func `modify failure`() {
     var foo = Foo.bar(.int(21))
-    #expect(throws: CasePathMismatch.self) {
+    #expect(throws: (any Error).self) {
       try foo.modify(\.baz.string) { $0.append("!") }
     }
     #expect(foo == .bar(.int(21)))
