@@ -467,11 +467,11 @@ extension CasePathable {
   /// > ```swift
   /// > switch e {
   /// > case .someCase:
-  /// >   try e.modify(\.someCase) { int in
+  /// >   e.modify(\.someCase) { int in
   /// >     int += 1
   /// >   }
   /// > case .anotherCase:
-  /// >   try e.modify(\.anotherCase) { string in
+  /// >   e.modify(\.anotherCase) { string in
   /// >     string.append("!")
   /// >   }
   /// > }

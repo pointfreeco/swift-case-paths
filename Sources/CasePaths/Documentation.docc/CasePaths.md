@@ -225,7 +225,7 @@ And their associated values can be mutated in place using the `modify` method:
 
 ```swift
 var result = Result<String, Error>.success("Blob")
-try result.modify(\.success) {
+result.modify(\.success) {
   $0 += ", Jr."
 }
 result  // Result.success("Blob, Jr.")
