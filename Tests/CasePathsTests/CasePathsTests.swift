@@ -107,7 +107,7 @@ struct CasePathsTests {
     #expect(Set(Foo.allCasePaths) == [\.bar, \.baz, \.fizzBuzz, \.blob, \.foo])
   }
 
-  @Test func modify() throws {
+  @Test func modify() {
     var foo = Foo.bar(.int(21))
     let value = foo.modify(\.bar.int) {
       $0 *= 2
