@@ -109,20 +109,19 @@ struct CasePathsTests {
 
   @Test func modify() {
     var foo = Foo.bar(.int(21))
-    foo.modify(\.bar.int) { $0 *= 2 }
+    let value = foo.modify(\.bar.int) {
+      $0 *= 2
+      return $0
+    }
     #expect(foo == .bar(.int(42)))
+    #expect(value == 42)
   }
 
-  #if DEBUG && !os(Linux) && !os(Windows) && !os(WASI) && !os(Android)
-    @Test func `modify failure`() {
-      guard ProcessInfo.processInfo.environment["CI"] == nil else { return }
-      var foo = Foo.bar(.int(21))
-      withKnownIssue {
-        foo.modify(\.baz.string) { $0.append("!") }
-      }
-      #expect(foo == .bar(.int(21)))
-    }
-  #endif
+  @Test func `modify failure`() {
+    var foo = Foo.bar(.int(21))
+    #expect(foo.modify(\.baz.string) { $0.append("!") } == nil)
+    #expect(foo == .bar(.int(21)))
+  }
 
   @Test func `manual conformance via 'AnyCasePath'`() {
     // A hand-written conformance in the documented 1.x style, vending
