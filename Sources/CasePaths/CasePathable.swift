@@ -493,8 +493,6 @@ extension CasePathable {
   }
 }
 
-struct CasePathMismatch: Error {}
-
 extension AnyCasePath where Root: CasePathable {
   /// Creates a type-erased case path for a given case key path.
   ///
