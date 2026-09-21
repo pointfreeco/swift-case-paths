@@ -123,7 +123,7 @@ struct CasePathsTests {
     #expect(foo == .bar(.int(21)))
   }
 
-  @Test func `manual conformance via 'AnyCasePath'`() throws {
+  @Test func `manual conformance via 'AnyCasePath'`() {
     // A hand-written conformance in the documented 1.x style, vending
     // 'AnyCasePath' properties, still supplies working case key paths.
     #expect(Legacy.wrapped(.bar(.int(42)))[case: \.wrapped] == .bar(.int(42)))
