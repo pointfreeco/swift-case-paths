@@ -5,7 +5,6 @@ public import SwiftSyntaxMacros
 
 public struct CasePathableMacro {
   static let moduleName = "CasePaths"
-  static let casePathTypeName = "AnyCasePath"
   static let casePathableExpandingMacroNames = [
     "CaseBindable",
     "Table",
@@ -131,20 +130,20 @@ extension CasePathableMacro: MemberMacro {
 
     let selfRewriter = SelfRewriter(selfEquivalent: enumName)
     let memberBlock = selfRewriter.rewrite(enumDecl.memberBlock).cast(MemberBlockSyntax.self)
-    let rootSubscriptCases = generateCases(from: memberBlock.members, enumName: enumName) {
-      "if case .\($0.name.text) = root { return \\.\($0.name.text) }"
+    let caseKeyPathCases = generateCases(from: memberBlock.members, enumName: enumName) {
+      "if case .\($0.name.text) = self { return \\.\($0.name.text) }"
     }
-    let elementRewriter = ElementRewriter()
+    let associatedTypeRewriter = AssociatedTypeRewriter()
     let casePaths = generateDeclSyntax(
       from: memberBlock.members,
       enumName: enumName,
-      elementRewriter: elementRewriter
+      rewriter: associatedTypeRewriter
     )
     let allCases = generateCases(from: memberBlock.members, enumName: enumName) {
       "allCasePaths.append(\\.\($0.name.text))"
     }
 
-    let subscriptReturn = allCases.isEmpty ? #"\.never"# : #"return \.never"#
+    let caseKeyPathReturn = allCases.isEmpty ? #"\.never"# : #"return \.never"#
 
     let caseNameCases = generateCases(from: memberBlock.members, enumName: enumName) {
       #"if keyPath == \.\#($0.name.text) { return "\#($0.name.text)" }"#
@@ -153,21 +152,27 @@ extension CasePathableMacro: MemberMacro {
     var decls: [DeclSyntax] = [
       """
       public \(nonisolated)struct AllCasePaths: \
-      CasePaths.CasePathReflectable, Swift.Sendable, Swift.Sequence {
-      public static func _case(for root: \(enumName)) -> CasePaths.PartialCaseKeyPath<\(enumName)> {
-      \(raw: rootSubscriptCases.map { "\($0.description)\n" }.joined())\(raw: subscriptReturn)
-      }
+      CasePaths.CasePath, Swift.Hashable, Swift.Sendable {
+      public func embed(_ value: \(enumName)) -> \(enumName) {\(raw: allCases.isEmpty ? "" : "\nvalue\n")}
+      public func extract(from root: \(enumName)) -> \(enumName)? {\(raw: allCases.isEmpty ? "" : "\nroot\n")}
       \(raw: casePaths.map(\.description).joined(separator: "\n"))
-      public static var _allCaseKeyPaths: [CasePaths.PartialCaseKeyPath<\(enumName)>] {
+      }
+      """,
+      """
+      public \(nonisolated)static var allCasePaths: AllCasePaths { AllCasePaths() }
+      """,
+      """
+      public \(nonisolated)var `case`: CasePaths.PartialCaseKeyPath<\(enumName)> {
+      \(raw: caseKeyPathCases.map { "\($0.description)\n" }.joined())\(raw: caseKeyPathReturn)
+      }
+      """,
+      """
+      public \(nonisolated)static var _allCaseKeyPaths: [CasePaths.PartialCaseKeyPath<\(enumName)>] {
       \(raw: allCases.isEmpty ? "let" : "var") allCasePaths: \
       [CasePaths.PartialCaseKeyPath<\(enumName)>] = []\
       \(raw: allCases.map { "\n\($0.description)" }.joined())
       return allCasePaths
       }
-      }
-      """,
-      """
-      public \(nonisolated)static var allCasePaths: AllCasePaths { AllCasePaths() }
       """,
       """
       public \(nonisolated)static func caseName(
@@ -178,8 +183,9 @@ extension CasePathableMacro: MemberMacro {
       """,
     ]
 
-    if elementRewriter.didRewriteElement {
-      decls.append("public typealias _$Element = Element")
+    for name in AssociatedTypeRewriter.typeNames
+    where associatedTypeRewriter.rewrittenNames.contains(name) {
+      decls.append("public typealias _$\(raw: name) = \(raw: name)")
     }
 
     return decls
@@ -212,12 +218,12 @@ extension CasePathableMacro: MemberMacro {
   static func generateDeclSyntax(
     from elements: MemberBlockItemListSyntax,
     enumName: TokenSyntax,
-    elementRewriter: ElementRewriter
+    rewriter: AssociatedTypeRewriter
   ) -> [String] {
     elements.flatMap {
       if let decl = $0.decl.as(EnumCaseDeclSyntax.self) {
         return generateDeclSyntax(from: decl, enumName: enumName).map {
-          elementRewriter.rewrite($0).description
+          rewriter.rewrite($0).description
         }
       }
       if let ifConfigDecl = $0.decl.as(IfConfigDeclSyntax.self) {
@@ -230,7 +236,7 @@ extension CasePathableMacro: MemberMacro {
             + generateDeclSyntax(
               from: elements,
               enumName: enumName,
-              elementRewriter: elementRewriter
+              rewriter: rewriter
             )
         }
         return ifClauses + ["#endif"]
@@ -243,20 +249,43 @@ extension CasePathableMacro: MemberMacro {
     from decl: EnumCaseDeclSyntax,
     enumName: TokenSyntax
   ) -> [DeclSyntax] {
-    decl.elements.map {
-      let caseName = $0.name.trimmed
-      let associatedValueType = valueType(for: $0)
-      let hasPayload = $0.parameterClause.map { !$0.parameters.isEmpty } ?? false
-      let embed: String = hasPayload ? "\(enumName).\(caseName)" : "{ \(enumName).\(caseName) }"
+    decl.elements.flatMap { element -> [DeclSyntax] in
+      let caseName = element.name.trimmed
+      let casePathTypeName = "_$\(caseName.text.filter { $0 != "`" })"
+      let associatedValueType = valueType(for: element)
+      let hasPayload = element.parameterClause.map { !$0.parameters.isEmpty } ?? false
+      let embedBody: String
       let bindingNames: String
       let returnName: String
-      if hasPayload, let associatedValue = $0.parameterClause {
+      if hasPayload, let associatedValue = element.parameterClause {
+        let arguments = associatedValue.parameters.enumerated()
+          .map { index, parameter -> String in
+            let label: String =
+              switch parameter.firstName?.tokenKind {
+              case .none, .wildcard: ""
+              case .some: "\(parameter.firstName!.text): "
+              }
+            let access = associatedValue.parameters.count == 1 ? "value" : "value.\(index)"
+            return "\(label)\(access)"
+          }
+          .joined(separator: ", ")
+        let pattern =
+          associatedValue.parameters.count == 1
+          ? "_"
+          : "(\(Array(repeating: "_", count: associatedValue.parameters.count).joined(separator: ", ")))"
+        embedBody = """
+          switch value {
+          case \(pattern):
+          \(enumName).\(caseName)(\(arguments))
+          }
+          """
         let parameterNames = (0..<associatedValue.parameters.count)
           .map { "v\($0)" }
           .joined(separator: ", ")
         bindingNames = "(\(parameterNames))"
         returnName = associatedValue.parameters.count == 1 ? parameterNames : bindingNames
       } else {
+        embedBody = "\(enumName).\(caseName)"
         bindingNames = ""
         returnName = "()"
       }
@@ -273,17 +302,26 @@ extension CasePathableMacro: MemberMacro {
         .map { String($0.dropFirst(indent)) }
         .joined(separator: "\n")
         .trimmingSuffix(while: { $0.isWhitespace && !$0.isNewline })
-      return """
-        \(raw: leadingTrivia)public var \(caseName): \
-        \(raw: casePathTypeName.qualified)<\(enumName), \(associatedValueType)> {
-        \(raw: casePathTypeName.qualified)(embed: \(raw: embed)) {
-        guard case\(raw: hasPayload ? " let" : "").\(caseName)\(raw: bindingNames) = $0 else { \
+      return [
+        """
+        public struct \(raw: casePathTypeName): CasePaths.CasePath, Swift.Hashable, Swift.Sendable {
+        public func embed(_ value: \(associatedValueType)) -> \(enumName) {
+        \(raw: embedBody)
+        }
+        public func extract(from root: \(enumName)) -> \(associatedValueType)? {
+        guard case\(raw: hasPayload ? " let" : "").\(caseName)\(raw: bindingNames) = root else { \
         return nil \
         }
         return \(raw: returnName)
         }
         }
+        """,
         """
+        \(raw: leadingTrivia)public var \(caseName): \(raw: casePathTypeName) {
+        \(raw: casePathTypeName)()
+        }
+        """,
+      ]
     }
   }
 }
@@ -552,26 +590,17 @@ final class SelfRewriter: SyntaxRewriter {
   }
 }
 
-final class ElementRewriter: SyntaxRewriter {
-  var didRewriteElement = false
+final class AssociatedTypeRewriter: SyntaxRewriter {
+  static let typeNames = ["Element", "Root", "Value"]
+
+  var rewrittenNames: Set<String> = []
 
   override func visit(_ node: IdentifierTypeSyntax) -> TypeSyntax {
-    guard node.name.text == "Element"
+    let name = node.name.text
+    guard Self.typeNames.contains(name)
     else { return super.visit(node) }
-    didRewriteElement = true
-    return super.visit(node.with(\.name, "_$Element"))
-  }
-}
-
-extension [String] {
-  fileprivate var qualified: [String] {
-    map(\.qualified)
-  }
-}
-
-extension String {
-  fileprivate var qualified: String {
-    "\(CasePathableMacro.moduleName).\(self)"
+    rewrittenNames.insert(name)
+    return super.visit(node.with(\.name, "_$\(raw: name)"))
   }
 }
 

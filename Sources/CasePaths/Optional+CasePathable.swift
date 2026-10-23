@@ -1,60 +1,61 @@
-extension Optional: CasePathable, CasePathIterable {
-  @dynamicMemberLookup
-  public struct AllCasePaths: CasePathReflectable, Sendable {
-    public static func _case(for root: Optional) -> PartialCaseKeyPath<Optional> {
-      switch root {
-      case .none: return \.none
-      case .some: return \.some
+import IssueReporting
+
+extension Optional: CasePathable {
+  public struct AllCasePaths: CasePath, Hashable, Sendable {
+    public func embed(_ value: Optional) -> Optional { value }
+
+    public func extract(from root: Optional) -> Optional? { root }
+
+    @frozen
+    public struct _$none: CasePath, Hashable, Sendable {
+      @inlinable
+      public init() {}
+
+      @inlinable
+      public func embed(_ value: Void) -> Optional { .none }
+
+      @inlinable
+      public func extract(from root: Optional) -> Void? {
+        guard case .none = root else { return nil }
+        return ()
       }
     }
 
-    public static var _allCaseKeyPaths: [PartialCaseKeyPath<Optional>] {
-      [\.none, \.some]
-    }
-
     /// A case path to the absence of a value.
-    public var none: AnyCasePath<Optional, Void> {
-      AnyCasePath(
-        embed: { .none },
-        extract: {
-          guard case .none = $0 else { return nil }
-          return ()
-        }
-      )
+    public var none: _$none { _$none() }
+
+    @frozen
+    public struct _$some: CasePath, Hashable, Sendable {
+      @inlinable
+      public init() {}
+
+      @inlinable
+      public func embed(_ value: Wrapped) -> Optional { .some(value) }
+
+      @inlinable
+      public func extract(from root: Optional) -> Wrapped? {
+        guard case .some(let value) = root else { return nil }
+        return value
+      }
     }
 
     /// A case path to the presence of a value.
-    public var some: AnyCasePath<Optional, Wrapped> {
-      AnyCasePath(
-        embed: { .some($0) },
-        extract: {
-          guard case let .some(value) = $0 else { return nil }
-          return value
-        }
-      )
-    }
-
-    /// A case path to an optional-chained value.
-    @_disfavoredOverload
-    @available(*, deprecated, message: "This subscript will be removed in CasePaths 2.0")
-    public subscript<Member>(
-      dynamicMember keyPath: KeyPath<Wrapped.AllCasePaths, AnyCasePath<Wrapped, Member>>
-    ) -> AnyCasePath<Optional, Member?>
-    where Wrapped: CasePathable {
-      let casePath = Wrapped.allCasePaths[keyPath: keyPath]
-      return AnyCasePath(
-        embed: { $0.map(casePath.embed) },
-        extract: {
-          guard case let .some(wrapped) = $0, let member = casePath.extract(from: wrapped)
-          else { return .none }
-          return member
-        }
-      )
-    }
+    public var some: _$some { _$some() }
   }
 
   public static var allCasePaths: AllCasePaths {
     AllCasePaths()
+  }
+
+  public var `case`: PartialCaseKeyPath<Optional> {
+    switch self {
+    case .none: return \.none
+    case .some: return \.some
+    }
+  }
+
+  public static var _allCaseKeyPaths: [PartialCaseKeyPath<Optional>] {
+    [\.none, \.some]
   }
 
   public static func caseName(for keyPath: PartialCaseKeyPath<Self>) -> String? {
@@ -66,51 +67,44 @@ extension Optional: CasePathable, CasePathIterable {
   }
 }
 
-extension Case {
-  /// A case path to the presence of a nested value.
-  ///
-  /// This subscript can chain into an optional's wrapped value without explicitly specifying each
-  /// `some` component.
-  @_disfavoredOverload
-  public subscript<Member>(
-    dynamicMember keyPath: KeyPath<Value.AllCasePaths, AnyCasePath<Value, Member?>>
-  ) -> Case<Member>
-  where Value: CasePathable {
-    self[dynamicMember: keyPath].some
-  }
-}
-
 extension Optional.AllCasePaths: Sequence {
-  @available(*, deprecated, message: "Iterate over 'Array(Optional.allCasePaths)' instead")
-  public func makeIterator() -> IndexingIterator<[PartialCaseKeyPath<Optional>]> {
-    Self._allCaseKeyPaths.makeIterator()
+  public func makeIterator() -> some IteratorProtocol<PartialCaseKeyPath<Optional>> {
+    [\.none, \.some].makeIterator()
   }
 }
 
 extension Optional where Wrapped: CasePathable {
   @_disfavoredOverload
-  @_documentation(visibility: internal)
   public func `is`(_ keyPath: PartialCaseKeyPath<Wrapped>) -> Bool {
     self?[case: keyPath] != nil
   }
 
   @_disfavoredOverload
-  @_documentation(visibility: internal)
-  public mutating func modify<Value>(
-    _ keyPath: CaseKeyPath<Wrapped, Value>,
-    yield: (inout Value) -> Void,
+  public mutating func modify<Path>(
+    _ keyPath: CaseKeyPath<Wrapped, Path>,
+    yield: (inout Path.Value) -> Void,
     fileID: StaticString = #fileID,
     filePath: StaticString = #filePath,
     line: UInt = #line,
     column: UInt = #column
   ) {
-    modify(
-      (\Cases.some).appending(path: keyPath),
-      yield: yield,
-      fileID: fileID,
-      filePath: filePath,
-      line: line,
-      column: column
-    )
+    let path = Wrapped.allCasePaths[keyPath: keyPath]
+    guard case .some(let wrapped) = self, var value = path.extract(from: wrapped)
+    else {
+      reportIssue(
+        """
+        Can't modify '\(String(describing: self))' via \
+        'CaseKeyPath<\(Self.self), \(Path.Value.self)>' \
+        (aka '\(String(reflecting: keyPath))')
+        """,
+        fileID: fileID,
+        filePath: filePath,
+        line: line,
+        column: column
+      )
+      return
+    }
+    yield(&value)
+    self = .some(path.embed(value))
   }
 }

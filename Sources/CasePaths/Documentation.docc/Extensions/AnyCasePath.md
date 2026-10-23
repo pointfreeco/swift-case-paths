@@ -12,7 +12,3 @@
 
 - ``extract(from:)``
 - ``embed(_:)``
-
-### Appending paths
-
-- ``subscript(dynamicMember:)``
