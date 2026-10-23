@@ -133,11 +133,11 @@ extension CasePathableMacro: MemberMacro {
     let caseKeyPathCases = generateCases(from: memberBlock.members, enumName: enumName) {
       "if case .\($0.name.text) = self { return \\.\($0.name.text) }"
     }
-    let elementRewriter = ElementRewriter()
+    let associatedTypeRewriter = AssociatedTypeRewriter()
     let casePaths = generateDeclSyntax(
       from: memberBlock.members,
       enumName: enumName,
-      elementRewriter: elementRewriter
+      rewriter: associatedTypeRewriter
     )
     let allCases = generateCases(from: memberBlock.members, enumName: enumName) {
       "allCasePaths.append(\\.\($0.name.text))"
@@ -183,8 +183,9 @@ extension CasePathableMacro: MemberMacro {
       """,
     ]
 
-    if elementRewriter.didRewriteElement {
-      decls.append("public typealias _$Element = Element")
+    for name in AssociatedTypeRewriter.typeNames
+    where associatedTypeRewriter.rewrittenNames.contains(name) {
+      decls.append("public typealias _$\(raw: name) = \(raw: name)")
     }
 
     return decls
@@ -217,12 +218,12 @@ extension CasePathableMacro: MemberMacro {
   static func generateDeclSyntax(
     from elements: MemberBlockItemListSyntax,
     enumName: TokenSyntax,
-    elementRewriter: ElementRewriter
+    rewriter: AssociatedTypeRewriter
   ) -> [String] {
     elements.flatMap {
       if let decl = $0.decl.as(EnumCaseDeclSyntax.self) {
         return generateDeclSyntax(from: decl, enumName: enumName).map {
-          elementRewriter.rewrite($0).description
+          rewriter.rewrite($0).description
         }
       }
       if let ifConfigDecl = $0.decl.as(IfConfigDeclSyntax.self) {
@@ -235,7 +236,7 @@ extension CasePathableMacro: MemberMacro {
             + generateDeclSyntax(
               from: elements,
               enumName: enumName,
-              elementRewriter: elementRewriter
+              rewriter: rewriter
             )
         }
         return ifClauses + ["#endif"]
@@ -589,14 +590,17 @@ final class SelfRewriter: SyntaxRewriter {
   }
 }
 
-final class ElementRewriter: SyntaxRewriter {
-  var didRewriteElement = false
+final class AssociatedTypeRewriter: SyntaxRewriter {
+  static let typeNames = ["Element", "Root", "Value"]
+
+  var rewrittenNames: Set<String> = []
 
   override func visit(_ node: IdentifierTypeSyntax) -> TypeSyntax {
-    guard node.name.text == "Element"
+    let name = node.name.text
+    guard Self.typeNames.contains(name)
     else { return super.visit(node) }
-    didRewriteElement = true
-    return super.visit(node.with(\.name, "_$Element"))
+    rewrittenNames.insert(name)
+    return super.visit(node.with(\.name, "_$\(raw: name)"))
   }
 }
 

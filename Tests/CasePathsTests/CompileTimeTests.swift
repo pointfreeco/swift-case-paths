@@ -30,6 +30,14 @@ enum Alert {
   case element(Element)
 }
 
+@CasePathable enum EnumWithRootGeneric<Root> {
+  case root(Root)
+}
+
+@CasePathable enum EnumWithValueGeneric<Value> {
+  case value(Value)
+}
+
 #if DEBUG
   @available(*, deprecated, message: "Deprecated")
 #else

@@ -34,7 +34,9 @@
   named(`case`),
   named(_allCaseKeyPaths),
   named(caseName),
-  named(_$Element)
+  named(_$Element),
+  named(_$Root),
+  named(_$Value)
 )
 public macro CasePathable() =
   #externalMacro(

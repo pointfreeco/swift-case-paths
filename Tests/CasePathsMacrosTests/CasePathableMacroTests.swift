@@ -1806,6 +1806,107 @@
       }
     }
 
+    @Test func `generic root and value`() {
+      assertMacro {
+        """
+        @CasePathable enum Action<Root, Value> {
+          case root(Root)
+          case value(Value)
+        }
+        """
+      } expansion: {
+        #"""
+        enum Action<Root, Value> {
+          case root(Root)
+          case value(Value)
+
+          public nonisolated struct AllCasePaths: CasePaths.CasePath, Swift.Hashable, Swift.Sendable {
+            public func embed(_ value: Action) -> Action {
+              value
+            }
+            public func extract(from root: Action) -> Action? {
+              root
+            }
+            public struct _$root: CasePaths.CasePath, Swift.Hashable, Swift.Sendable {
+              public func embed(_ value: _$Root) -> Action {
+                switch value {
+                case _:
+                  Action.root(value)
+                }
+              }
+              public func extract(from root: Action) -> _$Root? {
+                guard case let .root(v0) = root else {
+                  return nil
+                }
+                return v0
+              }
+            }
+            public var root: _$root {
+              _$root()
+            }
+            public struct _$value: CasePaths.CasePath, Swift.Hashable, Swift.Sendable {
+              public func embed(_ value: _$Value) -> Action {
+                switch value {
+                case _:
+                  Action.value(value)
+                }
+              }
+              public func extract(from root: Action) -> _$Value? {
+                guard case let .value(v0) = root else {
+                  return nil
+                }
+                return v0
+              }
+            }
+            public var value: _$value {
+              _$value()
+            }
+          }
+
+          public nonisolated static var allCasePaths: AllCasePaths {
+            AllCasePaths()
+          }
+
+          public nonisolated var `case`: CasePaths.PartialCaseKeyPath<Action> {
+            if case .root = self {
+              return \.root
+            }
+            if case .value = self {
+              return \.value
+            }
+            return \.never
+          }
+
+          public nonisolated static var _allCaseKeyPaths: [CasePaths.PartialCaseKeyPath<Action>] {
+            var allCasePaths: [CasePaths.PartialCaseKeyPath<Action>] = []
+            allCasePaths.append(\.root)
+            allCasePaths.append(\.value)
+            return allCasePaths
+          }
+
+          public nonisolated static func caseName(
+            for keyPath: CasePaths.PartialCaseKeyPath<Action>
+          ) -> Swift.String? {
+            if keyPath == \.root {
+              return "root"
+            }
+            if keyPath == \.value {
+              return "value"
+            }
+            return nil
+          }
+
+          public typealias _$Root = Root
+
+          public typealias _$Value = Value
+        }
+
+        extension Action: nonisolated CasePathable {
+        }
+        """#
+      }
+    }
+
     @Test func `parent generic`() {
       assertMacro {
         """
