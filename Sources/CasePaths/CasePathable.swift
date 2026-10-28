@@ -1,5 +1,3 @@
-import IssueReporting
-
 /// A type that provides a collection of all of its case paths.
 ///
 /// Use the `@CasePathable` macro to automatically add case paths, and this conformance, to an
@@ -496,21 +494,10 @@ extension CasePathable {
     filePath: StaticString = #filePath,
     line: UInt = #line,
     column: UInt = #column
-  ) {
+  ) throws {
     let path = Self.allCasePaths[keyPath: keyPath]
     guard var value = path.extract(from: self) else {
-      reportIssue(
-        """
-        Can't modify '\(String(describing: self))' via \
-        'CaseKeyPath<\(Self.self), \(Path.Value.self)>' \
-        (aka '\(String(reflecting: keyPath))')
-        """,
-        fileID: fileID,
-        filePath: filePath,
-        line: line,
-        column: column
-      )
-      return
+      throw InvalidCase()
     }
     yield(&value)
     self = path.embed(value)
@@ -525,3 +512,5 @@ extension AnyCasePath where Root: CasePathable {
     self.init(Root.allCasePaths[keyPath: keyPath])
   }
 }
+
+struct InvalidCase: Error {}

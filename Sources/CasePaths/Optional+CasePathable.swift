@@ -1,5 +1,3 @@
-import IssueReporting
-
 extension Optional: CasePathable {
   public struct AllCasePaths: CasePath, Hashable, Sendable {
     public func embed(_ value: Optional) -> Optional { value }
@@ -87,22 +85,11 @@ extension Optional where Wrapped: CasePathable {
     filePath: StaticString = #filePath,
     line: UInt = #line,
     column: UInt = #column
-  ) {
+  ) throws {
     let path = Wrapped.allCasePaths[keyPath: keyPath]
     guard case .some(let wrapped) = self, var value = path.extract(from: wrapped)
     else {
-      reportIssue(
-        """
-        Can't modify '\(String(describing: self))' via \
-        'CaseKeyPath<\(Self.self), \(Path.Value.self)>' \
-        (aka '\(String(reflecting: keyPath))')
-        """,
-        fileID: fileID,
-        filePath: filePath,
-        line: line,
-        column: column
-      )
-      return
+      throw InvalidCase()
     }
     yield(&value)
     self = .some(path.embed(value))
