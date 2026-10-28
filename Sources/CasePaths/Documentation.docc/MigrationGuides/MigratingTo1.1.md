@@ -103,7 +103,7 @@ casePath(value)
 ```
 
 Case key paths can also replace an enum's existing associated value via
-``CasePathable/subscript(case:)->Value``:
+``CasePathable/subscript(case:)``:
 
 ```swift
 root[case: casePath] = value

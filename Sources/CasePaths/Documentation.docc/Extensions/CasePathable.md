@@ -8,21 +8,15 @@
 
 ### Extracting, replacing, and modifying values
 
-- ``subscript(case:)->Value?``
-- ``subscript(case:)->Value``
+- ``subscript(case:)``
 - ``modify(_:yield:fileID:filePath:line:column:)``
 
 ### Case properties
 
 - ``case``
 - ``is(_:)``
-- ``subscript(dynamicMember:)->Value?``
-- ``subscript(dynamicMember:)->Value``
+- ``subscript(dynamicMember:)``
 
-### Iteration and reflection
-
-- ``CasePathIterable``
-- ``CasePathReflectable``
 
 ### Manual conformances
 

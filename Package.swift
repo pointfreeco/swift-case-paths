@@ -23,15 +23,15 @@ let package = Package(
     ),
   ],
   dependencies: [
-    .package(url: "https://github.com/pointfreeco/swift-issue-reporting", from: "2.1.0"),
     .package(url: "https://github.com/swiftlang/swift-syntax", "509.0.0"..<"605.0.0"),
   ],
   targets: [
     .target(
       name: "CasePaths",
       dependencies: [
+        "CasePaths1",
+        "CasePaths2",
         "CasePathsMacros",
-        .product(name: "IssueReporting", package: "swift-issue-reporting"),
       ]
     ),
     .target(
@@ -59,6 +59,14 @@ let package = Package(
         "CasePaths",
         "CasePathsMacrosSupport",
       ]
+    ),
+    .target(
+      name: "CasePaths1",
+      path: "Sources/VersionMarkerModules/CasePaths1"
+    ),
+    .target(
+      name: "CasePaths2",
+      path: "Sources/VersionMarkerModules/CasePaths2"
     ),
   ],
   swiftLanguageModes: [.v6]
