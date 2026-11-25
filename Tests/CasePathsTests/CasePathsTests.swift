@@ -107,9 +107,9 @@ struct CasePathsTests {
     #expect(Set(Foo.allCasePaths) == [\.bar, \.baz, \.fizzBuzz, \.blob, \.foo])
   }
 
-  @Test func modify() {
+  @Test func modify() throws {
     var foo = Foo.bar(.int(21))
-    foo.modify(\.bar.int) { $0 *= 2 }
+    try foo.modify(\.bar.int) { $0 *= 2 }
     #expect(foo == .bar(.int(42)))
   }
 
@@ -118,13 +118,13 @@ struct CasePathsTests {
       guard ProcessInfo.processInfo.environment["CI"] == nil else { return }
       var foo = Foo.bar(.int(21))
       withKnownIssue {
-        foo.modify(\.baz.string) { $0.append("!") }
+        try foo.modify(\.baz.string) { $0.append("!") }
       }
       #expect(foo == .bar(.int(21)))
     }
   #endif
 
-  @Test func `manual conformance via 'AnyCasePath'`() {
+  @Test func `manual conformance via 'AnyCasePath'`() throws {
     // A hand-written conformance in the documented 1.x style, vending
     // 'AnyCasePath' properties, still supplies working case key paths.
     #expect(Legacy.wrapped(.bar(.int(42)))[case: \.wrapped] == .bar(.int(42)))
@@ -132,7 +132,7 @@ struct CasePathsTests {
     #expect(Legacy.count(1)[case: \.wrapped] == nil)
     #expect((\Legacy.Cases.wrapped.bar.int)(1) == .wrapped(.bar(.int(1))))
     var legacy = Legacy.count(1)
-    legacy.modify(\.count) { $0 += 1 }
+    try legacy.modify(\.count) { $0 += 1 }
     #expect(legacy == .count(2))
   }
 
@@ -244,6 +244,46 @@ struct CasePathsTests {
     #expect(!Optional(Foo.fizzBuzz).is(\.blob))
     #expect(!Optional(Foo.fizzBuzz).is(\.foo))
   }
+
+  @Test func `labeled tuples`() {
+    func embed<Root: CasePathable, Path: CasePath>(
+      _ keyPath: CaseKeyPath<Root, Path>,
+      _ value: Path._UnlabeledValue
+    ) -> Root {
+      Root.allCasePaths[keyPath: keyPath]._embed(value)
+    }
+    func extract<Root: CasePathable, Path: CasePath>(
+      _ keyPath: CaseKeyPath<Root, Path>,
+      from root: Root
+    ) -> Path._UnlabeledValue? {
+      Root.allCasePaths[keyPath: keyPath]._extract(from: root)
+    }
+
+    #expect(embed(\Shape.Cases.point, (1, 2)) == .point(x: 1, y: 2))
+    #expect(embed(\Shape.Cases.mixed, (1, "one")) == .mixed(1, name: "one"))
+    #expect(embed(\Shape.Cases.unlabeled, (5, 6)) == .unlabeled(5, 6))
+    #expect(embed(\Canvas.Cases.shape.point, (3, 4)) == .shape(.point(x: 3, y: 4)))
+
+    let point: (Int, Int)? = extract(\Shape.Cases.point, from: .point(x: 1, y: 2))
+    #expect(point.map { $0 == (1, 2) } == true)
+    let mixed: (Int, String)? = extract(\Shape.Cases.mixed, from: .mixed(1, name: "one"))
+    #expect(mixed.map { $0 == (1, "one") } == true)
+    #expect(extract(\Shape.Cases.point, from: .mixed(1, name: "one")) == nil)
+    let nested: (Int, Int)? = extract(\Canvas.Cases.shape.point, from: .shape(.point(x: 3, y: 4)))
+    #expect(nested.map { $0 == (3, 4) } == true)
+  }
+}
+
+@CasePathable
+enum Shape: Equatable {
+  case point(x: Int, y: Int)
+  case mixed(Int, name: String)
+  case unlabeled(Int, Int)
+}
+
+@CasePathable
+enum Canvas: Equatable {
+  case shape(Shape)
 }
 
 @CasePathable
