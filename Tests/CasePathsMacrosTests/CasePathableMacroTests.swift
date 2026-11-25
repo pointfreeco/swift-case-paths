@@ -101,6 +101,12 @@
                 }
                 return (v0, v1)
               }
+              public func _embed(_ value: (Int, String)) -> Foo {
+                embed(value)
+              }
+              public func _extract(from root: Foo) -> (Int, String)? {
+                extract(from: root)
+              }
             }
             public var fizzier: _$fizzier {
               _$fizzier()
@@ -912,6 +918,12 @@
                 }
                 return (v0, v1)
               }
+              public func _embed(_ value: (Int, Bool)) -> Foo {
+                embed(value)
+              }
+              public func _extract(from root: Foo) -> (Int, Bool)? {
+                extract(from: root)
+              }
             }
             public var bar: _$bar {
               _$bar()
@@ -1652,6 +1664,12 @@
                 }
                 return (v0, v1)
               }
+              public func _embed(_ value: (Int, String)) -> Foo {
+                embed(value)
+              }
+              public func _extract(from root: Foo) -> (Int, String)? {
+                extract(from: root)
+              }
             }
             public var fizzier: _$fizzier {
               _$fizzier()
@@ -1812,6 +1830,7 @@
         @CasePathable enum Action<Root, Value> {
           case root(Root)
           case value(Value)
+          case both(root: Root, value: Value)
         }
         """
       } expansion: {
@@ -1819,6 +1838,7 @@
         enum Action<Root, Value> {
           case root(Root)
           case value(Value)
+          case both(root: Root, value: Value)
 
           public nonisolated struct AllCasePaths: CasePaths.CasePath, Swift.Hashable, Swift.Sendable {
             public func embed(_ value: Action) -> Action {
@@ -1861,6 +1881,29 @@
             public var value: _$value {
               _$value()
             }
+            public struct _$both: CasePaths.CasePath, Swift.Hashable, Swift.Sendable {
+              public func embed(_ value: (root: _$Root, value: _$Value)) -> Action {
+                switch value {
+                case (_, _):
+                  Action.both(root: value.0, value: value.1)
+                }
+              }
+              public func extract(from root: Action) -> (root: _$Root, value: _$Value)? {
+                guard case let .both(v0, v1) = root else {
+                  return nil
+                }
+                return (v0, v1)
+              }
+              public func _embed(_ value: (_$Root, _$Value)) -> Action {
+                embed(value)
+              }
+              public func _extract(from root: Action) -> (_$Root, _$Value)? {
+                extract(from: root)
+              }
+            }
+            public var both: _$both {
+              _$both()
+            }
           }
 
           public nonisolated static var allCasePaths: AllCasePaths {
@@ -1874,6 +1917,9 @@
             if case .value = self {
               return \.value
             }
+            if case .both = self {
+              return \.both
+            }
             return \.never
           }
 
@@ -1881,6 +1927,7 @@
             var allCasePaths: [CasePaths.PartialCaseKeyPath<Action>] = []
             allCasePaths.append(\.root)
             allCasePaths.append(\.value)
+            allCasePaths.append(\.both)
             return allCasePaths
           }
 
@@ -1892,6 +1939,9 @@
             }
             if keyPath == \.value {
               return "value"
+            }
+            if keyPath == \.both {
+              return "both"
             }
             return nil
           }
@@ -2242,6 +2292,12 @@
                 }
                 return (v0, v1, v2)
               }
+              public func _embed(_ value: (String, String, String)) -> Action {
+                embed(value)
+              }
+              public func _extract(from root: Action) -> (String, String, String)? {
+                extract(from: root)
+              }
             }
             public var exampleAction: _$exampleAction {
               _$exampleAction()
@@ -2279,6 +2335,12 @@
                   return nil
                 }
                 return (v0, v1, v2)
+              }
+              public func _embed(_ value: (String, Bool, Double)) -> Action {
+                embed(value)
+              }
+              public func _extract(from root: Action) -> (String, Bool, Double)? {
+                extract(from: root)
               }
             }
             public var multipleWithLabels: _$multipleWithLabels {

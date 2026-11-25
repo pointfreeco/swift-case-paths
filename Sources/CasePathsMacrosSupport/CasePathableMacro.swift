@@ -253,6 +253,7 @@ extension CasePathableMacro: MemberMacro {
       let caseName = element.name.trimmed
       let casePathTypeName = "_$\(caseName.text.filter { $0 != "`" })"
       let associatedValueType = valueType(for: element)
+      let unlabeledType = unlabeledValueType(for: element)
       let hasPayload = element.parameterClause.map { !$0.parameters.isEmpty } ?? false
       let embedBody: String
       let bindingNames: String
@@ -302,6 +303,18 @@ extension CasePathableMacro: MemberMacro {
         .map { String($0.dropFirst(indent)) }
         .joined(separator: "\n")
         .trimmingSuffix(while: { $0.isWhitespace && !$0.isNewline })
+      let unlabeledMembers =
+        unlabeledType.map { unlabeledType in
+          """
+
+          public func _embed(_ value: \(unlabeledType)) -> \(enumName) {
+          embed(value)
+          }
+          public func _extract(from root: \(enumName)) -> \(unlabeledType)? {
+          extract(from: root)
+          }
+          """
+        } ?? ""
       return [
         """
         public struct \(raw: casePathTypeName): CasePaths.CasePath, Swift.Hashable, Swift.Sendable {
@@ -313,7 +326,7 @@ extension CasePathableMacro: MemberMacro {
         return nil \
         }
         return \(raw: returnName)
-        }
+        }\(raw: unlabeledMembers)
         }
         """,
         """
@@ -349,6 +362,23 @@ extension CasePathableMacro {
         .with(\.trailingComma, nil)
     }
     return TypeSyntax("(\(associatedValue.parameters.trimmed))")
+  }
+}
+
+extension CasePathableMacro {
+  static func unlabeledValueType(for element: EnumCaseElementSyntax) -> TypeSyntax? {
+    guard
+      let parameters = element.parameterClause?.parameters,
+      parameters.count > 1,
+      parameters.contains(where: {
+        switch $0.firstName?.tokenKind {
+        case .none, .wildcard: false
+        case .some: true
+        }
+      })
+    else { return nil }
+    let types = parameters.map { $0.type.trimmedDescription }.joined(separator: ", ")
+    return TypeSyntax("(\(raw: types))")
   }
 }
 

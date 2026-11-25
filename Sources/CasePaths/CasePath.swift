@@ -21,6 +21,22 @@ public protocol CasePath<Root, Value> {
   /// - Parameter root: A root to extract from.
   /// - Returns: A value if it can be extracted from the given root, otherwise `nil`.
   func extract(from root: Root) -> Value?
+
+  associatedtype _UnlabeledValue = Value
+  func _embed(_ value: _UnlabeledValue) -> Root
+  func _extract(from root: Root) -> _UnlabeledValue?
+}
+
+extension CasePath where _UnlabeledValue == Value {
+  @inlinable
+  public func _embed(_ value: Value) -> Root {
+    embed(value)
+  }
+
+  @inlinable
+  public func _extract(from root: Root) -> Value? {
+    extract(from: root)
+  }
 }
 
 extension CasePath {
@@ -62,6 +78,16 @@ where Base.Value == Appended.Root {
   @inlinable
   public func extract(from root: Base.Root) -> Appended.Value? {
     _base.extract(from: root).flatMap(_appended.extract(from:))
+  }
+
+  @inlinable
+  public func _embed(_ value: Appended._UnlabeledValue) -> Base.Root {
+    _base.embed(_appended._embed(value))
+  }
+
+  @inlinable
+  public func _extract(from root: Base.Root) -> Appended._UnlabeledValue? {
+    _base.extract(from: root).flatMap(_appended._extract(from:))
   }
 }
 
